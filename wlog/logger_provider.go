@@ -16,50 +16,9 @@ package wlog
 
 import (
 	"io"
-	"reflect"
 )
 
 type LoggerProvider interface {
 	NewLogger(w io.Writer) Logger
 	NewLeveledLogger(w io.Writer, level LogLevel) LeveledLogger
 }
-
-// NewNoopLoggerProvider returns a LoggerProvider whose implementations
-// are no-ops. That is, they return immediately after doing nothing.
-func NewNoopLoggerProvider() LoggerProvider {
-	return &noopLoggerProvider{}
-}
-
-type nooplogger struct{}
-
-func (*nooplogger) Log(params ...Param)               {}
-func (*nooplogger) Debug(msg string, params ...Param) {}
-func (*nooplogger) Info(msg string, params ...Param)  {}
-func (*nooplogger) Warn(msg string, params ...Param)  {}
-func (*nooplogger) Error(msg string, params ...Param) {}
-func (*nooplogger) SetLevel(level LogLevel)           {}
-
-type noopLoggerProvider struct{}
-
-func (*noopLoggerProvider) NewLogger(w io.Writer) Logger {
-	return &nooplogger{}
-}
-
-func (*noopLoggerProvider) NewLeveledLogger(w io.Writer, level LogLevel) LeveledLogger {
-	return &nooplogger{}
-}
-
-func (p *noopLoggerProvider) NewLogEntry() LogEntry {
-	return &noopLogEntry{}
-}
-
-type noopLogEntry struct{}
-
-func (*noopLogEntry) StringValue(k, v string)                                         {}
-func (*noopLogEntry) OptionalStringValue(k, v string)                                 {}
-func (*noopLogEntry) StringListValue(k string, v []string)                            {}
-func (*noopLogEntry) SafeLongValue(k string, v int64)                                 {}
-func (*noopLogEntry) IntValue(k string, v int32)                                      {}
-func (*noopLogEntry) StringMapValue(k string, v map[string]string)                    {}
-func (*noopLogEntry) AnyMapValue(k string, v map[string]interface{})                  {}
-func (*noopLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {}
