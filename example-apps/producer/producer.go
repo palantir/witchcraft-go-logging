@@ -17,7 +17,9 @@ package producer
 import (
 	"context"
 	"math/rand"
+	"os"
 
+	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
@@ -30,7 +32,7 @@ func ProduceNumberContext(ctx context.Context) int {
 
 func ProduceNumberNoContext() int {
 	newNum := rand.Int()
-	logger := svc1log.DefaultLogger()
+	logger := svc1log.New(os.Stdout, wlog.InfoLevel)
 	logger.Info("ProduceNumberNoContext produced a number", svc1log.SafeParam("newNum", newNum))
 	return newNum
 }
