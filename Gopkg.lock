@@ -56,7 +56,7 @@
     "wtracing",
     "wzipkin",
   ]
-  revision = "807d7de4bba306f9f8c55dbce78107311919efbb"
+  revision = "9bbc60bf738dedb14cd1ca439e8d823ac77a44be"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -105,13 +105,13 @@
   branch = "develop"
   name = "github.palantir.build/deployability/witchcraft-error-go"
   packages = ["."]
-  revision = "a00aff95c703c3fc4070760b128c67efa505d191"
+  revision = "3734e41791d9969e02f14faef420d9870c01a4ec"
 
 [[projects]]
   branch = "develop"
   name = "github.palantir.build/deployability/witchcraft-params-go"
   packages = ["."]
-  revision = "3e8e721e257d3adb66f1ce0585ed32299caa763d"
+  revision = "8d1890e01115e9572227c79d3741761604983a42"
 
 [[projects]]
   name = "go.uber.org/atomic"
