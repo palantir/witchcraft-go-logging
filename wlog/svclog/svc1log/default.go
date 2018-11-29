@@ -12,25 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package producer
+package svc1log
 
 import (
-	"context"
-	"math/rand"
+	"os"
 
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
-func ProduceNumberContext(ctx context.Context) int {
-	newNum := rand.Int()
-	logger := svc1log.FromContext(ctx)
-	logger.Info("ProduceNumberContext produced a number", svc1log.SafeParam("newNum", newNum))
-	return newNum
-}
-
-func ProduceNumberNoContext() int {
-	newNum := rand.Int()
-	logger := svc1log.DefaultLogger()
-	logger.Info("ProduceNumberNoContext produced a number", svc1log.SafeParam("newNum", newNum))
-	return newNum
+func DefaultLogger() Logger {
+	return New(os.Stdout, wlog.InfoLevel)
 }

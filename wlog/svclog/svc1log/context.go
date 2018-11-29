@@ -33,28 +33,26 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 }
 
 // WithLoggerParams returns a copy of the provided context whose logger is configured with the provided parameters. If
-// the provided context does not have a logger set on it or if no parameters are provided, the original context is
-// returned unmodified. If any of the provided parameters set safe or unsafe values, the returned context will also have
-// those values set on it using the wparams.ContextWithSafeAndUnsafeParams function.
+// no parameters are provided, the original context is returned unmodified. If the provided context did not have a
+// logger set on it, the returned context will contain the default logger configured with the provided parameters. If
+// any of the provided parameters set safe or unsafe values, the returned context will also have those values set on it
+// using the wparams.ContextWithSafeAndUnsafeParams function.
 func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
-	logger := loggerFromContext(ctx)
-	if logger == nil || len(params) == 0 {
+	if len(params) == 0 {
 		return ctx
 	}
 	// if the provided params set any safe or unsafe values, set those as wparams on the context
 	if safeParams, unsafeParams := safeAndUnsafeParamsFromParams(params); len(safeParams) > 0 || len(unsafeParams) > 0 {
 		ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safeParams, unsafeParams)
 	}
-	return WithLogger(ctx, WithParams(logger, params...))
+	return WithLogger(ctx, WithParams(loggerFromContext(ctx), params...))
 }
 
-// FromContext returns the Logger stored in the provided context or nil if no logger is set on the context. If a logger
-// is returned, the returned logger has any safe or unsafe parameters stored on the context using wparams set on it.
+// FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
+// created by calling DefaultLogger. The returned logger also has any safe or unsafe parameters stored on the context
+// using wparams set on it.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
-	if logger == nil {
-		return nil
-	}
 	if paramStorer := wparams.ParamStorerFromContext(ctx); paramStorer != nil && (len(paramStorer.SafeParams()) > 0 || len(paramStorer.UnsafeParams()) > 0) {
 		logger = WithParams(logger, Params(paramStorer))
 	}
@@ -69,10 +67,11 @@ func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{},
 	return logEntry.AnyMapValues()[ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
 }
 
-// FromContext returns the Logger stored in the provided context or nil if no logger is set on the context.
+// loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
+// logger created by calling DefaultLogger.
 func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
 	}
-	return nil
+	return DefaultLogger()
 }
