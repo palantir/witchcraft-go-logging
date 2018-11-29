@@ -1,0 +1,4 @@
+projects:
+  sls-health-api:
+    output-dir: conjure
+    ir-locator: https://publish.artifactory.palantir.build/artifactory/internal-conjure-release/com/palantir/sls/spec/sls-logging-api/3.2.0/sls-logging-api-3.2.0.json
