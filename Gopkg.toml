@@ -37,10 +37,6 @@
   version = "1.10.3"
 
 [[constraint]]
-  branch = "develop"
-  name = "github.palantir.build/deployability/witchcraft-error-go"
-
-[[constraint]]
   name = "go.uber.org/zap"
   version = "1.9.1"
 

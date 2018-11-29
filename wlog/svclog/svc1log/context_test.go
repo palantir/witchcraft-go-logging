@@ -27,9 +27,9 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.palantir.build/deployability/witchcraft-params-go"
 )
 
 func newTestLogger(w io.Writer, origin string) svc1log.Logger {

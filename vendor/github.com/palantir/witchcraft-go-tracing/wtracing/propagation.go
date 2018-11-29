@@ -50,26 +50,34 @@ func InjectB3HeaderVals(req *http.Request, sc SpanContext) {
 	}
 }
 
-// ExtractB3HeaderVals returns a SpanContext created by extracting the B3 values from the provided header. Returns an
-// error if the B3 values in the provided header are corrupt (for example, if only a TraceID or SpanID is specified or
-// if a ParentID is specified when a TraceID or SpanID is not present). However, if both TraceID and SpanID are missing,
-// other header are still extracted and set on the returned SpanContext. This means that it is possible for the returned
-// SpanContext to have a blank TraceID and SpanID.
-func ExtractB3HeaderVals(req *http.Request) (*SpanContext, error) {
+// ExtractB3HeaderVals returns a SpanContext created by extracting the B3 values from the provided header. If the values
+// in the provided header do not constitute a valid SpanContext (for example, if it is missing a TraceID or SpanID,
+// has an unsupported "Sampled" value, etc.), the "Err" field of the returned SpanContext will be non-nil and will
+// contain the error. However, even if the "Err" field is set, all of the values that could be extracted from the header
+// and set on the returned context.
+func ExtractB3HeaderVals(req *http.Request) SpanContext {
+	sc := SpanContext{}
+
 	traceID := strings.ToLower(req.Header.Get(b3TraceID))
-	spanID := strings.ToLower(req.Header.Get(b3SpanID))
-	if (traceID == "") != (spanID == "") {
-		// either both traceID and spanID must be present or neither must be present
-		return nil, werror.Error("TraceID and SpanID must both be present or both be absent",
+	if traceID == "" {
+		sc.Err = werror.Error("TraceID must be present",
 			werror.SafeParam("traceId", traceID),
+		)
+	}
+	sc.TraceID = TraceID(traceID)
+
+	spanID := strings.ToLower(req.Header.Get(b3SpanID))
+	if spanID == "" {
+		sc.Err = werror.Error("SpanID must be present",
 			werror.SafeParam("spanId", spanID),
 		)
 	}
+	sc.ID = SpanID(spanID)
 
 	var parentIDVal *SpanID
 	if parentID := strings.ToLower(req.Header.Get(b3ParentSpanID)); parentID != "" {
 		if traceID == "" || spanID == "" {
-			return nil, werror.Error("ParentID was present but TraceID or SpanID was not",
+			sc.Err = werror.Error("ParentID was present but TraceID or SpanID was not",
 				werror.SafeParam("parentId", parentID),
 				werror.SafeParam("traceId", traceID),
 				werror.SafeParam("spanId", spanID),
@@ -77,6 +85,7 @@ func ExtractB3HeaderVals(req *http.Request) (*SpanContext, error) {
 		}
 		parentIDVal = (*SpanID)(&parentID)
 	}
+	sc.ParentID = parentIDVal
 
 	var sampledVal *bool
 	switch sampledHeader := strings.ToLower(req.Header.Get(b3Sampled)); sampledHeader {
@@ -89,19 +98,14 @@ func ExtractB3HeaderVals(req *http.Request) (*SpanContext, error) {
 	case "":
 		// keep nil
 	default:
-		return nil, werror.Error("Sampled value was invalid", werror.SafeParam("sampledHeaderVal", sampledHeader))
+		sc.Err = werror.Error("Sampled value was invalid", werror.SafeParam("sampledHeaderVal", sampledHeader))
 	}
-
 	debug := req.Header.Get(b3Flags) == "1"
 	if debug {
 		sampledVal = nil
 	}
+	sc.Sampled = sampledVal
+	sc.Debug = debug
 
-	return &SpanContext{
-		TraceID:  TraceID(traceID),
-		ID:       SpanID(spanID),
-		ParentID: parentIDVal,
-		Debug:    debug,
-		Sampled:  sampledVal,
-	}, nil
+	return sc
 }

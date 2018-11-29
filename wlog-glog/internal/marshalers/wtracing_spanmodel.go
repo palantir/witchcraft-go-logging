@@ -15,8 +15,8 @@
 package marshalers
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -25,7 +25,7 @@ import (
 )
 
 func marshalWTracingSpanModel(key string, val interface{}) string {
-	builder := &strings.Builder{}
+	builder := &bytes.Buffer{}
 	needSeparator := false
 
 	span := val.(wtracing.SpanModel)
@@ -72,7 +72,7 @@ func marshalWTracingSpanModel(key string, val interface{}) string {
 	return builder.String()
 }
 
-func encodeSpanModelAnnotations(builder *strings.Builder, needSeparator *bool, startVal, endVal string, span wtracing.SpanModel) {
+func encodeSpanModelAnnotations(builder *bytes.Buffer, needSeparator *bool, startVal, endVal string, span wtracing.SpanModel) {
 	if *needSeparator {
 		_, _ = builder.WriteString(separator)
 	}
@@ -86,7 +86,7 @@ func encodeSpanModelAnnotations(builder *strings.Builder, needSeparator *bool, s
 	*needSeparator = true
 }
 
-func spanModelAnnotationEncoder(builder *strings.Builder, value string, timeStamp time.Time, endpoint *wtracing.Endpoint) {
+func spanModelAnnotationEncoder(builder *bytes.Buffer, value string, timeStamp time.Time, endpoint *wtracing.Endpoint) {
 	_, _ = builder.WriteString(trc1log.AnnotationValueKey + ": " + value)
 	_, _ = builder.WriteString(separator)
 

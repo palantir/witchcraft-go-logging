@@ -63,22 +63,14 @@
 
 [[projects]]
   branch = "develop"
-  digest = "1:a4321821cfb441be63958b5899e7df1eeed51be1de130a270ca4b5277dd61622"
+  digest = "1:cb4ca2dc028714c1b8dc17c42a3f242391d42527f86c4d9b6f0814819b8ad8b1"
   name = "github.com/palantir/witchcraft-go-tracing"
   packages = [
     "wtracing",
     "wzipkin",
   ]
   pruneopts = "UT"
-  revision = "807d7de4bba306f9f8c55dbce78107311919efbb"
-
-[[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "9bbc60bf738dedb14cd1ca439e8d823ac77a44be"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -120,30 +112,6 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:4951ccd59be9b1246757977d6a7615e2e82f9f1a077e17994adfbe6c34415db9"
-  name = "github.palantir.build/deployability/conjure-go"
-  packages = ["conjure/types/conjuretype"]
-  pruneopts = "UT"
-  revision = "9a2153d87ad77eca8a6b99718e5a21b4b6bf5578"
-  version = "1.0.0"
-
-[[projects]]
-  branch = "develop"
-  digest = "1:63e33d754fb15f7989d4fe0683cc5c262c076db76eb7bff0922e43881022aee6"
-  name = "github.palantir.build/deployability/witchcraft-error-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "a00aff95c703c3fc4070760b128c67efa505d191"
-
-[[projects]]
-  branch = "develop"
-  digest = "1:3669808ee62b5aaa9db6899793a00581f8c74a45f40a87e259dfd84620a8df05"
-  name = "github.palantir.build/deployability/witchcraft-params-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3e8e721e257d3adb66f1ce0585ed32299caa763d"
-
-[[projects]]
   digest = "1:3c1a69cdae3501bf75e76d0d86dc6f2b0a7421bc205c0cb7b96b19eed464a34d"
   name = "go.uber.org/atomic"
   packages = ["."]
@@ -181,15 +149,14 @@
     "github.com/golang/glog",
     "github.com/palantir/pkg/objmatcher",
     "github.com/palantir/pkg/safejson",
+    "github.com/palantir/witchcraft-go-error",
+    "github.com/palantir/witchcraft-go-params",
     "github.com/palantir/witchcraft-go-tracing/wtracing",
     "github.com/palantir/witchcraft-go-tracing/wzipkin",
     "github.com/rs/zerolog",
     "github.com/satori/go.uuid",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
-    "github.palantir.build/deployability/conjure-go/conjure/types/conjuretype",
-    "github.palantir.build/deployability/witchcraft-error-go",
-    "github.palantir.build/deployability/witchcraft-params-go",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
   ]
