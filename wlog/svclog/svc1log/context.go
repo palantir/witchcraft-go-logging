@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.palantir.build/deployability/witchcraft-params-go"
+	"github.com/palantir/witchcraft-go-params"
 )
 
 type svc1LogContextKeyType string

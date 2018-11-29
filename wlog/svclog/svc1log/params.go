@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.palantir.build/deployability/witchcraft-error-go"
-	"github.palantir.build/deployability/witchcraft-params-go"
+	"github.com/palantir/witchcraft-go-params"
 )
 
 const (

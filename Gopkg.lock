@@ -59,12 +59,6 @@
   revision = "9bbc60bf738dedb14cd1ca439e8d823ac77a44be"
 
 [[projects]]
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
-
-[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -96,24 +90,6 @@
   version = "v1.2.2"
 
 [[projects]]
-  name = "github.palantir.build/deployability/conjure-go"
-  packages = ["conjure/types/conjuretype"]
-  revision = "9a2153d87ad77eca8a6b99718e5a21b4b6bf5578"
-  version = "1.0.0"
-
-[[projects]]
-  branch = "develop"
-  name = "github.palantir.build/deployability/witchcraft-error-go"
-  packages = ["."]
-  revision = "3734e41791d9969e02f14faef420d9870c01a4ec"
-
-[[projects]]
-  branch = "develop"
-  name = "github.palantir.build/deployability/witchcraft-params-go"
-  packages = ["."]
-  revision = "8d1890e01115e9572227c79d3741761604983a42"
-
-[[projects]]
   name = "go.uber.org/atomic"
   packages = ["."]
   revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
@@ -141,6 +117,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "294485910649cb014557874c5a76497568e6eff154e435b7e65fb708deb37963"
+  inputs-digest = "26e81f5284d004fa86e66151362c96c6f13d302d29e5f46a076d2584755846ac"
   solver-name = "gps-cdcl"
   solver-version = 1

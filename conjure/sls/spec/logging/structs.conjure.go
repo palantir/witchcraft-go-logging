@@ -4,8 +4,7 @@ package logging
 
 import (
 	"encoding/json"
-
-	"github.palantir.build/deployability/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/witchcraft-go-logging/internal/conjuretype"
 )
 
 // Wraps a log entry with entity information.
