@@ -15,15 +15,15 @@
 package marshalers
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/sls/spec/logging"
 )
 
 func marshalLoggingDiagnostic(key string, val interface{}) string {
-	builder := &strings.Builder{}
+	builder := &bytes.Buffer{}
 	_, _ = builder.WriteString("{")
 	diagnostic := val.(logging.Diagnostic)
 	_ = diagnostic.Accept(&marshalVisitor{
@@ -34,7 +34,7 @@ func marshalLoggingDiagnostic(key string, val interface{}) string {
 }
 
 type marshalVisitor struct {
-	builder *strings.Builder
+	builder *bytes.Buffer
 }
 
 func (m *marshalVisitor) VisitGeneric(v logging.GenericDiagnostic) error {
@@ -66,7 +66,7 @@ func (m *marshalVisitor) VisitThreadDump(v logging.ThreadDumpV1) error {
 	return nil
 }
 
-func encodeThreadInfoV1(builder *strings.Builder, threadInfo logging.ThreadInfoV1) {
+func encodeThreadInfoV1(builder *bytes.Buffer, threadInfo logging.ThreadInfoV1) {
 	needSeparator := false
 	if threadInfo.Id != nil {
 		_, _ = builder.WriteString("id: " + fmt.Sprint(int64(*threadInfo.Id)))
@@ -96,7 +96,7 @@ func encodeThreadInfoV1(builder *strings.Builder, threadInfo logging.ThreadInfoV
 	}
 }
 
-func encodeStackFrameV1(builder *strings.Builder, stackFrame logging.StackFrameV1) {
+func encodeStackFrameV1(builder *bytes.Buffer, stackFrame logging.StackFrameV1) {
 	needSeparator := false
 	encodeNonEmptyStr(builder, "address", stackFrame.Address, &needSeparator)
 	encodeNonEmptyStr(builder, "procedure", stackFrame.Procedure, &needSeparator)
@@ -117,7 +117,7 @@ func encodeStackFrameV1(builder *strings.Builder, stackFrame logging.StackFrameV
 	}
 }
 
-func encodeNonEmptyStr(builder *strings.Builder, key string, val *string, needSeparator *bool) {
+func encodeNonEmptyStr(builder *bytes.Buffer, key string, val *string, needSeparator *bool) {
 	if val == nil || len(*val) == 0 {
 		return
 	}
