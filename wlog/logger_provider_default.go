@@ -14,7 +14,7 @@
 
 package wlog
 
-var defaultLoggerProvider = NewNoopLoggerProvider()
+var defaultLoggerProvider = newWarnOnceLoggerProvider()
 
 func SetDefaultLoggerProvider(provider LoggerProvider) {
 	defaultLoggerProvider = provider
