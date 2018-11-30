@@ -17,11 +17,8 @@ package audit2log_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -34,26 +31,7 @@ import (
 )
 
 func newTestLogger(w io.Writer) audit2log.Logger {
-	return &testAudit2Logger{
-		w: w,
-	}
-}
-
-type testAudit2Logger struct {
-	w io.Writer
-}
-
-func (l *testAudit2Logger) Audit(name string, result audit2log.AuditResultType, params ...audit2log.Param) {
-	entry := wlog.NewMapLogEntry()
-	entry.StringValue(wlog.TypeKey, audit2log.TypeValue)
-	entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	entry.StringValue(audit2log.NameKey, name)
-	entry.StringValue(audit2log.ResultKey, string(result))
-	for _, p := range params {
-		audit2log.ApplyParam(p, entry)
-	}
-	jsonBytes, _ := json.Marshal(entry.AllValues())
-	fmt.Fprintln(l.w, string(jsonBytes))
+	return audit2log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
 }
 
 func TestFromContext(t *testing.T) {

@@ -17,11 +17,8 @@ package evt2log_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -34,25 +31,7 @@ import (
 )
 
 func newTestLogger(w io.Writer) evt2log.Logger {
-	return &testEvent2Logger{
-		w: w,
-	}
-}
-
-type testEvent2Logger struct {
-	w io.Writer
-}
-
-func (l *testEvent2Logger) Event(name string, params ...evt2log.Param) {
-	entry := wlog.NewMapLogEntry()
-	entry.StringValue(wlog.TypeKey, evt2log.TypeValue)
-	entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	entry.StringValue(evt2log.EventNameKey, name)
-	for _, p := range params {
-		evt2log.ApplyParam(p, entry)
-	}
-	jsonBytes, _ := json.Marshal(entry.AllValues())
-	fmt.Fprintln(l.w, string(jsonBytes))
+	return evt2log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
 }
 
 func TestFromContext(t *testing.T) {
