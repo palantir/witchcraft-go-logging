@@ -37,11 +37,9 @@ func (l *warnOnceLogger) Error(msg string, params ...Param) { l.once.Do(l.printW
 func (l *warnOnceLogger) SetLevel(level LogLevel)           { l.once.Do(l.printWarning) }
 
 func (l *warnOnceLogger) printWarning() {
-	_, _ = fmt.Fprintln(l.w,
-		`[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation.`+"\n"+
-			`          To see logger output, set the global tracer implementation using wlog.SetDefaultLoggerProvider or by importing an implementation.`+"\n"+
-			`          This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`,
-	)
+	_, _ = fmt.Fprintln(l.w, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. `+
+		`To see logger output, set the global tracer implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. `+
+		`This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`)
 }
 
 type warnOnceLoggerProvider struct{}
