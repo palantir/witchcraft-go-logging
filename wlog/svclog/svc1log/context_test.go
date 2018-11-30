@@ -18,10 +18,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -35,47 +33,7 @@ import (
 )
 
 func newTestLogger(w io.Writer, origin string) svc1log.Logger {
-	return &testSvc1Logger{
-		w:      w,
-		origin: origin,
-	}
-}
-
-type testSvc1Logger struct {
-	origin string
-	w      io.Writer
-}
-
-func (l *testSvc1Logger) Debug(msg string, params ...svc1log.Param) {
-	l.log(msg, "DEBUG", params...)
-}
-
-func (l *testSvc1Logger) Info(msg string, params ...svc1log.Param) {
-	l.log(msg, "INFO", params...)
-}
-
-func (l *testSvc1Logger) Warn(msg string, params ...svc1log.Param) {
-	l.log(msg, "WARN", params...)
-}
-
-func (l *testSvc1Logger) Error(msg string, params ...svc1log.Param) {
-	l.log(msg, "ERROR", params...)
-}
-
-func (l *testSvc1Logger) SetLevel(level wlog.LogLevel) {}
-
-func (l *testSvc1Logger) log(msg, lvl string, params ...svc1log.Param) {
-	entry := wlog.NewMapLogEntry()
-	entry.StringValue(wlog.TypeKey, svc1log.TypeValue)
-	entry.StringValue(svc1log.MessageKey, msg)
-	entry.StringValue(svc1log.LevelKey, lvl)
-	entry.StringValue(svc1log.OriginKey, l.origin)
-	entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	for _, p := range params {
-		svc1log.ApplyParam(p, entry)
-	}
-	jsonBytes, _ := json.Marshal(entry.AllValues())
-	fmt.Fprintln(l.w, string(jsonBytes))
+	return svc1log.WithParams(svc1log.NewFromCreator(w, wlog.InfoLevel, wlog.NewJSONMarshalLoggerProvider().NewLeveledLogger), svc1log.Origin(origin))
 }
 
 func TestFromContext(t *testing.T) {

@@ -17,11 +17,8 @@ package metric1log_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -32,26 +29,7 @@ import (
 )
 
 func newTestLogger(w io.Writer) metric1log.Logger {
-	return &testMetric1Logger{
-		w: w,
-	}
-}
-
-type testMetric1Logger struct {
-	w io.Writer
-}
-
-func (l *testMetric1Logger) Metric(name, typ string, params ...metric1log.Param) {
-	entry := wlog.NewMapLogEntry()
-	entry.StringValue(wlog.TypeKey, metric1log.TypeValue)
-	entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	entry.StringValue(metric1log.MetricNameKey, name)
-	entry.StringValue(metric1log.MetricTypeKey, typ)
-	for _, p := range params {
-		metric1log.ApplyParam(p, entry)
-	}
-	jsonBytes, _ := json.Marshal(entry.AllValues())
-	fmt.Fprintln(l.w, string(jsonBytes))
+	return metric1log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
 }
 
 func TestFromContext(t *testing.T) {
