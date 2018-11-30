@@ -16,6 +16,8 @@ package audit2log
 
 import (
 	"context"
+
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 type audit2LogContextKeyType string
@@ -30,8 +32,19 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 }
 
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
-// created by calling DefaultLogger.
+// created by calling DefaultLogger. If the context contains a TraceID set using wtracing, the returned logger has that
+// TraceID set on it as a parameter.
 func FromContext(ctx context.Context) Logger {
+	logger := loggerFromContext(ctx)
+	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
+		logger = WithParams(logger, TraceID(string(traceID)))
+	}
+	return logger
+}
+
+// loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
+// logger created by calling DefaultLogger.
+func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
 	}

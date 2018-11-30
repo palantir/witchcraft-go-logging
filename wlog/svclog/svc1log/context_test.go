@@ -28,6 +28,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-params"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
+	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -96,6 +98,67 @@ func TestFromContext(t *testing.T) {
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
+}
+
+// Tests that the logger returned by svc1log.FromContext has a TraceID set on it if the context has a wtracing TraceID.
+func TestFromContextSetsTraceID(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	// create a no-op tracer to use for the test
+	tracer, err := wzipkin.NewTracer(wtracing.NewNoopReporter())
+	require.NoError(t, err)
+
+	createMatcher := func(msg, traceID string) objmatcher.Matcher {
+		matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"level":   objmatcher.NewEqualsMatcher("INFO"),
+			"time":    objmatcher.NewRegExpMatcher(".+"),
+			"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+			"type":    objmatcher.NewEqualsMatcher("service.1"),
+			"message": objmatcher.NewEqualsMatcher(msg),
+		})
+		if traceID != "" {
+			matcher["traceId"] = objmatcher.NewEqualsMatcher(traceID)
+		}
+		return matcher
+	}
+
+	// logger output should have no TraceID (none set as parameter and none exists in context)
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Message0")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+	matcher := createMatcher("Message0", "")
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+	buf.Reset()
+
+	// logger output should have TraceID set in context (span is set on context)
+	spanOne := tracer.StartSpan("spanOne")
+	ctx = wtracing.ContextWithSpan(ctx, spanOne)
+	logger = svc1log.FromContext(ctx)
+	logger.Info("Message1")
+
+	entries, err = logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+	matcher = createMatcher("Message1", string(spanOne.Context().TraceID))
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+	buf.Reset()
+
+	// manually adding a TraceID parameter will override the TraceID (because it is applied after the context one)
+	logger = svc1log.WithParams(logger, svc1log.TraceID("manually-set-trace-id"))
+	logger.Info("Message2")
+
+	entries, err = logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+	matcher = createMatcher("Message2", "manually-set-trace-id")
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+	buf.Reset()
 }
 
 func TestWithLoggerParams(t *testing.T) {

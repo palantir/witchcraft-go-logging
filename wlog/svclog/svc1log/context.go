@@ -19,6 +19,7 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-params"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 type svc1LogContextKeyType string
@@ -49,12 +50,16 @@ func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
 }
 
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
-// created by calling DefaultLogger. The returned logger also has any safe or unsafe parameters stored on the context
-// using wparams set on it.
+// created by calling DefaultLogger. If the context contains a TraceID set using wtracing, the returned logger has that
+// TraceID set on it as a parameter. Any safe or unsafe parameters stored on the context using wparams are also set as
+// parameters on the returned logger.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
 	if paramStorer := wparams.ParamStorerFromContext(ctx); paramStorer != nil && (len(paramStorer.SafeParams()) > 0 || len(paramStorer.UnsafeParams()) > 0) {
 		logger = WithParams(logger, Params(paramStorer))
+	}
+	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
+		logger = WithParams(logger, TraceID(string(traceID)))
 	}
 	return logger
 }
