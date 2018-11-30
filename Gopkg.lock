@@ -18,6 +18,14 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+  branch = "develop"
+  digest = "1:e3ef56367b26bd9af40cc27ea3ae48efdca309b10ed5859bc6289a40a53c3143"
+  name = "github.com/nmiyake/pkg"
+  packages = ["dirs"]
+  pruneopts = "UT"
+  revision = "b64318170fdef93b4462420e0badef8050dbb7ec"
+
+[[projects]]
   digest = "1:fe3dbc20b592ad7cac16a2855ee7505edf07e4f9feb47e78e40a39f2270386b8"
   name = "github.com/openzipkin/zipkin-go"
   packages = [
@@ -147,6 +155,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/golang/glog",
+    "github.com/nmiyake/pkg/dirs",
     "github.com/palantir/pkg/objmatcher",
     "github.com/palantir/pkg/safejson",
     "github.com/palantir/witchcraft-go-error",
