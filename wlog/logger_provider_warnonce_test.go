@@ -24,9 +24,7 @@ import (
 // Verifies that a logger created by newWarnOnceLoggerProvider outputs a warning on the first log call but not on
 // subsequent calls.
 func TestWarnOnceProvider(t *testing.T) {
-	const wantOutput = `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation.` + "\n" +
-		`          To see logger output, set the global tracer implementation using wlog.SetDefaultLoggerProvider or by importing an implementation.` + "\n" +
-		`          This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).` + "\n"
+	const wantOutput = `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).` + "\n"
 	provider := newWarnOnceLoggerProvider()
 
 	buf := &bytes.Buffer{}
