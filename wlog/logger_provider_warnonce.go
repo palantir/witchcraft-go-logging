@@ -20,9 +20,6 @@ import (
 	"sync"
 )
 
-// TODO(nmiyake): remove this once logger is used in project
-var _ = newWarnOnceLoggerProvider()
-
 func newWarnOnceLoggerProvider() LoggerProvider {
 	return &warnOnceLoggerProvider{}
 }
