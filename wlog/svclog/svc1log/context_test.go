@@ -100,6 +100,37 @@ func TestFromContext(t *testing.T) {
 	assert.NoError(t, err, "%v", err)
 }
 
+// Tests that the logger returned by svc1log.FromContext has UID, SID and TokenID parameters set on it if the context
+// has those values set on it using wlog.
+func TestFromContextUsesCommonIDs(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	ctx = wlog.ContextWithUID(ctx, "test-UID")
+	ctx = wlog.ContextWithSID(ctx, "test-SID")
+	ctx = wlog.ContextWithTokenID(ctx, "test-TokenID")
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"uid":     objmatcher.NewEqualsMatcher("test-UID"),
+		"sid":     objmatcher.NewEqualsMatcher("test-SID"),
+		"tokenId": objmatcher.NewEqualsMatcher("test-TokenID"),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
 // Tests that the logger returned by svc1log.FromContext has a TraceID set on it if the context has a wtracing TraceID.
 func TestFromContextSetsTraceID(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()

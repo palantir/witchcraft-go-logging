@@ -16,6 +16,8 @@ package metric1log
 
 import (
 	"context"
+
+	"github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type metric1LogContextKeyType string
@@ -32,6 +34,23 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
 // created by calling DefaultLogger.
 func FromContext(ctx context.Context) Logger {
+	logger := loggerFromContext(ctx)
+	var params []Param
+	if uid := wloginternal.IDFromContext(ctx, wloginternal.UIDKey); uid != nil {
+		params = append(params, UID(*uid))
+	}
+	if sid := wloginternal.IDFromContext(ctx, wloginternal.SIDKey); sid != nil {
+		params = append(params, SID(*sid))
+	}
+	if tokenID := wloginternal.IDFromContext(ctx, wloginternal.TokenIDKey); tokenID != nil {
+		params = append(params, TokenID(*tokenID))
+	}
+	return WithParams(logger, params...)
+}
+
+// loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
+// logger created by calling DefaultLogger.
+func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
 	}
