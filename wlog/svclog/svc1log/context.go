@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
@@ -55,13 +56,23 @@ func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
 // parameters on the returned logger.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
+	var params []Param
 	if paramStorer := wparams.ParamStorerFromContext(ctx); paramStorer != nil && (len(paramStorer.SafeParams()) > 0 || len(paramStorer.UnsafeParams()) > 0) {
-		logger = WithParams(logger, Params(paramStorer))
+		params = append(params, Params(paramStorer))
+	}
+	if uid := wloginternal.IDFromContext(ctx, wloginternal.UIDKey); uid != nil {
+		params = append(params, UID(*uid))
+	}
+	if sid := wloginternal.IDFromContext(ctx, wloginternal.SIDKey); sid != nil {
+		params = append(params, SID(*sid))
+	}
+	if tokenID := wloginternal.IDFromContext(ctx, wloginternal.TokenIDKey); tokenID != nil {
+		params = append(params, TokenID(*tokenID))
 	}
 	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
-		logger = WithParams(logger, TraceID(string(traceID)))
+		params = append(params, TraceID(string(traceID)))
 	}
-	return logger
+	return WithParams(logger, params...)
 }
 
 func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {

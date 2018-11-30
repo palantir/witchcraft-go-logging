@@ -17,6 +17,7 @@ package evt2log
 import (
 	"context"
 
+	"github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
@@ -36,10 +37,20 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 // TraceID set on it as a parameter.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
-	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
-		logger = WithParams(logger, TraceID(string(traceID)))
+	var params []Param
+	if uid := wloginternal.IDFromContext(ctx, wloginternal.UIDKey); uid != nil {
+		params = append(params, UID(*uid))
 	}
-	return logger
+	if sid := wloginternal.IDFromContext(ctx, wloginternal.SIDKey); sid != nil {
+		params = append(params, SID(*sid))
+	}
+	if tokenID := wloginternal.IDFromContext(ctx, wloginternal.TokenIDKey); tokenID != nil {
+		params = append(params, TokenID(*tokenID))
+	}
+	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
+		params = append(params, TraceID(string(traceID)))
+	}
+	return WithParams(logger, params...)
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the

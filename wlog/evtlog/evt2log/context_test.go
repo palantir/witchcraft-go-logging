@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package audit2log_test
+package evt2log_test
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ import (
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
@@ -33,24 +33,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestLogger(w io.Writer) audit2log.Logger {
-	return &testAudit2Logger{
+func newTestLogger(w io.Writer) evt2log.Logger {
+	return &testEvent2Logger{
 		w: w,
 	}
 }
 
-type testAudit2Logger struct {
+type testEvent2Logger struct {
 	w io.Writer
 }
 
-func (l *testAudit2Logger) Audit(name string, result audit2log.AuditResultType, params ...audit2log.Param) {
+func (l *testEvent2Logger) Event(name string, params ...evt2log.Param) {
 	entry := wlog.NewMapLogEntry()
-	entry.StringValue(wlog.TypeKey, audit2log.TypeValue)
+	entry.StringValue(wlog.TypeKey, evt2log.TypeValue)
 	entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	entry.StringValue(audit2log.NameKey, name)
-	entry.StringValue(audit2log.ResultKey, string(result))
+	entry.StringValue(evt2log.EventNameKey, name)
 	for _, p := range params {
-		audit2log.ApplyParam(p, entry)
+		evt2log.ApplyParam(p, entry)
 	}
 	jsonBytes, _ := json.Marshal(entry.AllValues())
 	fmt.Fprintln(l.w, string(jsonBytes))
@@ -59,8 +58,8 @@ func (l *testAudit2Logger) Audit(name string, result audit2log.AuditResultType, 
 func TestFromContext(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
 
-	logger := audit2log.FromContext(ctx)
-	logger.Audit("TEST_ENTRY", audit2log.AuditResultSuccess)
+	logger := evt2log.FromContext(ctx)
+	logger.Event("testop")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
@@ -68,16 +67,15 @@ func TestFromContext(t *testing.T) {
 	assert.Equal(t, 1, len(entries))
 
 	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-		"time":   objmatcher.NewRegExpMatcher(".+"),
-		"type":   objmatcher.NewEqualsMatcher("audit.2"),
-		"name":   objmatcher.NewEqualsMatcher("TEST_ENTRY"),
-		"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+		"time":      objmatcher.NewRegExpMatcher(".+"),
+		"type":      objmatcher.NewEqualsMatcher("event.2"),
+		"eventName": objmatcher.NewEqualsMatcher("testop"),
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
-// Tests that the logger returned by audit2log.FromContext has UID, SID and TokenID parameters set on it if the context
+// Tests that the logger returned by evt2log.FromContext has UID, SID and TokenID parameters set on it if the context
 // has those values set on it using wlog.
 func TestFromContextUsesCommonIDs(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -86,8 +84,8 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 	ctx = wlog.ContextWithSID(ctx, "test-SID")
 	ctx = wlog.ContextWithTokenID(ctx, "test-TokenID")
 
-	logger := audit2log.FromContext(ctx)
-	logger.Audit("TEST_ENTRY", audit2log.AuditResultSuccess)
+	logger := evt2log.FromContext(ctx)
+	logger.Event("testop")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
@@ -95,20 +93,18 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 	assert.Equal(t, 1, len(entries))
 
 	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-		"time":    objmatcher.NewRegExpMatcher(".+"),
-		"type":    objmatcher.NewEqualsMatcher("audit.2"),
-		"name":    objmatcher.NewEqualsMatcher("TEST_ENTRY"),
-		"result":  objmatcher.NewEqualsMatcher("SUCCESS"),
-		"uid":     objmatcher.NewEqualsMatcher("test-UID"),
-		"sid":     objmatcher.NewEqualsMatcher("test-SID"),
-		"tokenId": objmatcher.NewEqualsMatcher("test-TokenID"),
+		"time":      objmatcher.NewRegExpMatcher(".+"),
+		"type":      objmatcher.NewEqualsMatcher("event.2"),
+		"eventName": objmatcher.NewEqualsMatcher("testop"),
+		"uid":       objmatcher.NewEqualsMatcher("test-UID"),
+		"sid":       objmatcher.NewEqualsMatcher("test-SID"),
+		"tokenId":   objmatcher.NewEqualsMatcher("test-TokenID"),
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
-// Tests that the logger returned by audit2log.FromContext has a TraceID set on it if the context has a wtracing
-// TraceID.
+// Tests that the logger returned by evt2log.FromContext has a TraceID set on it if the context has a wtracing TraceID.
 func TestFromContextSetsTraceID(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
 
@@ -118,10 +114,9 @@ func TestFromContextSetsTraceID(t *testing.T) {
 
 	createMatcher := func(name, traceID string) objmatcher.Matcher {
 		matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-			"time":   objmatcher.NewRegExpMatcher(".+"),
-			"type":   objmatcher.NewEqualsMatcher("audit.2"),
-			"name":   objmatcher.NewEqualsMatcher(name),
-			"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+			"time":      objmatcher.NewRegExpMatcher(".+"),
+			"type":      objmatcher.NewEqualsMatcher("event.2"),
+			"eventName": objmatcher.NewEqualsMatcher(name),
 		})
 		if traceID != "" {
 			matcher["traceId"] = objmatcher.NewEqualsMatcher(traceID)
@@ -130,13 +125,13 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	}
 
 	// logger output should have no TraceID (none set as parameter and none exists in context)
-	logger := audit2log.FromContext(ctx)
-	logger.Audit("EVENT_0", audit2log.AuditResultSuccess)
+	logger := evt2log.FromContext(ctx)
+	logger.Event("testop_0")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
-	matcher := createMatcher("EVENT_0", "")
+	matcher := createMatcher("testop_0", "")
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
@@ -144,25 +139,25 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	// logger output should have TraceID set in context (span is set on context)
 	spanOne := tracer.StartSpan("spanOne")
 	ctx = wtracing.ContextWithSpan(ctx, spanOne)
-	logger = audit2log.FromContext(ctx)
-	logger.Audit("EVENT_1", audit2log.AuditResultSuccess)
+	logger = evt2log.FromContext(ctx)
+	logger.Event("testop_1")
 
 	entries, err = logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
-	matcher = createMatcher("EVENT_1", string(spanOne.Context().TraceID))
+	matcher = createMatcher("testop_1", string(spanOne.Context().TraceID))
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 
 	// manually adding a TraceID parameter will override the TraceID (because it is applied after the context one)
-	logger = audit2log.WithParams(logger, audit2log.TraceID("manually-set-trace-id"))
-	logger.Audit("EVENT_2", audit2log.AuditResultSuccess)
+	logger = evt2log.WithParams(logger, evt2log.TraceID("manually-set-trace-id"))
+	logger.Event("testop_2")
 
 	entries, err = logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
-	matcher = createMatcher("EVENT_2", "manually-set-trace-id")
+	matcher = createMatcher("testop_2", "manually-set-trace-id")
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
@@ -170,6 +165,6 @@ func TestFromContextSetsTraceID(t *testing.T) {
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := audit2log.WithLogger(context.Background(), newTestLogger(buf))
+	ctx := evt2log.WithLogger(context.Background(), newTestLogger(buf))
 	return buf, ctx
 }
