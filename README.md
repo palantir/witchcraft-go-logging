@@ -53,18 +53,86 @@ type LoggerProvider interface {
 }
 ```
 
-The default implementation of `wlog.DefaultLoggerProvider()` returns a no-op logger provider, meaning that all logging
-operations performed by loggers that use this implementation will be no-ops.
+The default implementation of `wlog.DefaultLoggerProvider()` returns a logger that outputs a warning that states that
+the default logger provider has not been set. For example, running the program:
 
-The `wlog.SetDefaultLoggerProvider(provider LoggerProvider)` can be used to set the default logger provider to be a 
-specific logger provider. For example, calling `wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())` will set the
-default logger provider to be the logger provider provided by the `wlogzap` package, which is an implementation of the
-`wlog` logger interfaces backed by the `zap` logger.
+```go
+package main
 
-Logger provider implementations generally declare an `init()` function in their top-level package that calls
-`wlog.SetDefaultLoggerProvider` and provides the implemented logger provider. This means that underscore imports can be
-used to set the default logger provider: for example, `import _ "github.palantir.build/deployability/witchcraft-go-logging/witchcraft-go-logging-zap"`
-will set the default logger provider to be `witchcraft-go-logging-zap`.   
+import (
+	"os"
+
+	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+)
+
+func main() {
+	logger := svc1log.New(os.Stdout, wlog.InfoLevel)
+	logger.Info("Hello")
+}
+```
+
+Results in the following output to STDOUT:
+
+```
+[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).
+```
+
+The global logger provider should always be set by the top-level program (the `main` package), so if this warning is
+output it indicates that the top-level program should set a global logger implementation.
+
+Most logger implementations have a package that contains an `init()` function that sets the global logger provider to be
+the implementation's provider. This allows an underscore import to set the logger provider. For example, the following
+sets the default logger provider to be a provider backed by `zap`:
+
+```go
+package main
+
+import (
+	"os"
+
+	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	// import wlog-zap to set zap as the default logger provider
+	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
+)
+
+func main() {
+	logger := svc1log.New(os.Stdout, wlog.InfoLevel)
+	logger.Info("Hello")
+}
+```
+
+Running this program results in the following output to STDOUT:
+
+```
+{"level":"INFO","time":"2018-12-01T05:25:28.856348Z","message":"Hello","type":"service.1"}
+```
+
+It is also possible to set the default logger provider explicitly using the `SetDefaultLoggerProvider(provider LoggerProvider)`
+function in `wlog`. For example, the following program also uses `wlog-zap` as the default logger provider, but does so
+by calling `wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())` rather than using an import: 
+
+```go
+package main
+
+import (
+	"os"
+
+	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog-zap"
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+)
+
+func main() {
+	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
+	logger := svc1log.New(os.Stdout, wlog.InfoLevel)
+	logger.Info("Hello")
+}
+```
+
+Setting the default logger provider to a no-op logger disables all output of loggers created using the default logger
+provider. This can be done by calling `wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider())`. 
 
 Active TODOs
 ------------
