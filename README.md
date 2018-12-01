@@ -71,7 +71,6 @@ Active TODOs
 * Add section on usage to README
 * Improve testing loggers that produce non-JSON output (glog)
 * Port over more tests for audit logs
-* Remove tests that update loggers
 
 License
 -------

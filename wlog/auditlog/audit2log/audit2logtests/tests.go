@@ -92,7 +92,6 @@ func TestCases() []TestCase {
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
 	jsonOutputTests(t, loggerProvider)
-	//jsonLoggerUpdateTest(t, loggerProvider)
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
@@ -122,42 +121,3 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Lo
 		})
 	}
 }
-
-//func jsonLoggerUpdateTest(t *testing.T, loggerProvider func(params wlog.LoggerParams, origin string) svc1log.Logger) {
-//	t.Run("update JSON logger", func(t *testing.T) {
-//		currCase := TestCases()[0]
-//
-//		buf := bytes.Buffer{}
-//		logger := loggerProvider(wlog.LoggerParams{
-//			Level:  wlog.ErrorLevel,
-//			Output: &buf,
-//		}, currCase.Origin)
-//
-//		// log at info level
-//		logger.Info(currCase.Message, currCase.LogParams...)
-//
-//		// output should be empty
-//		assert.Equal(t, "", buf.String())
-//
-//		// update configuration to log at info level
-//		updatable, ok := logger.(wlog.UpdatableLogger)
-//		require.True(t, ok, "logger does not support updating")
-//
-//		updated := updatable.UpdateLogger(wlog.LoggerParams{
-//			Level:  wlog.InfoLevel,
-//			Output: &buf,
-//		})
-//		assert.True(t, updated)
-//
-//		// log at info level
-//		logger.Info(currCase.Message, currCase.LogParams...)
-//
-//		// output should exist and match
-//		gotServiceLog := map[string]interface{}{}
-//		logEntry := buf.Bytes()
-//		err := safejson.Unmarshal(logEntry, &gotServiceLog)
-//		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
-//
-//		assert.NoError(t, currCase.JSONMatcher.Matches(gotServiceLog), "No match")
-//	})
-//}
