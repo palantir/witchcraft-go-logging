@@ -30,7 +30,7 @@ func ProduceNumberContext(ctx context.Context) int {
 
 func ProduceNumberNoContext() int {
 	newNum := rand.Int()
-	logger := svc1log.DefaultLogger()
+	logger := svc1log.FromContext(context.Background())
 	logger.Info("ProduceNumberNoContext produced a number", svc1log.SafeParam("newNum", newNum))
 	return newNum
 }
