@@ -119,7 +119,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 				}),
 			)
 			require.NoError(t, err)
-			span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan.Context())}, tc.SpanOptions...)...)
+			span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan)}, tc.SpanOptions...)...)
 			// Finish() triggers logging
 			span.Finish()
 

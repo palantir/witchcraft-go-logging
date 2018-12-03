@@ -71,14 +71,14 @@
 
 [[projects]]
   branch = "develop"
-  digest = "1:cb4ca2dc028714c1b8dc17c42a3f242391d42527f86c4d9b6f0814819b8ad8b1"
+  digest = "1:63c309ef026855538e3cc897e1ae79e7651042e09e0028e7f9c5f5ab8a461bb7"
   name = "github.com/palantir/witchcraft-go-tracing"
   packages = [
     "wtracing",
     "wzipkin",
   ]
   pruneopts = "UT"
-  revision = "9bbc60bf738dedb14cd1ca439e8d823ac77a44be"
+  revision = "cdc181c163e22a6bee05a6277f8462bf786c0d4c"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"

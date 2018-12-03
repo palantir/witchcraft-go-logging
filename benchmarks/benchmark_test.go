@@ -165,7 +165,7 @@ func BenchmarkTrc1Log(b *testing.B) {
 				require.NoError(b, err)
 				for n := 0; n < b.N; n++ {
 					// Finish() triggers logging
-					tracer.StartSpan("testOp", wtracing.WithParent(clientSpan.Context())).Finish()
+					tracer.StartSpan("testOp", wtracing.WithParent(clientSpan)).Finish()
 				}
 			})
 		})
