@@ -316,7 +316,8 @@ something/something:123`,
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
-	jsonExtraParamsDoNotAppearTest(t, loggerProvider)
+	paramIsntOverwrittenByParams(t, loggerProvider)
+	extraParamsDoNotAppearTest(t, loggerProvider)
 	jsonLoggerUpdateTest(t, loggerProvider)
 }
 
@@ -368,7 +369,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.L
 }
 
 func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	t.Run("params only marshaled if logged", func(t *testing.T) {
+	t.Run("Params only marshaled if logged", func(t *testing.T) {
 		logger := loggerProvider(&bytes.Buffer{}, wlog.InfoLevel, "")
 		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
 		// parameters (if marshal occurred, this would panic).
@@ -376,21 +377,64 @@ func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.
 	})
 }
 
-func jsonExtraParamsDoNotAppearTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	t.Run("extra params do not appear", func(t *testing.T) {
-		buf := bytes.Buffer{}
-		logger := loggerProvider(&buf, wlog.DebugLevel, "")
+// Verifies that if different parameters are specified using SafeParam and SafeParams params, all of the values are
+// present in the final output (that is, these parameters should be additive).
+func paramIsntOverwrittenByParams(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+	t.Run("SafeParam and SafeParams params are additive", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := loggerProvider(&buf, wlog.InfoLevel, "")
 
-		reusedParams := svc1log.SafeParams(map[string]interface{}{"params": "values"})
-		logger.Info("msg", reusedParams, svc1log.SafeParam("param", "value"))
-		buf.Reset()
-		logger.Info("msg", reusedParams)
+		logger.Info("msg", svc1log.SafeParam("param", "value"), svc1log.SafeParams(map[string]interface{}{"params": "values"}))
 
 		gotServiceLog := map[string]interface{}{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 
+		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"level":   objmatcher.NewEqualsMatcher("INFO"),
+			"message": objmatcher.NewEqualsMatcher("msg"),
+			"time":    objmatcher.NewRegExpMatcher(".+"),
+			"type":    objmatcher.NewEqualsMatcher("service.1"),
+			"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"param":  objmatcher.NewEqualsMatcher("value"),
+				"params": objmatcher.NewEqualsMatcher("values"),
+			}),
+		}).Matches(gotServiceLog))
+	})
+}
+
+// Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
+// are modified by making a logger call).
+func extraParamsDoNotAppearTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+	t.Run("SafeParam and SafeParams params stay separate across logger calls", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := loggerProvider(&buf, wlog.DebugLevel, "")
+
+		reusedParams := svc1log.SafeParams(map[string]interface{}{"params": "values"})
+		logger.Info("msg", reusedParams, svc1log.SafeParam("param", "value"))
+		gotServiceLog := map[string]interface{}{}
+		logEntry := buf.Bytes()
+		err := safejson.Unmarshal(logEntry, &gotServiceLog)
+		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
+		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"level":   objmatcher.NewEqualsMatcher("INFO"),
+			"message": objmatcher.NewEqualsMatcher("msg"),
+			"time":    objmatcher.NewRegExpMatcher(".+"),
+			"type":    objmatcher.NewEqualsMatcher("service.1"),
+			"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"param":  objmatcher.NewEqualsMatcher("value"),
+				"params": objmatcher.NewEqualsMatcher("values"),
+			}),
+		}).Matches(gotServiceLog))
+
+		buf.Reset()
+		logger.Info("msg", reusedParams)
+
+		gotServiceLog = map[string]interface{}{}
+		logEntry = buf.Bytes()
+		err = safejson.Unmarshal(logEntry, &gotServiceLog)
+		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 			"level":   objmatcher.NewEqualsMatcher("INFO"),
 			"message": objmatcher.NewEqualsMatcher("msg"),
