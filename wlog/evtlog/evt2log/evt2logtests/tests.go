@@ -110,7 +110,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logg
 // Verifies that if different parameters are specified using Value and Values params, all of the values are present in
 // the final output (that is, these parameters should be additive).
 func valueIsntOverwrittenByValues(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
-	t.Run("Value param and Values param are additive", func(t *testing.T) {
+	t.Run("Value and Values params are additive", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
@@ -136,7 +136,7 @@ func valueIsntOverwrittenByValues(t *testing.T, loggerProvider func(w io.Writer)
 // Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
 // are modified by making a logger call).
 func extraValuesIndependentAcrossCalls(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
-	t.Run("Values provided by parameters are independent across calls", func(t *testing.T) {
+	t.Run("Value and Values params stay separate across logger calls", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
