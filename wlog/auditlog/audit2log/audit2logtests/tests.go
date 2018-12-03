@@ -169,8 +169,8 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			logger := loggerProvider(buf)
+			var buf bytes.Buffer
+			logger := loggerProvider(&buf)
 
 			logger.Audit("audited action name", audit2log.AuditResultSuccess, tc.params...)
 
@@ -189,6 +189,8 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 	}
 }
 
+// Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
+// are modified by making a logger call).
 func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
 	const (
 		resultParamsKey  = "resultParams"
@@ -202,25 +204,24 @@ func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audi
 		paramsFunc func(map[string]interface{}) audit2log.Param
 	}{
 		{
-			name:       "Params stay seaparate across calls for ResultParam",
+			name:       "Params stay separate across calls for ResultParam",
 			paramKey:   resultParamsKey,
 			paramFunc:  audit2log.ResultParam,
 			paramsFunc: audit2log.ResultParams,
 		},
 		{
-			name:       "Params stay seaparate across calls for RequestParam",
+			name:       "Params stay separate across calls for RequestParam",
 			paramKey:   requestParamsKey,
 			paramFunc:  audit2log.RequestParam,
 			paramsFunc: audit2log.RequestParams,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			buf := bytes.Buffer{}
+			var buf bytes.Buffer
 			logger := loggerProvider(&buf)
 
 			reusedParams := tc.paramsFunc(map[string]interface{}{"key1": "val1"})
 
-			// create a log entry with "reusedParams" and a separate single param
 			logger.Audit(
 				"audited action name",
 				audit2log.AuditResultSuccess,
