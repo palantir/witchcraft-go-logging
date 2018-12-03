@@ -85,6 +85,8 @@ func TestCases() []TestCase {
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
 	jsonOutputTests(t, loggerProvider)
+	valueIsntOverwrittenByValues(t, loggerProvider)
+	extraValuesIndependentAcrossCalls(t, loggerProvider)
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
@@ -103,4 +105,73 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logg
 			assert.NoError(t, tc.JSONMatcher.Matches(gotEventLog), "Case %d: %s", i, tc.Name)
 		})
 	}
+}
+
+// Verifies that if different parameters are specified using Value and Values params, all of the values are present in
+// the final output (that is, these parameters should be additive).
+func valueIsntOverwrittenByValues(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
+	t.Run("Value and Values params are additive", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := loggerProvider(&buf)
+
+		logger.Event("event", evt2log.Value("key", "value"), evt2log.Values(map[string]interface{}{"keys": "values"}))
+
+		gotEventLog := map[string]interface{}{}
+		logEntry := buf.Bytes()
+		err := safejson.Unmarshal(logEntry, &gotEventLog)
+		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))
+
+		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"eventName": objmatcher.NewEqualsMatcher("event"),
+			"time":      objmatcher.NewRegExpMatcher(".+"),
+			"type":      objmatcher.NewEqualsMatcher("event.2"),
+			"values": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"key":  objmatcher.NewEqualsMatcher("value"),
+				"keys": objmatcher.NewEqualsMatcher("values"),
+			}),
+		}).Matches(gotEventLog))
+	})
+}
+
+// Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
+// are modified by making a logger call).
+func extraValuesIndependentAcrossCalls(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logger) {
+	t.Run("Value and Values params stay separate across logger calls", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := loggerProvider(&buf)
+
+		reusedParams := evt2log.Values(map[string]interface{}{"keys": "values"})
+		logger.Event("event", reusedParams, evt2log.Value("key", "value"))
+		gotEventLog := map[string]interface{}{}
+		logEntry := buf.Bytes()
+		err := safejson.Unmarshal(logEntry, &gotEventLog)
+		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))
+
+		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"eventName": objmatcher.NewEqualsMatcher("event"),
+			"time":      objmatcher.NewRegExpMatcher(".+"),
+			"type":      objmatcher.NewEqualsMatcher("event.2"),
+			"values": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"key":  objmatcher.NewEqualsMatcher("value"),
+				"keys": objmatcher.NewEqualsMatcher("values"),
+			}),
+		}).Matches(gotEventLog))
+
+		buf.Reset()
+		logger.Event("event", reusedParams)
+
+		gotEventLog = map[string]interface{}{}
+		logEntry = buf.Bytes()
+		err = safejson.Unmarshal(logEntry, &gotEventLog)
+		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))
+
+		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"eventName": objmatcher.NewEqualsMatcher("event"),
+			"time":      objmatcher.NewRegExpMatcher(".+"),
+			"type":      objmatcher.NewEqualsMatcher("event.2"),
+			"values": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"keys": objmatcher.NewEqualsMatcher("values"),
+			}),
+		}).Matches(gotEventLog))
+	})
 }
