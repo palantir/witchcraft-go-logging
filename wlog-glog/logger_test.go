@@ -136,7 +136,7 @@ func TestTrc1Log(t *testing.T) {
 			}),
 		)
 		require.NoError(t, err)
-		span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan.Context())}, tc.SpanOptions...)...)
+		span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan)}, tc.SpanOptions...)...)
 		// Finish() triggers logging
 		span.Finish()
 	}
