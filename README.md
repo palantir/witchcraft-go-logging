@@ -134,9 +134,67 @@ func main() {
 Setting the default logger provider to a no-op logger disables all output of loggers created using the default logger
 provider. This can be done by calling `wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider())`. 
 
+Using loggers in code
+---------------------
+### Creating loggers and making them available in code
+Each logger defines creation functions that typically take the `io.Writer` to which the logger output should be written
+as an argument. There are typically 2 versions of a logger creation function: one that is explicitly provided with the
+logger implementation that should be used to create the logger, and another which uses the default logger provider (as
+determined at runtime) to create the logger. In most cases, loggers are created using the function that uses the default
+logger provider (this makes it easier to set the default logger provider once to change all implementation).
+
+Loggers are typically created by the top-level program (the program with a `main` package) and made available to other
+code using some mechanism such as setting it in an exported package variable, passing it as an argument or setting it in
+the contexts provided to program logic. This is a general issue common to all logging frameworks, and 
+`witchcraft-go-logging` does not take an explicit stance on the correct approach.
+
+Packages that are written as libraries typically do not instantiate loggers themselves -- they either accept the 
+required loggers as arguments or have a context parameter and require that the expected loggers be set in the context.
+
+### Using contexts to propagate loggers
+Most logger packages define functions that can be used to set and retrieve the logger from a context. For example,
+the `svc1log` package defines `WithLogger` and `FromContext` functions that can be used to set a logger on a context and
+retrieve a logger from a context, respectively.
+
+If a `FromContext` function is called on a context that does not have the logger set, it creates a default logger that
+is returned instead. This ensures that the function will not return `nil`. However, this situation is usually indicative
+of a programming error -- the consuming API expected a logger to be set on a context, but it was not (this implicit API
+dependency is a [commonly expressed concern](https://dave.cheney.net/2017/01/26/context-is-for-cancelation) about using
+storing loggers in contexts). As such, the default implementation of the logger returned in this situation is configured
+to write to STDERR, and writes a warning about this situation (followed by the actual logger output). The logger 
+returned by the `FromContext` function when no logger is present in the context is configurable, so if this default
+behavior is not desirable it can be changed -- for example, one may return a noop logger to quietly suppress output or
+return `nil` to force a panic in this situation.  
+
+One advantage of using loggers stored in contexts is the ability to decorate them with parameters so that subsequent
+calls use the provided parameters. For example, consider the following series of calls starting with `UpdateService`:
+
+```go
+func UpdateService(ctx context.Context, serviceID string) {
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.SafeParam("serviceId", serviceID))
+	for _, currProcessID := range processIDs {
+		updateProcess(ctx, currProcessID)
+	}
+}
+
+func updateProcess(ctx context.Context, processID string) {
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.SafeParam("processId", processID))
+	updateValue(ctx, processVals[processID], "timestamp", time.Now().String())
+}
+
+func updateValue(ctx context.Context, vals map[string]string, key, newValue string) {
+	prevValue := vals[key]
+	vals[key] = newValue
+	svc1log.FromContext(ctx).Debug("Updating value", svc1log.SafeParam("prevValue", prevValue), svc1log.SafeParam("newValue", newValue))
+}
+```
+
+In this series of calls, each function creates a new context that decorates its service logger with the provided
+parameter. This has the result that, when `updateValue` performs its debug logging, the `serviceId` and `processId`
+parameters that were added in the previous calls will be included in the logger output.
+
 Active TODOs
 ------------
-* Add section on usage to README
 * Improve testing loggers that produce non-JSON output (glog)
 * Port over more tests for audit logs
 
