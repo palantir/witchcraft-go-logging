@@ -16,6 +16,7 @@ package audit2logtests
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -92,6 +93,8 @@ func TestCases() []TestCase {
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
 	jsonOutputTests(t, loggerProvider)
+	rParamIsntOverwrittenByRParamsTest(t, loggerProvider)
+	extraRParamsDoNotAppear(t, loggerProvider)
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
@@ -118,6 +121,157 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Lo
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.Name, string(logEntry))
 
 			assert.NoError(t, tc.JSONMatcher.Matches(gotAuditLog), "Case %d: %s", i, tc.Name)
+		})
+	}
+}
+
+// Verifies that if different parameters are specified using ResultParam/RequestParam and ResultParams/RequestParams,
+// all of the values are present in the final output (that is, these parameters should be additivte).
+func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
+	mapFieldMatcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"key1": objmatcher.NewEqualsMatcher("val1"),
+		"key2": objmatcher.NewEqualsMatcher("val2"),
+	})
+	for i, tc := range []struct {
+		name   string
+		params []audit2log.Param
+		want   objmatcher.MapMatcher
+	}{
+		{
+			name: "ResultParam params are additive",
+			params: []audit2log.Param{
+				audit2log.ResultParam("key1", "val1"),
+				audit2log.ResultParams(map[string]interface{}{"key2": "val2"}),
+			},
+			want: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":         objmatcher.NewRegExpMatcher(".+"),
+				"name":         objmatcher.NewEqualsMatcher("audited action name"),
+				"type":         objmatcher.NewEqualsMatcher("audit.2"),
+				"result":       objmatcher.NewEqualsMatcher("SUCCESS"),
+				"resultParams": mapFieldMatcher,
+			}),
+		},
+		{
+			name: "RequestParam params are additive",
+			params: []audit2log.Param{
+				audit2log.RequestParam("key1", "val1"),
+				audit2log.RequestParams(map[string]interface{}{
+					"key2": "val2",
+				}),
+			},
+			want: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"name":          objmatcher.NewEqualsMatcher("audited action name"),
+				"type":          objmatcher.NewEqualsMatcher("audit.2"),
+				"result":        objmatcher.NewEqualsMatcher("SUCCESS"),
+				"requestParams": mapFieldMatcher,
+			}),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			logger := loggerProvider(buf)
+
+			logger.Audit("audited action name", audit2log.AuditResultSuccess, tc.params...)
+
+			auditLog := map[string]interface{}{}
+			logEntry := buf.Bytes()
+			err := safejson.Unmarshal(logEntry, &auditLog)
+			require.NoError(
+				t,
+				err,
+				"Case %d: %s\nAudit log line is not a valid map: %v",
+				i,
+				tc.name,
+				string(logEntry))
+			assert.NoError(t, tc.want.Matches(auditLog), "Case %d: %s", i, tc.name)
+		})
+	}
+}
+
+func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
+	const (
+		resultParamsKey  = "resultParams"
+		requestParamsKey = "requestParams"
+	)
+
+	for i, tc := range []struct {
+		name       string
+		paramKey   string
+		paramFunc  func(key string, val interface{}) audit2log.Param
+		paramsFunc func(map[string]interface{}) audit2log.Param
+	}{
+		{
+			name:       "Params stay seaparate across calls for ResultParam",
+			paramKey:   resultParamsKey,
+			paramFunc:  audit2log.ResultParam,
+			paramsFunc: audit2log.ResultParams,
+		},
+		{
+			name:       "Params stay seaparate across calls for RequestParam",
+			paramKey:   requestParamsKey,
+			paramFunc:  audit2log.RequestParam,
+			paramsFunc: audit2log.RequestParams,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := bytes.Buffer{}
+			logger := loggerProvider(&buf)
+
+			reusedParams := tc.paramsFunc(map[string]interface{}{"key1": "val1"})
+
+			// create a log entry with "reusedParams" and a separate single param
+			logger.Audit(
+				"audited action name",
+				audit2log.AuditResultSuccess,
+				reusedParams,
+				tc.paramFunc("key2", "val2"))
+			want := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":   objmatcher.NewRegExpMatcher(".+"),
+				"name":   objmatcher.NewEqualsMatcher("audited action name"),
+				"type":   objmatcher.NewEqualsMatcher("audit.2"),
+				"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key1": objmatcher.NewEqualsMatcher("val1"),
+					"key2": objmatcher.NewEqualsMatcher("val2"),
+				}),
+			})
+			auditLog := map[string]interface{}{}
+			logEntry := buf.Bytes()
+			err := json.Unmarshal(logEntry, &auditLog)
+			require.NoError(
+				t,
+				err,
+				"Case %d: %s\nAudit log is not a valid map: %v",
+				i,
+				tc.name,
+				string(logEntry))
+
+			buf.Reset()
+			logger.Audit("audited action name", audit2log.AuditResultSuccess, reusedParams)
+
+			want = objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":   objmatcher.NewRegExpMatcher(".+"),
+				"name":   objmatcher.NewEqualsMatcher("audited action name"),
+				"type":   objmatcher.NewEqualsMatcher("audit.2"),
+				"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key1": objmatcher.NewEqualsMatcher("val1"),
+				}),
+			})
+
+			auditLog = map[string]interface{}{}
+			logEntry = buf.Bytes()
+			err = json.Unmarshal(logEntry, &auditLog)
+			require.NoError(
+				t,
+				err,
+				"Case %d: %s\nAudit log is not a valid map: %v",
+				i,
+				tc.name,
+				string(logEntry))
+
+			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
 		})
 	}
 }
