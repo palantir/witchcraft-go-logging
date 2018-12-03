@@ -126,7 +126,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Lo
 }
 
 // Verifies that if different parameters are specified using ResultParam/RequestParam and ResultParams/RequestParams,
-// all of the values are present in the final output (that is, these parameters should be additivte).
+// all of the values are present in the final output (that is, these parameters should be additive).
 func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.Writer) audit2log.Logger) {
 	mapFieldMatcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 		"key1": objmatcher.NewEqualsMatcher("val1"),
