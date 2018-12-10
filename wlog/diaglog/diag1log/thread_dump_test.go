@@ -15,58 +15,73 @@
 package diag1log
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"runtime/pprof"
 	"testing"
-	"time"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/sls/spec/logging"
-	"github.com/stretchr/testify/assert"
+	"github.com/palantir/witchcraft-go-logging/internal/conjuretype"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateThreadDump(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	for i := 0; i < 3; i++ {
-		go func(ctx context.Context) {
-			timer := time.NewTimer(time.Millisecond)
-			select {
-			case <-timer.C:
-			case <-ctx.Done():
-			}
-		}(ctx)
+func TestThreadDumpV1FromGoroutines(t *testing.T) {
+	for _, test := range []struct {
+		Name     string
+		Input    string
+		Expected logging.ThreadDumpV1
+	}{
+		{
+			Name: "single goroutine",
+			Input: `goroutine 14 [select]:
+net/http.(*persistConn).writeLoop(0xc0000bd0e0)
+	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go:1885 +0x113
+created by net/http.(*Transport).dialConn
+	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go:1339 +0x966
+`,
+			Expected: logging.ThreadDumpV1{
+				Threads: []logging.ThreadInfoV1{
+					{
+						Name: strPtr("goroutine 14"),
+						Id:   safelongPtr(14),
+						Params: map[string]interface{}{
+							"status": "select",
+						},
+						StackTrace: []logging.StackFrameV1{
+							{
+								Address:   strPtr("0x113"),
+								Procedure: strPtr("net/http.(*persistConn).writeLoop"),
+								File:      strPtr("net/http/transport.go"),
+								Line:      intPtr(1885),
+								Params:    map[string]interface{}{},
+							},
+							{
+								Address:   strPtr("0x966"),
+								Procedure: strPtr("net/http.(*Transport).dialConn"),
+								File:      strPtr("net/http/transport.go"),
+								Line:      intPtr(1339),
+								Params: map[string]interface{}{
+									"goroutineCreator": true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			dump := ThreadDumpV1FromGoroutines([]byte(test.Input))
+			require.Equal(t, test.Expected, dump)
+		})
 	}
-
-	var threads logging.ThreadDumpV1
-	testServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		var err error
-		threads, err = generateThreadDump()
-		if err != nil {
-			panic(err)
-		}
-		rw.WriteHeader(200)
-	}))
-	defer testServer.Close()
-	_, err := http.Get(testServer.URL)
-	require.NoError(t, err)
-
-	// TODO assert something
-	threadJSON, err := json.MarshalIndent(threads, "", "  ")
-	assert.NoError(t, err)
-	fmt.Println(string(threadJSON))
 }
 
-func generateThreadDump() (logging.ThreadDumpV1, error) {
-	var buf bytes.Buffer
-	if err := pprof.Lookup("goroutine").WriteTo(&buf, 2); err != nil {
-		return logging.ThreadDumpV1{}, err
+func strPtr(s string) *string { return &s }
+
+func intPtr(i int) *int { return &i }
+
+func safelongPtr(i int64) *conjuretype.SafeLong {
+	s, err := conjuretype.NewSafeLong(i)
+	if err != nil {
+		panic(err)
 	}
-	return ThreadDumpV1FromGoroutines(buf.Bytes()), nil
+	return &s
 }
