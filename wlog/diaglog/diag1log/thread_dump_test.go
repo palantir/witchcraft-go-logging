@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package diaglog
+package diag1log
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -45,7 +47,7 @@ func TestGenerateThreadDump(t *testing.T) {
 	var threads logging.ThreadDumpV1
 	testServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var err error
-		threads, err = GenerateThreadDump()
+		threads, err = generateThreadDump()
 		if err != nil {
 			panic(err)
 		}
@@ -59,4 +61,12 @@ func TestGenerateThreadDump(t *testing.T) {
 	threadJSON, err := json.MarshalIndent(threads, "", "  ")
 	assert.NoError(t, err)
 	fmt.Println(string(threadJSON))
+}
+
+func generateThreadDump() (logging.ThreadDumpV1, error) {
+	var buf bytes.Buffer
+	if err := pprof.Lookup("goroutine").WriteTo(&buf, 2); err != nil {
+		return logging.ThreadDumpV1{}, err
+	}
+	return ThreadDumpV1FromGoroutines(buf.Bytes()), nil
 }

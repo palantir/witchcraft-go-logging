@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package diaglog
+package diag1log
 
 import (
 	"bytes"
 	"regexp"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 
@@ -25,17 +24,11 @@ import (
 	"github.com/palantir/witchcraft-go-logging/internal/conjuretype"
 )
 
-func GenerateThreadDump() (logging.ThreadDumpV1, error) {
-	var buf bytes.Buffer
-	if err := pprof.Lookup("goroutine").WriteTo(&buf, 2); err != nil {
-		return logging.ThreadDumpV1{}, err
-	}
-	return UnmarshalGoroutines(buf.Bytes()), nil
-}
-
-func UnmarshalGoroutines(output []byte) logging.ThreadDumpV1 {
+// ThreadDumpV1FromGoroutines unmarshals a "goroutine dump" (as formatted by panic or the runtime package)
+// and returns a conjured logging.ThreadDumpV1 object.
+func ThreadDumpV1FromGoroutines(goroutinesContent []byte) logging.ThreadDumpV1 {
 	// Goroutines are separated by an empty line
-	goroutines := bytes.Split(output, []byte("\n\n"))
+	goroutines := bytes.Split(goroutinesContent, []byte("\n\n"))
 
 	threads := logging.ThreadDumpV1{Threads: make([]logging.ThreadInfoV1, len(goroutines))}
 	for i, goroutine := range goroutines {
