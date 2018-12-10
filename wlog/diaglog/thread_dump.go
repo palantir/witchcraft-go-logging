@@ -16,7 +16,6 @@ package diaglog
 
 import (
 	"bytes"
-	"fmt"
 	"regexp"
 	"runtime/pprof"
 	"strconv"
@@ -31,7 +30,6 @@ func GenerateThreadDump() (logging.ThreadDumpV1, error) {
 	if err := pprof.Lookup("goroutine").WriteTo(&buf, 2); err != nil {
 		return logging.ThreadDumpV1{}, err
 	}
-	fmt.Println(buf.String())
 	return UnmarshalGoroutines(buf.Bytes()), nil
 }
 
