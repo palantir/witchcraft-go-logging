@@ -77,24 +77,24 @@ func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
 }
 
 func unmarshalFuncLine(funcLine []byte, frame *logging.StackFrameV1) {
-	isCreator := bytes.HasPrefix(funcLine, []byte("created by "))
-	if isCreator {
+	if bytes.HasPrefix(funcLine, []byte("created by ")) {
+		// creators do not include arguments
 		procedure := strings.TrimPrefix(string(funcLine), "created by ")
 		frame.Procedure = &procedure
 		frame.Params["goroutineCreator"] = true
-	} else {
-		// creators do not include arguments
-		argIndex := bytes.LastIndex(funcLine, []byte("("))
-		if argIndex != -1 {
-			procedure := string(funcLine[:argIndex])
-			frame.Procedure = &procedure
+		return
+	}
 
-			// TODO Is including function arguments safe???
-			//args := bytes.Split(funcLine[argIndex+1:len(funcLine)-1], []byte(", "))
-			//for i, arg := range args {
-			//	frame.Params[fmt.Sprintf("arg%d", i)] = string(arg)
-			//}
-		}
+	argIndex := bytes.LastIndex(funcLine, []byte("("))
+	if argIndex != -1 {
+		procedure := string(funcLine[:argIndex])
+		frame.Procedure = &procedure
+
+		// TODO(bmoylan): Would including function arguments be safe?
+		//args := bytes.Split(funcLine[argIndex+1:len(funcLine)-1], []byte(", "))
+		//for i, arg := range args {
+		//	frame.Params[fmt.Sprintf("arg%d", i)] = string(arg)
+		//}
 	}
 }
 
