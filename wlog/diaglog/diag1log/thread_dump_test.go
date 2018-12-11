@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package diag1log
+package diag1log_test
 
 import (
 	"testing"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/sls/spec/logging"
 	"github.com/palantir/witchcraft-go-logging/internal/conjuretype"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,11 +40,9 @@ created by net/http.(*Transport).dialConn
 			Expected: logging.ThreadDumpV1{
 				Threads: []logging.ThreadInfoV1{
 					{
-						Name: strPtr("goroutine 14"),
-						Id:   safelongPtr(14),
-						Params: map[string]interface{}{
-							"status": "select",
-						},
+						Name:   strPtr("goroutine 14 [select]"),
+						Id:     safelongPtr(14),
+						Params: map[string]interface{}{"status": "select"},
 						StackTrace: []logging.StackFrameV1{
 							{
 								Address:   strPtr("0x113"),
@@ -68,7 +67,7 @@ created by net/http.(*Transport).dialConn
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
-			dump := ThreadDumpV1FromGoroutines([]byte(test.Input))
+			dump := diag1log.ThreadDumpV1FromGoroutines([]byte(test.Input))
 			require.Equal(t, test.Expected, dump)
 		})
 	}
@@ -79,9 +78,6 @@ func strPtr(s string) *string { return &s }
 func intPtr(i int) *int { return &i }
 
 func safelongPtr(i int64) *conjuretype.SafeLong {
-	s, err := conjuretype.NewSafeLong(i)
-	if err != nil {
-		panic(err)
-	}
+	s, _ := conjuretype.NewSafeLong(i)
 	return &s
 }
