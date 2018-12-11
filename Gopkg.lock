@@ -40,6 +40,14 @@
   version = "v0.1.3"
 
 [[projects]]
+  digest = "1:3ca794cab21462befc91c1767333e3cb16240680b4067beee52a18c1e18e1c89"
+  name = "github.com/palantir/conjure-go"
+  packages = ["conjure/types/conjuretype"]
+  pruneopts = "UT"
+  revision = "fd40b72c7444aacb4cfe357b3cb285526d151ed1"
+  version = "2.0.0"
+
+[[projects]]
   digest = "1:5ccab57e70f32fb9ef9a3a9938677e367852f06f699901f8dc00e3de433e2c46"
   name = "github.com/palantir/pkg"
   packages = [
@@ -156,6 +164,7 @@
   input-imports = [
     "github.com/golang/glog",
     "github.com/nmiyake/pkg/dirs",
+    "github.com/palantir/conjure-go/conjure/types/conjuretype",
     "github.com/palantir/pkg/objmatcher",
     "github.com/palantir/pkg/safejson",
     "github.com/palantir/witchcraft-go-error",
