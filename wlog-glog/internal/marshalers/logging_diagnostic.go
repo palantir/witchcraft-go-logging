@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/sls/spec/logging"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/spec/logging"
 )
 
 func marshalLoggingDiagnostic(key string, val interface{}) string {

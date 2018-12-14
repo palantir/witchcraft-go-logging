@@ -2,4 +2,4 @@ version: 1
 projects:
   conjure:
     output-dir: ./conjure
-    ir-locator: ./conjure/defs/sls-logging-api-3.2.0.json
+    ir-locator: ./conjure/defs/witchcraft-logging-api-3.2.0.json

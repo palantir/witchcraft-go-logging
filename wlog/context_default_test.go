@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
-	"github.com/palantir/witchcraft-go-logging/conjure/sls/spec/logging"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/spec/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
