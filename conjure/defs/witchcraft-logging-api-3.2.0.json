@@ -6,7 +6,7 @@
     "object" : {
       "typeName" : {
         "name" : "WrappedLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -21,7 +21,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "WrappedLogV1Payload",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -45,7 +45,7 @@
     "union" : {
       "typeName" : {
         "name" : "WrappedLogV1Payload",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "union" : [ {
         "fieldName" : "serviceLogV1",
@@ -53,7 +53,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "ServiceLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -62,7 +62,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "RequestLogV2",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -71,7 +71,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "TraceLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -80,7 +80,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "EventLogV2",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -89,7 +89,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "MetricLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -98,7 +98,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "AuditLogV2",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -107,7 +107,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "DiagnosticLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ]
@@ -117,7 +117,7 @@
     "object" : {
       "typeName" : {
         "name" : "ServiceLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -132,7 +132,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "LogLevel",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         },
         "docs" : "The logger output level. One of {FATAL,ERROR,WARN,INFO,DEBUG,TRACE}."
@@ -199,7 +199,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -214,7 +214,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -229,7 +229,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -244,7 +244,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -302,7 +302,7 @@
     "union" : {
       "typeName" : {
         "name" : "RequestLog",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "union" : [ {
         "fieldName" : "v1",
@@ -310,7 +310,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "RequestLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -319,7 +319,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "RequestLogV2",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ]
@@ -329,7 +329,7 @@
     "object" : {
       "typeName" : {
         "name" : "RequestLogV2",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -422,7 +422,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -437,7 +437,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -452,7 +452,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -467,7 +467,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -497,7 +497,7 @@
     "object" : {
       "typeName" : {
         "name" : "RequestLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -638,7 +638,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -653,7 +653,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -668,7 +668,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -683,7 +683,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -713,7 +713,7 @@
     "object" : {
       "typeName" : {
         "name" : "TraceLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -736,7 +736,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -750,7 +750,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -764,7 +764,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -790,7 +790,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Span",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ],
@@ -801,7 +801,7 @@
     "object" : {
       "typeName" : {
         "name" : "Span",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "traceId",
@@ -859,7 +859,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "Annotation",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -872,7 +872,7 @@
     "object" : {
       "typeName" : {
         "name" : "Annotation",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "timestamp",
@@ -894,7 +894,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Endpoint",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ],
@@ -905,7 +905,7 @@
     "object" : {
       "typeName" : {
         "name" : "Endpoint",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "serviceName",
@@ -945,7 +945,7 @@
     "object" : {
       "typeName" : {
         "name" : "EventLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -998,7 +998,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1013,7 +1013,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1028,7 +1028,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1058,7 +1058,7 @@
     "object" : {
       "typeName" : {
         "name" : "EventLogV2",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -1104,7 +1104,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1119,7 +1119,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1134,7 +1134,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1149,7 +1149,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1195,7 +1195,7 @@
     "object" : {
       "typeName" : {
         "name" : "MetricLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -1264,7 +1264,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1279,7 +1279,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1294,7 +1294,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1324,7 +1324,7 @@
     "object" : {
       "typeName" : {
         "name" : "BeaconLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -1396,7 +1396,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1411,7 +1411,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1426,7 +1426,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1456,7 +1456,7 @@
     "object" : {
       "typeName" : {
         "name" : "AuditLogV2",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -1480,7 +1480,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1495,7 +1495,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "SessionId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1510,7 +1510,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TokenId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1525,7 +1525,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "TraceId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1540,7 +1540,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "UserId",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1571,7 +1571,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "AuditResult",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         },
         "docs" : "Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED\n"
@@ -1615,7 +1615,7 @@
     "object" : {
       "typeName" : {
         "name" : "DiagnosticLogV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "type",
@@ -1636,7 +1636,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Diagnostic",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         },
         "docs" : "The diagnostic being logged."
@@ -1664,7 +1664,7 @@
     "union" : {
       "typeName" : {
         "name" : "Diagnostic",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "union" : [ {
         "fieldName" : "generic",
@@ -1672,7 +1672,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "GenericDiagnostic",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -1681,7 +1681,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "ThreadDumpV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ]
@@ -1691,7 +1691,7 @@
     "object" : {
       "typeName" : {
         "name" : "GenericDiagnostic",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "diagnosticType",
@@ -1714,7 +1714,7 @@
     "object" : {
       "typeName" : {
         "name" : "ThreadDumpV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "threads",
@@ -1725,7 +1725,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "ThreadInfoV1",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1738,7 +1738,7 @@
     "object" : {
       "typeName" : {
         "name" : "ThreadInfoV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "id",
@@ -1773,7 +1773,7 @@
               "type" : "reference",
               "reference" : {
                 "name" : "StackFrameV1",
-                "package" : "com.palantir.sls.spec.logging"
+                "package" : "com.palantir.witchcraft.spec.logging"
               }
             }
           }
@@ -1802,7 +1802,7 @@
     "object" : {
       "typeName" : {
         "name" : "StackFrameV1",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "fields" : [ {
         "fieldName" : "address",
@@ -1875,7 +1875,7 @@
     "enum" : {
       "typeName" : {
         "name" : "AuditResult",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "values" : [ {
         "value" : "SUCCESS"
@@ -1890,7 +1890,7 @@
     "union" : {
       "typeName" : {
         "name" : "UnionEventLog",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "union" : [ {
         "fieldName" : "eventLog",
@@ -1898,7 +1898,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "EventLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -1907,7 +1907,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "EventLogV2",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       }, {
@@ -1916,7 +1916,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "BeaconLogV1",
-            "package" : "com.palantir.sls.spec.logging"
+            "package" : "com.palantir.witchcraft.spec.logging"
           }
         }
       } ],
@@ -1927,7 +1927,7 @@
     "enum" : {
       "typeName" : {
         "name" : "LogLevel",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "values" : [ {
         "value" : "FATAL"
@@ -1948,7 +1948,7 @@
     "alias" : {
       "typeName" : {
         "name" : "UserId",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "alias" : {
         "type" : "primitive",
@@ -1960,7 +1960,7 @@
     "alias" : {
       "typeName" : {
         "name" : "SessionId",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "alias" : {
         "type" : "primitive",
@@ -1972,7 +1972,7 @@
     "alias" : {
       "typeName" : {
         "name" : "TokenId",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "alias" : {
         "type" : "primitive",
@@ -1984,7 +1984,7 @@
     "alias" : {
       "typeName" : {
         "name" : "TraceId",
-        "package" : "com.palantir.sls.spec.logging"
+        "package" : "com.palantir.witchcraft.spec.logging"
       },
       "alias" : {
         "type" : "primitive",
