@@ -30,7 +30,7 @@ import (
 func TestRunWithFatalLogging_Panic(t *testing.T) {
 	buf := &bytes.Buffer{}
 	defer func() {
-		recover()
+		_ = recover()
 	}()
 	ctx := getContextWithLogger(context.Background(), buf)
 	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
