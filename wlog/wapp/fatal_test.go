@@ -41,7 +41,7 @@ func TestRunWithFatalLogging_Panic(t *testing.T) {
 	assert.True(t, ok, "Expected a stacktrace param")
 	assert.NotNil(t, st, "Expected stacktrace param to not be nil")
 	r, ok := werror.ParamFromError(err, "recovered")
-	assert.True(t, ok, "Expected a recovered param")
+	assert.False(t, ok, "Expected a recovered param to be unsafe")
 	assert.NotNil(t, r, "Expected recovered param value to not be nil")
 }
 

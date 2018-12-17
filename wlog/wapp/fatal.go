@@ -16,9 +16,9 @@ package wapp
 
 import (
 	"context"
-	"github.com/palantir/witchcraft-go-error"
 	"runtime/debug"
 
+	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
@@ -32,18 +32,13 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 			return
 		}
 		stacktrace := diag1log.ThreadDumpV1FromGoroutines(debug.Stack())
-		stacktraceJSON, err := stacktrace.MarshalJSON()
-		if err != nil {
-			svc1log.FromContext(ctx).Error("failed to convert threaddump to JSON",
-				svc1log.Stacktrace(err))
-		}
-		svc1log.FromContext(ctx).Error("panicking",
-			svc1log.SafeParam("stacktrace", string(stacktraceJSON)),
+		svc1log.FromContext(ctx).Error("panic recovered",
+			svc1log.SafeParam("stacktrace", stacktrace),
 			svc1log.UnsafeParam("recovered", r))
 		if retErr == nil {
-			retErr = werror.Error("panicking",
-				werror.SafeParam("stacktrace", string(stacktraceJSON)),
-				werror.SafeParam("recovered", r))
+			retErr = werror.Error("panic recovered",
+				werror.SafeParam("stacktrace", stacktrace),
+				werror.UnsafeParam("recovered", r))
 		}
 	}()
 	if err := runFn(ctx); err != nil {
