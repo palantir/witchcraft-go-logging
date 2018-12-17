@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app
+package wapp
 
 import (
 	"bytes"
@@ -30,15 +30,19 @@ import (
 func TestRunWithFatalLogging_Panic(t *testing.T) {
 	buf := &bytes.Buffer{}
 	defer func() {
-		r := recover()
-		assert.NotNil(t, r)
-		assert.Contains(t, buf.String(), "panicking")
+		recover()
 	}()
 	ctx := getContextWithLogger(context.Background(), buf)
-	_ = RunWithFatalLogging(ctx, func(ctx context.Context) error {
+	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
 		panic("foo")
 	})
-	assert.Fail(t, "unexpected")
+	assert.Error(t, err)
+	st, ok := werror.ParamFromError(err, "stacktrace")
+	assert.True(t, ok, "Expected a stacktrace param")
+	assert.NotNil(t, st, "Expected stacktrace param to not be nil")
+	r, ok := werror.ParamFromError(err, "recovered")
+	assert.True(t, ok, "Expected a recovered param")
+	assert.NotNil(t, r, "Expected recovered param value to not be nil")
 }
 
 func TestRunWithFatalLogging_Error(t *testing.T) {

@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app
+package wapp
 
 import (
 	"context"
+	"github.com/palantir/witchcraft-go-error"
 	"runtime/debug"
 
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -24,14 +25,25 @@ import (
 
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.
 // Useful as a "catch all" for applications so that they can sls log fatal events, perhaps before exiting.
-func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) error {
+func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
 	defer func() {
-		if r := recover(); r != nil {
-			stacktrace := diag1log.ThreadDumpV1FromGoroutines(debug.Stack())
-			svc1log.FromContext(ctx).Error("panicking",
-				svc1log.SafeParam("stacktrace", stacktrace),
-				svc1log.UnsafeParam("recovered", r))
-			panic(r)
+		r := recover()
+		if r == nil {
+			return
+		}
+		stacktrace := diag1log.ThreadDumpV1FromGoroutines(debug.Stack())
+		stacktraceJSON, err := stacktrace.MarshalJSON()
+		if err != nil {
+			svc1log.FromContext(ctx).Error("failed to convert threaddump to JSON",
+				svc1log.Stacktrace(err))
+		}
+		svc1log.FromContext(ctx).Error("panicking",
+			svc1log.SafeParam("stacktrace", string(stacktraceJSON)),
+			svc1log.UnsafeParam("recovered", r))
+		if retErr == nil {
+			retErr = werror.Error("panicking",
+				werror.SafeParam("stacktrace", string(stacktraceJSON)),
+				werror.SafeParam("recovered", r))
 		}
 	}()
 	if err := runFn(ctx); err != nil {
