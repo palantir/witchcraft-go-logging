@@ -20,9 +20,9 @@ import (
 	"io"
 	"testing"
 
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/stretchr/testify/assert"
@@ -129,8 +129,8 @@ func TestCases() []TestCase {
 	}
 }
 
-func safeLongVal(in int64) *conjuretype.SafeLong {
-	val, err := conjuretype.NewSafeLong(in)
+func safeLongVal(in int64) *safelong.SafeLong {
+	val, err := safelong.NewSafeLong(in)
 	if err != nil {
 		panic(err)
 	}

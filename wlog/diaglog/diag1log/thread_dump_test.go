@@ -17,7 +17,7 @@ package diag1log_test
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/stretchr/testify/require"
@@ -77,7 +77,7 @@ func strPtr(s string) *string { return &s }
 
 func intPtr(i int) *int { return &i }
 
-func safelongPtr(i int64) *conjuretype.SafeLong {
-	s, _ := conjuretype.NewSafeLong(i)
+func safelongPtr(i int64) *safelong.SafeLong {
+	s, _ := safelong.NewSafeLong(i)
 	return &s
 }
