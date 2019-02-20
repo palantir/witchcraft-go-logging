@@ -23,20 +23,3 @@ const (
 	ErrorLevel LogLevel = "error"
 	FatalLevel LogLevel = "fatal"
 )
-
-func (l LogLevel) value() int {
-	switch l {
-	case DebugLevel:
-		return 0
-	case InfoLevel:
-		return 1
-	case WarnLevel:
-		return 2
-	case ErrorLevel:
-		return 3
-	case FatalLevel:
-		return 4
-	default:
-		return -1
-	}
-}
