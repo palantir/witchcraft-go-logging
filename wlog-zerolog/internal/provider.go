@@ -48,7 +48,7 @@ func toZeroLevel(lvl wlog.LogLevel) zerolog.Level {
 	switch lvl {
 	case wlog.DebugLevel:
 		return zerolog.DebugLevel
-	case wlog.InfoLevel:
+	case wlog.LogLevel(""), wlog.InfoLevel:
 		return zerolog.InfoLevel
 	case wlog.WarnLevel:
 		return zerolog.WarnLevel
