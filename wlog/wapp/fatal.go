@@ -16,9 +16,9 @@ package wapp
 
 import (
 	"context"
-	"github.com/palantir/witchcraft-go-error"
 	"runtime/debug"
 
+	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
