@@ -17,6 +17,7 @@ package wapp
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"testing"
 
@@ -29,19 +30,16 @@ import (
 
 func TestRunWithFatalLogging_Panic(t *testing.T) {
 	buf := &bytes.Buffer{}
-	defer func() {
-		_ = recover()
-	}()
 	ctx := getContextWithLogger(context.Background(), buf)
 	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
 		panic("foo")
 	})
 	assert.Error(t, err)
-	st, ok := werror.ParamFromError(err, "stacktrace")
-	assert.True(t, ok, "Expected a stacktrace param")
+	st, safe := werror.ParamFromError(err, "stacktrace")
+	assert.True(t, safe, "Expected stacktrace param to be safe")
 	assert.NotNil(t, st, "Expected stacktrace param to not be nil")
-	r, ok := werror.ParamFromError(err, "recovered")
-	assert.False(t, ok, "Expected a recovered param to be unsafe")
+	r, safe := werror.ParamFromError(err, "recovered")
+	assert.False(t, safe, "Expected recovered param to be unsafe")
 	assert.NotNil(t, r, "Expected recovered param value to not be nil")
 }
 
@@ -53,6 +51,36 @@ func TestRunWithFatalLogging_Error(t *testing.T) {
 	})
 	assert.NotNil(t, err)
 	assert.Contains(t, buf.String(), "foo")
+}
+
+func TestRunWithFatalLogging_PanicWithError(t *testing.T) {
+	buf := &bytes.Buffer{}
+	ctx := getContextWithLogger(context.Background(), buf)
+	var panicErr error
+	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
+		panicErr = werror.Error("foo", werror.SafeParam("verySafeParam", "blah"), werror.UnsafeParam("notSafeParam", "oogabooga"))
+		panic(panicErr)
+	})
+	assert.Error(t, err)
+
+	errorWithStacktrace := fmt.Sprintf("%+v", err)
+	assert.Contains(t, errorWithStacktrace, panicErr.Error(), "Expected error returned through panic to be included in the stacktrace")
+
+	// assert params from original error are present
+	st, safe := werror.ParamFromError(err, "stacktrace")
+	assert.True(t, safe, "Expected stacktrace param to be safe")
+	assert.NotNil(t, st, "Expected stacktrace param to not be nil")
+	vsp, safe := werror.ParamFromError(err, "verySafeParam")
+	assert.True(t, safe, "Expected verySafeParam param to be safe")
+	assert.Equal(t, "blah", vsp, "Expected verySafeParam param to match what was returned")
+	nsp, safe := werror.ParamFromError(err, "notSafeParam")
+	assert.False(t, safe, "Expected notSafeParam param to be unsafe")
+	assert.Equal(t, "oogabooga", nsp, "Expected notSafeParam param to match what was returned")
+
+	// assert original error is listed as the cause
+	expectedPanicErr := werror.RootCause(err)
+	assert.Equal(t, panicErr, expectedPanicErr, "Expected panic error to be root cause of recovered error")
+	assert.EqualError(t, expectedPanicErr, "foo")
 }
 
 func getContextWithLogger(ctx context.Context, writer io.Writer) context.Context {
