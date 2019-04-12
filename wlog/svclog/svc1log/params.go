@@ -60,6 +60,13 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
+// Message sets the "message" field to be the provided value if it is non-empty.
+func Message(message string) Param {
+	return paramFunc(func(logger wlog.LogEntry) {
+		logger.OptionalStringValue(MessageKey, message)
+	})
+}
+
 // Origin sets the "origin" field to be the provided value if it is non-empty.
 func Origin(origin string) Param {
 	return paramFunc(func(logger wlog.LogEntry) {
