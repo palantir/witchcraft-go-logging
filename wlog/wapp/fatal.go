@@ -20,6 +20,7 @@ import (
 
 	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
@@ -49,6 +50,9 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 					werror.SafeParam("stacktrace", stacktrace),
 					werror.UnsafeParam("recovered", r))
 			}
+		}
+		if evtlog := evt2log.FromContext(ctx); evtlog != nil {
+			evt2log.FromContext(ctx).Event("wapp.panic_recovered")
 		}
 	}()
 	if err := runFn(ctx); err != nil {
