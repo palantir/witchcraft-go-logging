@@ -52,7 +52,9 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 			}
 		}
 		if evtlog := evt2log.FromContext(ctx); evtlog != nil {
-			evt2log.FromContext(ctx).Event("wapp.panic_recovered")
+			evt2log.FromContext(ctx).Event("wapp.panic_recovered",
+				evt2log.Value("stacktrace", stacktrace),
+				evt2log.UnsafeParam("recovered", r))
 		}
 	}()
 	if err := runFn(ctx); err != nil {
