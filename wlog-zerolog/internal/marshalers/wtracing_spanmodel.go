@@ -34,7 +34,7 @@ func marshalWTracingSpanModel(evt *zerolog.Event, key string, val interface{}) *
 			e.Str(trc1log.SpanParentIDKey, string(*parentID))
 		}
 		e.Int64(trc1log.SpanTimestampKey, span.Timestamp.Round(time.Microsecond).UnixNano()/1e3)
-		e.Int64(trc1log.SpanDurationKey, int64(span.Duration.Round(time.Microsecond)/1e3))
+		e.Int64(trc1log.SpanDurationKey, int64(span.Duration/time.Microsecond))
 		if kind := span.Kind; kind != "" {
 			// if kind is non-empty, manually create v1-style annotations
 			switch kind {
