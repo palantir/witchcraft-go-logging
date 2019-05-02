@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -307,6 +309,38 @@ something/something:123`,
 				"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"param":  objmatcher.NewEqualsMatcher("value"),
 					"params": objmatcher.NewEqualsMatcher("values"),
+				}),
+			}),
+		},
+		{
+			Name:    "verify that SpanModel timestamp and duration are marshalled properly",
+			Message: "msg",
+			LogParams: []svc1log.Param{
+				svc1log.SafeParam("spanModel", wtracing.SpanModel{
+					Timestamp: time.Unix(1546300800, 0),
+					Duration:  1234 * time.Millisecond,
+				}),
+			},
+			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"level":   objmatcher.NewEqualsMatcher("INFO"),
+				"message": objmatcher.NewEqualsMatcher("msg"),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"type":    objmatcher.NewEqualsMatcher("service.1"),
+				"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"spanModel": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"Debug":          objmatcher.NewAnyMatcher(),
+						"Duration":       objmatcher.NewEqualsMatcher(json.Number("1234000000")),
+						"Err":            objmatcher.NewAnyMatcher(),
+						"ID":             objmatcher.NewAnyMatcher(),
+						"Kind":           objmatcher.NewAnyMatcher(),
+						"LocalEndpoint":  objmatcher.NewAnyMatcher(),
+						"Name":           objmatcher.NewAnyMatcher(),
+						"ParentID":       objmatcher.NewAnyMatcher(),
+						"RemoteEndpoint": objmatcher.NewAnyMatcher(),
+						"Sampled":        objmatcher.NewAnyMatcher(),
+						"Timestamp":      objmatcher.NewEqualsMatcher("2018-12-31T16:00:00-08:00"),
+						"TraceID":        objmatcher.NewAnyMatcher(),
+					}),
 				}),
 			}),
 		},
