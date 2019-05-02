@@ -55,7 +55,7 @@ func marshalWTracingSpanModel(key string, val interface{}) string {
 	if needSeparator {
 		_, _ = builder.WriteString(separator)
 	}
-	_, _ = builder.WriteString(fmt.Sprintf("%s: %d", trc1log.SpanDurationKey, int64(span.Duration.Round(time.Microsecond))))
+	_, _ = builder.WriteString(fmt.Sprintf("%s: %d", trc1log.SpanDurationKey, int64(span.Duration.Round(time.Microsecond))/1e3))
 	needSeparator = true
 
 	if kind := span.Kind; kind != "" {
