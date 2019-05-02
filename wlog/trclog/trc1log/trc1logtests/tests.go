@@ -17,6 +17,7 @@ package trc1logtests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"testing"
@@ -116,8 +117,8 @@ func durationFormatOutputTest(t *testing.T, loggerProvider func(w io.Writer) trc
 	require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
 	// Ensure the duration matches the sleep amount
 	intValue := getDurationValue(t, entries[0])
-	assert.True(t, intValue*time.Microsecond < 200*time.Millisecond, "duration must be less than 200 milliseconds")
-	assert.True(t, intValue*time.Microsecond > 100*time.Millisecond, "duration must be more than 100 milliseconds")
+	assert.True(t, intValue*time.Microsecond < 200*time.Millisecond, fmt.Sprintf("duration must be less than 200 milliseconds and is %d", intValue))
+	assert.True(t, intValue*time.Microsecond > 100*time.Millisecond, fmt.Sprintf("duration must be more than 100 milliseconds and is %d", intValue))
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logger) {
