@@ -138,15 +138,15 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 }
 
 func getDurationValue(t *testing.T, entry logreader.Entry) int64 {
-	for k, v := range  entry {
+	for k, v := range entry {
 		if k == "span" {
 			valueAsMap, ok := v.(map[string]interface{})
 			assert.True(t, ok)
 			durationValue, ok := valueAsMap["duration"]
 			assert.True(t, ok)
-			durationAsJsonNumber, ok := durationValue.(json.Number)
+			durationAsJSONNumber, ok := durationValue.(json.Number)
 			assert.True(t, ok)
-			intValue, err := durationAsJsonNumber.Int64()
+			intValue, err := durationAsJSONNumber.Int64()
 			assert.NoError(t, err)
 			return intValue
 		}
