@@ -16,9 +16,12 @@ package trc1logtests
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
@@ -39,7 +42,6 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 	spanContext := clientSpan.Context()
 	traceID := string(spanContext.TraceID)
 	clientSpanID := string(spanContext.ID)
-
 	return []TestCase{
 		{
 			Name: "trace.1 log entry",
@@ -97,6 +99,26 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
+	durationFormatOutputTest(t, loggerProvider)
+}
+
+func durationFormatOutputTest(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logger) {
+	buf := &bytes.Buffer{}
+	logger := loggerProvider(buf)
+	tracer, err := wzipkin.NewTracer(logger)
+	require.NoError(t, err)
+	span := tracer.StartSpan("testOp")
+	time.Sleep(100 * time.Millisecond)
+	// Finish() triggers logging
+	span.Finish()
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
+	// Ensure the duration matches the sleep amount
+	intValue := getDurationValue(t, entries[0])
+	assert.True(t, intValue*time.Microsecond < 200*time.Millisecond, fmt.Sprintf("duration must be less than 200 milliseconds and is %d", intValue))
+	assert.True(t, intValue*time.Microsecond > 100*time.Millisecond, fmt.Sprintf("duration must be more than 100 milliseconds and is %d", intValue))
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logger) {
@@ -126,8 +148,21 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 			entries, err := logreader.EntriesFromContent(buf.Bytes())
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
-
 			assert.NoError(t, tc.JSONMatcher.Matches(map[string]interface{}(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}
+}
+
+func getDurationValue(t *testing.T, entry logreader.Entry) time.Duration {
+	v, ok := entry["span"]
+	require.True(t, ok)
+	valueAsMap, ok := v.(map[string]interface{})
+	require.True(t, ok)
+	durationValue, ok := valueAsMap["duration"]
+	require.True(t, ok)
+	durationAsJSONNumber, ok := durationValue.(json.Number)
+	require.True(t, ok)
+	intValue, err := durationAsJSONNumber.Int64()
+	require.NoError(t, err)
+	return time.Duration(intValue)
 }
