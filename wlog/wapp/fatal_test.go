@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wapp
+package wapp_test
 
 import (
 	"bytes"
@@ -21,17 +21,33 @@ import (
 	"io"
 	"testing"
 
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wapp"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestRunWithRecoveryLogging_Panic(t *testing.T) {
+	buf := &bytes.Buffer{}
+	ctx := getContextWithLogger(context.Background(), buf)
+	wapp.RunWithRecoveryLogging(ctx, func(ctx context.Context) {
+		panic("foo")
+	})
+	var msg logging.ServiceLogV1
+	err := safejson.Unmarshal(buf.Bytes(), &msg)
+	assert.NoError(t, err)
+	assert.Equal(t, msg.Message, "panic recovered")
+	assert.Equal(t, msg.UnsafeParams["recovered"], "foo")
+}
 
 func TestRunWithFatalLogging_Panic(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
-	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
+	err := wapp.RunWithFatalLogging(ctx, func(ctx context.Context) error {
 		panic("foo")
 	})
 	assert.Error(t, err)
@@ -46,7 +62,7 @@ func TestRunWithFatalLogging_Panic(t *testing.T) {
 func TestRunWithFatalLogging_Error(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
-	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
+	err := wapp.RunWithFatalLogging(ctx, func(ctx context.Context) error {
 		return werror.Error("foo")
 	})
 	assert.NotNil(t, err)
@@ -57,7 +73,7 @@ func TestRunWithFatalLogging_PanicWithError(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
 	var panicErr error
-	err := RunWithFatalLogging(ctx, func(ctx context.Context) error {
+	err := wapp.RunWithFatalLogging(ctx, func(ctx context.Context) error {
 		panicErr = werror.Error("foo", werror.SafeParam("verySafeParam", "blah"), werror.UnsafeParam("notSafeParam", "oogabooga"))
 		panic(panicErr)
 	})

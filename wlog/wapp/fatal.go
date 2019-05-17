@@ -24,8 +24,17 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
+// RunWithRecoveryLogging wraps a callback, logging any panics recovered as errors.
+// Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
+func RunWithRecoveryLogging(ctx context.Context, runFn func(ctx context.Context)) {
+	_ = RunWithFatalLogging(ctx, func(ctx context.Context) error {
+		runFn(ctx)
+		return nil
+	})
+}
+
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.
-// Useful as a "catch all" for applications so that they can sls log fatal events, perhaps before exiting.
+// Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
 func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
 	defer func() {
 		r := recover()
