@@ -24,31 +24,13 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-// RunWithRecovery wraps a callback, logging any panics recovered as errors.
+// RunWithRecoveryLogging wraps a callback, logging any panics recovered as errors.
 // Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
-func RunWithRecovery(ctx context.Context, runFn func(ctx context.Context)) {
-	defer func() {
-		r := recover()
-		if r == nil {
-			return
-		}
-		stacktrace := diag1log.ThreadDumpV1FromGoroutines(debug.Stack())
-		if err, ok := r.(error); ok {
-			svc1log.FromContext(ctx).Error("panic recovered",
-				svc1log.SafeParam("stacktrace", stacktrace),
-				svc1log.Stacktrace(err))
-		} else {
-			svc1log.FromContext(ctx).Error("panic recovered",
-				svc1log.SafeParam("stacktrace", stacktrace),
-				svc1log.UnsafeParam("recovered", r))
-		}
-		if evtlog := evt2log.FromContext(ctx); evtlog != nil {
-			evtlog.Event("wapp.panic_recovered",
-				evt2log.Value("stacktrace", stacktrace),
-				evt2log.UnsafeParam("recovered", r))
-		}
-	}()
-	runFn(ctx)
+func RunWithRecoveryLogging(ctx context.Context, runFn func(ctx context.Context)) {
+	_ = RunWithFatalLogging(ctx, func(ctx context.Context) error {
+		runFn(ctx)
+		return nil
+	})
 }
 
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.

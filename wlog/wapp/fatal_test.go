@@ -31,10 +31,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRunWithRecovery_Panic(t *testing.T) {
+func TestRunWithRecoveryLogging_Panic(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
-	wapp.RunWithRecovery(ctx, func(ctx context.Context) {
+	wapp.RunWithRecoveryLogging(ctx, func(ctx context.Context) {
 		panic("foo")
 	})
 	var msg logging.ServiceLogV1
