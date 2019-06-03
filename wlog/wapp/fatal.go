@@ -20,11 +20,21 @@ import (
 
 	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
+// RunWithRecoveryLogging wraps a callback, logging any panics recovered as errors.
+// Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
+func RunWithRecoveryLogging(ctx context.Context, runFn func(ctx context.Context)) {
+	_ = RunWithFatalLogging(ctx, func(ctx context.Context) error {
+		runFn(ctx)
+		return nil
+	})
+}
+
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.
-// Useful as a "catch all" for applications so that they can sls log fatal events, perhaps before exiting.
+// Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
 func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
 	defer func() {
 		r := recover()
@@ -49,6 +59,11 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 					werror.SafeParam("stacktrace", stacktrace),
 					werror.UnsafeParam("recovered", r))
 			}
+		}
+		if evtlog := evt2log.FromContext(ctx); evtlog != nil {
+			evtlog.Event("wapp.panic_recovered",
+				evt2log.Value("stacktrace", stacktrace),
+				evt2log.UnsafeParam("recovered", r))
 		}
 	}()
 	if err := runFn(ctx); err != nil {

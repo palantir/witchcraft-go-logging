@@ -65,6 +65,42 @@ created by net/http.(*Transport).dialConn
 				},
 			},
 		},
+		{
+			Name: "missing fields",
+			Input: `goroutine 14 [select]:
+net/http.(*persistConn).writeLoop(0xc0000bd0e0)
+	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go:1885
+created by net/http.(*Transport).dialConn
+	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go +0x966
+`,
+			Expected: logging.ThreadDumpV1{
+				Threads: []logging.ThreadInfoV1{
+					{
+						Name:   strPtr("goroutine 14 [select]"),
+						Id:     safelongPtr(14),
+						Params: map[string]interface{}{"status": "select"},
+						StackTrace: []logging.StackFrameV1{
+							{
+								Address:   nil,
+								Procedure: strPtr("net/http.(*persistConn).writeLoop"),
+								File:      strPtr("net/http/transport.go"),
+								Line:      intPtr(1885),
+								Params:    map[string]interface{}{},
+							},
+							{
+								Address:   strPtr("0x966"),
+								Procedure: strPtr("net/http.(*Transport).dialConn"),
+								File:      nil,
+								Line:      nil,
+								Params: map[string]interface{}{
+									"goroutineCreator": true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			dump := diag1log.ThreadDumpV1FromGoroutines([]byte(test.Input))
