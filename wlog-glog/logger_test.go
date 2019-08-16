@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog-glog"
+	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"

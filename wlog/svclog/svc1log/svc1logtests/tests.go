@@ -61,7 +61,7 @@ func (t testError) Error() string {
 
 func (t testError) Format(state fmt.State, c rune) {
 	if state.Flag('+') && c == 'v' {
-		fmt.Fprint(state, t.stacktrace)
+		_, _ = fmt.Fprint(state, t.stacktrace)
 	}
 }
 

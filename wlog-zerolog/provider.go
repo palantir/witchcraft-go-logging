@@ -16,7 +16,7 @@ package wlogzerolog
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal"
+	zeroimpl "github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal"
 )
 
 func LoggerProvider() wlog.LoggerProvider {

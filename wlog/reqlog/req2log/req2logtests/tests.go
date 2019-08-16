@@ -66,7 +66,7 @@ func TestCases() []TestCase {
 			},
 		},
 		{
-			Name: "request.2 log entry with forbidden header",
+			Name:                  "request.2 log entry with forbidden header",
 			ForbiddenHeaderParams: []string{"FooHeaderParamName"},
 			JSONMatcher: map[string]objmatcher.Matcher{
 				"type":         objmatcher.NewEqualsMatcher("request.2"),

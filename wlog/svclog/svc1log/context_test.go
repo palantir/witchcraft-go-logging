@@ -25,7 +25,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
-	"github.com/palantir/witchcraft-go-params"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/stretchr/testify/assert"
