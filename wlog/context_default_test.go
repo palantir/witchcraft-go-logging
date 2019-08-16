@@ -67,7 +67,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 			},
 			validateJSON: func(bytes []byte) {
 				var logEntry logging.AuditLogV2
-				require.NoError(t, json.Unmarshal([]byte(bytes), &logEntry))
+				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "TEST_EVT", logEntry.Name)
 			},
 			setEmptyLoggerCreator: func() {
@@ -87,7 +87,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 			},
 			validateJSON: func(bytes []byte) {
 				var logEntry logging.EventLogV2
-				require.NoError(t, json.Unmarshal([]byte(bytes), &logEntry))
+				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "TEST_EVT", logEntry.EventName)
 			},
 			setEmptyLoggerCreator: func() {
@@ -107,7 +107,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 			},
 			validateJSON: func(bytes []byte) {
 				var logEntry logging.MetricLogV1
-				require.NoError(t, json.Unmarshal([]byte(bytes), &logEntry))
+				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "com.palantir.metric", logEntry.MetricName)
 				assert.Equal(t, "gauge", logEntry.MetricType)
 			},
@@ -128,7 +128,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 			},
 			validateJSON: func(bytes []byte) {
 				var logEntry logging.ServiceLogV1
-				require.NoError(t, json.Unmarshal([]byte(bytes), &logEntry))
+				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "Test message", logEntry.Message)
 				assert.Equal(t, logging.LogLevel("INFO"), logEntry.Level)
 			},

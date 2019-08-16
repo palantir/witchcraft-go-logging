@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/witchcraft-go-logging/example-apps/producer"
+
 	// required to hook up the default implementation
 	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
 )
