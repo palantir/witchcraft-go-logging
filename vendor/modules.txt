@@ -1,0 +1,51 @@
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+github.com/golang/glog
+# github.com/nmiyake/pkg v0.0.0-20170627000939-b64318170fde
+github.com/nmiyake/pkg/dirs
+# github.com/openzipkin/zipkin-go v0.1.3
+github.com/openzipkin/zipkin-go
+github.com/openzipkin/zipkin-go/idgenerator
+github.com/openzipkin/zipkin-go/model
+github.com/openzipkin/zipkin-go/propagation
+github.com/openzipkin/zipkin-go/reporter
+# github.com/palantir/pkg v0.0.0-20190121182015-418f3ad7b9ad
+github.com/palantir/pkg/datetime
+github.com/palantir/pkg/objmatcher
+github.com/palantir/pkg/safejson
+github.com/palantir/pkg/safelong
+github.com/palantir/pkg/safeyaml
+github.com/palantir/pkg/transform
+# github.com/palantir/witchcraft-go-error v0.0.0-20190602061831-c915c4fc8543
+github.com/palantir/witchcraft-go-error
+github.com/palantir/witchcraft-go-error/internal/errors
+# github.com/palantir/witchcraft-go-params v0.0.0-20181128232028-69ecd8453e7a
+github.com/palantir/witchcraft-go-params
+# github.com/palantir/witchcraft-go-tracing v0.0.0-20181203175509-cdc181c163e2
+github.com/palantir/witchcraft-go-tracing/wtracing
+github.com/palantir/witchcraft-go-tracing/wzipkin
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/rs/zerolog v1.11.0
+github.com/rs/zerolog
+github.com/rs/zerolog/internal/cbor
+github.com/rs/zerolog/internal/json
+# github.com/satori/go.uuid v1.2.0
+github.com/satori/go.uuid
+# github.com/stretchr/testify v1.2.2
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
+# go.uber.org/atomic v1.3.2
+go.uber.org/atomic
+# go.uber.org/multierr v1.1.0
+go.uber.org/multierr
+# go.uber.org/zap v1.9.1
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2
