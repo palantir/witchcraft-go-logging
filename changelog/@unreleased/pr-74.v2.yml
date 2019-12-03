@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description:  Fix OriginFromCallLine for zap and zerolog loggers
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/74
