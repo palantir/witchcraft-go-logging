@@ -19,12 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"io"
 	"runtime"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
+	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
@@ -234,23 +234,23 @@ func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
 }
 
 func TestWithLoggerOriginFromCallLine(t *testing.T) {
-	for _, test := range []struct{
-		name string
+	for _, test := range []struct {
+		name     string
 		provider wlog.LoggerProvider
 	}{
 		{
-			name: "jsonMarshalLogger",
+			name:     "jsonMarshalLogger",
 			provider: wlog.NewJSONMarshalLoggerProvider(),
 		},
 		{
-			name: "zap",
+			name:     "zap",
 			provider: wlogzap.LoggerProvider(),
 		},
 		{
-			name: "zerolog",
+			name:     "zerolog",
 			provider: wlogzerolog.LoggerProvider(),
 		},
-	}{
+	} {
 		t.Run(test.name, func(t *testing.T) {
 			buf, ctx := newBufAndCtxWithLogger(test.provider)
 
