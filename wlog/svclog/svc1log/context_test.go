@@ -23,6 +23,8 @@ import (
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
+	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	wparams "github.com/palantir/witchcraft-go-params"
@@ -228,8 +230,91 @@ func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
 	}, unsafe)
 }
 
+func TestWithJSONLoggerOriginFromCallLine(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:239"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestWithZapLoggerOriginFromCallLine(t *testing.T) {
+	buf, ctx := newBufAndCtxWithZapLogger()
+
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:262"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestWithZeroLoggerOriginFromCallLine(t *testing.T) {
+	buf, ctx := newBufAndCtxWithZeroLogger()
+
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:285"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
 	ctx := svc1log.WithLogger(context.Background(), newTestLogger(buf, "com.palantir.test"))
+	return buf, ctx
+}
+
+func newBufAndCtxWithZapLogger() (*bytes.Buffer, context.Context) {
+	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
+	buf := &bytes.Buffer{}
+	ctx := svc1log.WithLogger(context.Background(), svc1log.New(buf, wlog.InfoLevel))
+	return buf, ctx
+}
+
+func newBufAndCtxWithZeroLogger() (*bytes.Buffer, context.Context) {
+	wlog.SetDefaultLoggerProvider(wlogzerolog.LoggerProvider())
+	buf := &bytes.Buffer{}
+	ctx := svc1log.WithLogger(context.Background(), svc1log.New(buf, wlog.InfoLevel))
 	return buf, ctx
 }
