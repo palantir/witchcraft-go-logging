@@ -18,7 +18,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"io"
+	"runtime"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -236,6 +239,7 @@ func TestWithJSONLoggerOriginFromCallLine(t *testing.T) {
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
 
 	logger := svc1log.FromContext(ctx)
+	file, line := getFileAndLine()
 	logger.Info("Test")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
@@ -245,7 +249,7 @@ func TestWithJSONLoggerOriginFromCallLine(t *testing.T) {
 	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 		"level":   objmatcher.NewEqualsMatcher("INFO"),
 		"time":    objmatcher.NewRegExpMatcher(".+"),
-		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:239"),
+		"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
 		"type":    objmatcher.NewEqualsMatcher("service.1"),
 		"message": objmatcher.NewEqualsMatcher("Test"),
 	})
@@ -259,16 +263,16 @@ func TestWithZapLoggerOriginFromCallLine(t *testing.T) {
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
 
 	logger := svc1log.FromContext(ctx)
+	file, line := getFileAndLine()
 	logger.Info("Test")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
-
 	assert.Equal(t, 1, len(entries))
 	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 		"level":   objmatcher.NewEqualsMatcher("INFO"),
 		"time":    objmatcher.NewRegExpMatcher(".+"),
-		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:262"),
+		"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
 		"type":    objmatcher.NewEqualsMatcher("service.1"),
 		"message": objmatcher.NewEqualsMatcher("Test"),
 	})
@@ -282,6 +286,7 @@ func TestWithZeroLoggerOriginFromCallLine(t *testing.T) {
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
 
 	logger := svc1log.FromContext(ctx)
+	file, line := getFileAndLine()
 	logger.Info("Test")
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
@@ -291,7 +296,7 @@ func TestWithZeroLoggerOriginFromCallLine(t *testing.T) {
 	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 		"level":   objmatcher.NewEqualsMatcher("INFO"),
 		"time":    objmatcher.NewRegExpMatcher(".+"),
-		"origin":  objmatcher.NewEqualsMatcher("github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/context_test.go:285"),
+		"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
 		"type":    objmatcher.NewEqualsMatcher("service.1"),
 		"message": objmatcher.NewEqualsMatcher("Test"),
 	})
@@ -317,4 +322,9 @@ func newBufAndCtxWithZeroLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
 	ctx := svc1log.WithLogger(context.Background(), svc1log.New(buf, wlog.InfoLevel))
 	return buf, ctx
+}
+
+func getFileAndLine() (string, int) {
+	_, file, line, _ := runtime.Caller(1)
+	return gopath.TrimPrefix(file), line
 }
