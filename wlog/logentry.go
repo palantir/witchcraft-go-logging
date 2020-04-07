@@ -15,6 +15,7 @@
 package wlog
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 )
@@ -88,6 +89,9 @@ func (m *MapValueEntries) AnyMapValue(key string, values map[string]interface{})
 		m.anyMapValues[key] = entryMapVals
 	}
 	for k, v := range values {
+		if s, ok := v.(fmt.Stringer); ok {
+			entryMapVals[k] = s.String()
+		}
 		entryMapVals[k] = v
 	}
 }

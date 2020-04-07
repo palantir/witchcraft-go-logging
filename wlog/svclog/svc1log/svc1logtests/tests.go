@@ -35,6 +35,14 @@ type testStruct struct {
 	privateStrVal     string
 }
 
+type testStringer struct {
+	testStruct
+}
+
+func (t *testStringer) String() string {
+	return t.ExportedStringVal
+}
+
 type testParamStorerObject struct {
 	safeParams   map[string]interface{}
 	unsafeParams map[string]interface{}
@@ -186,6 +194,30 @@ func TestCases() []TestCase {
 					}),
 					"sliceKey":  objmatcher.NewEqualsMatcher([]interface{}{"one", "two", "three"}),
 					"stringKey": objmatcher.NewEqualsMatcher("stringVal"),
+				}),
+			}),
+		},
+		{
+			Name:    "service log entry with Stringer object in params map",
+			Message: "this is a test",
+			LogParams: []svc1log.Param{
+				svc1log.SafeParams(map[string]interface{}{
+					"stringerKey": testStringer{
+						testStruct: testStruct{
+							NumVal:            13,
+							ExportedStringVal: "stringValue",
+							privateStrVal:     "privateFoo",
+						},
+					},
+				}),
+			},
+			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"level":   objmatcher.NewEqualsMatcher("INFO"),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"type":    objmatcher.NewEqualsMatcher("service.1"),
+				"message": objmatcher.NewEqualsMatcher("this is a test"),
+				"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"stringerKey": objmatcher.NewEqualsMatcher("stringValue"),
 				}),
 			}),
 		},
