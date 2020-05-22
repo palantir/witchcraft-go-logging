@@ -10,19 +10,21 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/pkg/datetime v1.0.0
+# github.com/palantir/pkg v1.0.1
+github.com/palantir/pkg
+# github.com/palantir/pkg/datetime v1.0.1
 github.com/palantir/pkg/datetime
-# github.com/palantir/pkg/objmatcher v1.0.0
+# github.com/palantir/pkg/objmatcher v1.0.1
 github.com/palantir/pkg/objmatcher
-# github.com/palantir/pkg/safejson v1.0.0
+# github.com/palantir/pkg/safejson v1.0.1
 github.com/palantir/pkg/safejson
-# github.com/palantir/pkg/safelong v1.0.0
+# github.com/palantir/pkg/safelong v1.0.1
 github.com/palantir/pkg/safelong
-# github.com/palantir/pkg/safeyaml v1.0.0
+# github.com/palantir/pkg/safeyaml v1.0.1
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.2.0
+# github.com/palantir/witchcraft-go-error v1.3.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.1.0
