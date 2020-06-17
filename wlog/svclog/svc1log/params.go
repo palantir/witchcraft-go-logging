@@ -106,6 +106,12 @@ func OriginFromInitPkg(skipPkg int) Param {
 	return Origin(CallerPkg(1, 0))
 }
 
+var originFromCallLineSkip = 8
+
+func SetOriginFromCallLineDefaultSkip(skip int) {
+	originFromCallLineSkip = skip
+}
+
 // OriginFromCallLine sets the "origin" field to be the filename and line of the location at which the logger invocation
 // is performed.
 //
@@ -119,7 +125,7 @@ func OriginFromInitPkg(skipPkg int) Param {
 func OriginFromCallLine() Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		origin := ""
-		if file, line, ok := initLineCaller(8); ok {
+		if file, line, ok := initLineCaller(originFromCallLineSkip); ok {
 			origin = file + ":" + strconv.Itoa(line)
 		}
 		entry.OptionalStringValue(OriginKey, origin)
