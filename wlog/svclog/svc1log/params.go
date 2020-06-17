@@ -106,10 +106,12 @@ func OriginFromInitPkg(skipPkg int) Param {
 	return Origin(CallerPkg(1, 0))
 }
 
-var originFromCallLineSkip = 8
+var defaultOriginFromCallLineStackSkip = 8
 
-func SetOriginFromCallLineDefaultSkip(skip int) {
-	originFromCallLineSkip = skip
+// SetOriginFromCallLineStackSkip sets the number of frames that OriginFromCallLine should skip to identify the filename
+// and line of the logger invocation.
+func SetOriginFromCallLineStackSkip(skip int) {
+	defaultOriginFromCallLineStackSkip = skip
 }
 
 // OriginFromCallLine sets the "origin" field to be the filename and line of the location at which the logger invocation
@@ -121,11 +123,11 @@ func SetOriginFromCallLineDefaultSkip(skip int) {
 // Note that this parameter is tied to the implementation details of the logger implementations defined in the svc1log
 // package (it hard-codes assumptions relating to the number of call stacks that must be skipped to reach the log site).
 // Using this parameter with an svc1log.Logger implementation not defined in the svc1log package may result in incorrect
-// output.
+// output unless the implementation explicitly states that it handles this correctly.
 func OriginFromCallLine() Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		origin := ""
-		if file, line, ok := initLineCaller(originFromCallLineSkip); ok {
+		if file, line, ok := initLineCaller(defaultOriginFromCallLineStackSkip); ok {
 			origin = file + ":" + strconv.Itoa(line)
 		}
 		entry.OptionalStringValue(OriginKey, origin)
