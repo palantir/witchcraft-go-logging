@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package evt2log
 
-import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
-)
-
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type wrappedLogger struct {
+	logger Logger
+	params []Param
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func (w *wrappedLogger) Event(name string, params ...Param) {
+	w.logger.Event(name, append(w.params, params...)...)
 }

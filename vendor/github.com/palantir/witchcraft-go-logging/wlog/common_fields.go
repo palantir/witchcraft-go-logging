@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package wlog
 
-import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+const (
+	TypeKey         = "type"
+	TimeKey         = "time"
+	UIDKey          = "uid"
+	SIDKey          = "sid"
+	TokenIDKey      = "tokenId"
+	TraceIDKey      = "traceId"
+	UnsafeParamsKey = "unsafeParams"
 )
-
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
-}
-
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
-}

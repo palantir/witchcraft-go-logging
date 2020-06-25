@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package trc1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type wrappedLogger struct {
+	logger Logger
+	params []Param
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func (w *wrappedLogger) Log(span wtracing.SpanModel, params ...Param) {
+	w.logger.Log(span, append(w.params, params...)...)
+}
+
+func (w *wrappedLogger) Send(span wtracing.SpanModel) {
+	w.logger.Log(span, w.params...)
+}
+
+func (w *wrappedLogger) Close() error {
+	return w.logger.Close()
 }

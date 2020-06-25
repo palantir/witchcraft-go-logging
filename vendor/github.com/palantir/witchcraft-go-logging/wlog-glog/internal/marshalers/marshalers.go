@@ -12,17 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package marshalers
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"reflect"
+
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type encoderFunc func(key string, val interface{}) string
+
+var encoders = map[reflect.Type]encoderFunc{
+	reflect.TypeOf(wtracing.SpanModel{}): marshalWTracingSpanModel,
+	reflect.TypeOf(logging.Diagnostic{}): marshalLoggingDiagnostic,
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func StringForType(typ reflect.Type, key string, val interface{}) (string, bool) {
+	fn, ok := encoders[typ]
+	if !ok {
+		return "", false
+	}
+	return fn(key, val), true
 }
+
+const separator = ", "

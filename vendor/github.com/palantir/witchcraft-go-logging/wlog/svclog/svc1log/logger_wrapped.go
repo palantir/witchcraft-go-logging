@@ -12,17 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package svc1log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type wrappedLogger struct {
+	logger Logger
+	params []Param
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func (w *wrappedLogger) Debug(msg string, params ...Param) {
+	w.logger.Debug(msg, append(w.params, params...)...)
+}
+
+func (w *wrappedLogger) Info(msg string, params ...Param) {
+	w.logger.Info(msg, append(w.params, params...)...)
+}
+
+func (w *wrappedLogger) Warn(msg string, params ...Param) {
+	w.logger.Warn(msg, append(w.params, params...)...)
+}
+
+func (w *wrappedLogger) Error(msg string, params ...Param) {
+	w.logger.Error(msg, append(w.params, params...)...)
+}
+
+func (w *wrappedLogger) SetLevel(level wlog.LogLevel) {
+	w.logger.SetLevel(level)
 }

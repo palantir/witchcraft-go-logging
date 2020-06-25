@@ -12,17 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package evt2log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type defaultLogger struct {
+	logger wlog.Logger
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func (l *defaultLogger) Event(name string, params ...Param) {
+	l.logger.Log(toParams(name, params)...)
+}
+
+func toParams(evtName string, inParams []Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+	copy(outParams, defaultTypeParam)
+	outParams[len(defaultTypeParam)] = wlog.NewParam(eventNameParam(evtName).apply)
+	for idx := range inParams {
+		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
+	}
+	return outParams
+}
+
+var defaultTypeParam = []wlog.Param{
+	wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(wlog.TypeKey, TypeValue)
+	}),
 }

@@ -12,17 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package extractor
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"net/http"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type IDsFromRequest interface {
+	ExtractIDs(req *http.Request) map[string]string
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func newCompoundExtractor(extractors ...IDsFromRequest) IDsFromRequest {
+	return compoundExtractor(extractors)
+}
+
+type compoundExtractor []IDsFromRequest
+
+func (e compoundExtractor) ExtractIDs(req *http.Request) map[string]string {
+	out := make(map[string]string)
+	for _, currExtractor := range e {
+		for k, v := range currExtractor.ExtractIDs(req) {
+			out[k] = v
+		}
+	}
+	return out
 }

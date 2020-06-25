@@ -12,17 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package wloginternal
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"context"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type wlogContextKeyType string
+
+const (
+	UIDKey     = wlogContextKeyType("wlog.uid")
+	SIDKey     = wlogContextKeyType("wlog.sid")
+	TokenIDKey = wlogContextKeyType("wlog.tokenID")
+)
+
+func ContextWithID(ctx context.Context, key wlogContextKeyType, id string) context.Context {
+	return context.WithValue(ctx, key, id)
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func IDFromContext(ctx context.Context, key wlogContextKeyType) *string {
+	if val, ok := ctx.Value(key).(string); ok {
+		return &val
+	}
+	return nil
 }

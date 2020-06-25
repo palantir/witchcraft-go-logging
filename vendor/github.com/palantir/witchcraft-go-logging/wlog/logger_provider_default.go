@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package wlog
 
-import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
-)
+var defaultLoggerProvider = newWarnOnceLoggerProvider()
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+func SetDefaultLoggerProvider(provider LoggerProvider) {
+	defaultLoggerProvider = provider
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func DefaultLoggerProvider() LoggerProvider {
+	return defaultLoggerProvider
 }

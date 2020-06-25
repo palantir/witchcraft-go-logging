@@ -1,4 +1,4 @@
-module github.com/palantir/witchcraft-go-logging
+module github.com/smoorpal/witchcraft-go-logging
 
 go 1.13
 
@@ -11,6 +11,7 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/witchcraft-go-error v1.3.0
+	github.com/palantir/witchcraft-go-logging v1.6.0
 	github.com/palantir/witchcraft-go-params v1.1.0
 	github.com/palantir/witchcraft-go-tracing v1.2.0
 	github.com/rs/zerolog v1.11.0

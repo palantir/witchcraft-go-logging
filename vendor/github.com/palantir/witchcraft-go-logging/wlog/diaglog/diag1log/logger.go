@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package diag1log
 
 import (
+	"io"
+
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+type Logger interface {
+	Diagnostic(diagnostic logging.Diagnostic, params ...Param)
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func New(w io.Writer) Logger {
+	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
+}
+
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
+	return &defaultLogger{
+		logger: creator(w),
+	}
 }

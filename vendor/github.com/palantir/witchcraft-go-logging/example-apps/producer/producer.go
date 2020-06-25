@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package producer
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"context"
+	"math/rand"
+
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+func ProduceNumberContext(ctx context.Context) int {
+	newNum := rand.Int()
+	logger := svc1log.FromContext(ctx)
+	logger.Info("ProduceNumberContext produced a number", svc1log.SafeParam("newNum", newNum))
+	return newNum
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+func ProduceNumberNoContext() int {
+	newNum := rand.Int()
+	logger := svc1log.FromContext(context.Background())
+	logger.Info("ProduceNumberNoContext produced a number", svc1log.SafeParam("newNum", newNum))
+	return newNum
 }

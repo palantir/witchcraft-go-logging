@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package wlogzerolog
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	zeroimpl "github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal"
 )
 
 func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
-}
-
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+	return zeroimpl.LoggerProvider()
 }

@@ -58,39 +58,6 @@ func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlo
 	}
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return &zapMapLoggerProvider{}
-}
-
-type zapMapLoggerProvider struct{}
-
-func (lp *zapMapLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
-	logger, atomicLevel := newZapLogger(w, wlog.InfoLevel, zapcore.EncoderConfig{
-		TimeKey:        wlog.TimeKey,
-		EncodeTime:     rfc3339NanoTimeEncoder,
-		EncodeDuration: zapcore.NanosDurationEncoder,
-	})
-	return &zapLogger{
-		logger: logger,
-		level:  atomicLevel,
-	}
-}
-
-func (lp *zapMapLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
-	logger, atomicLevel := newZapLogger(w, level, zapcore.EncoderConfig{
-		TimeKey:        wlog.TimeKey,
-		EncodeTime:     rfc3339NanoTimeEncoder,
-		EncodeDuration: zapcore.NanosDurationEncoder,
-		LevelKey:       svc1log.LevelKey,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,
-		MessageKey:     svc1log.MessageKey,
-	})
-	return &zapMapLogger{
-		logger: logger,
-		level:  atomicLevel,
-	}
-}
-
 func rfc3339NanoTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.In(time.UTC).Format(time.RFC3339Nano))
 }

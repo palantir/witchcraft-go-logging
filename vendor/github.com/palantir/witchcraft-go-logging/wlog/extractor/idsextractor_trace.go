@@ -12,17 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package wlogzap
+package extractor
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
+	"net/http"
 )
 
-func LoggerProvider() wlog.LoggerProvider {
-	return zapimpl.LoggerProvider()
+const (
+	TraceIDKey = "traceId"
+)
+
+// newTraceIDFromHeaderExtractor returns a map with the TraceIDKey key with the value stored in the "X-B3-TraceId"
+// header of the request.
+func newTraceIDFromHeaderExtractor() IDsFromRequest {
+	return &traceIDExtractor{}
 }
 
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
+type traceIDExtractor struct{}
+
+func (e *traceIDExtractor) ExtractIDs(req *http.Request) map[string]string {
+	return map[string]string{
+		TraceIDKey: req.Header.Get("X-B3-TraceId"),
+	}
 }
