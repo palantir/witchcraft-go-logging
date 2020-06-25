@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -310,6 +311,49 @@ something/something:123`,
 				}),
 			}),
 		},
+		{
+			Name:    "duplicate origin",
+			Message: "this is a test",
+			LogParams: []svc1log.Param{
+				svc1log.Origin("origin.0"),
+				svc1log.Origin("origin.1"),
+				svc1log.UID("user-1"),
+				svc1log.SID("session-1"),
+				svc1log.TraceID("X-Y-Z"),
+				svc1log.SafeParams(map[string]interface{}{
+					"key": "value",
+					"int": 10,
+				}),
+				svc1log.UnsafeParams(map[string]interface{}{
+					"Password": "HelloWorld!",
+				}),
+				svc1log.Tags(map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				}),
+			},
+			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"origin":  objmatcher.NewEqualsMatcher("origin.1"),
+				"level":   objmatcher.NewEqualsMatcher("INFO"),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"type":    objmatcher.NewEqualsMatcher("service.1"),
+				"message": objmatcher.NewEqualsMatcher("this is a test"),
+				"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key": objmatcher.NewEqualsMatcher("value"),
+					"int": objmatcher.NewEqualsMatcher(json.Number("10")),
+				}),
+				"uid":     objmatcher.NewEqualsMatcher("user-1"),
+				"sid":     objmatcher.NewEqualsMatcher("session-1"),
+				"traceId": objmatcher.NewEqualsMatcher("X-Y-Z"),
+				"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"Password": objmatcher.NewEqualsMatcher("HelloWorld!"),
+				}),
+				"tags": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key1": objmatcher.NewEqualsMatcher("value1"),
+					"key2": objmatcher.NewEqualsMatcher("value2"),
+				}),
+			}),
+		},
 	}
 }
 
@@ -362,6 +406,8 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.L
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotServiceLog)
 			require.NoError(t, err, "Case %d: %s\nService log line is not a valid map: %v", i, tc.Name, string(logEntry))
+			logEntryRewrite, err := safejson.Marshal(gotServiceLog)
+			assert.Equal(t, len(strings.TrimRight(string(logEntry),"\n")), len(string(logEntryRewrite)), "log line is not stable. Differing length on remarshal")
 
 			assert.NoError(t, tc.JSONMatcher.Matches(gotServiceLog), "Case %d: %s", i, tc.Name)
 		})

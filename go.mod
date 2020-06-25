@@ -20,3 +20,5 @@ require (
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.2.5
 )
+
+replace github.com/palantir/witchcraft-go-logging => /Users/smoorman/Development/go/src/github.com/smoorpal/witchcraft-go-logging
