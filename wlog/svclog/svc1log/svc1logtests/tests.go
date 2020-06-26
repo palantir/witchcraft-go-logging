@@ -396,6 +396,17 @@ something/something:123`,
 	}
 }
 
+func BenchmarkCases() []TestCase {
+	testCases := TestCases()
+	benchmarkCases := make([]TestCase,0,len(testCases))
+	for _, testCase := range testCases {
+		if testCase.Name!="duplicate origin" && testCase.Name!="parameter that is set manually overrides base value" {
+		    benchmarkCases = append(benchmarkCases,testCase)
+		}
+	}
+	return benchmarkCases
+}
+
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
@@ -537,27 +548,19 @@ func JSONBenchmarkSuite(b *testing.B, loggerProvider func(w io.Writer, level wlo
 }
 
 func jsonOutputBenchmarks(b *testing.B, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	for _, tc := range TestCases() {
+	for _, tc := range BenchmarkCases() {
 		b.Run(tc.Name, func(b *testing.B) {
+		b.ResetTimer()
+		b.StopTimer()
+		for i := 0; i<b.N; i++ {
+			buf := bytes.Buffer{}
+			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
 
-			b.ResetTimer()
+			b.StartTimer()
+			logger.Info(tc.Message, tc.LogParams...)
 			b.StopTimer()
-			for i := 0; i<b.N; i++ {
-				buf := bytes.Buffer{}
-				logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
-
-			    b.StartTimer()
-				logger.Info(tc.Message, tc.LogParams...)
-			    b.StopTimer()
-
-				gotServiceLog := map[string]interface{}{}
-				logEntry := buf.Bytes()
-				err := safejson.Unmarshal(logEntry, &gotServiceLog)
-				require.NoError(b, err, "Case %d: %s\nService log line is not a valid map: %v", i, tc.Name, string(logEntry))
-				logEntryRewrite, err := safejson.Marshal(gotServiceLog)
-				assert.Equal(b, len(strings.TrimRight(string(logEntry), "\n")), len(string(logEntryRewrite)), "log line is not stable. Differing length on remarshal")
-				assert.NoError(b, tc.JSONMatcher.Matches(gotServiceLog), "Case %d: %s", i, tc.Name)
-			}
+			assert.Greater(b,buf.Len(),0)
+		}
 		})
 	}
 }

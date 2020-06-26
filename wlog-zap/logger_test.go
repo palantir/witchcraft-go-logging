@@ -48,6 +48,7 @@ func TestSvc1Log(t *testing.T) {
 }
 
 func BenchmarkSvc1Log(b *testing.B) {
+	b.ReportAllocs()
 	svc1logtests.JSONBenchmarkSuite(b, func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
 		return svc1log.NewFromCreator(
 			w,
@@ -70,6 +71,7 @@ func TestSvc1LogZapMap(t *testing.T) {
 }
 
 func BenchmarkSvc1LogZapMap(b *testing.B) {
+	b.ReportAllocs()
 	svc1logtests.JSONBenchmarkSuite(b, func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
 		return svc1log.NewFromCreator(
 			w,
