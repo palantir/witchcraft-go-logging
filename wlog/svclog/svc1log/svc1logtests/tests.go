@@ -551,10 +551,10 @@ func jsonOutputBenchmarks(b *testing.B, loggerProvider func(w io.Writer, level w
 	buf := bytes.Buffer{}
 	for _, tc := range BenchmarkCases() {
 		b.Run(tc.Name, func(b *testing.B) {
-		    buf.Reset()
 			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
 			b.ResetTimer()
 			for i := 0; i<b.N; i++ {
+				buf.Truncate(0)
 				logger.Info(tc.Message, tc.LogParams...)
 				assert.Greater(b,buf.Len(),0)
 			}
