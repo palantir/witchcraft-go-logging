@@ -548,19 +548,16 @@ func JSONBenchmarkSuite(b *testing.B, loggerProvider func(w io.Writer, level wlo
 }
 
 func jsonOutputBenchmarks(b *testing.B, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+	buf := bytes.Buffer{}
 	for _, tc := range BenchmarkCases() {
 		b.Run(tc.Name, func(b *testing.B) {
-		b.ResetTimer()
-		b.StopTimer()
-		for i := 0; i<b.N; i++ {
-			buf := bytes.Buffer{}
+		    buf.Reset()
 			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
-
-			b.StartTimer()
-			logger.Info(tc.Message, tc.LogParams...)
-			b.StopTimer()
-			assert.Greater(b,buf.Len(),0)
-		}
+			b.ResetTimer()
+			for i := 0; i<b.N; i++ {
+				logger.Info(tc.Message, tc.LogParams...)
+				assert.Greater(b,buf.Len(),0)
+			}
 		})
 	}
 }
