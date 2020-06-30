@@ -27,18 +27,19 @@ import (
 )
 
 type zapMapLogEntry struct {
-	fields map[string]zapcore.Field
+	fields map[string]*zapcore.Field
 	wlog.MapValueEntries
 }
 
 func newZapMapLogEntry() *zapMapLogEntry {
 	return &zapMapLogEntry{
-		fields: make(map[string]zapcore.Field),
+		fields: make(map[string]*zapcore.Field),
 	}
 }
 
 func (e *zapMapLogEntry) StringValue(key, value string) {
-	e.fields[key] = zap.String(key,value)
+	s := zap.String(key,value)
+	e.fields[key] = &s
 }
 
 func (e *zapMapLogEntry) OptionalStringValue(key, value string) {
@@ -49,23 +50,27 @@ func (e *zapMapLogEntry) OptionalStringValue(key, value string) {
 
 func (e *zapMapLogEntry) StringListValue(k string, v []string) {
 	if len(v) > 0 {
-		e.fields[k] = zap.Strings(k, v)
+		s := zap.Strings(k, v)
+		e.fields[k] = &s
 	}
 }
 
 func (e *zapMapLogEntry) SafeLongValue(key string, value int64) {
-	e.fields[key] = zap.Int64(key,value)
+	s := zap.Int64(key,value)
+	e.fields[key] = &s
 }
 
 func (e *zapMapLogEntry) IntValue(key string, value int32) {
-	e.fields[key] = zap.Int32(key, value)
+	s := zap.Int32(key, value)
+	e.fields[key] = &s
 }
 
 func (e *zapMapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
 	if field, ok := marshalers.FieldForType(marshalerType, k, v); ok {
-		e.fields[k] = field
+		e.fields[k] = &field
 	} else {
-		e.fields[k] = zap.Reflect(k,v)
+		s := zap.Reflect(k,v)
+		e.fields[k] = &s
 	}
 }
 
@@ -74,7 +79,7 @@ func (e *zapMapLogEntry) Fields() []zapcore.Field {
 	anyMapValues := e.AnyMapValues()
 	fields := make([]zapcore.Field,0,len(e.fields)+len(stringMapValues)+len(anyMapValues))
 	for _, field := range e.fields {
-		fields = append(fields, field)
+		fields = append(fields, *field)
 	}
 	for key, values := range stringMapValues {
 		key := key
