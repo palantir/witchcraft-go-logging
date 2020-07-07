@@ -38,7 +38,7 @@ func newZapMapLogEntry() *zapMapLogEntry {
 }
 
 func (e *zapMapLogEntry) StringValue(key, value string) {
-	s := zap.String(key,value)
+	s := zap.String(key, value)
 	e.fields[key] = &s
 }
 
@@ -56,7 +56,7 @@ func (e *zapMapLogEntry) StringListValue(k string, v []string) {
 }
 
 func (e *zapMapLogEntry) SafeLongValue(key string, value int64) {
-	s := zap.Int64(key,value)
+	s := zap.Int64(key, value)
 	e.fields[key] = &s
 }
 
@@ -69,7 +69,7 @@ func (e *zapMapLogEntry) ObjectValue(k string, v interface{}, marshalerType refl
 	if field, ok := marshalers.FieldForType(marshalerType, k, v); ok {
 		e.fields[k] = &field
 	} else {
-		s := zap.Reflect(k,v)
+		s := zap.Reflect(k, v)
 		e.fields[k] = &s
 	}
 }
@@ -77,7 +77,7 @@ func (e *zapMapLogEntry) ObjectValue(k string, v interface{}, marshalerType refl
 func (e *zapMapLogEntry) Fields() []zapcore.Field {
 	stringMapValues := e.StringMapValues()
 	anyMapValues := e.AnyMapValues()
-	fields := make([]zapcore.Field,0,len(e.fields)+len(stringMapValues)+len(anyMapValues))
+	fields := make([]zapcore.Field, 0, len(e.fields)+len(stringMapValues)+len(anyMapValues))
 	for _, field := range e.fields {
 		fields = append(fields, *field)
 	}

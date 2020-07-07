@@ -398,10 +398,10 @@ something/something:123`,
 
 func BenchmarkCases() []TestCase {
 	testCases := TestCases()
-	benchmarkCases := make([]TestCase,0,len(testCases))
+	benchmarkCases := make([]TestCase, 0, len(testCases))
 	for _, testCase := range testCases {
-		if testCase.Name!="duplicate origin" && testCase.Name!="parameter that is set manually overrides base value" {
-		    benchmarkCases = append(benchmarkCases,testCase)
+		if testCase.Name != "duplicate origin" && testCase.Name != "parameter that is set manually overrides base value" {
+			benchmarkCases = append(benchmarkCases, testCase)
 		}
 	}
 	return benchmarkCases
@@ -457,7 +457,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.L
 			err := safejson.Unmarshal(logEntry, &gotServiceLog)
 			require.NoError(t, err, "Case %d: %s\nService log line is not a valid map: %v", i, tc.Name, string(logEntry))
 			logEntryRewrite, err := safejson.Marshal(gotServiceLog)
-			assert.Equal(t, len(strings.TrimRight(string(logEntry),"\n")), len(string(logEntryRewrite)), "log line is not stable. Differing length on remarshal")
+			assert.Equal(t, len(strings.TrimRight(string(logEntry), "\n")), len(string(logEntryRewrite)), "log line is not stable. Differing length on remarshal")
 
 			assert.NoError(t, tc.JSONMatcher.Matches(gotServiceLog), "Case %d: %s", i, tc.Name)
 		})
@@ -553,10 +553,10 @@ func jsonOutputBenchmarks(b *testing.B, loggerProvider func(w io.Writer, level w
 		b.Run(tc.Name, func(b *testing.B) {
 			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
 			b.ResetTimer()
-			for i := 0; i<b.N; i++ {
-				buf.Truncate(0)
+			for i := 0; i < b.N; i++ {
+				buf.Reset()
 				logger.Info(tc.Message, tc.LogParams...)
-				assert.Greater(b,buf.Len(),0)
+				assert.Greater(b, buf.Len(), 0)
 			}
 		})
 	}
