@@ -457,6 +457,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.L
 			err := safejson.Unmarshal(logEntry, &gotServiceLog)
 			require.NoError(t, err, "Case %d: %s\nService log line is not a valid map: %v", i, tc.Name, string(logEntry))
 			logEntryRewrite, err := safejson.Marshal(gotServiceLog)
+			require.NoError(t, err, "Not able to marshal log line")
 			assert.Equal(t, len(strings.TrimRight(string(logEntry), "\n")), len(string(logEntryRewrite)), "log line is not stable. Differing length on remarshal")
 
 			assert.NoError(t, tc.JSONMatcher.Matches(gotServiceLog), "Case %d: %s", i, tc.Name)
