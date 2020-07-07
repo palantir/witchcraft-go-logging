@@ -59,29 +59,6 @@ func BenchmarkSvc1Log(b *testing.B) {
 	})
 }
 
-func TestSvc1LogZapMap(t *testing.T) {
-	svc1logtests.JSONTestSuite(t, func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
-		return svc1log.NewFromCreator(
-			w,
-			level,
-			zapimpl.ZapMapLoggerProvider().NewLeveledLogger,
-			svc1log.Origin(origin),
-		)
-	})
-}
-
-func BenchmarkSvc1LogZapMap(b *testing.B) {
-	b.ReportAllocs()
-	svc1logtests.JSONBenchmarkSuite(b, func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
-		return svc1log.NewFromCreator(
-			w,
-			level,
-			zapimpl.ZapMapLoggerProvider().NewLeveledLogger,
-			svc1log.Origin(origin),
-		)
-	})
-}
-
 func TestReq2Log(t *testing.T) {
 	req2logtests.JSONTestSuite(t, func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger {
 		allParams := append([]req2log.LoggerCreatorParam{

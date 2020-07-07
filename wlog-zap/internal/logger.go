@@ -26,46 +26,46 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type zapMapLogEntry struct {
+type zapLogEntry struct {
 	fields map[string]*zapcore.Field
 	wlog.MapValueEntries
 }
 
-func newZapMapLogEntry() *zapMapLogEntry {
-	return &zapMapLogEntry{
+func newZapLogEntry() *zapLogEntry {
+	return &zapLogEntry{
 		fields: make(map[string]*zapcore.Field),
 	}
 }
 
-func (e *zapMapLogEntry) StringValue(key, value string) {
+func (e *zapLogEntry) StringValue(key, value string) {
 	s := zap.String(key, value)
 	e.fields[key] = &s
 }
 
-func (e *zapMapLogEntry) OptionalStringValue(key, value string) {
+func (e *zapLogEntry) OptionalStringValue(key, value string) {
 	if value != "" {
 		e.StringValue(key, value)
 	}
 }
 
-func (e *zapMapLogEntry) StringListValue(k string, v []string) {
+func (e *zapLogEntry) StringListValue(k string, v []string) {
 	if len(v) > 0 {
 		s := zap.Strings(k, v)
 		e.fields[k] = &s
 	}
 }
 
-func (e *zapMapLogEntry) SafeLongValue(key string, value int64) {
+func (e *zapLogEntry) SafeLongValue(key string, value int64) {
 	s := zap.Int64(key, value)
 	e.fields[key] = &s
 }
 
-func (e *zapMapLogEntry) IntValue(key string, value int32) {
+func (e *zapLogEntry) IntValue(key string, value int32) {
 	s := zap.Int32(key, value)
 	e.fields[key] = &s
 }
 
-func (e *zapMapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (e *zapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
 	if field, ok := marshalers.FieldForType(marshalerType, k, v); ok {
 		e.fields[k] = &field
 	} else {
@@ -74,7 +74,7 @@ func (e *zapMapLogEntry) ObjectValue(k string, v interface{}, marshalerType refl
 	}
 }
 
-func (e *zapMapLogEntry) Fields() []zapcore.Field {
+func (e *zapLogEntry) Fields() []zapcore.Field {
 	stringMapValues := e.StringMapValues()
 	anyMapValues := e.AnyMapValues()
 	fields := make([]zapcore.Field, 0, len(e.fields)+len(stringMapValues)+len(anyMapValues))
@@ -97,115 +97,6 @@ func (e *zapMapLogEntry) Fields() []zapcore.Field {
 		})))
 	}
 	for key, values := range anyMapValues {
-		key := key
-		values := values
-		fields = append(fields, zap.Object(key, zapcore.ObjectMarshalerFunc(func(enc zapcore.ObjectEncoder) error {
-			keys := make([]string, 0, len(values))
-			for k := range values {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				if err := encodeField(k, values[k], enc); err != nil {
-					return fmt.Errorf("failed to encode field %s: %v", k, err)
-				}
-			}
-			return nil
-		})))
-	}
-	return fields
-}
-
-type zapMapLogger struct {
-	logger *zap.Logger
-	level  *zap.AtomicLevel
-}
-
-func (l *zapMapLogger) Log(params ...wlog.Param) {
-	zapMapLogOutput(l.logger.Info, "", params)
-}
-
-func (l *zapMapLogger) Debug(msg string, params ...wlog.Param) {
-	zapMapLogOutput(l.logger.Debug, msg, params)
-}
-
-func (l *zapMapLogger) Info(msg string, params ...wlog.Param) {
-	zapMapLogOutput(l.logger.Info, msg, params)
-}
-
-func (l *zapMapLogger) Warn(msg string, params ...wlog.Param) {
-	zapMapLogOutput(l.logger.Warn, msg, params)
-}
-
-func (l *zapMapLogger) Error(msg string, params ...wlog.Param) {
-	zapMapLogOutput(l.logger.Error, msg, params)
-}
-
-func (l *zapMapLogger) SetLevel(level wlog.LogLevel) {
-	l.level.SetLevel(toZapLevel(level))
-}
-
-func zapMapLogOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param) {
-	entry := newZapMapLogEntry()
-	wlog.ApplyParams(entry, params)
-	logFn(msg, entry.Fields()...)
-}
-
-type zapLogEntry struct {
-	fields []zapcore.Field
-	wlog.MapValueEntries
-}
-
-func (e *zapLogEntry) StringValue(key, value string) {
-	e.fields = append(e.fields, zap.String(key, value))
-}
-
-func (e *zapLogEntry) OptionalStringValue(key, value string) {
-	if value != "" {
-		e.StringValue(key, value)
-	}
-}
-
-func (e *zapLogEntry) StringListValue(k string, v []string) {
-	if len(v) > 0 {
-		e.fields = append(e.fields, zap.Strings(k, v))
-	}
-}
-
-func (e *zapLogEntry) SafeLongValue(key string, value int64) {
-	e.fields = append(e.fields, zap.Int64(key, value))
-}
-
-func (e *zapLogEntry) IntValue(key string, value int32) {
-	e.fields = append(e.fields, zap.Int32(key, value))
-}
-
-func (e *zapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
-	if field, ok := marshalers.FieldForType(marshalerType, k, v); ok {
-		e.fields = append(e.fields, field)
-	} else {
-		e.fields = append(e.fields, zap.Reflect(k, v))
-	}
-}
-
-func (e *zapLogEntry) Fields() []zapcore.Field {
-	fields := e.fields
-	for key, values := range e.StringMapValues() {
-		key := key
-		values := values
-		fields = append(fields, zap.Object(key, zapcore.ObjectMarshalerFunc(func(enc zapcore.ObjectEncoder) error {
-			keys := make([]string, 0, len(values))
-			for k := range values {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				enc.AddString(k, values[k])
-			}
-			return nil
-		})))
-	}
-	for key, values := range e.AnyMapValues() {
 		key := key
 		values := values
 		fields = append(fields, zap.Object(key, zapcore.ObjectMarshalerFunc(func(enc zapcore.ObjectEncoder) error {
@@ -255,7 +146,7 @@ func (l *zapLogger) SetLevel(level wlog.LogLevel) {
 }
 
 func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param) {
-	entry := &zapLogEntry{}
+	entry := newZapLogEntry()
 	wlog.ApplyParams(entry, params)
 	logFn(msg, entry.Fields()...)
 }

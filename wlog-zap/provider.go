@@ -22,7 +22,3 @@ import (
 func LoggerProvider() wlog.LoggerProvider {
 	return zapimpl.LoggerProvider()
 }
-
-func ZapMapLoggerProvider() wlog.LoggerProvider {
-	return zapimpl.ZapMapLoggerProvider()
-}
