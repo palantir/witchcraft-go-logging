@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	zapimpl "github.com/palantir/witchcraft-go-logging/wlog-zap/internal"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -33,7 +34,6 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
-	zapimpl "github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal"
 )
 
 func TestSvc1Log(t *testing.T) {

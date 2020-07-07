@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/smoorpal/witchcraft-go-logging/wlog-zap/internal/marshalers"
+	"github.com/palantir/witchcraft-go-logging/wlog-zap/internal/marshalers"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

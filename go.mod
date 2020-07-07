@@ -1,4 +1,4 @@
-module github.com/smoorpal/witchcraft-go-logging
+module github.com/palantir/witchcraft-go-logging
 
 go 1.13
 
@@ -11,7 +11,6 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/witchcraft-go-error v1.3.0
-	github.com/palantir/witchcraft-go-logging v1.6.0
 	github.com/palantir/witchcraft-go-params v1.1.0
 	github.com/palantir/witchcraft-go-tracing v1.2.0
 	github.com/rs/zerolog v1.11.0
@@ -20,5 +19,3 @@ require (
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.2.5
 )
-
-replace github.com/palantir/witchcraft-go-logging => /Users/smoorman/Development/go/src/github.com/smoorpal/witchcraft-go-logging
