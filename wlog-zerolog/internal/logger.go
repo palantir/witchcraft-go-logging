@@ -169,9 +169,6 @@ func reverseParams(params []wlog.Param) []wlog.Param {
 }
 
 func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog.Param) {
-	//TODO(smoorman): to remove duplicate level entries
-	// either:
-	// 	make newEvt produce a zerolog event without level printed already
 	entry := &zeroLogEntry{
 		evt:  newEvt(),
 		keys: make(map[string]int),
@@ -180,9 +177,6 @@ func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog
 		return
 	}
 	entry.evt = entry.evt.Str(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	//TODO(smoorman):
-	// or:
-	//	remove these 3 lines
 	if levelVal != "" {
 		entry.evt = entry.evt.Str(svc1log.LevelKey, levelVal)
 	}
