@@ -172,10 +172,11 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 			verify: func(loggerTestCaseInfo loggerTestCase, bytes []byte) {
 				logOutput := string(bytes)
 
-				firstPortionRegexp := regexp.MustCompile(
-					regexp.QuoteMeta(`[WARNING] github.com/palantir/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/palantir/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
+				firstPortionRegexp, err := regexp.Compile(
+					regexp.QuoteMeta(`[WARNING]`) + ".*" + regexp.QuoteMeta(`github.com/`) + ".+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/`) + ".+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
+				require.NoError(t, err, "Unexpected error compiling regex")
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
-				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
+				require.NotNil(t, loc, "Unexpected log output: %s regex %s", logOutput, firstPortionRegexp.String())
 
 				got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
 				assert.Equal(t, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`, got)
@@ -196,7 +197,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				logOutput := string(bytes)
 
 				firstPortionRegexp := regexp.MustCompile(
-					regexp.QuoteMeta(`[WARNING] github.com/palantir/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/palantir/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
+					regexp.QuoteMeta(`[WARNING]`) + ".*" + regexp.QuoteMeta(`github.com/`) + ".+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/`) + ".+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
