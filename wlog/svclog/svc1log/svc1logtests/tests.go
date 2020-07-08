@@ -354,45 +354,6 @@ something/something:123`,
 				}),
 			}),
 		},
-		{
-			Name:    "duplicate safe param",
-			Message: "this is a test",
-			LogParams: []svc1log.Param{
-				svc1log.Origin("origin.0"),
-				svc1log.UID("user-1"),
-				svc1log.SID("session-1"),
-				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParam("key", 10),
-				svc1log.SafeParam("key", 11),
-				svc1log.UnsafeParams(map[string]interface{}{
-					"Password": "HelloWorld!",
-				}),
-				svc1log.Tags(map[string]string{
-					"key1": "value1",
-					"key2": "value2",
-				}),
-			},
-			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"origin":  objmatcher.NewEqualsMatcher("origin.0"),
-				"level":   objmatcher.NewEqualsMatcher("INFO"),
-				"time":    objmatcher.NewRegExpMatcher(".+"),
-				"type":    objmatcher.NewEqualsMatcher("service.1"),
-				"message": objmatcher.NewEqualsMatcher("this is a test"),
-				"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"key": objmatcher.NewEqualsMatcher(json.Number("11")),
-				}),
-				"uid":     objmatcher.NewEqualsMatcher("user-1"),
-				"sid":     objmatcher.NewEqualsMatcher("session-1"),
-				"traceId": objmatcher.NewEqualsMatcher("X-Y-Z"),
-				"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"Password": objmatcher.NewEqualsMatcher("HelloWorld!"),
-				}),
-				"tags": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"key1": objmatcher.NewEqualsMatcher("value1"),
-					"key2": objmatcher.NewEqualsMatcher("value2"),
-				}),
-			}),
-		},
 	}
 }
 
