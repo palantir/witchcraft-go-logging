@@ -43,7 +43,7 @@ func (lp *loggerProvider) NewLogger(w io.Writer) wlog.Logger {
 func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &zeroLogger{
 		logger: newZeroLogger(w, level),
-		level: toZeroLevel(level),
+		level:  toZeroLevel(level),
 	}
 }
 
