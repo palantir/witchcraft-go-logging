@@ -505,25 +505,6 @@ func extraParamsDoNotAppearTest(t *testing.T, loggerProvider func(w io.Writer, l
 	})
 }
 
-func JSONBenchmarkSuite(b *testing.B, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	jsonOutputBenchmarks(b, loggerProvider)
-}
-
-func jsonOutputBenchmarks(b *testing.B, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	buf := bytes.Buffer{}
-	for _, tc := range BenchmarkCases() {
-		b.Run(tc.Name, func(b *testing.B) {
-			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				buf.Reset()
-				logger.Info(tc.Message, tc.LogParams...)
-				assert.Greater(b, buf.Len(), 0)
-			}
-		})
-	}
-}
-
 // panics when marshaled as JSON
 type jsonMarshalPanicType struct{}
 
