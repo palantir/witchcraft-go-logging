@@ -34,10 +34,9 @@ func (e *zeroLogEntry) keyExists(key string) bool {
 	if i, exists := e.keys[key]; exists {
 		e.keys[key] = i + 1
 		return true
-	} else {
-		e.keys[key] = 1
-		return false
 	}
+	e.keys[key] = 1
+	return false
 }
 
 func (e *zeroLogEntry) StringValue(key, value string) {
