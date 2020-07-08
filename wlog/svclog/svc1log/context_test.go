@@ -186,14 +186,15 @@ func TestWithLoggerParams(t *testing.T) {
 }
 
 func TestWParamsSafeAndUnsafeParamsUsed(t *testing.T) {
+
 	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
 
-	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bar")
+	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bath")
 	ctx = wparams.ContextWithSafeParam(ctx, "ten", 10)
 	ctx = wparams.ContextWithUnsafeParam(ctx, "unsafe", "secret")
 
 	logger := svc1log.FromContext(ctx)
-	logger.Info("Test")
+	logger.Info("Test", svc1log.SafeParam("foo", "bar"))
 
 	entries, err := logreader.EntriesFromContent(buf.Bytes())
 	require.NoError(t, err)
