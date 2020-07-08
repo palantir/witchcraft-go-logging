@@ -85,17 +85,17 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 	}
 }
 
-func (m *zeroLogEntry) StringMapValue(key string, values map[string]string) {
+func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 	if len(values) == 0 {
 		return
 	}
-	if m.stringMapValues == nil {
-		m.stringMapValues = make(map[string]map[string]string)
+	if e.stringMapValues == nil {
+		e.stringMapValues = make(map[string]map[string]string)
 	}
-	entryMapVals, ok := m.stringMapValues[key]
+	entryMapVals, ok := e.stringMapValues[key]
 	if !ok {
 		entryMapVals = make(map[string]string)
-		m.stringMapValues[key] = entryMapVals
+		e.stringMapValues[key] = entryMapVals
 	}
 	for k, v := range values {
 		if _, exists := entryMapVals[k]; !exists {
@@ -104,20 +104,20 @@ func (m *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 	}
 }
 
-func (m *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
+func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
 	if len(values) == 0 {
 		return
 	}
 	if len(values) == 0 {
 		return
 	}
-	if m.anyMapValues == nil {
-		m.anyMapValues = make(map[string]map[string]interface{})
+	if e.anyMapValues == nil {
+		e.anyMapValues = make(map[string]map[string]interface{})
 	}
-	entryMapVals, ok := m.anyMapValues[key]
+	entryMapVals, ok := e.anyMapValues[key]
 	if !ok {
 		entryMapVals = make(map[string]interface{})
-		m.anyMapValues[key] = entryMapVals
+		e.anyMapValues[key] = entryMapVals
 	}
 	for k, v := range values {
 		if _, exists := entryMapVals[k]; !exists {
@@ -126,12 +126,12 @@ func (m *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
 	}
 }
 
-func (m *zeroLogEntry) StringMapValues() map[string]map[string]string {
-	return m.stringMapValues
+func (e *zeroLogEntry) StringMapValues() map[string]map[string]string {
+	return e.stringMapValues
 }
 
-func (m *zeroLogEntry) AnyMapValues() map[string]map[string]interface{} {
-	return m.anyMapValues
+func (e *zeroLogEntry) AnyMapValues() map[string]map[string]interface{} {
+	return e.anyMapValues
 }
 
 func (e *zeroLogEntry) Evt() *zerolog.Event {
