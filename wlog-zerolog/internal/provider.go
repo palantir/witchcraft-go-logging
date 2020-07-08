@@ -28,18 +28,12 @@ func LoggerProvider() wlog.LoggerProvider {
 
 type loggerProvider struct{}
 
-// NewLogger returns a new zerolog Logger
-//
-// Deprecated: Use wlog-zap
 func (lp *loggerProvider) NewLogger(w io.Writer) wlog.Logger {
 	return &zeroLogger{
 		logger: newZeroLogger(w, wlog.InfoLevel),
 	}
 }
 
-// NewLeveledLogger returns a new zerolog Logger
-//
-// Deprecated: Use wlog-zap
 func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &zeroLogger{
 		logger: newZeroLogger(w, level),
