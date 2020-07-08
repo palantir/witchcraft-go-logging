@@ -25,9 +25,10 @@ import (
 )
 
 type zeroLogEntry struct {
-	evt  *zerolog.Event
-	keys map[string]int
-	wlog.MapValueEntries
+	evt             *zerolog.Event
+	keys            map[string]int
+	stringMapValues map[string]map[string]string
+	anyMapValues    map[string]map[string]interface{}
 }
 
 func (e *zeroLogEntry) keyExists(key string) bool {
@@ -83,6 +84,55 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 	if !ok {
 		e.evt.Interface(k, v)
 	}
+}
+
+func (m *zeroLogEntry) StringMapValue(key string, values map[string]string) {
+	if len(values) == 0 {
+		return
+	}
+	if m.stringMapValues == nil {
+		m.stringMapValues = make(map[string]map[string]string)
+	}
+	entryMapVals, ok := m.stringMapValues[key]
+	if !ok {
+		entryMapVals = make(map[string]string)
+		m.stringMapValues[key] = entryMapVals
+	}
+	for k, v := range values {
+		if _, exists := entryMapVals[k]; !exists {
+			entryMapVals[k] = v
+		}
+	}
+}
+
+func (m *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
+	if len(values) == 0 {
+		return
+	}
+	if len(values) == 0 {
+		return
+	}
+	if m.anyMapValues == nil {
+		m.anyMapValues = make(map[string]map[string]interface{})
+	}
+	entryMapVals, ok := m.anyMapValues[key]
+	if !ok {
+		entryMapVals = make(map[string]interface{})
+		m.anyMapValues[key] = entryMapVals
+	}
+	for k, v := range values {
+		if _, exists := entryMapVals[k]; !exists {
+			entryMapVals[k] = v
+		}
+	}
+}
+
+func (m *zeroLogEntry) StringMapValues() map[string]map[string]string {
+	return m.stringMapValues
+}
+
+func (m *zeroLogEntry) AnyMapValues() map[string]map[string]interface{} {
+	return m.anyMapValues
 }
 
 func (e *zeroLogEntry) Evt() *zerolog.Event {
