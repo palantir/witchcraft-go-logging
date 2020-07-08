@@ -186,8 +186,90 @@ func TestWithLoggerParams(t *testing.T) {
 }
 
 func TestWParamsSafeAndUnsafeParamsUsed(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testWParamsSafeAndUnsafeParamsUsed(t, test.provider)
+		})
+	}
+}
 
-	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+func testWParamsSafeAndUnsafeParamsUsed(t *testing.T, provider wlog.LoggerProvider) {
+
+	buf, ctx := newBufAndCtxWithLogger(provider)
+
+	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bar")
+	ctx = wparams.ContextWithSafeParam(ctx, "ten", 10)
+	ctx = wparams.ContextWithUnsafeParam(ctx, "unsafe", "secret")
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test")
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"foo": objmatcher.NewEqualsMatcher("bar"),
+			"ten": objmatcher.NewEqualsMatcher(json.Number("10")),
+		}),
+		"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"unsafe": objmatcher.NewEqualsMatcher("secret"),
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestWParamsSafeAndUnsafeParamsOverwritten(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t, test.provider)
+		})
+	}
+}
+
+func testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t *testing.T, provider wlog.LoggerProvider) {
+
+	buf, ctx := newBufAndCtxWithLogger(provider)
 
 	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bath")
 	ctx = wparams.ContextWithSafeParam(ctx, "ten", 10)
