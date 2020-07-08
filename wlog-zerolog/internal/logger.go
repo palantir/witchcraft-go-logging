@@ -26,17 +26,16 @@ import (
 
 type zeroLogEntry struct {
 	evt             *zerolog.Event
-	keys            map[string]int
+	keys            map[string]struct{}
 	stringMapValues map[string]map[string]string
 	anyMapValues    map[string]map[string]interface{}
 }
 
 func (e *zeroLogEntry) keyExists(key string) bool {
-	if i, exists := e.keys[key]; exists {
-		e.keys[key] = i + 1
+	if _, exists := e.keys[key]; exists {
 		return true
 	}
-	e.keys[key] = 1
+	e.keys[key] = struct{}{}
 	return false
 }
 
@@ -210,17 +209,16 @@ func (l *zeroLogger) SetLevel(level wlog.LogLevel) {
 	l.logger = l.logger.Level(toZeroLevel(level))
 }
 
-func reverseParams(params []wlog.Param) []wlog.Param {
+func reverseParams(params []wlog.Param) {
 	for i, j := 0, len(params)-1; i < j; i, j = i+1, j-1 {
 		params[i], params[j] = params[j], params[i]
 	}
-	return params
 }
 
 func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog.Param) {
 	entry := &zeroLogEntry{
 		evt:  newEvt(),
-		keys: make(map[string]int),
+		keys: make(map[string]struct{}),
 	}
 	if !entry.evt.Enabled() {
 		return
@@ -229,7 +227,7 @@ func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog
 	if levelVal != "" {
 		entry.evt = entry.evt.Str(svc1log.LevelKey, levelVal)
 	}
-	params = reverseParams(params)
+	reverseParams(params)
 	wlog.ApplyParams(entry, params)
 	entry.Evt().Msg(msg)
 }
