@@ -88,7 +88,7 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 //StringMapValue adds or merges the strings in values
 //Since wlog overrides duplicates with a preference for the last parameter
 //The parameters should not replace an existing key because parameters are passed to zerolog in reverse
-//This differs from the default StringMapValue since parameters are not reversed
+//This differs from the default wlog StringMapValue since parameters are not reversed
 func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 	if len(values) == 0 {
 		return
@@ -111,7 +111,7 @@ func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 //AnyMapValue adds or merges the values in values
 //Since wlog overrides duplicates with a preference for the last parameter
 //The parameters should not replace an existing key because parameters are passed to zerolog in reverse
-//This differs from the default AnyMapValue since parameters are not reversed
+//This differs from the default wlog AnyMapValue since parameters are not reversed
 func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
 	if len(values) == 0 {
 		return
