@@ -173,7 +173,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				logOutput := string(bytes)
 
 				firstPortionRegexp := regexp.MustCompile(
-					regexp.QuoteMeta(`[WARNING] github.com/palantir/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/palantir/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
+					regexp.QuoteMeta(`[WARNING]`) + ".*" + regexp.QuoteMeta(`github.com/`) + "[^/]+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/`) + "[^/]+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
@@ -196,7 +196,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				logOutput := string(bytes)
 
 				firstPortionRegexp := regexp.MustCompile(
-					regexp.QuoteMeta(`[WARNING] github.com/palantir/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/palantir/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
+					regexp.QuoteMeta(`[WARNING]`) + ".*" + regexp.QuoteMeta(`github.com/`) + "[^/]+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog_test.TestOutputFromContextEmptyContext`) + ".+" + regexp.QuoteMeta(`/github.com/`) + "[^/]+" + regexp.QuoteMeta(`/witchcraft-go-logging/wlog/context_default_test.go:`) + "[0-9]+" + regexp.QuoteMeta(`]: usage of `+loggerTestCaseInfo.loggerPkg+`.Logger from FromContext that did not have that logger set: `))
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
