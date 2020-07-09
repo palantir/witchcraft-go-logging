@@ -357,17 +357,6 @@ something/something:123`,
 	}
 }
 
-func BenchmarkCases() []TestCase {
-	testCases := TestCases()
-	benchmarkCases := make([]TestCase, 0, len(testCases))
-	for _, testCase := range testCases {
-		if testCase.Name != "duplicate origin" && testCase.Name != "parameter that is set manually overrides base value" {
-			benchmarkCases = append(benchmarkCases, testCase)
-		}
-	}
-	return benchmarkCases
-}
-
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
