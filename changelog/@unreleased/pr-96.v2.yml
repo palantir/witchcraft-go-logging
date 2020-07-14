@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Add `diag1log.WithLogger` and `diag1log.FromContext` methods.
+  links:
+    - https://github.com/palantir/witchcraft-go-logging/pull/96
+
