@@ -19,7 +19,6 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +29,3 @@ func TestWithLoggerFromContextRoundTrip(t *testing.T) {
 	got := diag1log.FromContext(ctx)
 	assert.Equal(t, expected, got)
 }
-
-type testDiagLogger struct{}
-
-func (testDiagLogger) Diagnostic(diagnostic logging.Diagnostic, params ...diag1log.Param) {}
