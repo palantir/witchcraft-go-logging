@@ -17,15 +17,21 @@ package wlogtmpl_test
 import (
 	"bytes"
 	"context"
+	"net/http"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,13 +73,6 @@ func TestLogger(t *testing.T) {
 			Expected: regexp.MustCompile(`^INFO  \[[0-9TZ:.-]+] origin: An info message about bar \(0: bar\)$`),
 		},
 		{
-			Name: "evt2log",
-			LogFn: func(ctx context.Context) {
-				evt2log.FromContext(ctx).Event("MY_EVENT", evt2log.UnsafeParam("foo", "bar"))
-			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] MY_EVENT \(foo: bar\)$`),
-		},
-		{
 			Name: "custom config",
 			Config: &wlogtmpl.Config{
 				FormatterMap: customFormatter("service.1", `CUSTOM {{printf "%-5s" .Level}} {{printf "%-26s" (printf "[%s]" .Time)}} {{.Origin}}: {{.Message}}`),
@@ -83,13 +82,60 @@ func TestLogger(t *testing.T) {
 			},
 			Expected: regexp.MustCompile(`^CUSTOM INFO  \[[0-9TZ:.-]+] origin: An info message about foo$`),
 		},
+		{
+			Name: "diag1log",
+			LogFn: func(ctx context.Context) {
+				diag1log.FromContext(ctx).Diagnostic(logging.NewDiagnosticFromGeneric(logging.GenericDiagnostic{
+					DiagnosticType: "myDiagnostic",
+					Value:          "hello world",
+				}))
+			},
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] hello world$`),
+		},
+		{
+			Name: "evt2log",
+			LogFn: func(ctx context.Context) {
+				evt2log.FromContext(ctx).Event("MY_EVENT", evt2log.UnsafeParam("foo", "bar"))
+			},
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] MY_EVENT \(foo: bar\)$`),
+		},
+		{
+			Name: "metric1log",
+			LogFn: func(ctx context.Context) {
+				metric1log.FromContext(ctx).Metric("com.palantir.foo", "gauge", metric1log.Value("value", 1))
+			},
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] METRIC com.palantir.foo gauge \(value: 1\)$`),
+		},
+		{
+			Name: "req2log",
+			LogFn: func(ctx context.Context) {
+				req, err := http.NewRequest("GET", "https://localhost:3000/foo/bar", nil)
+				if err != nil {
+					panic(err)
+				}
+				ctx.Value("req2log").(req2log.Logger).Request(req2log.Request{
+					Request: req,
+					RouteInfo: req2log.RouteInfo{
+						Template:   "/foo/{name}",
+						PathParams: map[string]string{"name": "bar"},
+					},
+					ResponseStatus: 200,
+					ResponseSize:   64,
+					Duration:       time.Millisecond,
+				})
+			},
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] "GET /foo/bar HTTP/1.1" 200 64 1000$`),
+		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			out := &bytes.Buffer{}
 			ctx := context.Background()
 			provider := wlogtmpl.LoggerProvider(test.Config)
-			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, provider.NewLogger))
 			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, provider.NewLeveledLogger, svc1log.Origin("origin")))
+			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, provider.NewLogger))
+			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, provider.NewLogger))
+			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, provider.NewLogger))
+			ctx = context.WithValue(ctx, "req2log", req2log.NewFromCreator(out, provider.NewLogger))
 
 			test.LogFn(ctx)
 

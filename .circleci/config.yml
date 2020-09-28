@@ -5,51 +5,31 @@
 owner-repo: &owner-repo
   owner-repo: palantir/witchcraft-go-logging
 
-excutor: &executor
-  executor:
-    name: go/darwin-linux-no-cgo
-    version: 1.15-t57
-    <<: *owner-repo
-
 version: 2.1
 
 orbs:
   go: palantir/go@0.0.15
   godel: palantir/godel@0.0.15
 
-all-tags-filter: &all-tags-filter
-  filters:
-    tags:
-      only: /.*/
-
 workflows:
   version: 2
-  verify-test-dist-publish:
+  verify-test:
     jobs:
       - godel/verify:
           name: verify
-          <<: *executor
-          <<: *all-tags-filter
+          executor:
+            name: go/golang
+            version: 1.15.2
+            <<: *owner-repo
       - godel/test:
-          name: test
-          <<: *executor
-          <<: *all-tags-filter
-      - godel/dist:
-          name: dist
-          <<: *executor
-          <<: *all-tags-filter
-      - godel/bintray-publish:
-          name: publish
-          <<: *executor
-          bintray-subject: palantir
-          bintray-repo: releases
-          bintray-product: wlog # N.B. This deviates from the circle template, which needs the ability to override the distribution name.
-          requires:
-            - verify
-            - test
-            - dist
-          filters:
-            tags:
-              only: /^v?[0-9]+(\.[0-9]+)+(-rc[0-9]+)?(-alpha[0-9]+)?$/
-            branches:
-              ignore: /.*/
+          name: test-go-1.15
+          executor:
+            name: go/golang
+            version: 1.15.2
+            <<: *owner-repo
+      - godel/test:
+          name: test-go-1.14
+          executor:
+            name: go/golang
+            version: 1.14.9
+            <<: *owner-repo
