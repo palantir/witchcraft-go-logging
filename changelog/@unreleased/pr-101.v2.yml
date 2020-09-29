@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: Add wlog-tmpl for human-readable logging, and the `wlog` CLI for formatting
+    external logging
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/101
