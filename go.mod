@@ -19,6 +19,5 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/zap v1.15.0
-	google.golang.org/grpc v1.21.0 // indirect
 	gopkg.in/yaml.v2 v2.2.5
 )
