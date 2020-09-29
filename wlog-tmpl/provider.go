@@ -17,6 +17,7 @@ package wlogtmpl
 import (
 	"io"
 
+	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"
@@ -69,17 +70,19 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 
 func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
 	return &tmplLogger{
-		w:        w,
-		cfg:      p.cfg,
-		delegate: p.cfg.DelegateLogger.NewLogger,
+		w:          w,
+		cfg:        p.cfg,
+		delegate:   p.cfg.DelegateLogger.NewLogger,
+		bufferPool: bytesbuffers.NewSyncPool(128),
 	}
 }
 
 func (p *tmplLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &tmplLogger{
-		w:        w,
-		level:    level,
-		cfg:      p.cfg,
-		delegate: p.cfg.DelegateLogger.NewLogger,
+		w:          w,
+		level:      level,
+		cfg:        p.cfg,
+		delegate:   p.cfg.DelegateLogger.NewLogger,
+		bufferPool: bytesbuffers.NewSyncPool(128),
 	}
 }
