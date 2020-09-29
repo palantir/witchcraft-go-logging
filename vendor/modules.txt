@@ -18,6 +18,8 @@ github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
+# github.com/palantir/pkg/bytesbuffers v1.0.1
+github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/datetime v1.0.1
 github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/objmatcher v1.0.1

@@ -50,6 +50,8 @@ github.com/openzipkin/zipkin-go v0.2.2 h1:nY8Hti+WKaP0cRsSeQ026wU03QsM762XBeCXBb
 github.com/openzipkin/zipkin-go v0.2.2/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
 github.com/palantir/pkg v1.0.1 h1:ZbGUcc14N7xcZSY9cehQoiHHTm/BAZO5RJdlsNEtSbk=
 github.com/palantir/pkg v1.0.1/go.mod h1:Eo6Jl0UXfT+65sLXJOcU9duu0WPvKsWFXCb0dE5VWZs=
+github.com/palantir/pkg/bytesbuffers v1.0.1 h1:I4ejeyYuMmIiplfPuKDycvtm7O2G6SffNrBqEWvAWJI=
+github.com/palantir/pkg/bytesbuffers v1.0.1/go.mod h1:tmmrI9egWT9g6oBhcO3bsd+R5HOxNiNMkTelr2+W2vg=
 github.com/palantir/pkg/datetime v1.0.1 h1:jxJmpTZYrb0mzD8vD0ct0ii7iClWvgzS8Wbct17IDso=
 github.com/palantir/pkg/datetime v1.0.1/go.mod h1:Xx0XxVNJKPZRPw4xkNJ2qLNTLqGFu5QW6rAWeuoATBs=
 github.com/palantir/pkg/objmatcher v1.0.1 h1:rzKVO2LXVR2ND7t9Hi3Q+sfFh1RZ5Liq/zmsz0vlgdw=

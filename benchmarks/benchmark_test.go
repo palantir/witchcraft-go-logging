@@ -175,8 +175,9 @@ func BenchmarkTrc1Log(b *testing.B) {
 
 func RunBenchmarks(b *testing.B, benchmark func(*testing.B, wlog.LoggerProvider)) {
 	b.Run("noop", func(b *testing.B) { benchmark(b, wlog.NewNoopLoggerProvider()) })
+	b.Run("json.Marshal", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
 	b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
-	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
 	b.Run("zap", func(b *testing.B) { benchmark(b, wlogzap.LoggerProvider()) })
 	b.Run("zerolog", func(b *testing.B) { benchmark(b, wlogzerolog.LoggerProvider()) })
+	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
 }

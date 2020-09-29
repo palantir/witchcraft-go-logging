@@ -32,9 +32,14 @@ type Config struct {
 	UnwrapperMap  map[logentryformatter.LogType]logentryformatter.Unwrapper
 	FormatterMap  map[logentryformatter.LogType]logentryformatter.Formatter
 	Only, Exclude map[logentryformatter.LogType]struct{}
+	// DelegateLogger is used to create the intermediate json representation that is passed to the template.
+	DelegateLogger wlog.LoggerProvider
 }
 
-// LoggerProvider returns a wlog.LoggerProvider which formats log entries with wlog.
+// LoggerProvider returns a wlog.LoggerProvider which formats log entries with wlog templates.
+// The default templates give a human-friendly output suitable for command-line tools.
+// Services which leverage log collection infrastructure should use a JSON-based provider.
+//
 // Nil configuration is valid and will result in the default behavior.
 func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerProvider {
 	if cfg == nil {
@@ -54,6 +59,9 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 			}
 		}
 	}
+	if cfg.DelegateLogger == nil {
+		cfg.DelegateLogger = wlog.NewJSONMarshalLoggerProvider()
+	}
 	return &tmplLoggerProvider{
 		cfg: cfg,
 	}
@@ -61,15 +69,17 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 
 func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
 	return &tmplLogger{
-		w:   w,
-		cfg: p.cfg,
+		w:        w,
+		cfg:      p.cfg,
+		delegate: p.cfg.DelegateLogger.NewLogger,
 	}
 }
 
 func (p *tmplLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &tmplLogger{
-		w:     w,
-		level: level,
-		cfg:   p.cfg,
+		w:        w,
+		level:    level,
+		cfg:      p.cfg,
+		delegate: p.cfg.DelegateLogger.NewLogger,
 	}
 }

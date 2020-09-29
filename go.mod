@@ -6,6 +6,7 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/nmiyake/pkg/dirs v1.0.0
+	github.com/palantir/pkg/bytesbuffers v1.0.1
 	github.com/palantir/pkg/datetime v1.0.1
 	github.com/palantir/pkg/objmatcher v1.0.1
 	github.com/palantir/pkg/safejson v1.0.1

@@ -15,11 +15,11 @@
 package wlogtmpl
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"time"
 
+	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 )
@@ -28,6 +28,9 @@ type tmplLogger struct {
 	w     io.Writer
 	level wlog.LogLevel
 	cfg   *Config
+
+	delegate   wlog.LoggerCreator
+	bufferPool bytesbuffers.Pool
 }
 
 func (l *tmplLogger) Log(params ...wlog.Param) {
@@ -73,19 +76,14 @@ func (l *tmplLogger) logOutput(params []wlog.Param) {
 func (l *tmplLogger) formatOutput(params []wlog.Param) string {
 	params = append(params, wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)))
 
-	entry := wlog.NewMapLogEntry()
-	wlog.ApplyParams(entry, params)
-	bytes, err := json.Marshal(entry.AllValues())
+	buf := l.bufferPool.Get()
+	defer l.bufferPool.Put(buf)
+	l.delegate(buf).Log(params...)
+
+	out, err := logentryformatter.FormatLogLine(buf.String(), l.cfg.UnwrapperMap, l.cfg.FormatterMap, l.cfg.Only, l.cfg.Exclude)
 	if err != nil {
 		if !l.cfg.Strict {
-			return string(bytes)
-		}
-		return err.Error()
-	}
-	out, err := logentryformatter.FormatLogLine(string(bytes), l.cfg.UnwrapperMap, l.cfg.FormatterMap, l.cfg.Only, l.cfg.Exclude)
-	if err != nil {
-		if !l.cfg.Strict {
-			return string(bytes)
+			return buf.String()
 		}
 		return err.Error()
 	}
