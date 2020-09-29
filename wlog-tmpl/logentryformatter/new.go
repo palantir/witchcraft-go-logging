@@ -51,14 +51,6 @@ func NoSubstitution() Param {
 	})
 }
 
-type EntryParser interface {
-	ParseJSON(content []byte, substitute bool) (interface{}, error)
-	ParseMap(content map[string]interface{}, substitute bool) (interface{}, error)
-}
-
-type entryParser struct {
-}
-
 func New(entryParser func([]byte, bool) (interface{}, error), tmplString string, params ...Param) (Formatter, error) {
 	tmpl := template.New("logFunc")
 	tmpl.Funcs(map[string]interface{}{
