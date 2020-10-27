@@ -360,6 +360,52 @@ func TestWithLoggerOriginFromCallLine(t *testing.T) {
 	}
 }
 
+func TestWithLoggerOriginFromCallLineWithSkip(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			delegate := svc1log.NewFromCreator(buf, wlog.InfoLevel, test.provider.NewLeveledLogger)
+			ctx := svc1log.WithLogger(context.Background(), wrappedSvcLogger{delegate: delegate})
+			ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLineWithSkip(2))
+
+			logger := svc1log.FromContext(ctx)
+			file, line := getFileAndLine()
+			logger.Info("Test")
+
+			entries, err := logreader.EntriesFromContent(buf.Bytes())
+			require.NoError(t, err)
+
+			assert.Equal(t, 1, len(entries))
+			matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"level":   objmatcher.NewEqualsMatcher("INFO"),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
+				"type":    objmatcher.NewEqualsMatcher("service.1"),
+				"message": objmatcher.NewEqualsMatcher("Test"),
+			})
+			fmt.Println(entries[0])
+			err = matcher.Matches(map[string]interface{}(entries[0]))
+			assert.NoError(t, err, "%v", err)
+		})
+	}
+}
+
 func newBufAndCtxWithLogger(provider wlog.LoggerProvider) (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
 	ctx := svc1log.WithLogger(context.Background(), newTestLogger(buf, "com.palantir.test", provider))
@@ -369,4 +415,28 @@ func newBufAndCtxWithLogger(provider wlog.LoggerProvider) (*bytes.Buffer, contex
 func getFileAndLine() (string, int) {
 	_, file, line, _ := runtime.Caller(1)
 	return gopath.TrimPrefix(file), line
+}
+
+type wrappedSvcLogger struct {
+	delegate svc1log.Logger
+}
+
+func (w wrappedSvcLogger) Debug(msg string, params ...svc1log.Param) {
+	w.delegate.Debug(msg, params...)
+}
+
+func (w wrappedSvcLogger) Info(msg string, params ...svc1log.Param) {
+	w.delegate.Info(msg, params...)
+}
+
+func (w wrappedSvcLogger) Warn(msg string, params ...svc1log.Param) {
+	w.delegate.Warn(msg, params...)
+}
+
+func (w wrappedSvcLogger) Error(msg string, params ...svc1log.Param) {
+	w.delegate.Error(msg, params...)
+}
+
+func (w wrappedSvcLogger) SetLevel(level wlog.LogLevel) {
+	w.delegate.SetLevel(level)
 }
