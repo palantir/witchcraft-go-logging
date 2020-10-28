@@ -39,9 +39,9 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 	return runWithFatalLoggingInternal(ctx, runFn, true)
 }
 
-// RunWithFatalLoggingNoNonPanicLogging is identical to RunWithFatalLogging however it only emits logs on panics, not if runFn a normal error
+// RunWithRecoveryLoggingWithError is identical to RunWithFatalLogging however it only emits logs on panics, not if runFn a normal error
 // This can be useful if you want to special case the logging of this error but still want a centralized place to handle panics
-func RunWithFatalLoggingNoNonPanicLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
+func RunWithRecoveryLoggingWithError(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
 	return runWithFatalLoggingInternal(ctx, runFn, false)
 }
 

@@ -72,7 +72,7 @@ func TestRunWithFatalLogging_Error(t *testing.T) {
 func TestRunRunWithFatalLoggingNoLog_Error(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
-	err := wapp.RunWithFatalLoggingNoNonPanicLogging(ctx, func(ctx context.Context) error {
+	err := wapp.RunWithRecoveryLoggingWithError(ctx, func(ctx context.Context) error {
 		return werror.Error("foo")
 	})
 	assert.NotNil(t, err)
@@ -118,7 +118,7 @@ func getContextWithLogger(ctx context.Context, writer io.Writer) context.Context
 func TestRunRunWithFatalLoggingNoErrors(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
-	err := wapp.RunWithFatalLoggingNoNonPanicLogging(ctx, func(ctx context.Context) error {
+	err := wapp.RunWithRecoveryLoggingWithError(ctx, func(ctx context.Context) error {
 		return nil
 	})
 	assert.NoError(t, err)
