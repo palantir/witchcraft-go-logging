@@ -33,24 +33,19 @@ func RunWithRecoveryLogging(ctx context.Context, runFn func(ctx context.Context)
 	})
 }
 
-func RunWithRecoveryLoggingNoLog(ctx context.Context, runFn func(ctx context.Context)) {
-	_ = RunWithFatalLoggingNoLog(ctx, func(ctx context.Context) error {
-		runFn(ctx)
-		return nil
-	})
-}
-
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.
 // Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
 func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
-	return runWithFatalLoggingI(ctx, runFn, true)
+	return runWithFatalLoggingInternal(ctx, runFn, true)
 }
 
-func RunWithFatalLoggingNoLog(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
-	return runWithFatalLoggingI(ctx, runFn, false)
+// RunWithFatalLoggingNoNonPanicLogging is identical to RunWithFatalLogging however it only emits logs on panics, not if runFn a normal error
+// This can be useful if you want to special case the logging of this error but still want a centralized place to handle panics
+func RunWithFatalLoggingNoNonPanicLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
+	return runWithFatalLoggingInternal(ctx, runFn, false)
 }
 
-func runWithFatalLoggingI(ctx context.Context, runFn func(ctx context.Context) error, logAnyError bool) (retErr error) {
+func runWithFatalLoggingInternal(ctx context.Context, runFn func(ctx context.Context) error, logAnyError bool) (retErr error) {
 	defer func() {
 		r := recover()
 		if r == nil {

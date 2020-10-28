@@ -69,6 +69,16 @@ func TestRunWithFatalLogging_Error(t *testing.T) {
 	assert.Contains(t, buf.String(), "foo")
 }
 
+func TestRunRunWithFatalLoggingNoLog_Error(t *testing.T) {
+	buf := &bytes.Buffer{}
+	ctx := getContextWithLogger(context.Background(), buf)
+	err := wapp.RunWithFatalLoggingNoNonPanicLogging(ctx, func(ctx context.Context) error {
+		return werror.Error("foo")
+	})
+	assert.NotNil(t, err)
+	assert.NotContains(t, buf.String(), "foo")
+}
+
 func TestRunWithFatalLogging_PanicWithError(t *testing.T) {
 	buf := &bytes.Buffer{}
 	ctx := getContextWithLogger(context.Background(), buf)
@@ -103,4 +113,14 @@ func getContextWithLogger(ctx context.Context, writer io.Writer) context.Context
 	logger := svc1log.New(writer, wlog.DebugLevel)
 	ctx = svc1log.WithLogger(ctx, logger)
 	return ctx
+}
+
+func TestRunRunWithFatalLoggingNoErrors(t *testing.T) {
+	buf := &bytes.Buffer{}
+	ctx := getContextWithLogger(context.Background(), buf)
+	err := wapp.RunWithFatalLoggingNoNonPanicLogging(ctx, func(ctx context.Context) error {
+		return nil
+	})
+	assert.NoError(t, err)
+	assert.Empty(t, buf.String())
 }
