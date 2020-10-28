@@ -33,9 +33,25 @@ func RunWithRecoveryLogging(ctx context.Context, runFn func(ctx context.Context)
 	})
 }
 
+func RunWithRecoveryLoggingNoLog(ctx context.Context, runFn func(ctx context.Context)) {
+	_ = RunWithFatalLoggingNoLog(ctx, func(ctx context.Context) error {
+		runFn(ctx)
+		return nil
+	})
+}
+
 // RunWithFatalLogging wraps a callback, logging errors and panics it returns.
 // Useful as a "catch all" for applications so that they can log fatal events, perhaps before exiting.
 func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
+	return runWithFatalLoggingI(ctx, runFn, true)
+}
+
+func RunWithFatalLoggingNoLog(ctx context.Context, runFn func(ctx context.Context) error) (retErr error) {
+	return runWithFatalLoggingI(ctx, runFn, false)
+}
+
+
+func runWithFatalLoggingI(ctx context.Context, runFn func(ctx context.Context) error, logAnyError bool) (retErr error) {
 	defer func() {
 		r := recover()
 		if r == nil {
@@ -67,7 +83,9 @@ func RunWithFatalLogging(ctx context.Context, runFn func(ctx context.Context) er
 		}
 	}()
 	if err := runFn(ctx); err != nil {
-		svc1log.FromContext(ctx).Error("error", svc1log.Stacktrace(err))
+		if logAnyError {
+			svc1log.FromContext(ctx).Error("error", svc1log.Stacktrace(err))
+		}
 		return err
 	}
 	return nil
