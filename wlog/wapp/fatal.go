@@ -50,7 +50,6 @@ func RunWithFatalLoggingNoLog(ctx context.Context, runFn func(ctx context.Contex
 	return runWithFatalLoggingI(ctx, runFn, false)
 }
 
-
 func runWithFatalLoggingI(ctx context.Context, runFn func(ctx context.Context) error, logAnyError bool) (retErr error) {
 	defer func() {
 		r := recover()
