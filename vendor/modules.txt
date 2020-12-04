@@ -10,7 +10,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.2.0
+# github.com/palantir/conjure-go-runtime/v2 v2.6.0
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
 # github.com/palantir/pkg v1.0.1
@@ -27,10 +27,10 @@ github.com/palantir/pkg/safelong
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
-# github.com/palantir/pkg/uuid v1.0.0
+# github.com/palantir/pkg/uuid v1.0.1
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
-# github.com/palantir/witchcraft-go-error v1.3.0
+# github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.1.0
@@ -60,5 +60,5 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# gopkg.in/yaml.v2 v2.2.7
+# gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
