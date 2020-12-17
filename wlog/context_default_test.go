@@ -130,7 +130,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				var logEntry logging.ServiceLogV1
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "Test message", logEntry.Message)
-				assert.Equal(t, logging.LogLevel("INFO"), logEntry.Level)
+				assert.Equal(t, logging.LogLevel_Value("INFO"), logEntry.Level.Value())
 			},
 			setEmptyLoggerCreator: func() {
 				// set the default logger creator
