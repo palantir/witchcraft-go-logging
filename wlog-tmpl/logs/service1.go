@@ -68,7 +68,6 @@ func performRenderSubstitution(logEntry *logging.ServiceLogV1) {
 		rv := match
 		if unsafeVal, ok := logEntry.UnsafeParams[strconv.Itoa(blankIdx)]; ok {
 			rv = fmt.Sprint(unsafeVal)
-
 		}
 		blankIdx++
 		return rv
@@ -89,9 +88,9 @@ func performRenderSubstitution(logEntry *logging.ServiceLogV1) {
 }
 
 var (
-	logLevelColors = map[string]*color.Color{
-		"WARN":  color.New(color.FgYellow),
-		"ERROR": color.New(color.FgRed),
+	logLevelColors = map[logging.LogLevel_Value]*color.Color{
+		logging.LogLevel_WARN:  color.New(color.FgYellow),
+		logging.LogLevel_ERROR: color.New(color.FgRed),
 	}
 )
 
@@ -100,5 +99,5 @@ func ServiceLogLevelColorer(in interface{}) *color.Color {
 	if !ok {
 		return nil
 	}
-	return logLevelColors[string(sle.Level)]
+	return logLevelColors[sle.Level.Value()]
 }

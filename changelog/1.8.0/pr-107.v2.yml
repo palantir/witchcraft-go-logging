@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add svc1log.OriginFromCallLineWithSkip for more configurable usage
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/107
