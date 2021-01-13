@@ -49,7 +49,7 @@ func (s *goLogrWrapper) WithName(name string) logr.Logger {
 
 func toSafeParams(logger svc1log.Logger, keysAndValues []interface{}) svc1log.Param {
 	if len(keysAndValues)%2 == 1 {
-		logger.Warn("KeysAndValues pair slice has an odd number of arguments; ignoring all",
+		logger.Error("KeysAndValues pair slice has an odd number of arguments; ignoring all",
 			svc1log.SafeParam("keysAndValuesLen", len(keysAndValues)))
 		return svc1log.SafeParams(map[string]interface{}{})
 	}
@@ -58,7 +58,7 @@ func toSafeParams(logger svc1log.Logger, keysAndValues []interface{}) svc1log.Pa
 	for i := 0; i < len(keysAndValues); i = i + 2 {
 		key, ok := keysAndValues[i].(string)
 		if !ok {
-			logger.Warn("Key type is not string",
+			logger.Error("Key type is not string",
 				svc1log.SafeParam("actualType", fmt.Sprintf("%T", keysAndValues[i])),
 				svc1log.SafeParam("key", key))
 			continue
