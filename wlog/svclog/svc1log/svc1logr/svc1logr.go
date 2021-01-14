@@ -23,7 +23,7 @@ import (
 )
 
 type svc1logr struct {
-	origin    string
+	origin string
 	logger svc1log.Logger
 }
 
@@ -31,7 +31,7 @@ type svc1logr struct {
 func New(logger svc1log.Logger, origin string) logr.Logger {
 	logger = svc1log.WithParams(logger, svc1log.Origin(origin))
 	return &svc1logr{
-		origin:    origin,
+		origin: origin,
 		logger: logger,
 	}
 }
