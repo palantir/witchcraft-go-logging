@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add wlog-tmpl for human-readable logging
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/101
