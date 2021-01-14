@@ -27,7 +27,7 @@ github.com/palantir/pkg/transform
 # github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.1.0
+# github.com/palantir/witchcraft-go-params v1.2.0
 github.com/palantir/witchcraft-go-params
 # github.com/palantir/witchcraft-go-tracing v1.2.0
 github.com/palantir/witchcraft-go-tracing/wtracing
