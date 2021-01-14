@@ -22,48 +22,48 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-type logger struct {
+type svc1logr struct {
 	origin    string
-	svcLogger svc1log.Logger
+	logger svc1log.Logger
 }
 
 // New returns a go-logr interface implementation that uses svc1log internally.
-func New(svcLogger svc1log.Logger, origin string) logr.Logger {
-	svcLogger = svc1log.WithParams(svcLogger, svc1log.Origin(origin))
-	return &logger{
+func New(logger svc1log.Logger, origin string) logr.Logger {
+	logger = svc1log.WithParams(logger, svc1log.Origin(origin))
+	return &svc1logr{
 		origin:    origin,
-		svcLogger: svcLogger,
+		logger: logger,
 	}
 }
 
-func (l *logger) Info(msg string, keysAndValues ...interface{}) {
-	l.svcLogger.Info(msg, toSafeParams(l.svcLogger, keysAndValues))
+func (s *svc1logr) Info(msg string, keysAndValues ...interface{}) {
+	s.logger.Info(msg, toSafeParams(s.logger, keysAndValues))
 }
 
-func (l *logger) Enabled() bool {
+func (s *svc1logr) Enabled() bool {
 	return true
 }
 
-func (l *logger) Error(err error, msg string, keysAndValues ...interface{}) {
-	l.svcLogger.Error(msg, svc1log.Stacktrace(err), toSafeParams(l.svcLogger, keysAndValues))
+func (s *svc1logr) Error(err error, msg string, keysAndValues ...interface{}) {
+	s.logger.Error(msg, svc1log.Stacktrace(err), toSafeParams(s.logger, keysAndValues))
 }
 
-func (l *logger) V(level int) logr.InfoLogger {
-	return New(l.svcLogger, l.origin)
+func (s *svc1logr) V(level int) logr.InfoLogger {
+	return New(s.logger, s.origin)
 }
 
-func (l *logger) WithValues(keysAndValues ...interface{}) logr.Logger {
-	svcLogger := svc1log.WithParams(l.svcLogger, toSafeParams(l.svcLogger, keysAndValues))
-	return New(svcLogger, l.origin)
+func (s *svc1logr) WithValues(keysAndValues ...interface{}) logr.Logger {
+	logger := svc1log.WithParams(s.logger, toSafeParams(s.logger, keysAndValues))
+	return New(logger, s.origin)
 }
 
-func (l *logger) WithName(name string) logr.Logger {
-	return New(l.svcLogger, filepath.Join(l.origin, name))
+func (s *svc1logr) WithName(name string) logr.Logger {
+	return New(s.logger, filepath.Join(s.origin, name))
 }
 
-func toSafeParams(svcLogger svc1log.Logger, keysAndValues []interface{}) svc1log.Param {
+func toSafeParams(logger svc1log.Logger, keysAndValues []interface{}) svc1log.Param {
 	if len(keysAndValues)%2 == 1 {
-		svcLogger.Error("KeysAndValues pair slice has an odd number of arguments; ignoring all",
+		logger.Error("KeysAndValues pair slice has an odd number of arguments; ignoring all",
 			svc1log.SafeParam("keysAndValuesLen", len(keysAndValues)))
 		return svc1log.SafeParams(map[string]interface{}{})
 	}
@@ -72,7 +72,7 @@ func toSafeParams(svcLogger svc1log.Logger, keysAndValues []interface{}) svc1log
 	for i := 0; i < len(keysAndValues); i = i + 2 {
 		key, ok := keysAndValues[i].(string)
 		if !ok {
-			svcLogger.Error("Key type is not string",
+			logger.Error("Key type is not string",
 				svc1log.SafeParam("actualType", fmt.Sprintf("%T", keysAndValues[i])),
 				svc1log.SafeParam("key", key))
 			continue
