@@ -48,7 +48,7 @@ func (s *svc1logr) Error(err error, msg string, keysAndValues ...interface{}) {
 	s.logger.Error(msg, svc1log.Stacktrace(err), toSafeParams(s.logger, keysAndValues))
 }
 
-func (s *svc1logr) V(level int) logr.InfoLogger {
+func (s *svc1logr) V(level int) logr.Logger {
 	return New(s.logger, s.origin)
 }
 
