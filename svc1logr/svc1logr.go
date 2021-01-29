@@ -16,32 +16,38 @@ package svc1logr
 
 import (
 	"fmt"
-	"path/filepath"
+	"path"
 
 	"github.com/go-logr/logr"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
 type svc1logr struct {
-	origin string
-	logger svc1log.Logger
+	origin  string
+	logger  svc1log.Logger
+	level   int
+	enabled bool
 }
 
 // New returns a go-logr interface implementation that uses svc1log internally.
-func New(logger svc1log.Logger, origin string) logr.Logger {
+func New(logger svc1log.Logger, origin string, level int) logr.Logger {
 	logger = svc1log.WithParams(logger, svc1log.Origin(origin))
 	return &svc1logr{
-		origin: origin,
-		logger: logger,
+		origin:  origin,
+		logger:  logger,
+		level:   level,
+		enabled: true,
 	}
 }
 
 func (s *svc1logr) Info(msg string, keysAndValues ...interface{}) {
-	s.logger.Info(msg, toSafeParams(s.logger, keysAndValues))
+	if s.Enabled() {
+		s.logger.Info(msg, toSafeParams(s.logger, keysAndValues))
+	}
 }
 
 func (s *svc1logr) Enabled() bool {
-	return true
+	return s.enabled
 }
 
 func (s *svc1logr) Error(err error, msg string, keysAndValues ...interface{}) {
@@ -49,21 +55,30 @@ func (s *svc1logr) Error(err error, msg string, keysAndValues ...interface{}) {
 }
 
 func (s *svc1logr) V(level int) logr.Logger {
-	return New(s.logger, s.origin)
+	enabled := true
+	if level > s.level {
+		enabled = false
+	}
+	return &svc1logr{
+		origin:  s.origin,
+		logger:  s.logger,
+		level:   s.level,
+		enabled: enabled,
+	}
 }
 
 func (s *svc1logr) WithValues(keysAndValues ...interface{}) logr.Logger {
 	logger := svc1log.WithParams(s.logger, toSafeParams(s.logger, keysAndValues))
-	return New(logger, s.origin)
+	return New(logger, s.origin, s.level)
 }
 
 func (s *svc1logr) WithName(name string) logr.Logger {
-	return New(s.logger, filepath.Join(s.origin, name))
+	return New(s.logger, path.Join(s.origin, name), s.level)
 }
 
 func toSafeParams(logger svc1log.Logger, keysAndValues []interface{}) svc1log.Param {
 	if len(keysAndValues)%2 == 1 {
-		logger.Error("KeysAndValues pair slice has an odd number of arguments; ignoring all",
+		logger.Error("Logging error: keysAndValues pair slice has an odd number of arguments; ignoring all",
 			svc1log.SafeParam("keysAndValuesLen", len(keysAndValues)))
 		return svc1log.SafeParams(map[string]interface{}{})
 	}
@@ -72,7 +87,7 @@ func toSafeParams(logger svc1log.Logger, keysAndValues []interface{}) svc1log.Pa
 	for i := 0; i < len(keysAndValues); i = i + 2 {
 		key, ok := keysAndValues[i].(string)
 		if !ok {
-			logger.Error("Key type is not string",
+			logger.Error("Logging error: Key type is not string",
 				svc1log.SafeParam("actualType", fmt.Sprintf("%T", keysAndValues[i])),
 				svc1log.SafeParam("key", key))
 			continue
