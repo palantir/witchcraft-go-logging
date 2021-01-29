@@ -33,7 +33,7 @@ func TestSvc1LogrWrapper(t *testing.T) {
 	buf := new(bytes.Buffer)
 	logger := svc1log.New(buf, wlog.DebugLevel)
 
-	logr1 := New(logger, "foo")
+	logr1 := New(logger, "foo", 1)
 	logr2 := logr1.WithValues("key2", "val2", "key3", "val3")
 	logr3 := logr1.WithName("bar")
 
