@@ -29,7 +29,10 @@ type svc1logr struct {
 	enabled bool
 }
 
-// New returns a go-logr interface implementation that uses svc1log internally.
+// New provides an implementation of [logr.Logger](https://pkg.go.dev/github.com/go-logr/logr#Logger) which delegates to
+// a witchcraft svc1log logger. Use this package for software which expects a logr.Logger but where the calling code
+// has access to an svc1log.Logger or wants the output to be Witchcraft-compatible.  Info() is logged as INFO and
+// Error() as ERROR. All values are converted to safe parameters.
 func New(logger svc1log.Logger, origin string, level int) logr.Logger {
 	logger = svc1log.WithParams(logger, svc1log.Origin(origin))
 	return &svc1logr{
