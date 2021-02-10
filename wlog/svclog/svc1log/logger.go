@@ -33,7 +33,7 @@ func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 }
 
 func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
-	return WithParams(&defaultLogger{
+	return WithParams(&DefaultLogger{
 		loggerCreator: func(level wlog.LogLevel) wlog.LeveledLogger {
 			return creator(w, level)
 		},

@@ -34,6 +34,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
 )
 
 func TestSvc1Log(t *testing.T) {
@@ -102,4 +104,16 @@ func TestDiag1Log(t *testing.T) {
 			wlogzerolog.LoggerProvider().NewLogger,
 		)
 	})
+}
+
+func TestWrapped1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Svc1LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
+			return wrapped1log.NewFromProvider(w, level, wlogzerolog.LoggerProvider(), entityName, entityVersion).Service(svc1log.Origin(origin))
+		})
 }
