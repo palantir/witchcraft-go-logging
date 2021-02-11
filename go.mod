@@ -8,6 +8,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.0.0
 	github.com/palantir/pkg/datetime v1.0.1
 	github.com/palantir/pkg/objmatcher v1.0.1
+	github.com/palantir/pkg/refreshable v1.1.0
 	github.com/palantir/pkg/safejson v1.0.1
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
@@ -16,7 +17,7 @@ require (
 	github.com/palantir/witchcraft-go-tracing v1.2.0
 	github.com/rs/zerolog v1.11.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.0
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.3.0
 )

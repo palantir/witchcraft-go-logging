@@ -15,8 +15,10 @@
 package svc1log
 
 import (
+	"fmt"
 	"io"
 
+	"github.com/palantir/pkg/refreshable"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
@@ -32,12 +34,30 @@ func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 	return NewFromCreator(w, level, wlog.DefaultLoggerProvider().NewLeveledLogger, params...)
 }
 
+func NewOriginLevelLogger(w io.Writer, config refreshable.Refreshable, params ...Param) Logger {
+	return NewOriginLevelFromCreator(w, config, wlog.DefaultLoggerProvider().NewLeveledLogger, params...)
+}
+
 func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
 	return WithParams(&defaultLogger{
 		loggerCreator: func(level wlog.LogLevel) wlog.LeveledLogger {
 			return creator(w, level)
 		},
 		logger: creator(w, level),
+	}, params...)
+}
+
+func NewOriginLevelFromCreator(w io.Writer, config refreshable.Refreshable, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
+	// type assert and panic on construction... providing the wrong type here is a programmer error
+	if _, ok := config.Current().(OriginLevelLoggerConfig); !ok {
+		panic(fmt.Sprintf("unexpected type for origin level logger configuration %T", config))
+	}
+	return WithParams(&originLevelLogger{
+		config: config,
+		loggerCreator: func(level wlog.LogLevel) wlog.LeveledLogger {
+			return creator(w, level)
+		},
+		logger: creator(w, wlog.DebugLevel),
 	}, params...)
 }
 

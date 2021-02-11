@@ -59,9 +59,15 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
+type originParamFunc paramFunc
+
+func (o originParamFunc) apply(entry wlog.LogEntry) {
+	o(entry)
+}
+
 // Origin sets the "origin" field to be the provided value if it is non-empty.
 func Origin(origin string) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
+	return originParamFunc(func(logger wlog.LogEntry) {
 		logger.OptionalStringValue(OriginKey, origin)
 	})
 }

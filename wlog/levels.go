@@ -19,6 +19,17 @@ import (
 	"strings"
 )
 
+// A Level is a logging priority. Higher levels are more important.
+type Level int8
+
+const (
+	Debug Level = iota
+	Info
+	Warn
+	Error
+	Fatal
+)
+
 type LogLevel string
 
 const (
@@ -28,6 +39,15 @@ const (
 	ErrorLevel LogLevel = "error"
 	FatalLevel LogLevel = "fatal"
 )
+
+// LogLevelToLevel converts a string log level to an integer for easier level comparison checks
+var LogLevelToLevel = map[LogLevel]Level{
+	DebugLevel: Debug,
+	InfoLevel:  Info,
+	WarnLevel:  Warn,
+	ErrorLevel: Error,
+	FatalLevel: Fatal,
+}
 
 func (l *LogLevel) UnmarshalText(b []byte) error {
 	switch strings.ToLower(string(b)) {
