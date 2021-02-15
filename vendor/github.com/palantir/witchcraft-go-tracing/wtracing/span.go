@@ -111,11 +111,12 @@ func WithRemoteEndpoint(endpoint *Endpoint) SpanOption {
 	})
 }
 
-// WithSpanTag adds the span tag value to the span tag name
+// WithSpanTag adds the tag indexed by name with the value specified to the list of tags
+// If the same name is seen multiple times the most recent will prevail
 func WithSpanTag(name, value string) SpanOption {
 	return spanOptionFn(func(impl *SpanOptionImpl) {
 		impl.Tags = append(impl.Tags, Tag{
-			Name: name,
+			Name:  name,
 			Value: value,
 		})
 	})

@@ -21,4 +21,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/palantir/witchcraft-go-tracing v1.2.0 => /Users/smoorman/Development/go/src/github.com/smoorpal/witchcraft-go-tracing
+replace github.com/palantir/witchcraft-go-tracing v1.2.0 => github.com/smoorpal/witchcraft-go-tracing v1.2.1-0.20210215191321-20edf21e6c4f
