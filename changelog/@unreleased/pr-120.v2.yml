@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Write trace span tags
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/120
