@@ -97,7 +97,7 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 		{
 			Name: "trace.1 log entry with trace tags ",
 			SpanOptions: []wtracing.SpanOption{
-			    wtracing.WithSpanTag("key0", "value0"),
+				wtracing.WithSpanTag("key0", "value0"),
 			},
 			JSONMatcher: map[string]objmatcher.Matcher{
 				"type": objmatcher.NewEqualsMatcher("trace.1"),

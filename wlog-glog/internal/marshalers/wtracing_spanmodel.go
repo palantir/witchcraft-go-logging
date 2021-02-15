@@ -68,10 +68,10 @@ func marshalWTracingSpanModel(key string, val interface{}) string {
 		}
 	}
 
-	if tags := span.Tags; tags != nil && len(tags)>0 {
+	if tags := span.Tags; tags != nil && len(tags) > 0 {
 		_, _ = builder.WriteString(`, tags:{`)
 		idx := 0
-		for k,v := range tags {
+		for k, v := range tags {
 			builder.WriteString(k + ":" + v)
 			if idx != len(tags)-1 {
 				builder.WriteString(separator)

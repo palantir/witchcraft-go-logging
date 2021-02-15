@@ -49,8 +49,8 @@ func marshalWTracingSpanModel(key string, val interface{}) zapcore.Field {
 				}
 			}
 		}
-		if tags := span.Tags; tags != nil && len(tags)>0 {
-		    // TODO this can probably be done the same way as annotations
+		if tags := span.Tags; tags != nil && len(tags) > 0 {
+			// TODO this can probably be done the same way as annotations
 			enc.AddReflected(trc1log.SpanTagsKey, span.Tags)
 		}
 		return nil
