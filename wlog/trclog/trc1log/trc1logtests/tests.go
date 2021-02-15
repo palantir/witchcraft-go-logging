@@ -55,7 +55,6 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
 					"timestamp": objmatcher.NewAnyMatcher(),
 					"duration":  objmatcher.NewAnyMatcher(),
-					"tags":      objmatcher.NewAnyMatcher(),
 				}),
 			},
 		},
@@ -92,9 +91,6 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 							}),
 						}),
 					}),
-					"tags": objmatcher.MapMatcher(
-						map[string]objmatcher.Matcher{},
-					),
 				}),
 			},
 		},
