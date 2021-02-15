@@ -44,6 +44,10 @@ func marshalWTracingSpanModel(evt *zerolog.Event, key string, val interface{}) *
 				encodeSpanModelAnnotations(evt, "cs", "cr", span)
 			}
 		}
+		// TODO this can probably be done the same way as annotations
+		if tags := span.Tags; tags != nil {
+		    e.Interface(trc1log.SpanTagsKey, tags)
+        }
 	}))
 }
 

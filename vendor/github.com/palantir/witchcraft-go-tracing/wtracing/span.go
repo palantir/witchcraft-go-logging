@@ -38,6 +38,7 @@ type SpanModel struct {
 	Duration       time.Duration
 	LocalEndpoint  *Endpoint
 	RemoteEndpoint *Endpoint
+	Tags           map[string]string
 }
 
 type SpanContext struct {
@@ -74,6 +75,7 @@ type SpanOptionImpl struct {
 	RemoteEndpoint *Endpoint
 	ParentSpan     *SpanContext
 	Kind           Kind
+	Tags           []Tag
 }
 
 func WithKind(kind Kind) SpanOption {
@@ -106,5 +108,15 @@ func WithParentSpanContext(parentCtx SpanContext) SpanOption {
 func WithRemoteEndpoint(endpoint *Endpoint) SpanOption {
 	return spanOptionFn(func(impl *SpanOptionImpl) {
 		impl.RemoteEndpoint = endpoint
+	})
+}
+
+// WithSpanTag adds the span tag value to the span tag name
+func WithSpanTag(name, value string) SpanOption {
+	return spanOptionFn(func(impl *SpanOptionImpl) {
+		impl.Tags = append(impl.Tags, Tag{
+			Name: name,
+			Value: value,
+		})
 	})
 }

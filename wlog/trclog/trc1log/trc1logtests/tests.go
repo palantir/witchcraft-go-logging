@@ -55,6 +55,7 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
 					"timestamp": objmatcher.NewAnyMatcher(),
 					"duration":  objmatcher.NewAnyMatcher(),
+					"tags":      objmatcher.NewAnyMatcher(),
 				}),
 			},
 		},
@@ -91,6 +92,58 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 							}),
 						}),
 					}),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log entry with trace tags ",
+			SpanOptions: []wtracing.SpanOption{
+			    wtracing.WithSpanTag("key0", "value0"),
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value0"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log entry with trace tag overwrite",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+				wtracing.WithSpanTag("key1", "value1"),
+				wtracing.WithSpanTag("key0", "value2"),
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value2"),
+							"key1": objmatcher.NewEqualsMatcher("value1"),
+						},
+					),
 				}),
 			},
 		},
