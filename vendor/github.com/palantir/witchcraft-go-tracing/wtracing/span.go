@@ -75,7 +75,7 @@ type SpanOptionImpl struct {
 	RemoteEndpoint *Endpoint
 	ParentSpan     *SpanContext
 	Kind           Kind
-	Tags           []Tag
+	Tags           map[string]string
 }
 
 func WithKind(kind Kind) SpanOption {
@@ -111,13 +111,13 @@ func WithRemoteEndpoint(endpoint *Endpoint) SpanOption {
 	})
 }
 
-// WithSpanTag adds the tag indexed by name with the value specified to the list of tags
-// If the same name is seen multiple times the most recent will prevail
+// WithSpanTag adds the tag indexed by name with the value specified to the set of tags defined for this span.
+// If the same name is seen multiple times the most recent will prevail.
 func WithSpanTag(name, value string) SpanOption {
 	return spanOptionFn(func(impl *SpanOptionImpl) {
-		impl.Tags = append(impl.Tags, Tag{
-			Name:  name,
-			Value: value,
-		})
+		if impl.Tags == nil {
+			impl.Tags = make(map[string]string)
+		}
+		impl.Tags[name] = value
 	})
 }

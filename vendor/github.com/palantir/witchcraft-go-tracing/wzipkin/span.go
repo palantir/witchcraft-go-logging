@@ -84,11 +84,7 @@ func toZipkinSpanOptions(impl *wtracing.SpanOptionImpl) []zipkin.SpanOption {
 	if parent := impl.ParentSpan; parent != nil {
 		zipkinSpanOptions = append(zipkinSpanOptions, zipkin.Parent(toZipkinSpanContext(*parent)))
 	}
-	if impl.Tags != nil {
-		tags := make(map[string]string, len(impl.Tags))
-		for _, tag := range impl.Tags {
-			tags[tag.Name] = tag.Value
-		}
+	if tags := impl.Tags; tags != nil {
 		zipkinSpanOptions = append(zipkinSpanOptions, zipkin.Tags(tags))
 	}
 	return zipkinSpanOptions
