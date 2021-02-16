@@ -50,7 +50,9 @@ func marshalWTracingSpanModel(key string, val interface{}) zapcore.Field {
 			}
 		}
 		if tags := span.Tags; tags != nil && len(tags) > 0 {
-			enc.AddObject("tags", newTagEncoder(tags))
+			if err := enc.AddObject("tags", newTagEncoder(tags)); err != nil {
+				return err
+			}
 		}
 		return nil
 	}))
