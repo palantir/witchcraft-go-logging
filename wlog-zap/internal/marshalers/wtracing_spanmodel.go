@@ -50,13 +50,27 @@ func marshalWTracingSpanModel(key string, val interface{}) zapcore.Field {
 			}
 		}
 		if tags := span.Tags; tags != nil && len(tags) > 0 {
-			// TODO this can probably be done the same way as annotations
-			if err := enc.AddReflected(trc1log.SpanTagsKey, span.Tags); err != nil {
-				return err
-			}
+			enc.AddObject("tags", newTagEncoder(tags))
 		}
 		return nil
 	}))
+}
+
+type tagEncoder struct {
+	tags map[string]string
+}
+
+func (e *tagEncoder) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	for k, v := range e.tags {
+		enc.AddString(k, v)
+	}
+	return nil
+}
+
+func newTagEncoder(tags map[string]string) zapcore.ObjectMarshaler {
+	return &tagEncoder{
+		tags: tags,
+	}
 }
 
 func encodeSpanModelAnnotations(enc zapcore.ObjectEncoder, startVal, endVal string, span wtracing.SpanModel) error {
