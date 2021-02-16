@@ -44,6 +44,17 @@ func marshalWTracingSpanModel(evt *zerolog.Event, key string, val interface{}) *
 				encodeSpanModelAnnotations(evt, "cs", "cr", span)
 			}
 		}
+		if tags := span.Tags; len(tags) > 0 {
+			encodeSpanTags(evt, tags)
+		}
+	}))
+}
+
+func encodeSpanTags(evt *zerolog.Event, tags map[string]string) {
+	evt.Object(trc1log.SpanTagsKey, logObjectMarshalerFn(func(e *zerolog.Event) {
+		for k, v := range tags {
+			e.Str(k, v)
+		}
 	}))
 }
 
