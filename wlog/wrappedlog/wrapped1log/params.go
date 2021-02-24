@@ -15,8 +15,6 @@
 package wrapped1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
@@ -55,20 +53,10 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
-func svc1PayloadParams(message string, level string, logger *svc1log.DefaultLogger, params []svc1log.Param) Param {
+func svc1PayloadParams(message string, level wlog.Param, logger *svc1log.DefaultLogger, params []svc1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		svc1Log := wlog.NewMapLogEntry()
-		svcParams := logger.ToParams(params)
-		svcParams = append(svcParams, wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-		}))
-		svcParams = append(svcParams, wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.StringValue(svc1log.MessageKey, message)
-		}))
-		svcParams = append(svcParams, wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.StringValue(svc1log.LevelKey, level)
-		}))
-		wlog.ApplyParams(svc1Log, svcParams)
+		wlog.ApplyParams(svc1Log, logger.ToParams(message, level, params))
 
 		payload := wlog.NewMapLogEntry()
 		payload.StringValue(PayloadTypeKey, PayloadServiceLogV1)

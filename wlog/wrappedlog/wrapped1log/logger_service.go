@@ -29,29 +29,29 @@ type wrappedSvc1Logger struct {
 }
 
 func (l *wrappedSvc1Logger) Debug(msg string, params ...svc1log.Param) {
-	l.logger.Debug("", l.ToServiceParams(msg, svc1log.LevelDebugValue, params)...)
+	l.logger.Debug("", l.ToServiceParams(msg, svc1log.DebugLevelParam, params)...)
 }
 
 func (l *wrappedSvc1Logger) Info(msg string, params ...svc1log.Param) {
-	l.logger.Info("", l.ToServiceParams(msg, svc1log.LevelInfoValue, params)...)
+	l.logger.Info("", l.ToServiceParams(msg, svc1log.InfoLevelParam, params)...)
 }
 
 func (l *wrappedSvc1Logger) Warn(msg string, params ...svc1log.Param) {
-	l.logger.Warn("", l.ToServiceParams(msg, svc1log.LevelWarnValue, params)...)
+	l.logger.Warn("", l.ToServiceParams(msg, svc1log.WarnLevelParam, params)...)
 }
 
 func (l *wrappedSvc1Logger) Error(msg string, params ...svc1log.Param) {
-	l.logger.Error("", l.ToServiceParams(msg, svc1log.LevelErrorValue, params)...)
+	l.logger.Error("", l.ToServiceParams(msg, svc1log.ErrorLevelParam, params)...)
 }
 
 func (l *wrappedSvc1Logger) SetLevel(level wlog.LogLevel) {
 	l.logger.SetLevel(level)
 }
 
-func (l *wrappedSvc1Logger) ToServiceParams(message string, level string, inParams []svc1log.Param) []wlog.Param {
+func (l *wrappedSvc1Logger) ToServiceParams(message string, levelParam wlog.Param, inParams []svc1log.Param) []wlog.Param {
 	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
 	copy(outParams, defaultTypeParam)
 	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(svc1PayloadParams(message, level, l.internal, append(l.params, inParams...)).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(svc1PayloadParams(message, levelParam, l.internal, append(l.params, inParams...)).apply)
 	return outParams
 }

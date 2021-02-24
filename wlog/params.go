@@ -55,6 +55,12 @@ func ApplyParams(logger LogEntry, params []Param) {
 	}
 }
 
+func ReverseParams(params []Param) {
+	for i, j := 0, len(params)-1; i < j; i, j = i+1, j-1 {
+		params[i], params[j] = params[j], params[i]
+	}
+}
+
 type paramFunc func(logger LogEntry)
 
 func (f paramFunc) apply(logger LogEntry) {

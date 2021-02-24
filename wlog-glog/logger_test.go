@@ -16,7 +16,6 @@ package wlogglog_test
 
 import (
 	"flag"
-	"io"
 	"net"
 	"net/http"
 	"os"
@@ -211,16 +210,16 @@ func TestWrapped1Log(t *testing.T) {
 
 	entityName := "entity"
 	entityVersion := "version"
-	wrapped1logtests.Svc1LogJSONTestSuite(t,
-		entityName,
-		entityVersion,
-		func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
-			return wrapped1log.NewFromProvider(
-				w,
-				level,
-				wlogglog.LoggerProvider(),
-				entityName,
-				entityVersion,
-			).Service(svc1log.Origin(origin))
-		})
+	for _, tc := range wrapped1logtests.TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.DebugLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Service(svc1log.Origin(tc.Origin))
+
+		logger.Info(tc.Message, tc.LogParams...)
+	}
 }

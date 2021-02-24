@@ -15,6 +15,8 @@
 package diag1log
 
 import (
+	"time"
+
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
@@ -28,17 +30,18 @@ func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Para
 }
 
 func toParams(diagnostic logging.Diagnostic, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(diagnosticParam(diagnostic).apply)
+	outParams := make([]wlog.Param, len(defaultParams)+1+len(inParams))
+	copy(outParams, defaultParams)
+	outParams[len(defaultParams)] = wlog.NewParam(diagnosticParam(diagnostic).apply)
 	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
+		outParams[len(defaultParams)+1+idx] = wlog.NewParam(inParams[idx].apply)
 	}
 	return outParams
 }
 
-var defaultTypeParam = []wlog.Param{
+var defaultParams = []wlog.Param{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
+		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
 	}),
 }

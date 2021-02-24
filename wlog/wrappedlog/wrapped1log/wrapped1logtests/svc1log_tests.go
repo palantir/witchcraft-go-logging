@@ -112,10 +112,7 @@ func TestCases(entityName string, entityVersion string) []TestCase {
 				}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -176,10 +173,7 @@ func TestCases(entityName string, entityVersion string) []TestCase {
 				}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -234,10 +228,7 @@ func TestCases(entityName string, entityVersion string) []TestCase {
 				}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -265,10 +256,7 @@ func TestCases(entityName string, entityVersion string) []TestCase {
 			Origin:    "github.com/palantir/witchcraft-go-logging",
 			LogParams: []svc1log.Param{svc1log.Origin("custom-origin")},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -303,10 +291,7 @@ something/something:123`,
 				),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -343,10 +328,7 @@ something/something:123`,
 				}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -375,10 +357,7 @@ something/something:123`,
 				svc1log.SafeParams(map[string]interface{}{"params": "values"}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -418,10 +397,7 @@ something/something:123`,
 				}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-				// TODO: make these optional?
-				"level":         objmatcher.NewEqualsMatcher("INFO"),
-				"time":          objmatcher.NewRegExpMatcher(".+"),
+				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
 				"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 				"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -499,10 +475,7 @@ func paramIsntOverwrittenByParams(t *testing.T, entityName string, entityVersion
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 
 		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-			"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-			// TODO: make these optional?
-			"level":         objmatcher.NewEqualsMatcher("INFO"),
-			"time":          objmatcher.NewRegExpMatcher(".+"),
+			"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 			"entityName":    objmatcher.NewEqualsMatcher(entityName),
 			"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 			"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -536,10 +509,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName string, entityVersion s
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-			"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-			// TODO: make these optional?
-			"level":         objmatcher.NewEqualsMatcher("INFO"),
-			"time":          objmatcher.NewRegExpMatcher(".+"),
+			"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 			"entityName":    objmatcher.NewEqualsMatcher(entityName),
 			"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 			"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -565,10 +535,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName string, entityVersion s
 		err = safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 		assert.NoError(t, objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-			"type": objmatcher.NewEqualsMatcher("wrapped.1"),
-			// TODO: make these optional?
-			"level":         objmatcher.NewEqualsMatcher("INFO"),
-			"time":          objmatcher.NewRegExpMatcher(".+"),
+			"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 			"entityName":    objmatcher.NewEqualsMatcher(entityName),
 			"entityVersion": objmatcher.NewEqualsMatcher(entityVersion),
 			"payload": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
