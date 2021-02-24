@@ -15,9 +15,8 @@
 package svc1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 var DebugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
@@ -41,42 +40,23 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
-	l.logger.Debug("", ToParams(msg, DebugLevelParam, params)...)
+	l.logger.Debug("", wloginternal.ToServiceParams(msg, DebugLevelParam, params)...)
 }
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
-	l.logger.Info("", ToParams(msg, InfoLevelParam, params)...)
+	l.logger.Info("", wloginternal.ToServiceParams(msg, InfoLevelParam, params)...)
 
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
-	l.logger.Warn("", ToParams(msg, WarnLevelParam, params)...)
+	l.logger.Warn("", wloginternal.ToServiceParams(msg, WarnLevelParam, params)...)
 }
 
 func (l *defaultLogger) Error(msg string, params ...Param) {
-	l.logger.Error("", ToParams(msg, ErrorLevelParam, params)...)
+	l.logger.Error("", wloginternal.ToServiceParams(msg, ErrorLevelParam, params)...)
 }
 
 func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 	l.logger.SetLevel(level)
 }
 
-func ToParams(msg string, level wlog.Param, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultParams)+2+len(inParams))
-	copy(outParams, defaultParams)
-	outParams[len(defaultParams)] = level
-	outParams[len(defaultParams)+1] = wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(MessageKey, msg)
-	})
-	for idx := range inParams {
-		outParams[len(defaultParams)+2+idx] = wlog.NewParam(inParams[idx].apply)
-	}
-	return outParams
-}
-
-var defaultParams = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
-}
