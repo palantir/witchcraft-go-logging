@@ -24,8 +24,7 @@ type wrappedSvc1Logger struct {
 	version string
 	params  []svc1log.Param
 
-	internal *svc1log.DefaultLogger
-	logger   wlog.LeveledLogger
+	logger wlog.LeveledLogger
 }
 
 func (l *wrappedSvc1Logger) Debug(msg string, params ...svc1log.Param) {
@@ -52,6 +51,6 @@ func (l *wrappedSvc1Logger) ToServiceParams(message string, levelParam wlog.Para
 	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
 	copy(outParams, defaultTypeParam)
 	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(svc1PayloadParams(message, levelParam, l.internal, append(l.params, inParams...)).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(svc1PayloadParams(message, levelParam, append(l.params, inParams...)).apply)
 	return outParams
 }

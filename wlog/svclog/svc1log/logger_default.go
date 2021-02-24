@@ -33,34 +33,35 @@ var ErrorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 	entry.StringValue(LevelKey, LevelErrorValue)
 })
 
-type DefaultLogger struct {
+type defaultLogger struct {
 	loggerCreator func(level wlog.LogLevel) wlog.LeveledLogger
 
 	logger wlog.LeveledLogger
 	params []Param
 }
 
-func (l *DefaultLogger) Debug(msg string, params ...Param) {
-	l.logger.Debug("", l.ToParams(msg, DebugLevelParam, params)...)
+func (l *defaultLogger) Debug(msg string, params ...Param) {
+	l.logger.Debug("", ToParams(msg, DebugLevelParam, params)...)
 }
 
-func (l *DefaultLogger) Info(msg string, params ...Param) {
-	l.logger.Info("", l.ToParams(msg, InfoLevelParam, params)...)
+func (l *defaultLogger) Info(msg string, params ...Param) {
+	l.logger.Info("", ToParams(msg, InfoLevelParam, params)...)
+
 }
 
-func (l *DefaultLogger) Warn(msg string, params ...Param) {
-	l.logger.Warn("", l.ToParams(msg, WarnLevelParam, params)...)
+func (l *defaultLogger) Warn(msg string, params ...Param) {
+	l.logger.Warn("", ToParams(msg, WarnLevelParam, params)...)
 }
 
-func (l *DefaultLogger) Error(msg string, params ...Param) {
-	l.logger.Error("", l.ToParams(msg, ErrorLevelParam, params)...)
+func (l *defaultLogger) Error(msg string, params ...Param) {
+	l.logger.Error("", ToParams(msg, ErrorLevelParam, params)...)
 }
 
-func (l *DefaultLogger) SetLevel(level wlog.LogLevel) {
+func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 	l.logger.SetLevel(level)
 }
 
-func (l *DefaultLogger) ToParams(msg string, level wlog.Param, inParams []Param) []wlog.Param {
+func ToParams(msg string, level wlog.Param, inParams []Param) []wlog.Param {
 	outParams := make([]wlog.Param, len(defaultParams)+2+len(inParams))
 	copy(outParams, defaultParams)
 	outParams[len(defaultParams)] = level
