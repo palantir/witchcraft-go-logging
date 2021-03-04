@@ -20,18 +20,31 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
-var DebugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+var debugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 	entry.StringValue(LevelKey, LevelDebugValue)
 })
-var InfoLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+var infoLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 	entry.StringValue(LevelKey, LevelInfoValue)
 })
-var WarnLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+var warnLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 	entry.StringValue(LevelKey, LevelWarnValue)
 })
-var ErrorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+var errorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 	entry.StringValue(LevelKey, LevelErrorValue)
 })
+
+func DebugLevelParam() wlog.Param {
+	return debugLevelParam
+}
+func InfoLevelParam() wlog.Param {
+	return infoLevelParam
+}
+func WarnLevelParam() wlog.Param {
+	return warnLevelParam
+}
+func ErrorLevelParam() wlog.Param {
+	return errorLevelParam
+}
 
 type defaultLogger struct {
 	loggerCreator func(level wlog.LogLevel) wlog.LeveledLogger
@@ -41,20 +54,20 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
-	l.logger.Debug("", ToParams(msg, DebugLevelParam, params)...)
+	l.logger.Debug("", ToParams(msg, DebugLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
-	l.logger.Info("", ToParams(msg, InfoLevelParam, params)...)
+	l.logger.Info("", ToParams(msg, InfoLevelParam(), params)...)
 
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
-	l.logger.Warn("", ToParams(msg, WarnLevelParam, params)...)
+	l.logger.Warn("", ToParams(msg, WarnLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Error(msg string, params ...Param) {
-	l.logger.Error("", ToParams(msg, ErrorLevelParam, params)...)
+	l.logger.Error("", ToParams(msg, ErrorLevelParam(), params)...)
 }
 
 func (l *defaultLogger) SetLevel(level wlog.LogLevel) {

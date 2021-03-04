@@ -41,9 +41,7 @@ func (l *jsonMapLogger) Log(params ...Param) {
 func (l *jsonMapLogger) Debug(msg string, params ...Param) {
 	switch l.level {
 	case DebugLevel:
-		params = append(params, StringParam("message", msg), StringParam("level", "DEBUG"))
-		ReverseParams(params)
-		l.logOutput(params)
+		l.logOutput(append([]Param{StringParam("message", msg), StringParam("level", "DEBUG")}, params...))
 	}
 }
 
@@ -57,18 +55,14 @@ func (l *jsonMapLogger) Info(msg string, params ...Param) {
 func (l *jsonMapLogger) Warn(msg string, params ...Param) {
 	switch l.level {
 	case DebugLevel, InfoLevel, WarnLevel:
-		params = append(params, StringParam("message", msg), StringParam("level", "WARN"))
-		ReverseParams(params)
-		l.logOutput(params)
+		l.logOutput(append([]Param{StringParam("message", msg), StringParam("level", "WARN")}, params...))
 	}
 }
 
 func (l *jsonMapLogger) Error(msg string, params ...Param) {
 	switch l.level {
 	case DebugLevel, InfoLevel, WarnLevel, ErrorLevel:
-		params = append(params, StringParam("message", msg), StringParam("level", "ERROR"))
-		ReverseParams(params)
-		l.logOutput(params)
+		l.logOutput(append([]Param{StringParam("message", msg), StringParam("level", "ERROR")}, params...))
 	}
 }
 
