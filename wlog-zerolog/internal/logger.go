@@ -16,7 +16,6 @@ package zeroimpl
 
 import (
 	"reflect"
-	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal/marshalers"
@@ -227,10 +226,6 @@ func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog
 	}
 	if !entry.evt.Enabled() {
 		return
-	}
-	entry.evt = entry.evt.Str(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	if levelVal != "" {
-		entry.evt = entry.evt.Str(svc1log.LevelKey, levelVal)
 	}
 	reverseParams(params)
 	wlog.ApplyParams(entry, params)

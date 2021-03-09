@@ -15,8 +15,38 @@
 package svc1log
 
 import (
+	"time"
+
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
+
+var (
+	debugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelDebugValue)
+	})
+	infoLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelInfoValue)
+	})
+	warnLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelWarnValue)
+	})
+	errorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelErrorValue)
+	})
+)
+
+func DebugLevelParam() wlog.Param {
+	return debugLevelParam
+}
+func InfoLevelParam() wlog.Param {
+	return infoLevelParam
+}
+func WarnLevelParam() wlog.Param {
+	return warnLevelParam
+}
+func ErrorLevelParam() wlog.Param {
+	return errorLevelParam
+}
 
 type defaultLogger struct {
 	loggerCreator func(level wlog.LogLevel) wlog.LeveledLogger
@@ -26,33 +56,35 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
-	l.logger.Debug(msg, l.toParams(params)...)
+	l.logger.Debug("", toParams(msg, DebugLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
-	l.logger.Info(msg, l.toParams(params)...)
+	l.logger.Info("", toParams(msg, InfoLevelParam(), params)...)
+
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
-	l.logger.Warn(msg, l.toParams(params)...)
+	l.logger.Warn("", toParams(msg, WarnLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Error(msg string, params ...Param) {
-	l.logger.Error(msg, l.toParams(params)...)
+	l.logger.Error("", toParams(msg, ErrorLevelParam(), params)...)
 }
 
 func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 	l.logger.SetLevel(level)
 }
 
-func (l *defaultLogger) toParams(inParams []Param) []wlog.Param {
-	if len(inParams) == 0 {
-		return defaultTypeParam
-	}
-	outParams := make([]wlog.Param, len(defaultTypeParam)+len(inParams))
+func toParams(msg string, level wlog.Param, inParams []Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2+len(inParams))
 	copy(outParams, defaultTypeParam)
+	outParams[len(defaultTypeParam)] = level
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(MessageKey, msg)
+	})
 	for idx := range inParams {
-		outParams[len(defaultTypeParam)+idx] = wlog.NewParam(inParams[idx].apply)
+		outParams[len(defaultTypeParam)+2+idx] = wlog.NewParam(inParams[idx].apply)
 	}
 	return outParams
 }
@@ -60,5 +92,6 @@ func (l *defaultLogger) toParams(inParams []Param) []wlog.Param {
 var defaultTypeParam = []wlog.Param{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
+		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
 	}),
 }
