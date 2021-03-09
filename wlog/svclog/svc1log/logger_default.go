@@ -21,6 +21,7 @@ import (
 )
 
 var (
+	// Level params declared as variables so that they are only allocated once
 	debugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(LevelKey, LevelDebugValue)
 	})
