@@ -84,7 +84,7 @@ func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{},
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
-// logger created by calling defaultLogger.
+// logger created by calling DefaultLogger.
 func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger

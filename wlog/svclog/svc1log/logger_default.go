@@ -20,18 +20,21 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
-var debugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
-	entry.StringValue(LevelKey, LevelDebugValue)
-})
-var infoLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
-	entry.StringValue(LevelKey, LevelInfoValue)
-})
-var warnLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
-	entry.StringValue(LevelKey, LevelWarnValue)
-})
-var errorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
-	entry.StringValue(LevelKey, LevelErrorValue)
-})
+var (
+	// Level params declared as variables so that they are only allocated once
+	debugLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelDebugValue)
+	})
+	infoLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelInfoValue)
+	})
+	warnLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelWarnValue)
+	})
+	errorLevelParam = wlog.NewParam(func(entry wlog.LogEntry) {
+		entry.StringValue(LevelKey, LevelErrorValue)
+	})
+)
 
 func DebugLevelParam() wlog.Param {
 	return debugLevelParam
@@ -75,19 +78,19 @@ func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 }
 
 func ToParams(msg string, level wlog.Param, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultParams)+2+len(inParams))
-	copy(outParams, defaultParams)
-	outParams[len(defaultParams)] = level
-	outParams[len(defaultParams)+1] = wlog.NewParam(func(entry wlog.LogEntry) {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2+len(inParams))
+	copy(outParams, defaultTypeParam)
+	outParams[len(defaultTypeParam)] = level
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(MessageKey, msg)
 	})
 	for idx := range inParams {
-		outParams[len(defaultParams)+2+idx] = wlog.NewParam(inParams[idx].apply)
+		outParams[len(defaultTypeParam)+2+idx] = wlog.NewParam(inParams[idx].apply)
 	}
 	return outParams
 }
 
-var defaultParams = []wlog.Param{
+var defaultTypeParam = []wlog.Param{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
 		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))

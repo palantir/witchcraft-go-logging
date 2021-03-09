@@ -30,16 +30,16 @@ func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Para
 }
 
 func toParams(diagnostic logging.Diagnostic, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParams)+1+len(inParams))
-	copy(outParams, defaultTypeParams)
-	outParams[len(defaultTypeParams)] = wlog.NewParam(diagnosticParam(diagnostic).apply)
+	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+	copy(outParams, defaultTypeParam)
+	outParams[len(defaultTypeParam)] = wlog.NewParam(diagnosticParam(diagnostic).apply)
 	for idx := range inParams {
-		outParams[len(defaultTypeParams)+1+idx] = wlog.NewParam(inParams[idx].apply)
+		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
 	}
 	return outParams
 }
 
-var defaultTypeParams = []wlog.Param{
+var defaultTypeParam = []wlog.Param{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
 		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
