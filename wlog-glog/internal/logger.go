@@ -51,16 +51,10 @@ func (*gLogger) SetLevel(level wlog.LogLevel) {
 
 func createGLogMsg(msg string, params []wlog.Param) string {
 	entry := wlog.NewMapLogEntry()
-	wlog.ApplyParams(entry, params)
-
-	var parts []string
-	if msg != "" {
-		parts = append(parts, msg)
-	}
-	parts = append(parts, paramsToLog(entry)...)
+	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 
 	// TODO: ignore/omit unsafe params?
-	return strings.Join(parts, ", ")
+	return strings.Join(paramsToLog(entry), ", ")
 }
 
 // paramsToLog returns the parameters to log as strings of the form "<key>: <value>".

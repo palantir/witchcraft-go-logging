@@ -147,8 +147,8 @@ func (l *zapLogger) SetLevel(level wlog.LogLevel) {
 
 func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param) {
 	entry := newZapLogEntry()
-	wlog.ApplyParams(entry, params)
-	logFn(msg, entry.Fields()...)
+	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
+	logFn("", entry.Fields()...)
 }
 
 func encodeField(key string, value interface{}, enc zapcore.ObjectEncoder) error {
