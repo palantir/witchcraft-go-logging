@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: remove time, level, and message keys in logger provider
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/123

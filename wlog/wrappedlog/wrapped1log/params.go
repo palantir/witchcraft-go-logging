@@ -56,8 +56,7 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 func svc1PayloadParams(message string, level wlog.Param, params []svc1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		svc1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(svc1Log, svc1log.ToParams(message, level, params))
-
+		wlog.ApplyParams(svc1Log, wlog.ParamsWithMessage(message, svc1log.ToParams(level, params)))
 		payload := wlog.NewMapLogEntry()
 		payload.StringValue(PayloadTypeKey, PayloadServiceLogV1)
 		payload.AnyMapValue(PayloadServiceLogV1, svc1Log.AllValues())

@@ -29,7 +29,7 @@ github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.2.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.2.0
+# github.com/palantir/witchcraft-go-tracing v1.3.0
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
 # github.com/pmezard/go-difflib v1.0.0

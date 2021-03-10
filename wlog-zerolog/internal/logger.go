@@ -213,6 +213,12 @@ func (l *zeroLogger) SetLevel(level wlog.LogLevel) {
 	l.logger = l.logger.Level(toZeroLevel(level))
 }
 
+func reverseParams(params []wlog.Param) {
+	for i, j := 0, len(params)-1; i < j; i, j = i+1, j-1 {
+		params[i], params[j] = params[j], params[i]
+	}
+}
+
 func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog.Param) {
 	entry := &zeroLogEntry{
 		evt:  newEvt(),
@@ -221,7 +227,7 @@ func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog
 	if !entry.evt.Enabled() {
 		return
 	}
-	wlog.ReverseParams(params)
+	reverseParams(params)
 	wlog.ApplyParams(entry, params)
 	entry.Evt().Msg(msg)
 }
