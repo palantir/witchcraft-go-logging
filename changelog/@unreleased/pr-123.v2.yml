@@ -1,5 +1,8 @@
 type: improvement
 improvement:
-  description: remove time, level, and message keys in logger provider
+  description: |
+    Removes the time, level and message keys from the loggers returned by implementations of the LoggerProvider interface.
+    Previously, wlog.Logger instances returned by the LoggerProvider interface set "time" as a top-level key and wlog.LeveledLogger instances returned by the LoggerProvider interface set "time", "level" and "message" as top-level keys. After this change, these top-level keys are no longer set. This allows the underlying logger interfaces to be used by logger implementations that may not set these top-level keys in their output.
+    Log type implementations that use these loggers may no longer assume that these keys are set and must set them themselves if they are desired in the output. Existing implementations have all been updated to do so, so there should be no behavioral changes.
   links:
   - https://github.com/palantir/witchcraft-go-logging/pull/123
