@@ -16,11 +16,9 @@ package zeroimpl
 
 import (
 	"reflect"
-	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal/marshalers"
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/rs/zerolog"
 )
 
@@ -178,35 +176,35 @@ func (l *zeroLogger) Log(params ...wlog.Param) {
 	if !l.should(zerolog.NoLevel) {
 		return
 	}
-	logOutput(l.logger.Log, "", "", params)
+	logOutput(l.logger.Log, "", params)
 }
 
 func (l *zeroLogger) Debug(msg string, params ...wlog.Param) {
 	if !l.should(zerolog.DebugLevel) {
 		return
 	}
-	logOutput(l.logger.Log, msg, svc1log.LevelDebugValue, params)
+	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Info(msg string, params ...wlog.Param) {
 	if !l.should(zerolog.InfoLevel) {
 		return
 	}
-	logOutput(l.logger.Log, msg, svc1log.LevelInfoValue, params)
+	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Warn(msg string, params ...wlog.Param) {
 	if !l.should(zerolog.WarnLevel) {
 		return
 	}
-	logOutput(l.logger.Log, msg, svc1log.LevelWarnValue, params)
+	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Error(msg string, params ...wlog.Param) {
 	if !l.should(zerolog.ErrorLevel) {
 		return
 	}
-	logOutput(l.logger.Log, msg, svc1log.LevelErrorValue, params)
+	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) SetLevel(level wlog.LogLevel) {
@@ -220,17 +218,13 @@ func reverseParams(params []wlog.Param) {
 	}
 }
 
-func logOutput(newEvt func() *zerolog.Event, msg, levelVal string, params []wlog.Param) {
+func logOutput(newEvt func() *zerolog.Event, msg string, params []wlog.Param) {
 	entry := &zeroLogEntry{
 		evt:  newEvt(),
 		keys: make(map[string]struct{}),
 	}
 	if !entry.evt.Enabled() {
 		return
-	}
-	entry.evt = entry.evt.Str(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	if levelVal != "" {
-		entry.evt = entry.evt.Str(svc1log.LevelKey, levelVal)
 	}
 	reverseParams(params)
 	wlog.ApplyParams(entry, params)
