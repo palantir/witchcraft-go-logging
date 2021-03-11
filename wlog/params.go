@@ -55,7 +55,9 @@ func ApplyParams(logger LogEntry, params []Param) {
 	}
 }
 
-// Appends a StringParam with the msg string if non-empty
+// ParamsWithMessage returns a new slice that appends a StringParam with the key "message" and
+// value of the provided msg parameter if it is non-empty. If msg is empty, returns the provided slice
+// without modification.
 func ParamsWithMessage(msg string, params []Param) []Param {
 	if msg != "" {
 		return append(params, StringParam("message", msg))

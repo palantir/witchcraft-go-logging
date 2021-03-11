@@ -62,7 +62,6 @@ func (l *defaultLogger) Debug(msg string, params ...Param) {
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
 	l.logger.Info(msg, ToParams(InfoLevelParam(), params)...)
-
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
