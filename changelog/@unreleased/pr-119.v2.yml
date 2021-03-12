@@ -1,5 +1,5 @@
-type: improvement
-improvement:
+type: feature
+feature:
   description: |-
     Add support for emitting wrapped.1 logs.
     Wrapped loggers expose the same interface to consumers as the logger of the underlying format.
