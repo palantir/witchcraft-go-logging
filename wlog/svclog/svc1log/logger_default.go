@@ -57,27 +57,26 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
-	l.logger.Debug(msg, toParams(DebugLevelParam(), params)...)
+	l.logger.Debug(msg, ToParams(DebugLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
-	l.logger.Info(msg, toParams(InfoLevelParam(), params)...)
-
+	l.logger.Info(msg, ToParams(InfoLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
-	l.logger.Warn(msg, toParams(WarnLevelParam(), params)...)
+	l.logger.Warn(msg, ToParams(WarnLevelParam(), params)...)
 }
 
 func (l *defaultLogger) Error(msg string, params ...Param) {
-	l.logger.Error(msg, toParams(ErrorLevelParam(), params)...)
+	l.logger.Error(msg, ToParams(ErrorLevelParam(), params)...)
 }
 
 func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 	l.logger.SetLevel(level)
 }
 
-func toParams(level wlog.Param, inParams []Param) []wlog.Param {
+func ToParams(level wlog.Param, inParams []Param) []wlog.Param {
 	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
 	copy(outParams, defaultTypeParam)
 	outParams[len(defaultTypeParam)] = level

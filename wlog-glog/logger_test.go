@@ -38,6 +38,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/stretchr/testify/require"
@@ -196,5 +198,28 @@ func TestDiag1Log(t *testing.T) {
 			tc.Diagnostic,
 			diag1log.UnsafeParams(tc.UnsafeParams),
 		)
+	}
+}
+
+func TestWrapped1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.DebugLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Service(svc1log.Origin(tc.Origin))
+
+		logger.Info(tc.Message, tc.LogParams...)
 	}
 }
