@@ -26,6 +26,5 @@ const contextKey = wrapped1LogContextKeyType(TypeValue)
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
 // logger).
 func WithLogger(ctx context.Context, logger Logger) context.Context {
-	// Set _all_ the underlying logger types
 	return context.WithValue(ctx, contextKey, logger)
 }

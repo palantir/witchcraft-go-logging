@@ -25,11 +25,11 @@ type Logger interface {
 	Service(params ...svc1log.Param) svc1log.Logger
 }
 
-func New(w io.Writer, level wlog.LogLevel, name string, version string) Logger {
+func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
 	return NewFromProvider(w, level, wlog.DefaultLoggerProvider(), name, version)
 }
 
-func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name string, version string) Logger {
+func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
 	return &defaultLogger{
 		name:        name,
 		version:     version,
