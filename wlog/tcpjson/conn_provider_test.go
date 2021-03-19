@@ -20,7 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/tcpjson"
+	"github.com/palantir/witchcraft-go-logging/wlog/tcpjson"
 	"github.com/stretchr/testify/require"
 )
 
