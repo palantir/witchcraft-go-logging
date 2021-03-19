@@ -99,7 +99,7 @@ func TestAsyncWriteWithSvc1log(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify all envelope metadata
-		assert.Equal(t, testMetadata.Type, gotEnvelope.Type)
+		assert.Equal(t, logEnvelopeV1Type, gotEnvelope.Type)
 		assert.Equal(t, testMetadata.Deployment, gotEnvelope.Deployment)
 		assert.Equal(t, testMetadata.Environment, gotEnvelope.Environment)
 		assert.Equal(t, testMetadata.EnvironmentID, gotEnvelope.EnvironmentID)

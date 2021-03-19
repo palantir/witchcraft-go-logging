@@ -171,7 +171,7 @@ func zerologSerializer(metadata LogEnvelopeMetadata) envelopeSerializerFunc {
 	// create a new top-level logger that writes to ioutil.Discard since each
 	// serialization will write to its own local buffer instead of a single writer
 	logger := zerolog.New(ioutil.Discard).With().
-		Str("type", "envelope.1").
+		Str("type", logEnvelopeV1Type).
 		Str("deployment", metadata.Deployment).
 		Str("environment", metadata.Environment).
 		Str("environmentId", metadata.EnvironmentID).

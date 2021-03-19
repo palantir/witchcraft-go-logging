@@ -39,7 +39,6 @@ import (
 
 var (
 	testMetadata = LogEnvelopeMetadata{
-		Type:           "envelope.1",
 		Deployment:     "test-deployment",
 		Environment:    "test-environment",
 		EnvironmentID:  "test-environment-id",
@@ -152,7 +151,7 @@ func TestWriteFromSvc1log(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify all envelope metadata
-	assert.Equal(t, testMetadata.Type, gotEnvelope.Type)
+	assert.Equal(t, logEnvelopeV1Type, gotEnvelope.Type)
 	assert.Equal(t, testMetadata.Deployment, gotEnvelope.Deployment)
 	assert.Equal(t, testMetadata.Environment, gotEnvelope.Environment)
 	assert.Equal(t, testMetadata.EnvironmentID, gotEnvelope.EnvironmentID)
@@ -356,7 +355,6 @@ func manualSerializer(metadata LogEnvelopeMetadata) envelopeSerializerFunc {
 func getEnvelopeWithPayload(metadata LogEnvelopeMetadata, payload []byte) LogEnvelopeV1 {
 	return LogEnvelopeV1{
 		LogEnvelopeMetadata: LogEnvelopeMetadata{
-			Type:           "envelope.1",
 			Deployment:     metadata.Deployment,
 			Environment:    metadata.Environment,
 			EnvironmentID:  metadata.EnvironmentID,
@@ -369,6 +367,7 @@ func getEnvelopeWithPayload(metadata LogEnvelopeMetadata, payload []byte) LogEnv
 			Product:        metadata.Product,
 			ProductVersion: metadata.ProductVersion,
 		},
+		Type:    logEnvelopeV1Type,
 		Payload: payload,
 	}
 }

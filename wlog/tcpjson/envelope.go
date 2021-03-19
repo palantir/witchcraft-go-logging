@@ -21,13 +21,17 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
+const (
+	logEnvelopeV1Type = "envelope.1"
+)
+
 type LogEnvelopeV1 struct {
 	LogEnvelopeMetadata
+	Type    string          `json:"type"`
 	Payload json.RawMessage `json:"payload"`
 }
 
 type LogEnvelopeMetadata struct {
-	Type           string `json:"type"`
 	Deployment     string `json:"deployment"`
 	Environment    string `json:"environment"`
 	EnvironmentID  string `json:"environmentId"`
