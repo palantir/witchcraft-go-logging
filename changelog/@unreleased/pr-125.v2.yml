@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add tcpjson package to support publishing JSON logs to a TCP connection
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/125
