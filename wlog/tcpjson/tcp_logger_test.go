@@ -54,6 +54,12 @@ var (
 	logPayload = []byte(`{"type": "service.1","message":"test","level":"INFO"}\n`)
 )
 
+type logEnvelopeV1 struct {
+	LogEnvelopeMetadata
+	Type    string          `json:"type"`
+	Payload json.RawMessage `json:"payload"`
+}
+
 func TestWrite(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
@@ -146,7 +152,7 @@ func TestWriteFromSvc1log(t *testing.T) {
 	logger.Debug("this is a test")
 
 	buf := provider.buffer.Bytes()
-	var gotEnvelope LogEnvelopeV1
+	var gotEnvelope logEnvelopeV1
 	err := json.Unmarshal(buf, &gotEnvelope)
 	require.NoError(t, err)
 
@@ -352,8 +358,8 @@ func manualSerializer(metadata LogEnvelopeMetadata) envelopeSerializerFunc {
 	}
 }
 
-func getEnvelopeWithPayload(metadata LogEnvelopeMetadata, payload []byte) LogEnvelopeV1 {
-	return LogEnvelopeV1{
+func getEnvelopeWithPayload(metadata LogEnvelopeMetadata, payload []byte) logEnvelopeV1 {
+	return logEnvelopeV1{
 		LogEnvelopeMetadata: LogEnvelopeMetadata{
 			Deployment:     metadata.Deployment,
 			Environment:    metadata.Environment,

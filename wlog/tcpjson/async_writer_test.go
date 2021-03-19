@@ -94,7 +94,7 @@ func TestAsyncWriteWithSvc1log(t *testing.T) {
 	assert.Equal(t, totalLogLines, len(logLines))
 
 	for i, logLine := range logLines {
-		var gotEnvelope LogEnvelopeV1
+		var gotEnvelope logEnvelopeV1
 		err := json.Unmarshal(logLine, &gotEnvelope)
 		require.NoError(t, err)
 
