@@ -90,7 +90,7 @@ func TestWrite_Timeout(t *testing.T) {
 
 	// get a TCP connection using the TCPConnProvider
 	uris := []string{fmt.Sprintf("%s://%s", server.Listener.Addr().Network(), server.Listener.Addr().String())}
-	connProvider, err := NewTCPConnProvider(uris, &tls.Config{InsecureSkipVerify: true})
+	connProvider, err := NewTCPConnProvider(uris, WithTLSConfig(&tls.Config{InsecureSkipVerify: true}))
 	require.NoError(t, err)
 	conn, err := connProvider.GetConn()
 	require.NoError(t, err)

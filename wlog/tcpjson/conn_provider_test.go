@@ -61,7 +61,7 @@ func TestNewTCPConnProvider(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			connProvider, err := tcpjson.NewTCPConnProvider(tc.uris, tc.tlsCfg)
+			connProvider, err := tcpjson.NewTCPConnProvider(tc.uris, tcpjson.WithTLSConfig(tc.tlsCfg))
 			if tc.expectedErr != "" {
 				require.EqualError(t, err, tc.expectedErr)
 			} else {
@@ -79,7 +79,7 @@ func TestGetConn(t *testing.T) {
 	server.StartTLS()
 	defer server.Close()
 
-	provider, err := tcpjson.NewTCPConnProvider([]string{server.URL}, &tls.Config{InsecureSkipVerify: true})
+	provider, err := tcpjson.NewTCPConnProvider([]string{server.URL}, tcpjson.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}))
 	require.NoError(t, err)
 
 	conn, err := provider.GetConn()
