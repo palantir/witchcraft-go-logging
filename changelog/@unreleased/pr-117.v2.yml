@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: |
+    Use Go's native package logic to determine the caller pkg path and use the GOPATH trimming heuristic as a fallback.
+    Fixes #116
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/117

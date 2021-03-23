@@ -16,6 +16,7 @@ package svc1log
 
 import (
 	"path"
+	"path/filepath"
 	"runtime"
 	"strconv"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wparams "github.com/palantir/witchcraft-go-params"
+	"golang.org/x/tools/go/packages"
 )
 
 const (
@@ -138,10 +140,15 @@ func OriginFromCallLineWithSkip(skipFrames int) Param {
 func initLineCaller(skip int) (string, int, bool) {
 	// the 1 skips the current "initLineCaller" function
 	_, file, line, ok := runtime.Caller(1 + skip)
-	if ok {
-		file = gopath.TrimPrefix(file)
+	if !ok {
+		return file, line, ok
 	}
-	return file, line, ok
+	cfg := &packages.Config{Mode: packages.NeedModule | packages.NeedName}
+	pkgs, err := packages.Load(cfg, "file="+file)
+	if err != nil || len(pkgs) < 1 {
+		return gopath.TrimPrefix(file), line, ok
+	}
+	return filepath.Join(pkgs[0].PkgPath, filepath.Base(file)), line, ok
 }
 
 func SafeParam(key string, value interface{}) Param {
