@@ -15,8 +15,6 @@
 package wrapped1log
 
 import (
-	"reflect"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
@@ -39,8 +37,6 @@ const (
 	PayloadAuditLogV2      = "auditLogV2"
 	PayloadDiagnosticLogV1 = "diagnosticLogV1"
 )
-
-var mapLogEntryType = reflect.TypeOf((*wlog.MapLogEntry)(nil)).Elem()
 
 type Param interface {
 	apply(entry wlog.LogEntry)

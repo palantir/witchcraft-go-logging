@@ -15,7 +15,6 @@
 package trc1log
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -25,8 +24,6 @@ import (
 type defaultLogger struct {
 	logger wlog.Logger
 }
-
-var spanType = reflect.TypeOf((*wtracing.SpanModel)(nil)).Elem()
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
 	l.logger.Log(ToParams(span, params)...)

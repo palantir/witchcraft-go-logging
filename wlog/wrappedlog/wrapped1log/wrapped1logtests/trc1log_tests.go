@@ -33,7 +33,7 @@ import (
 )
 
 func Trc1LogJSONTestSuite(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer) trc1log.Logger) {
-	trc1LogJsonOutputTests(t, entityName, entityVersion, loggerProvider)
+	trc1LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
 	durationFormatOutputTest(t, loggerProvider)
 }
 
@@ -202,7 +202,7 @@ func durationFormatOutputTest(t *testing.T, loggerProvider func(w io.Writer) trc
 	assert.True(t, intValue*time.Microsecond > 100*time.Millisecond, fmt.Sprintf("duration must be more than 100 milliseconds and is %d", intValue))
 }
 
-func trc1LogJsonOutputTests(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer) trc1log.Logger) {
+func trc1LogJSONOutputTests(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer) trc1log.Logger) {
 	tracer, err := wzipkin.NewTracer(wtracing.NewNoopReporter())
 	require.NoError(t, err)
 	clientSpan := tracer.StartSpan("testOp", wtracing.WithKind(wtracing.Client))
@@ -242,6 +242,7 @@ func getDurationValue(t *testing.T, entry logreader.Entry) time.Duration {
 	traceLog, ok := payloadAsMap["traceLogV1"]
 	require.True(t, ok)
 	traceLogAsMap, ok := traceLog.(map[string]interface{})
+	require.True(t, ok)
 	value, ok := traceLogAsMap["span"]
 	require.True(t, ok)
 	valueAsMap, ok := value.(map[string]interface{})

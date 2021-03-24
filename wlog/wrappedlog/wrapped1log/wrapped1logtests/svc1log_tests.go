@@ -31,7 +31,7 @@ import (
 )
 
 func Svc1LogJSONTestSuite(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	svc1LogJsonOutputTests(t, entityName, entityVersion, loggerProvider)
+	svc1LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
 	paramIsntOverwrittenByParams(t, entityName, entityVersion, loggerProvider)
 	extraParamsDoNotAppearTest(t, entityName, entityVersion, loggerProvider)
@@ -90,7 +90,7 @@ type Svc1TestCase struct {
 	JSONMatcher objmatcher.MapMatcher
 }
 
-func Svc1TestCases(entityName string, entityVersion string) []Svc1TestCase {
+func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 	return []Svc1TestCase{
 		{
 			Name:    "basic service log entry",
@@ -429,7 +429,7 @@ something/something:123`,
 	}
 }
 
-func svc1LogJsonOutputTests(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func svc1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	for i, tc := range Svc1TestCases(entityName, entityVersion) {
 		t.Run(tc.Name, func(t *testing.T) {
 			buf := bytes.Buffer{}
@@ -462,7 +462,7 @@ func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.
 
 // Verifies that if different parameters are specified using SafeParam and SafeParams params, all of the values are
 // present in the final output (that is, these parameters should be additive).
-func paramIsntOverwrittenByParams(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func paramIsntOverwrittenByParams(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	t.Run("SafeParam and SafeParams params are additive", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.InfoLevel, "")
@@ -497,7 +497,7 @@ func paramIsntOverwrittenByParams(t *testing.T, entityName string, entityVersion
 
 // Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
 // are modified by making a logger call).
-func extraParamsDoNotAppearTest(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func extraParamsDoNotAppearTest(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	t.Run("SafeParam and SafeParams params stay separate across logger calls", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.DebugLevel, "")
@@ -554,7 +554,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName string, entityVersion s
 	})
 }
 
-func jsonLoggerUpdateTest(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func jsonLoggerUpdateTest(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	t.Run("update JSON logger", func(t *testing.T) {
 		currCase := Svc1TestCases(entityName, entityVersion)[0]
 
