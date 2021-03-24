@@ -18,13 +18,11 @@ import (
 	"reflect"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
-	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 type encoderFunc func(key string, val interface{}) string
 
 var encoders = map[reflect.Type]encoderFunc{
-	reflect.TypeOf(wtracing.SpanModel{}): marshalWTracingSpanModel,
 	reflect.TypeOf(logging.Diagnostic{}): marshalLoggingDiagnostic,
 }
 

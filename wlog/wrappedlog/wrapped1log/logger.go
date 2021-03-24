@@ -19,10 +19,12 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
 type Logger interface {
 	Service(params ...svc1log.Param) svc1log.Logger
+	Trace() trc1log.Logger
 }
 
 func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {

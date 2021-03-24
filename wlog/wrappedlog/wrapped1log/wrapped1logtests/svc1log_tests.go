@@ -31,7 +31,7 @@ import (
 )
 
 func Svc1LogJSONTestSuite(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	jsonOutputTests(t, entityName, entityVersion, loggerProvider)
+	svc1LogJsonOutputTests(t, entityName, entityVersion, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
 	paramIsntOverwrittenByParams(t, entityName, entityVersion, loggerProvider)
 	extraParamsDoNotAppearTest(t, entityName, entityVersion, loggerProvider)
@@ -82,7 +82,7 @@ func (t testError) UnsafeParams() map[string]interface{} {
 	return t.unsafeParams
 }
 
-type TestCase struct {
+type Svc1TestCase struct {
 	Name        string
 	Message     string
 	Origin      string
@@ -90,8 +90,8 @@ type TestCase struct {
 	JSONMatcher objmatcher.MapMatcher
 }
 
-func TestCases(entityName string, entityVersion string) []TestCase {
-	return []TestCase{
+func Svc1TestCases(entityName string, entityVersion string) []Svc1TestCase {
+	return []Svc1TestCase{
 		{
 			Name:    "basic service log entry",
 			Message: "this is a test",
@@ -429,8 +429,8 @@ something/something:123`,
 	}
 }
 
-func jsonOutputTests(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
-	for i, tc := range TestCases(entityName, entityVersion) {
+func svc1LogJsonOutputTests(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+	for i, tc := range Svc1TestCases(entityName, entityVersion) {
 		t.Run(tc.Name, func(t *testing.T) {
 			buf := bytes.Buffer{}
 			logger := loggerProvider(&buf, wlog.DebugLevel, tc.Origin)
@@ -556,7 +556,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName string, entityVersion s
 
 func jsonLoggerUpdateTest(t *testing.T, entityName string, entityVersion string, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	t.Run("update JSON logger", func(t *testing.T) {
-		currCase := TestCases(entityName, entityVersion)[0]
+		currCase := Svc1TestCases(entityName, entityVersion)[0]
 
 		buf := bytes.Buffer{}
 		logger := loggerProvider(&buf, wlog.ErrorLevel, currCase.Origin)
