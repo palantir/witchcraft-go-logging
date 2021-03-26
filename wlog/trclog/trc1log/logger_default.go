@@ -92,7 +92,7 @@ func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog
 func spanAnnotationFields(value string, timeStamp time.Time, endpoint *wtracing.Endpoint) map[string]interface{} {
 	fields := make(map[string]interface{})
 	fields[AnnotationValueKey] = value
-	fields[AnnotationTimestampKey] = timeStamp.Round(time.Microsecond).UnixNano() / 1e3
+	fields[AnnotationTimestampKey] = timeStamp.Round(time.Microsecond).UnixNano() / time.Microsecond.Nanoseconds()
 	if endpoint != nil {
 		endpointFields := map[string]string{
 			EndpointServiceNameKey: endpoint.ServiceName,
