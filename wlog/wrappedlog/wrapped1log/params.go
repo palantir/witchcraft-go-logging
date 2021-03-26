@@ -17,6 +17,8 @@ package wrapped1log
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 const (
@@ -60,6 +62,18 @@ func svc1PayloadParams(message string, level wlog.Param, params []svc1log.Param)
 		payload := wlog.NewMapLogEntry()
 		payload.StringValue(PayloadTypeKey, PayloadServiceLogV1)
 		payload.AnyMapValue(PayloadServiceLogV1, svc1Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
+}
+
+func trc1PayloadParams(span wtracing.SpanModel, params ...trc1log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		trc1Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(trc1Log, trc1log.ToParams(span, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadTraceLogV1)
+		payload.AnyMapValue(PayloadTraceLogV1, trc1Log.AllValues())
 
 		entry.AnyMapValue(PayloadKey, payload.AllValues())
 	})

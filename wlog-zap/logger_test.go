@@ -117,3 +117,15 @@ func TestWrapped1LogSvc1Log(t *testing.T) {
 			return wrapped1log.NewFromProvider(w, level, zapimpl.LoggerProvider(), entityName, entityVersion).Service(svc1log.Origin(origin))
 		})
 }
+
+func TestWrapped1LogTrc1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Trc1LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) trc1log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Trace()
+		})
+}

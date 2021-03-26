@@ -210,7 +210,7 @@ func TestWrapped1Log(t *testing.T) {
 
 	entityName := "entity"
 	entityVersion := "version"
-	for _, tc := range wrapped1logtests.TestCases(entityName, entityVersion) {
+	for _, tc := range wrapped1logtests.Svc1TestCases(entityName, entityVersion) {
 		// TODO: test output
 		logger := wrapped1log.NewFromProvider(
 			os.Stdout,

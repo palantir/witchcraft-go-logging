@@ -17,6 +17,7 @@ package wrapped1log
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
 type defaultLogger struct {
@@ -32,6 +33,14 @@ func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 		name:    l.name,
 		version: l.version,
 		logger:  l.levellogger,
+	}
+}
+
+func (l *defaultLogger) Trace() trc1log.Logger {
+	return &wrappedTrc1Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
 	}
 }
 
