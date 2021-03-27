@@ -106,7 +106,7 @@ func TestDiag1Log(t *testing.T) {
 	})
 }
 
-func TestWrapped1Log(t *testing.T) {
+func TestWrapped1Svc1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
 	wrapped1logtests.Svc1LogJSONTestSuite(
@@ -115,5 +115,17 @@ func TestWrapped1Log(t *testing.T) {
 		entityVersion,
 		func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
 			return wrapped1log.NewFromProvider(w, level, wlogzerolog.LoggerProvider(), entityName, entityVersion).Service(svc1log.Origin(origin))
+		})
+}
+
+func TestWrapped1Trc1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Trc1LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) trc1log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Trace()
 		})
 }

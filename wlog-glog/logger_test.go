@@ -201,7 +201,7 @@ func TestDiag1Log(t *testing.T) {
 	}
 }
 
-func TestWrapped1Log(t *testing.T) {
+func TestWrapped1Svc1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
 		"-logtostderr=true",
@@ -221,5 +221,44 @@ func TestWrapped1Log(t *testing.T) {
 		).Service(svc1log.Origin(tc.Origin))
 
 		logger.Info(tc.Message, tc.LogParams...)
+	}
+}
+
+func TestWrapped1Trc1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	tracer, err := wzipkin.NewTracer(wtracing.NewNoopReporter())
+	require.NoError(t, err)
+	clientSpan := tracer.StartSpan("testOp", wtracing.WithKind(wtracing.Client))
+	defer clientSpan.Finish()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range trc1logtests.TestCases(clientSpan) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.DebugLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Trace()
+
+		tracer, err := wzipkin.NewTracer(
+			logger,
+			wtracing.WithLocalEndpoint(&wtracing.Endpoint{
+				ServiceName: "testService",
+				IPv4:        net.IPv4(127, 0, 0, 1),
+				Port:        1234,
+			}),
+		)
+		require.NoError(t, err)
+		span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan)}, tc.SpanOptions...)...)
+		// Finish() triggers logging
+		span.Finish()
 	}
 }
