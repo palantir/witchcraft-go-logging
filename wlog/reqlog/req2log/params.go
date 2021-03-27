@@ -20,12 +20,12 @@ import (
 )
 
 type LoggerCreatorParam interface {
-	apply(builder LoggerBuilder)
+	Apply(builder LoggerBuilder)
 }
 
 type loggerCreatorParamFunc func(builder LoggerBuilder)
 
-func (f loggerCreatorParamFunc) apply(builder LoggerBuilder) {
+func (f loggerCreatorParamFunc) Apply(builder LoggerBuilder) {
 	f(builder)
 }
 

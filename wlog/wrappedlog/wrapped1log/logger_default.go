@@ -15,7 +15,10 @@
 package wrapped1log
 
 import (
+	"io"
+
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
@@ -24,12 +27,21 @@ import (
 type defaultLogger struct {
 	name        string
 	version     string
+	creator     wlog.LoggerCreator
+	writer      io.Writer
 	logger      wlog.Logger
 	levellogger wlog.LeveledLogger
 }
 
-func (l *defaultLogger) Request() req2log.Logger {
-	return nil
+func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+	loggerBuilder := &req2LoggerBuilder{
+		loggerCreator: l.creator,
+		idsExtractor:  extractor.NewDefaultIDsExtractor(),
+	}
+	for _, p := range params {
+		p.Apply(loggerBuilder)
+	}
+	return loggerBuilder.build(l.writer)
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {

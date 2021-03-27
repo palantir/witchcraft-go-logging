@@ -24,7 +24,7 @@ import (
 )
 
 type Logger interface {
-	Request() req2log.Logger
+	Request(params ...req2log.LoggerCreatorParam) req2log.Logger
 	Service(params ...svc1log.Param) svc1log.Logger
 	Trace() trc1log.Logger
 }
@@ -37,6 +37,8 @@ func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvid
 	return &defaultLogger{
 		name:        name,
 		version:     version,
+		creator:     creator.NewLogger,
+		writer:      w,
 		logger:      creator.NewLogger(w),
 		levellogger: creator.NewLeveledLogger(w, level),
 	}

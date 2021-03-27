@@ -86,7 +86,7 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator, params ...LoggerCre
 		idsExtractor:  extractor.NewDefaultIDsExtractor(),
 	}
 	for _, p := range params {
-		p.apply(loggerBuilder)
+		p.Apply(loggerBuilder)
 	}
 	return loggerBuilder.build(w)
 }
@@ -103,6 +103,20 @@ type LoggerBuilder interface {
 
 	SafeHeaderParams(safeHeaderParams []string)
 	ForbiddenHeaderParams(forbiddenHeaderParams []string)
+}
+
+type defaultLoggerBuilder struct {
+	loggerCreator wlog.LoggerCreator
+	idsExtractor  extractor.IDsFromRequest
+
+	safePathParams      []string
+	forbiddenPathParams []string
+
+	safeQueryParams      []string
+	forbiddenQueryParams []string
+
+	safeHeaderParams      []string
+	forbiddenHeaderParams []string
 }
 
 func (b *defaultLoggerBuilder) LoggerCreator(creator wlog.LoggerCreator) {
@@ -135,20 +149,6 @@ func (b *defaultLoggerBuilder) SafeHeaderParams(safeHeaderParams []string) {
 
 func (b *defaultLoggerBuilder) ForbiddenHeaderParams(forbiddenHeaderParams []string) {
 	b.forbiddenHeaderParams = append(b.forbiddenHeaderParams, forbiddenHeaderParams...)
-}
-
-type defaultLoggerBuilder struct {
-	loggerCreator wlog.LoggerCreator
-	idsExtractor  extractor.IDsFromRequest
-
-	safePathParams      []string
-	forbiddenPathParams []string
-
-	safeQueryParams      []string
-	forbiddenQueryParams []string
-
-	safeHeaderParams      []string
-	forbiddenHeaderParams []string
 }
 
 func (b *defaultLoggerBuilder) build(w io.Writer) *defaultLogger {
