@@ -106,6 +106,17 @@ func TestDiag1Log(t *testing.T) {
 	})
 }
 
+func TestWrapped1Req2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Req2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger {
+		allParams := append([]req2log.LoggerCreatorParam{
+			req2log.Creator(wlogzerolog.LoggerProvider().NewLogger),
+		}, params...)
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Request(allParams...)
+	})
+}
+
 func TestWrapped1Svc1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"

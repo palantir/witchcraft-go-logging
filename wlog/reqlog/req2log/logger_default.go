@@ -97,9 +97,13 @@ func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamP
 		processKeyValPair(k, r.Request.Header.Get(k), safeMap, unsafeMap, headerParamPerms, r.HeaderParamPerms)
 	}
 	return wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.AnyMapValue(paramsKey, safeMap)
+			if len(safeMap) > 0 {
+				entry.AnyMapValue(paramsKey, safeMap)
+			}
 		}), wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.AnyMapValue(wlog.UnsafeParamsKey, unsafeMap)
+			if (len(unsafeMap)) > 0 {
+				entry.AnyMapValue(wlog.UnsafeParamsKey, unsafeMap)
+			}
 		})
 }
 

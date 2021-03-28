@@ -58,6 +58,9 @@ func (l *wrappedReq2Logger) toRequestParams(r req2log.Request) []wlog.Param {
 }
 
 type req2LoggerBuilder struct {
+	name    string
+	version string
+
 	loggerCreator wlog.LoggerCreator
 	idsExtractor  extractor.IDsFromRequest
 
@@ -106,6 +109,8 @@ func (b *req2LoggerBuilder) ForbiddenHeaderParams(forbiddenHeaderParams []string
 func (b *req2LoggerBuilder) build(w io.Writer) *wrappedReq2Logger {
 	defaultParams := req2log.DefaultRequestParamPerms()
 	return &wrappedReq2Logger{
+		name:             b.name,
+		version:          b.version,
 		idsExtractor:     b.idsExtractor,
 		pathParamPerms:   req2log.CombinedParamPerms(defaultParams.PathParamPerms(), req2log.NewParamPerms(b.safePathParams, b.forbiddenPathParams)),
 		queryParamPerms:  req2log.CombinedParamPerms(defaultParams.QueryParamPerms(), req2log.NewParamPerms(b.safeQueryParams, b.forbiddenQueryParams)),

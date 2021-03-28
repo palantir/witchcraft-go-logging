@@ -201,6 +201,39 @@ func TestDiag1Log(t *testing.T) {
 	}
 }
 
+func TestWrapped1Req2Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.Req2TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.InfoLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Request()
+		req := req2logtests.GenerateRequest(map[string]string{
+			"Authorization":      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0ifQ.JTD36MhcwmSuvfdCkfSYc-LHOGNA1UQ-0FKLKqdXbF4",
+			"FooHeaderParamName": "fooHeaderParamVal",
+		}, tc.ExtraQueryParams, tc.ExtraHeaderParams)
+
+		logger.Request(req2log.Request{
+			Request:        req,
+			RouteInfo:      req2log.RouteInfo{},
+			ResponseStatus: http.StatusOK,
+			ResponseSize:   int64(100),
+			Duration:       1 * time.Second,
+		})
+	}
+}
+
 func TestWrapped1Svc1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
@@ -238,7 +271,7 @@ func TestWrapped1Trc1Log(t *testing.T) {
 
 	entityName := "entity"
 	entityVersion := "version"
-	for _, tc := range trc1logtests.TestCases(clientSpan) {
+	for _, tc := range wrapped1logtests.Trc1TestCases(entityName, entityVersion, clientSpan) {
 		// TODO: test output
 		logger := wrapped1log.NewFromProvider(
 			os.Stdout,

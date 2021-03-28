@@ -35,6 +35,8 @@ type defaultLogger struct {
 
 func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
 	loggerBuilder := &req2LoggerBuilder{
+		name:          l.name,
+		version:       l.version,
 		loggerCreator: l.creator,
 		idsExtractor:  extractor.NewDefaultIDsExtractor(),
 	}
