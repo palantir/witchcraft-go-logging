@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add req2log wrapped logger
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/129
