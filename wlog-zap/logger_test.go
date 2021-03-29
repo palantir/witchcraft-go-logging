@@ -106,6 +106,14 @@ func TestDiag1Log(t *testing.T) {
 	})
 }
 
+func TestWrapped1Metric1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Metric1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) metric1log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Metric()
+	})
+}
+
 func TestWrapped1LogSvc1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
