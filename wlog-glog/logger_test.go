@@ -201,6 +201,29 @@ func TestDiag1Log(t *testing.T) {
 	}
 }
 
+func TestEvt2Wrapped1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.Evt2TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.InfoLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Event()
+
+		logger.Event(tc.EventName, tc.Params()...)
+	}
+}
+
 func TestWrapped1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
