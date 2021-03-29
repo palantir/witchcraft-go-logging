@@ -16,6 +16,7 @@ package wrapped1log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
@@ -25,6 +26,14 @@ type defaultLogger struct {
 	version     string
 	logger      wlog.Logger
 	levellogger wlog.LeveledLogger
+}
+
+func (l *defaultLogger) Metric() metric1log.Logger {
+	return &wrappedMetric1Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
+	}
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {

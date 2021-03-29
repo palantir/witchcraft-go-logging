@@ -12,35 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package metric1log
+package wrapped1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 )
 
-type defaultLogger struct {
+type wrappedMetric1Logger struct {
+	name    string
+	version string
+
 	logger wlog.Logger
 }
 
-func (l *defaultLogger) Metric(name, typ string, params ...Param) {
-	l.logger.Log(ToParams(name, typ, params)...)
+func (l *wrappedMetric1Logger) Metric(name, typ string, params ...metric1log.Param) {
+	l.logger.Log(l.toMetricParams(name, typ, params)...)
 }
 
-func ToParams(metricName, metricType string, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+func (l *wrappedMetric1Logger) toMetricParams(metricName, metricType string, inParams []metric1log.Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
 	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(metricNameTypeParam(metricName, metricType).apply)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
+	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(metric1PayloadParams(metricType, metricType, inParams).apply)
 	return outParams
-}
-
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
 }
