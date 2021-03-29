@@ -12,35 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package evt2log
+package wrapped1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 )
 
-type defaultLogger struct {
+type wrappedEvt2Logger struct {
+	name    string
+	version string
+
 	logger wlog.Logger
 }
 
-func (l *defaultLogger) Event(name string, params ...Param) {
-	l.logger.Log(ToParams(name, params)...)
+func (l *wrappedEvt2Logger) Event(name string, params ...evt2log.Param) {
+	l.logger.Log(l.toEventParams(name, params)...)
 }
 
-func ToParams(evtName string, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+func (l *wrappedEvt2Logger) toEventParams(name string, params []evt2log.Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
 	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(eventNameParam(evtName).apply)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
+	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(evt2PayloadParams(name, params).apply)
 	return outParams
-}
-
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
 }
