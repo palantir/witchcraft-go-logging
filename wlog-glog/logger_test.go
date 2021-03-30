@@ -180,6 +180,31 @@ func TestAudit2Log(t *testing.T) {
 	}
 }
 
+func TestWrapped1Diag1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.Diag1TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.InfoLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Diagnostic()
+		logger.Diagnostic(
+			tc.Diagnostic,
+			diag1log.UnsafeParams(tc.UnsafeParams),
+		)
+	}
+}
+
 func TestDiag1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
