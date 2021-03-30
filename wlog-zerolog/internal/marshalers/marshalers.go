@@ -18,7 +18,6 @@ import (
 	"reflect"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
-	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/rs/zerolog"
 )
 
@@ -37,7 +36,6 @@ func (f logArrayMarshalerFn) MarshalZerologArray(a *zerolog.Array) {
 }
 
 var encoders = map[reflect.Type]encoderFunc{
-	reflect.TypeOf(wtracing.SpanModel{}): marshalWTracingSpanModel,
 	reflect.TypeOf(logging.Diagnostic{}): marshalLoggingDiagnostic,
 }
 

@@ -223,6 +223,33 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 				}),
 			},
 		},
+		{
+			Name: "trace.1 log tag entry after span empty tag value",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+			},
+			Tags: map[string]string{
+				"key1": "",
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value0"),
+							"key1": objmatcher.NewEqualsMatcher(""),
+						},
+					),
+				}),
+			},
+		},
 	}
 }
 

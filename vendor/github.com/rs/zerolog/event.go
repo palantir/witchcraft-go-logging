@@ -5,7 +5,6 @@ import (
 	"net"
 	"os"
 	"runtime"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -18,11 +17,6 @@ var eventPool = &sync.Pool{
 	},
 }
 
-// ErrorMarshalFunc allows customization of global error marshaling
-var ErrorMarshalFunc = func(err error) interface{} {
-	return err
-}
-
 // Event represents a log event. It is instanced by one of the level method of
 // Logger and finalized by the Msg or Msgf method.
 type Event struct {
@@ -30,6 +24,7 @@ type Event struct {
 	w     LevelWriter
 	level Level
 	done  func(msg string)
+	stack bool   // enable error stack trace
 	ch    []Hook // hooks from context
 }
 
@@ -66,6 +61,7 @@ func newEvent(w LevelWriter, level Level) *Event {
 	e.buf = enc.AppendBeginMarker(e.buf)
 	e.w = w
 	e.level = level
+	e.stack = false
 	return e
 }
 
@@ -110,10 +106,20 @@ func (e *Event) Msg(msg string) {
 	e.msg(msg)
 }
 
-// Msgf sends the event with formated msg added as the message field if not empty.
+// Send is equivalent to calling Msg("").
 //
-// NOTICE: once this methid is called, the *Event should be disposed.
-// Calling Msg twice can have unexpected result.
+// NOTICE: once this method is called, the *Event should be disposed.
+func (e *Event) Send() {
+	if e == nil {
+		return
+	}
+	e.msg("")
+}
+
+// Msgf sends the event with formatted msg added as the message field if not empty.
+//
+// NOTICE: once this method is called, the *Event should be disposed.
+// Calling Msgf twice can have unexpected result.
 func (e *Event) Msgf(format string, v ...interface{}) {
 	if e == nil {
 		return
@@ -122,13 +128,8 @@ func (e *Event) Msgf(format string, v ...interface{}) {
 }
 
 func (e *Event) msg(msg string) {
-	if len(e.ch) > 0 {
-		e.ch[0].Run(e, e.level, msg)
-		if len(e.ch) > 1 {
-			for _, hook := range e.ch[1:] {
-				hook.Run(e, e.level, msg)
-			}
-		}
+	for _, hook := range e.ch {
+		hook.Run(e, e.level, msg)
 	}
 	if msg != "" {
 		e.buf = enc.AppendString(enc.AppendKey(e.buf, MessageFieldName), msg)
@@ -208,7 +209,7 @@ func (e *Event) Object(key string, obj LogObjectMarshaler) *Event {
 	return e
 }
 
-// Object marshals an object that implement the LogObjectMarshaler interface.
+// EmbedObject marshals an object that implement the LogObjectMarshaler interface.
 func (e *Event) EmbedObject(obj LogObjectMarshaler) *Event {
 	if e == nil {
 		return e
@@ -232,6 +233,21 @@ func (e *Event) Strs(key string, vals []string) *Event {
 		return e
 	}
 	e.buf = enc.AppendStrings(enc.AppendKey(e.buf, key), vals)
+	return e
+}
+
+// Stringer adds the field key with val.String() (or null if val is nil) to the *Event context.
+func (e *Event) Stringer(key string, val fmt.Stringer) *Event {
+	if e == nil {
+		return e
+	}
+
+	if val != nil {
+		e.buf = enc.AppendString(enc.AppendKey(e.buf, key), val.String())
+		return e
+	}
+
+	e.buf = enc.AppendInterface(enc.AppendKey(e.buf, key), nil)
 	return e
 }
 
@@ -271,14 +287,20 @@ func (e *Event) RawJSON(key string, b []byte) *Event {
 // AnErr adds the field key with serialized err to the *Event context.
 // If err is nil, no field is added.
 func (e *Event) AnErr(key string, err error) *Event {
-	marshaled := ErrorMarshalFunc(err)
-	switch m := marshaled.(type) {
+	if e == nil {
+		return e
+	}
+	switch m := ErrorMarshalFunc(err).(type) {
 	case nil:
 		return e
 	case LogObjectMarshaler:
 		return e.Object(key, m)
 	case error:
-		return e.Str(key, m.Error())
+		if m == nil || isNilValue(m) {
+			return e
+		} else {
+			return e.Str(key, m.Error())
+		}
 	case string:
 		return e.Str(key, m)
 	default:
@@ -292,11 +314,9 @@ func (e *Event) Errs(key string, errs []error) *Event {
 	if e == nil {
 		return e
 	}
-
 	arr := Arr()
 	for _, err := range errs {
-		marshaled := ErrorMarshalFunc(err)
-		switch m := marshaled.(type) {
+		switch m := ErrorMarshalFunc(err).(type) {
 		case LogObjectMarshaler:
 			arr = arr.Object(m)
 		case error:
@@ -313,9 +333,42 @@ func (e *Event) Errs(key string, errs []error) *Event {
 
 // Err adds the field "error" with serialized err to the *Event context.
 // If err is nil, no field is added.
+//
 // To customize the key name, change zerolog.ErrorFieldName.
+//
+// If Stack() has been called before and zerolog.ErrorStackMarshaler is defined,
+// the err is passed to ErrorStackMarshaler and the result is appended to the
+// zerolog.ErrorStackFieldName.
 func (e *Event) Err(err error) *Event {
+	if e == nil {
+		return e
+	}
+	if e.stack && ErrorStackMarshaler != nil {
+		switch m := ErrorStackMarshaler(err).(type) {
+		case nil:
+		case LogObjectMarshaler:
+			e.Object(ErrorStackFieldName, m)
+		case error:
+			if m != nil && !isNilValue(m) {
+				e.Str(ErrorStackFieldName, m.Error())
+			}
+		case string:
+			e.Str(ErrorStackFieldName, m)
+		default:
+			e.Interface(ErrorStackFieldName, m)
+		}
+	}
 	return e.AnErr(ErrorFieldName, err)
+}
+
+// Stack enables stack trace printing for the error passed to Err().
+//
+// ErrorStackMarshaler must be set for this method to do something.
+func (e *Event) Stack() *Event {
+	if e != nil {
+		e.stack = true
+	}
+	return e
 }
 
 // Bool adds the field key with val as a bool to the *Event context.
@@ -633,8 +686,14 @@ func (e *Event) Interface(key string, i interface{}) *Event {
 }
 
 // Caller adds the file:line of the caller with the zerolog.CallerFieldName key.
-func (e *Event) Caller() *Event {
-	return e.caller(CallerSkipFrameCount)
+// The argument skip is the number of stack frames to ascend
+// Skip If not passed, use the global variable CallerSkipFrameCount
+func (e *Event) Caller(skip ...int) *Event {
+	sk := CallerSkipFrameCount
+	if len(skip) > 0 {
+		sk = skip[0] + CallerSkipFrameCount
+	}
+	return e.caller(sk)
 }
 
 func (e *Event) caller(skip int) *Event {
@@ -645,7 +704,7 @@ func (e *Event) caller(skip int) *Event {
 	if !ok {
 		return e
 	}
-	e.buf = enc.AppendString(enc.AppendKey(e.buf, CallerFieldName), file+":"+strconv.Itoa(line))
+	e.buf = enc.AppendString(enc.AppendKey(e.buf, CallerFieldName), CallerMarshalFunc(file, line))
 	return e
 }
 
