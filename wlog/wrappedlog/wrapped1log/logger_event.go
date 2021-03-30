@@ -15,29 +15,25 @@
 package wrapped1log
 
 import (
-	"io"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
-	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
-type Logger interface {
-	Event() evt2log.Logger
-	Service(params ...svc1log.Param) svc1log.Logger
-	Trace() trc1log.Logger
+type wrappedEvt2Logger struct {
+	name    string
+	version string
+
+	logger wlog.Logger
 }
 
-func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
-	return NewFromProvider(w, level, wlog.DefaultLoggerProvider(), name, version)
+func (l *wrappedEvt2Logger) Event(name string, params ...evt2log.Param) {
+	l.logger.Log(l.toEventParams(name, params)...)
 }
 
-func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
-	return &defaultLogger{
-		name:        name,
-		version:     version,
-		logger:      creator.NewLogger(w),
-		levellogger: creator.NewLeveledLogger(w, level),
-	}
+func (l *wrappedEvt2Logger) toEventParams(name string, params []evt2log.Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
+	copy(outParams, defaultTypeParam)
+	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(evt2PayloadParams(name, params).apply)
+	return outParams
 }
