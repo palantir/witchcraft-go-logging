@@ -142,6 +142,17 @@ func TestWrapped1Metric1Log(t *testing.T) {
 	})
 }
 
+func TestWrapped1LogReq2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Req2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger {
+		allParams := append([]req2log.LoggerCreatorParam{
+			req2log.Creator(zapimpl.LoggerProvider().NewLogger),
+		}, params...)
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Request(allParams...)
+	})
+}
+
 func TestWrapped1LogSvc1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"

@@ -22,6 +22,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
@@ -31,6 +32,7 @@ type Logger interface {
 	Diagnostic() diag1log.Logger
 	Event() evt2log.Logger
 	Metric() metric1log.Logger
+	Request(params ...req2log.LoggerCreatorParam) req2log.Logger
 	Service(params ...svc1log.Param) svc1log.Logger
 	Trace() trc1log.Logger
 }
@@ -43,6 +45,8 @@ func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvid
 	return &defaultLogger{
 		name:        name,
 		version:     version,
+		creator:     creator.NewLogger,
+		writer:      w,
 		logger:      creator.NewLogger(w),
 		levellogger: creator.NewLeveledLogger(w, level),
 	}

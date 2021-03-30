@@ -15,19 +15,29 @@
 package wrapped1log
 
 import (
+	"io"
+
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
 type defaultLogger struct {
-	name        string
-	version     string
-	logger      wlog.Logger
+	name    string
+	version string
+
+	// creator and writer are used only by the request logger, to allow consumers to override the default creator with a Param
+	creator wlog.LoggerCreator
+	writer  io.Writer
+
+	logger wlog.Logger
+	// levellogger is only used by the service logger which supports logging at different log levels
 	levellogger wlog.LeveledLogger
 }
 
@@ -61,6 +71,19 @@ func (l *defaultLogger) Metric() metric1log.Logger {
 		version: l.version,
 		logger:  l.logger,
 	}
+}
+
+func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+	loggerBuilder := &req2LoggerBuilder{
+		name:          l.name,
+		version:       l.version,
+		loggerCreator: l.creator,
+		idsExtractor:  extractor.NewDefaultIDsExtractor(),
+	}
+	for _, p := range params {
+		p.Apply(loggerBuilder)
+	}
+	return loggerBuilder.build(l.writer)
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
