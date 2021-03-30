@@ -29,11 +29,15 @@ import (
 )
 
 type defaultLogger struct {
-	name        string
-	version     string
-	creator     wlog.LoggerCreator
-	writer      io.Writer
-	logger      wlog.Logger
+	name    string
+	version string
+
+	// creator and writer are used only by the request logger, to allow consumers to override the default creator with a Param
+	creator wlog.LoggerCreator
+	writer  io.Writer
+
+	logger wlog.Logger
+	// levellogger is only used by the service logger which supports logging at different log levels
 	levellogger wlog.LeveledLogger
 }
 
