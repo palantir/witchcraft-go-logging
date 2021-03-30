@@ -18,7 +18,11 @@ import (
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
@@ -31,6 +35,38 @@ type defaultLogger struct {
 	writer      io.Writer
 	logger      wlog.Logger
 	levellogger wlog.LeveledLogger
+}
+
+func (l *defaultLogger) Audit() audit2log.Logger {
+	return &wrappedAudit2Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
+	}
+}
+
+func (l *defaultLogger) Diagnostic() diag1log.Logger {
+	return &wrappedDiag1Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
+	}
+}
+
+func (l *defaultLogger) Event() evt2log.Logger {
+	return &wrappedEvt2Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
+	}
+}
+
+func (l *defaultLogger) Metric() metric1log.Logger {
+	return &wrappedMetric1Logger{
+		name:    l.name,
+		version: l.version,
+		logger:  l.logger,
+	}
 }
 
 func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {

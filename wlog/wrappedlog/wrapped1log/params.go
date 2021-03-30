@@ -15,8 +15,13 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
@@ -55,6 +60,54 @@ type paramFunc func(entry wlog.LogEntry)
 
 func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
+}
+
+func audit2PayloadParams(name string, result audit2log.AuditResultType, params []audit2log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		audit2Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(audit2Log, audit2log.ToParams(name, result, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadAuditLogV2)
+		payload.AnyMapValue(PayloadAuditLogV2, audit2Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
+}
+
+func diag1PayloadParams(diagnostic logging.Diagnostic, params []diag1log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		diag1Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(diag1Log, diag1log.ToParams(diagnostic, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadDiagnosticLogV1)
+		payload.AnyMapValue(PayloadDiagnosticLogV1, diag1Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
+}
+
+func evt2PayloadParams(name string, params []evt2log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		evt2Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(evt2Log, evt2log.ToParams(name, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadEventLogV2)
+		payload.AnyMapValue(PayloadEventLogV2, evt2Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
+}
+
+func metric1PayloadParams(metricName, metricType string, params []metric1log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		metric1Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(metric1Log, metric1log.ToParams(metricName, metricType, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadMetricLogV1)
+		payload.AnyMapValue(PayloadMetricLogV1, metric1Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
 }
 
 func req2PayloadParams(r req2log.Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms req2log.ParamPerms) Param {

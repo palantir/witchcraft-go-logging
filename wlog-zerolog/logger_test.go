@@ -106,6 +106,42 @@ func TestDiag1Log(t *testing.T) {
 	})
 }
 
+func TestWrapped1Audit2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Audit2LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) audit2log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Audit()
+		})
+}
+
+func TestWrapped1Diag1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Diag1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) diag1log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Diagnostic()
+	})
+}
+
+func TestWrapped1Evt2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Evt2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) evt2log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Event()
+	})
+}
+
+func TestWrapped1Metric1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Metric1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) metric1log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Metric()
+	})
+}
+
 func TestWrapped1Req2Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"

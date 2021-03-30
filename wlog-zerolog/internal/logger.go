@@ -18,7 +18,6 @@ import (
 	"reflect"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog-zerolog/internal/marshalers"
 	"github.com/rs/zerolog"
 )
 
@@ -77,10 +76,7 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 	if e.keyExists(k) {
 		return
 	}
-	ok := marshalers.EncodeType(e.evt, marshalerType, k, v)
-	if !ok {
-		e.evt.Interface(k, v)
-	}
+	e.evt.Interface(k, v)
 }
 
 //StringMapValue adds or merges the strings in values
