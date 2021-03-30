@@ -271,6 +271,29 @@ func TestWrapped1Audit2Log(t *testing.T) {
 	}
 }
 
+func TestWrapped1Metric1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.Metric1TestCases(entityName, entityVersion) {
+		// TODO: test output
+		logger := wrapped1log.NewFromProvider(
+			os.Stdout,
+			wlog.InfoLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Metric()
+
+		logger.Metric(tc.MetricName, tc.MetricType, tc.Params()...)
+	}
+}
+
 func TestWrapped1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],

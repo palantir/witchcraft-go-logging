@@ -93,7 +93,7 @@ func Evt2TestCases(entityName, entityVersion string) []Evt2TestCase {
 
 func Evt2LogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) evt2log.Logger) {
 	evt2LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
-	valueIsntOverwrittenByValues(t, entityName, entityVersion, loggerProvider)
+	evt2LogValueIsntOverwrittenByValues(t, entityName, entityVersion, loggerProvider)
 	extraValuesIndependentAcrossCalls(t, entityName, entityVersion, loggerProvider)
 }
 
@@ -117,7 +117,7 @@ func evt2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 
 // Verifies that if different parameters are specified using Value and Values params, all of the values are present in
 // the final output (that is, these parameters should be additive).
-func valueIsntOverwrittenByValues(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) evt2log.Logger) {
+func evt2LogValueIsntOverwrittenByValues(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) evt2log.Logger) {
 	t.Run("Value and Values params are additive", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
