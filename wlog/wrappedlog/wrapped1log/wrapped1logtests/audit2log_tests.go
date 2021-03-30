@@ -100,12 +100,12 @@ func Audit2TestCases(entityName, entityVersion string) []Audit2TestCase {
 }
 
 func Audit2LogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit2log.Logger) {
-	jsonOutputTests(t, entityName, entityVersion, loggerProvider)
+	audit2LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
 	rParamIsntOverwrittenByRParamsTest(t, entityName, entityVersion, loggerProvider)
 	extraRParamsDoNotAppear(t, entityName, entityVersion, loggerProvider)
 }
 
-func jsonOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit2log.Logger) {
+func audit2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit2log.Logger) {
 	for i, tc := range Audit2TestCases(entityName, entityVersion) {
 		t.Run(tc.Name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
