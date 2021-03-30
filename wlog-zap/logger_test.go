@@ -106,6 +106,18 @@ func TestDiag1Log(t *testing.T) {
 	})
 }
 
+func TestWrapped1LogAudit2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Audit2LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) audit2log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Audit()
+		})
+}
+
 func TestWrapped1LogDiag1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"

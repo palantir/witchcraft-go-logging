@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -25,6 +26,7 @@ import (
 )
 
 type Logger interface {
+	Audit() audit2log.Logger
 	Diagnostic() diag1log.Logger
 	Event() evt2log.Logger
 	Service(params ...svc1log.Param) svc1log.Logger
