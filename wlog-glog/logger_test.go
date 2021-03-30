@@ -180,6 +180,26 @@ func TestAudit2Log(t *testing.T) {
 	}
 }
 
+func TestDiag1Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	for _, tc := range diag1logtests.TestCases() {
+		// TODO: test output
+		logger := diag1log.NewFromCreator(
+			os.Stdout,
+			wlogglog.LoggerProvider().NewLogger,
+		)
+
+		logger.Diagnostic(
+			tc.Diagnostic,
+			diag1log.UnsafeParams(tc.UnsafeParams),
+		)
+	}
+}
 func TestWrapped1Diag1Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
@@ -205,24 +225,26 @@ func TestWrapped1Diag1Log(t *testing.T) {
 	}
 }
 
-func TestDiag1Log(t *testing.T) {
+func TestWrapped1Evt2Log(t *testing.T) {
 	os.Args = []string{
 		os.Args[0],
 		"-logtostderr=true",
 	}
 	flag.Parse()
 
-	for _, tc := range diag1logtests.TestCases() {
+	entityName := "entity"
+	entityVersion := "version"
+	for _, tc := range wrapped1logtests.Evt2TestCases(entityName, entityVersion) {
 		// TODO: test output
-		logger := diag1log.NewFromCreator(
+		logger := wrapped1log.NewFromProvider(
 			os.Stdout,
-			wlogglog.LoggerProvider().NewLogger,
-		)
+			wlog.InfoLevel,
+			wlogglog.LoggerProvider(),
+			entityName,
+			entityVersion,
+		).Event()
 
-		logger.Diagnostic(
-			tc.Diagnostic,
-			diag1log.UnsafeParams(tc.UnsafeParams),
-		)
+		logger.Event(tc.EventName, tc.Params()...)
 	}
 }
 
