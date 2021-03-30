@@ -113,7 +113,7 @@ func Metric1TestCases(entityName, entityVersion string) []Metric1TestCase {
 
 func Metric1LogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) metric1log.Logger) {
 	metric1LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
-	valueIsntOverwrittenByValues(t, entityName, entityVersion, loggerProvider)
+	metric1LogValueIsntOverwrittenByValues(t, entityName, entityVersion, loggerProvider)
 	extraValuesDoNotAppear(t, entityName, entityVersion, loggerProvider)
 	tagIsntOverwrittenByTags(t, entityName, entityVersion, loggerProvider)
 	extraTagsDoNotAppear(t, entityName, entityVersion, loggerProvider)
@@ -139,7 +139,7 @@ func metric1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, l
 
 // Verifies that if different parameters are specified using Value and Values params, all of the values are present in
 // the final output (that is, these parameters should be additive).
-func valueIsntOverwrittenByValues(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) metric1log.Logger) {
+func metric1LogValueIsntOverwrittenByValues(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) metric1log.Logger) {
 	t.Run("Value and Values params are additive", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)

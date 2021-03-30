@@ -20,7 +20,6 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog-glog/internal/marshalers"
 )
 
 type gLogger struct{}
@@ -79,11 +78,7 @@ func paramsToLog(entry wlog.MapLogEntry) []string {
 		params = append(params, fmt.Sprintf("%s: %v", k, v))
 	}
 	for k, v := range entry.ObjectValues() {
-		val, ok := marshalers.StringForType(v.MarshalerType, k, v.Value)
-		if !ok {
-			val = fmt.Sprintf("%+v", v.Value)
-		}
-		params = append(params, fmt.Sprintf("%s: %v", k, val))
+		params = append(params, fmt.Sprintf("%s: %v", k, v))
 	}
 	return params
 }
