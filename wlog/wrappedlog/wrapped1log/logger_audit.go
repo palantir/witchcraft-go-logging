@@ -12,35 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package audit2log
+package wrapped1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 )
 
-type defaultLogger struct {
+type wrappedAudit2Logger struct {
+	name    string
+	version string
+
 	logger wlog.Logger
 }
 
-func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
-	l.logger.Log(ToParams(name, result, params)...)
+func (l *wrappedAudit2Logger) Audit(name string, result audit2log.AuditResultType, params ...audit2log.Param) {
+	l.logger.Log(l.toAuditParams(name, result, params)...)
 }
 
-func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+func (l *wrappedAudit2Logger) toAuditParams(name string, result audit2log.AuditResultType, params []audit2log.Param) []wlog.Param {
+	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
 	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(auditNameResultParam(name, result).apply)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
+	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
+	outParams[len(defaultTypeParam)+1] = wlog.NewParam(audit2PayloadParams(name, result, params).apply)
 	return outParams
-}
-
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
 }

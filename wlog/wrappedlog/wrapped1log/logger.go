@@ -18,11 +18,13 @@ import (
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
 type Logger interface {
+	Audit() audit2log.Logger
 	Service(params ...svc1log.Param) svc1log.Logger
 	Trace() trc1log.Logger
 }

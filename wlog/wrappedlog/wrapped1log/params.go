@@ -16,6 +16,7 @@ package wrapped1log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
@@ -53,6 +54,18 @@ type paramFunc func(entry wlog.LogEntry)
 
 func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
+}
+
+func audit2PayloadParams(name string, result audit2log.AuditResultType, params []audit2log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		audit2Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(audit2Log, audit2log.ToParams(name, result, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadAuditLogV2)
+		payload.AnyMapValue(PayloadAuditLogV2, audit2Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
 }
 
 func svc1PayloadParams(message string, level wlog.Param, params []svc1log.Param) Param {
