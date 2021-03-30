@@ -15,7 +15,9 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
@@ -56,13 +58,25 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
+func diag1PayloadParams(diagnostic logging.Diagnostic, params []diag1log.Param) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		diag1Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(diag1Log, diag1log.ToParams(diagnostic, params))
+		payload := wlog.NewMapLogEntry()
+		payload.StringValue(PayloadTypeKey, PayloadDiagnosticLogV1)
+		payload.AnyMapValue(PayloadDiagnosticLogV1, diag1Log.AllValues())
+
+		entry.AnyMapValue(PayloadKey, payload.AllValues())
+	})
+}
+
 func evt2PayloadParams(name string, params []evt2log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		trc1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(trc1Log, evt2log.ToParams(name, params))
+		evt2Log := wlog.NewMapLogEntry()
+		wlog.ApplyParams(evt2Log, evt2log.ToParams(name, params))
 		payload := wlog.NewMapLogEntry()
 		payload.StringValue(PayloadTypeKey, PayloadEventLogV2)
-		payload.AnyMapValue(PayloadEventLogV2, trc1Log.AllValues())
+		payload.AnyMapValue(PayloadEventLogV2, evt2Log.AllValues())
 
 		entry.AnyMapValue(PayloadKey, payload.AllValues())
 	})
