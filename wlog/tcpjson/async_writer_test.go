@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -119,4 +120,54 @@ func TestAsyncWriteWithSvc1log(t *testing.T) {
 		assert.Equal(t, strconv.Itoa(i), gotPayload.Message)
 		assert.Equal(t, logging.New_LogLevel(logging.LogLevel_DEBUG), gotPayload.Level)
 	}
+}
+
+func TestDropsLogs(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	w := &blockingWriter{ctx: ctx}
+	registry := metrics.NewRootMetricsRegistry()
+	asyncTCPWriter := StartAsyncWriter(w, registry)
+	defer func() {
+		_ = asyncTCPWriter.Close()
+	}()
+	logger := svc1log.NewFromCreator(asyncTCPWriter, wlog.DebugLevel, wlog.NewJSONMarshalLoggerProvider().NewLeveledLogger)
+	for i := 0; i <= asyncWriterBufferCapacity+100; i++ {
+		logger.Info("msg")
+	}
+	assert.Equal(t, asyncWriterBufferCapacity, len(asyncTCPWriter.(*asyncWriter).buffer), "expected buffer to be full")
+	assert.Equal(t, int64(100), registry.Counter(asyncWriterDroppedCounter).Count(), "expected dropped counter to increment")
+	cancel()
+	time.Sleep(time.Second)
+	assert.Equal(t, 0, len(asyncTCPWriter.(*asyncWriter).buffer), "expected buffer to empty")
+}
+
+func TestDropsLogsOnError(t *testing.T) {
+	w := &alwaysErrorWriter{}
+	registry := metrics.NewRootMetricsRegistry()
+	asyncTCPWriter := StartAsyncWriter(w, registry)
+	defer func() {
+		_ = asyncTCPWriter.Close()
+	}()
+	logger := svc1log.NewFromCreator(asyncTCPWriter, wlog.DebugLevel, wlog.NewJSONMarshalLoggerProvider().NewLeveledLogger)
+	for i := 0; i < 5; i++ {
+		logger.Info("msg")
+	}
+	time.Sleep(time.Second)
+	assert.Equal(t, int64(5), registry.Counter(asyncWriterDroppedCounter).Count(), "expected dropped counter to increment")
+}
+
+type blockingWriter struct {
+	ctx context.Context
+}
+
+func (b *blockingWriter) Write(p []byte) (int, error) {
+	<-b.ctx.Done()
+	return len(p), nil
+}
+
+type alwaysErrorWriter struct{}
+
+func (alwaysErrorWriter) Write(p []byte) (int, error) {
+	return 0, errors.New("error")
 }
