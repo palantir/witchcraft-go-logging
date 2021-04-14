@@ -1,0 +1,8 @@
+go mod operation failed. This may mean that there are legitimate dependency issues with the "go.mod" definition in the repository and the updates performed by the gomod check. This branch can be cloned locally to debug the issue.
+
+Command that caused error:
+./godelw exec -- go build ./benchmarks ./example-apps ./example-apps/producer ./internal/gopath ./wlog ./wlog-glog ./wlog-glog/internal ./wlog-zap ./wlog-zap/internal ./wlog-zerolog ./wlog-zerolog/internal ./wlog/auditlog/audit2log ./wlog/auditlog/audit2log/audit2logtests ./wlog/diaglog/diag1log ./wlog/diaglog/diag1log/diag1logtests ./wlog/evtlog/evt2log ./wlog/evtlog/evt2log/evt2logtests ./wlog/extractor ./wlog/internal ./wlog/logreader ./wlog/metriclog/metric1log ./wlog/metriclog/metric1log/metric1logtests ./wlog/reqlog/req2log ./wlog/reqlog/req2log/req2logtests ./wlog/svclog/svc1log ./wlog/svclog/svc1log/svc1logtests ./wlog/tcpjson ./wlog/trclog/trc1log ./wlog/trclog/trc1log/trc1logtests ./wlog/wapp ./wlog/wrappedlog/wrapped1log ./wlog/wrappedlog/wrapped1log/wrapped1logtests
+
+Output:
+go build github.com/palantir/witchcraft-go-logging/benchmarks: no non-test Go files in /local/repositories/palantir-witchcraft-go-logging-159573815/benchmarks
+Error: exit status 1
