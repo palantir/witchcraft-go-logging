@@ -42,7 +42,7 @@ type asyncWriter struct {
 type AsyncWriter interface {
 	io.WriteCloser
 	// Drain tries to gracefully drain the remaining buffered messages,
-	//  blocking until the buffer is empty or the provided context is cancelled.
+	// blocking until the buffer is empty or the provided context is cancelled.
 	Drain(ctx context.Context)
 }
 
