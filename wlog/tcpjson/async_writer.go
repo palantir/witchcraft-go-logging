@@ -57,11 +57,14 @@ func StartAsyncWriter(output io.Writer, registry metrics.Registry) AsyncWriter {
 	w := &asyncWriter{buffer: buffer, output: output, dropped: droppedCounter, queued: queued, stop: stop}
 	go func() {
 		for {
+			// Ensure we stop when requested. Without the additional select,
+			// the loop could continue to run as long as there are items in the buffer.
 			select {
 			case <-stop:
 				return
 			default:
 			}
+
 			select {
 			case item := <-buffer:
 				w.write(item)
