@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -123,9 +124,9 @@ func TestAsyncWriteWithSvc1log(t *testing.T) {
 }
 
 func TestDropsLogs(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	w := &blockingWriter{ctx: ctx}
+	writerCtx, unblock := context.WithCancel(context.Background())
+	defer unblock()
+	w := &blockingWriter{ctx: writerCtx}
 	registry := metrics.NewRootMetricsRegistry()
 	asyncTCPWriter := StartAsyncWriter(w, registry)
 	defer func() {
@@ -137,7 +138,7 @@ func TestDropsLogs(t *testing.T) {
 	}
 	assert.Equal(t, asyncWriterBufferCapacity, len(asyncTCPWriter.(*asyncWriter).buffer), "expected buffer to be full")
 	assert.Equal(t, int64(100), registry.Counter(asyncWriterDroppedCounter).Count(), "expected dropped counter to increment")
-	cancel()
+	unblock()
 	time.Sleep(time.Second)
 	assert.Equal(t, 0, len(asyncTCPWriter.(*asyncWriter).buffer), "expected buffer to empty")
 }
@@ -157,13 +158,47 @@ func TestDropsLogsOnError(t *testing.T) {
 	assert.Equal(t, int64(5), registry.Counter(asyncWriterDroppedCounter).Count(), "expected dropped counter to increment")
 }
 
+func TestShutdownDrainsBuffer(t *testing.T) {
+	writerCtx, unblock := context.WithCancel(context.Background())
+	defer unblock()
+	w := &blockingWriter{ctx: writerCtx}
+	registry := metrics.NewRootMetricsRegistry()
+	asyncTCPWriter := StartAsyncWriter(w, registry)
+	logger := svc1log.NewFromCreator(asyncTCPWriter, wlog.DebugLevel, wlog.NewJSONMarshalLoggerProvider().NewLeveledLogger)
+	for i := 0; i < 5; i++ {
+		logger.Info(strconv.Itoa(i))
+	}
+	// Close the writer for new entries
+	_ = asyncTCPWriter.Close()
+	_, err := asyncTCPWriter.Write([]byte("too late"))
+	assert.EqualError(t, err, "write to closed asyncWriter")
+
+	// At this point, we have 5 messages queued. Next we start Drain(), which drains the writer.
+	assert.Empty(t, w.buf.String())
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		unblock()
+	}()
+	shutdownStart := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // should be instant, this is just to catch bugs
+	defer cancel()
+	asyncTCPWriter.Drain(ctx)
+	// We set a 5s timeout but this _should_ run very fast, so make sure it was less than 1s.
+	assert.Less(t, time.Since(shutdownStart), time.Second, "expected shutdown to be fast")
+
+	writtenLines := strings.Split(strings.TrimSpace(w.buf.String()), "\n")
+	assert.Len(t, writtenLines, 5)
+}
+
 type blockingWriter struct {
 	ctx context.Context
+	buf bytes.Buffer
 }
 
 func (b *blockingWriter) Write(p []byte) (int, error) {
 	<-b.ctx.Done()
-	return len(p), nil
+	return b.buf.Write(p)
 }
 
 type alwaysErrorWriter struct{}

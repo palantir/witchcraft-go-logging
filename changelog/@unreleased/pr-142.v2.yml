@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add Drain() method to tcpjson.AsyncWriter
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/142
