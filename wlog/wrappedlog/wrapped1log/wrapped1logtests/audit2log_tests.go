@@ -279,6 +279,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
+			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
 
 			buf.Reset()
 			logger.Audit("audited action name", audit2log.AuditResultSuccess, reusedParams)
@@ -311,7 +312,6 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
-
 			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
 		})
 	}
