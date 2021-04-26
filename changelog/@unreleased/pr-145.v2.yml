@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Updates Conjure definition for witchcraft-logging-api to v1.3.0
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/145
