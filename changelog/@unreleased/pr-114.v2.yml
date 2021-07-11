@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Add gologr svclog wrapper
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/114
+
