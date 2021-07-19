@@ -23,6 +23,8 @@ import (
 	"github.com/fatih/color"
 )
 
+var defaultColorizer = color.New()
+
 type LogType string
 
 type LogEntry struct {
@@ -123,7 +125,7 @@ func (f *entryFormatter) Format(lineJSON []byte) (string, error) {
 			return c.Sprint(logText), nil
 		}
 	}
-	return logText, nil
+	return defaultColorizer.Sprint(logText), nil
 }
 
 func (f *entryFormatter) TemplateObjectDescription() string {
