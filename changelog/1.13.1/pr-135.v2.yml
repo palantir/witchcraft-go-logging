@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: 'Async writer: Drop logs if buffer is full'
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/135

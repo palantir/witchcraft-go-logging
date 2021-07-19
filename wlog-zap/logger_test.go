@@ -34,6 +34,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
 )
 
 func TestSvc1Log(t *testing.T) {
@@ -102,4 +104,75 @@ func TestDiag1Log(t *testing.T) {
 			zapimpl.LoggerProvider().NewLogger,
 		)
 	})
+}
+
+func TestWrapped1LogAudit2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Audit2LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) audit2log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Audit()
+		})
+}
+
+func TestWrapped1LogDiag1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Diag1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) diag1log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Diagnostic()
+	})
+}
+
+func TestWrapped1LogEvt2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Evt2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) evt2log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Event()
+	})
+}
+
+func TestWrapped1Metric1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Metric1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) metric1log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Metric()
+	})
+}
+
+func TestWrapped1LogReq2Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Req2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger {
+		allParams := append([]req2log.LoggerCreatorParam{
+			req2log.Creator(zapimpl.LoggerProvider().NewLogger),
+		}, params...)
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Request(allParams...)
+	})
+}
+
+func TestWrapped1LogSvc1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Svc1LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
+			return wrapped1log.NewFromProvider(w, level, zapimpl.LoggerProvider(), entityName, entityVersion).Service(svc1log.Origin(origin))
+		})
+}
+
+func TestWrapped1LogTrc1Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Trc1LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) trc1log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, zapimpl.LoggerProvider(), entityName, entityVersion).Trace()
+		})
 }

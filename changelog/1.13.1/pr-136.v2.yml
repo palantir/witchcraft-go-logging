@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: 'Tcpjson: Shorten dial timeout to 5s'
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/136

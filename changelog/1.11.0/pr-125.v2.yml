@@ -1,0 +1,8 @@
+type: feature
+feature:
+  description: |-
+    Add support to write JSON encoded log lines to a TCP socket
+
+    The JSON encoded log lines will be wrapped in an envelope that contains metadata about the source origin, including hostname, product, product version, etc. The TCP receiver is expected to use TLS authentication so valid security material should be used with the TCPConnProvider.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/125

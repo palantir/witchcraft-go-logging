@@ -35,6 +35,7 @@ import (
 type TestCase struct {
 	Name        string
 	SpanOptions []wtracing.SpanOption
+	Tags        map[string]string
 	JSONMatcher objmatcher.MapMatcher
 }
 
@@ -94,6 +95,161 @@ func TestCases(clientSpan wtracing.Span) []TestCase {
 				}),
 			},
 		},
+		{
+			Name: "trace.1 log entry with trace tags ",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value0"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log entry with trace tag overwrite",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+				wtracing.WithSpanTag("key1", "value1"),
+				wtracing.WithSpanTag("key0", "value2"),
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value2"),
+							"key1": objmatcher.NewEqualsMatcher("value1"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log entry with after span creation tag",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+			},
+			Tags: map[string]string{
+				"key1": "value1",
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value0"),
+							"key1": objmatcher.NewEqualsMatcher("value1"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log tag entry after span creation overwrites",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+			},
+			Tags: map[string]string{
+				"key0": "value1",
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value1"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log tag entry after span creation does not overwrite error",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("error", "value0"),
+			},
+			Tags: map[string]string{
+				"error": "value1",
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"error": objmatcher.NewEqualsMatcher("value0"),
+						},
+					),
+				}),
+			},
+		},
+		{
+			Name: "trace.1 log tag entry after span empty tag value",
+			SpanOptions: []wtracing.SpanOption{
+				wtracing.WithSpanTag("key0", "value0"),
+			},
+			Tags: map[string]string{
+				"key1": "",
+			},
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"type": objmatcher.NewEqualsMatcher("trace.1"),
+				"time": objmatcher.NewRegExpMatcher(".+"),
+				"span": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"name":      objmatcher.NewEqualsMatcher("testOp"),
+					"traceId":   objmatcher.NewEqualsMatcher(traceID),
+					"id":        objmatcher.NewRegExpMatcher("[a-f0-9]+"),
+					"parentId":  objmatcher.NewEqualsMatcher(clientSpanID),
+					"timestamp": objmatcher.NewAnyMatcher(),
+					"duration":  objmatcher.NewAnyMatcher(),
+					"tags": objmatcher.MapMatcher(
+						map[string]objmatcher.Matcher{
+							"key0": objmatcher.NewEqualsMatcher("value0"),
+							"key1": objmatcher.NewEqualsMatcher(""),
+						},
+					),
+				}),
+			},
+		},
 	}
 }
 
@@ -142,6 +298,11 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 			)
 			require.NoError(t, err)
 			span := tracer.StartSpan("testOp", append([]wtracing.SpanOption{wtracing.WithParent(clientSpan)}, tc.SpanOptions...)...)
+			if tc.Tags != nil {
+				for k, v := range tc.Tags {
+					span.Tag(k, v)
+				}
+			}
 			// Finish() triggers logging
 			span.Finish()
 

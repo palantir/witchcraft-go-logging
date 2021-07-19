@@ -20,7 +20,6 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog-glog/internal/marshalers"
 )
 
 type gLogger struct{}
@@ -51,16 +50,10 @@ func (*gLogger) SetLevel(level wlog.LogLevel) {
 
 func createGLogMsg(msg string, params []wlog.Param) string {
 	entry := wlog.NewMapLogEntry()
-	wlog.ApplyParams(entry, params)
-
-	var parts []string
-	if msg != "" {
-		parts = append(parts, msg)
-	}
-	parts = append(parts, paramsToLog(entry)...)
+	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 
 	// TODO: ignore/omit unsafe params?
-	return strings.Join(parts, ", ")
+	return strings.Join(paramsToLog(entry), ", ")
 }
 
 // paramsToLog returns the parameters to log as strings of the form "<key>: <value>".
@@ -85,11 +78,7 @@ func paramsToLog(entry wlog.MapLogEntry) []string {
 		params = append(params, fmt.Sprintf("%s: %v", k, v))
 	}
 	for k, v := range entry.ObjectValues() {
-		val, ok := marshalers.StringForType(v.MarshalerType, k, v.Value)
-		if !ok {
-			val = fmt.Sprintf("%+v", v.Value)
-		}
-		params = append(params, fmt.Sprintf("%s: %v", k, val))
+		params = append(params, fmt.Sprintf("%s: %v", k, v))
 	}
 	return params
 }
