@@ -1,7 +1,13 @@
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/fatih/color v1.9.0
+github.com/fatih/color
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 github.com/golang/glog
+# github.com/mattn/go-colorable v0.1.4
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.11
+github.com/mattn/go-isatty
 # github.com/nmiyake/pkg/dirs v1.0.0
 github.com/nmiyake/pkg/dirs
 # github.com/openzipkin/zipkin-go v0.2.2
@@ -14,6 +20,8 @@ github.com/openzipkin/zipkin-go/reporter
 github.com/palantir/go-metrics
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
+# github.com/palantir/pkg/bytesbuffers v1.0.1
+github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/datetime v1.0.1
 github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/metrics v1.0.1
@@ -65,6 +73,8 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
+# golang.org/x/sys v0.0.0-20191026070338-33540a1f6037
+golang.org/x/sys/unix
 # gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c

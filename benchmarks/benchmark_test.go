@@ -23,6 +23,7 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
+	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
@@ -174,7 +175,9 @@ func BenchmarkTrc1Log(b *testing.B) {
 
 func RunBenchmarks(b *testing.B, benchmark func(*testing.B, wlog.LoggerProvider)) {
 	b.Run("noop", func(b *testing.B) { benchmark(b, wlog.NewNoopLoggerProvider()) })
+	b.Run("json.Marshal", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
 	b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
 	b.Run("zap", func(b *testing.B) { benchmark(b, wlogzap.LoggerProvider()) })
 	b.Run("zerolog", func(b *testing.B) { benchmark(b, wlogzerolog.LoggerProvider()) })
+	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
 }
