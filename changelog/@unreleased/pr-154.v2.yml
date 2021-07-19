@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Set default colorizer in wlog-tmpl
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/154
