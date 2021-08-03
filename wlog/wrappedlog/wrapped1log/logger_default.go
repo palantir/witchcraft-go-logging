@@ -28,7 +28,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
-type defaultLogger struct {
+type DefaultLogger struct {
 	name    string
 	version string
 
@@ -41,7 +41,7 @@ type defaultLogger struct {
 	levellogger wlog.LeveledLogger
 }
 
-func (l *defaultLogger) Audit() audit2log.Logger {
+func (l *DefaultLogger) Audit() audit2log.Logger {
 	return &wrappedAudit2Logger{
 		name:    l.name,
 		version: l.version,
@@ -49,7 +49,7 @@ func (l *defaultLogger) Audit() audit2log.Logger {
 	}
 }
 
-func (l *defaultLogger) Diagnostic() diag1log.Logger {
+func (l *DefaultLogger) Diagnostic() diag1log.Logger {
 	return &wrappedDiag1Logger{
 		name:    l.name,
 		version: l.version,
@@ -57,7 +57,7 @@ func (l *defaultLogger) Diagnostic() diag1log.Logger {
 	}
 }
 
-func (l *defaultLogger) Event() evt2log.Logger {
+func (l *DefaultLogger) Event() evt2log.Logger {
 	return &wrappedEvt2Logger{
 		name:    l.name,
 		version: l.version,
@@ -65,7 +65,7 @@ func (l *defaultLogger) Event() evt2log.Logger {
 	}
 }
 
-func (l *defaultLogger) Metric() metric1log.Logger {
+func (l *DefaultLogger) Metric() metric1log.Logger {
 	return &wrappedMetric1Logger{
 		name:    l.name,
 		version: l.version,
@@ -73,7 +73,7 @@ func (l *defaultLogger) Metric() metric1log.Logger {
 	}
 }
 
-func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+func (l *DefaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
 	loggerBuilder := &req2LoggerBuilder{
 		name:          l.name,
 		version:       l.version,
@@ -86,7 +86,7 @@ func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Lo
 	return loggerBuilder.build(l.writer)
 }
 
-func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
+func (l *DefaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 	return &wrappedSvc1Logger{
 		params:  params,
 		name:    l.name,
@@ -95,7 +95,7 @@ func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 	}
 }
 
-func (l *defaultLogger) Trace() trc1log.Logger {
+func (l *DefaultLogger) Trace() trc1log.Logger {
 	return &wrappedTrc1Logger{
 		name:    l.name,
 		version: l.version,
@@ -103,11 +103,11 @@ func (l *defaultLogger) Trace() trc1log.Logger {
 	}
 }
 
-func (l *defaultLogger) WithName(name string) {
+func (l *DefaultLogger) WithName(name string) {
 	l.name = name
 }
 
-func (l *defaultLogger) WithVersion(version string) {
+func (l *DefaultLogger) WithVersion(version string) {
 	l.version = version
 }
 

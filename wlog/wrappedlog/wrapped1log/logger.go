@@ -47,7 +47,7 @@ func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
 }
 
 func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
-	return &defaultLogger{
+	return &DefaultLogger{
 		name:        name,
 		version:     version,
 		creator:     creator.NewLogger,
