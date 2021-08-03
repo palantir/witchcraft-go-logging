@@ -103,6 +103,14 @@ func (l *defaultLogger) Trace() trc1log.Logger {
 	}
 }
 
+func (l *defaultLogger) WithName(name string) {
+	l.name = name
+}
+
+func (l *defaultLogger) WithVersion(version string) {
+	l.version = version
+}
+
 var defaultTypeParam = []wlog.Param{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)

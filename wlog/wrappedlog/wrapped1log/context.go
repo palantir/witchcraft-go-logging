@@ -28,3 +28,12 @@ const contextKey = wrapped1LogContextKeyType(TypeValue)
 func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
 }
+
+// FromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
+// logger created by calling DefaultLogger with an empty name and version.
+func FromContext(ctx context.Context) Logger {
+	if logger, ok := ctx.Value(contextKey).(Logger); ok {
+		return logger
+	}
+	return defaultLoggerCreator("", "")
+}

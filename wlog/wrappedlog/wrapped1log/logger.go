@@ -16,6 +16,7 @@ package wrapped1log
 
 import (
 	"io"
+	"os"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
@@ -35,6 +36,10 @@ type Logger interface {
 	Request(params ...req2log.LoggerCreatorParam) req2log.Logger
 	Service(params ...svc1log.Param) svc1log.Logger
 	Trace() trc1log.Logger
+}
+
+var defaultLoggerCreator = func(name, version string) Logger {
+	return New(os.Stderr, wlog.InfoLevel, name, version)
 }
 
 func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
