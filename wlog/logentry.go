@@ -56,6 +56,12 @@ type LevelChecker interface {
 	Enabled(level LogLevel) bool
 }
 
+type LevelChecker interface {
+	// Enabled determines whether the provided level should be logged.
+	// If implemented with LeveledLogger or SetLevel, they must remain consistent with Enabled.
+	Enabled(level LogLevel) bool
+}
+
 type MapValueEntries struct {
 	stringMapValues map[string]map[string]string
 	anyMapValues    map[string]map[string]interface{}
