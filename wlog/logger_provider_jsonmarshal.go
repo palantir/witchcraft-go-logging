@@ -39,29 +39,25 @@ func (l *jsonMapLogger) Log(params ...Param) {
 }
 
 func (l *jsonMapLogger) Debug(msg string, params ...Param) {
-	switch l.level {
-	case DebugLevel:
+	if l.level.Enabled(DebugLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
 func (l *jsonMapLogger) Info(msg string, params ...Param) {
-	switch l.level {
-	case DebugLevel, InfoLevel:
+	if l.level.Enabled(InfoLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
 func (l *jsonMapLogger) Warn(msg string, params ...Param) {
-	switch l.level {
-	case DebugLevel, InfoLevel, WarnLevel:
+	if l.level.Enabled(WarnLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
 func (l *jsonMapLogger) Error(msg string, params ...Param) {
-	switch l.level {
-	case DebugLevel, InfoLevel, WarnLevel, ErrorLevel:
+	if l.level.Enabled(ErrorLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
@@ -72,10 +68,6 @@ func (l *jsonMapLogger) SetLevel(level LogLevel) {
 
 func (l *jsonMapLogger) LogLevel() LogLevel {
 	return l.level
-}
-
-func (l *jsonMapLogger) enabled(level LogLevel) bool {
-	return l.level.Enabled(level)
 }
 
 func (l *jsonMapLogger) logOutput(params []Param) {
