@@ -70,6 +70,10 @@ func (l *jsonMapLogger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
+func (l *jsonMapLogger) Enabled(level LogLevel) bool {
+	return l.level.Enabled(level)
+}
+
 func (l *jsonMapLogger) logOutput(params []Param) {
 	params = append(params, StringParam(TimeKey, time.Now().Format(time.RFC3339Nano)))
 

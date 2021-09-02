@@ -48,6 +48,10 @@ func (*gLogger) SetLevel(level wlog.LogLevel) {
 	// intentionally not implemented as glog uses the globally defined level
 }
 
+func (*gLogger) Enabled(_ wlog.LogLevel) bool {
+	return true
+}
+
 func createGLogMsg(msg string, params []wlog.Param) string {
 	entry := wlog.NewMapLogEntry()
 	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))

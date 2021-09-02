@@ -33,6 +33,7 @@ func (*nooplogger) Info(msg string, params ...Param)  {}
 func (*nooplogger) Warn(msg string, params ...Param)  {}
 func (*nooplogger) Error(msg string, params ...Param) {}
 func (*nooplogger) SetLevel(level LogLevel)           {}
+func (*nooplogger) Enabled(level LogLevel) bool       { return false }
 
 type noopLoggerProvider struct{}
 

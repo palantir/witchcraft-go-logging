@@ -360,6 +360,7 @@ something/something:123`,
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
+	paramStorerOnlyEvaluatedIfLoggedTest(t, loggerProvider)
 	paramIsntOverwrittenByParams(t, loggerProvider)
 	extraParamsDoNotAppearTest(t, loggerProvider)
 	jsonLoggerUpdateTest(t, loggerProvider)
@@ -421,6 +422,15 @@ func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.
 		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
 		// parameters (if marshal occurred, this would panic).
 		logger.Debug("Test Message", svc1log.SafeParam("testType", jsonMarshalPanicType{}))
+	})
+}
+
+func paramStorerOnlyEvaluatedIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+	t.Run("Params only evaluated if logged", func(t *testing.T) {
+		logger := loggerProvider(&bytes.Buffer{}, wlog.InfoLevel, "")
+		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
+		// parameters (if marshal occurred, this would panic).
+		logger.Debug("Test Message", svc1log.Params(paramStorerPanicType{}))
 	})
 }
 
@@ -499,4 +509,14 @@ type jsonMarshalPanicType struct{}
 
 func (t jsonMarshalPanicType) MarshalJSON() ([]byte, error) {
 	panic("jsonMarshalPanicType panics on MarshalJSON")
+}
+
+type paramStorerPanicType struct{}
+
+func (p paramStorerPanicType) SafeParams() map[string]interface{} {
+	panic("paramStorerPanicType panics on SafeParams")
+}
+
+func (p paramStorerPanicType) UnsafeParams() map[string]interface{} {
+	panic("paramStorerPanicType panics on UnsafeParams")
 }

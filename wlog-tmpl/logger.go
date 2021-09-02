@@ -69,6 +69,10 @@ func (l *tmplLogger) SetLevel(level wlog.LogLevel) {
 	l.level = level
 }
 
+func (l *tmplLogger) Enabled(level wlog.LogLevel) bool {
+	return l.level.Enabled(level)
+}
+
 func (l *tmplLogger) logOutput(params []wlog.Param) {
 	_, _ = fmt.Fprintln(l.w, l.formatOutput(params))
 }

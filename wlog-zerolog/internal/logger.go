@@ -161,51 +161,41 @@ type zeroLogger struct {
 	level  zerolog.Level
 }
 
-func (l *zeroLogger) should(level zerolog.Level) bool {
-	if level < l.level {
-		return false
-	}
-	return true
-}
-
 func (l *zeroLogger) Log(params ...wlog.Param) {
-	if !l.should(zerolog.NoLevel) {
-		return
-	}
 	logOutput(l.logger.Log, "", params)
 }
 
 func (l *zeroLogger) Debug(msg string, params ...wlog.Param) {
-	if !l.should(zerolog.DebugLevel) {
-		return
+	if l.Enabled(wlog.DebugLevel) {
+		logOutput(l.logger.Log, msg, params)
 	}
-	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Info(msg string, params ...wlog.Param) {
-	if !l.should(zerolog.InfoLevel) {
-		return
+	if l.Enabled(wlog.InfoLevel) {
+		logOutput(l.logger.Log, msg, params)
 	}
-	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Warn(msg string, params ...wlog.Param) {
-	if !l.should(zerolog.WarnLevel) {
-		return
+	if l.Enabled(wlog.WarnLevel) {
+		logOutput(l.logger.Log, msg, params)
 	}
-	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) Error(msg string, params ...wlog.Param) {
-	if !l.should(zerolog.ErrorLevel) {
-		return
+	if l.Enabled(wlog.ErrorLevel) {
+		logOutput(l.logger.Log, msg, params)
 	}
-	logOutput(l.logger.Log, msg, params)
 }
 
 func (l *zeroLogger) SetLevel(level wlog.LogLevel) {
 	l.level = toZeroLevel(level)
 	l.logger = l.logger.Level(toZeroLevel(level))
+}
+
+func (l *zeroLogger) Enabled(level wlog.LogLevel) bool {
+	return l.level <= toZeroLevel(level)
 }
 
 func reverseParams(params []wlog.Param) {
