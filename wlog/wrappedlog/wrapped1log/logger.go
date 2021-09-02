@@ -42,15 +42,16 @@ func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
 }
 
 func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
-	levelLogger := creator.NewLeveledLogger(w, level)
-	levelProvider, _ := levelLogger.(wlog.LevelProvider)
+	delegate := creator.NewLeveledLogger(w, level)
+	// We ignore the second return value because 'level: nil' is a valid state handled in the implementation.
+	levelChecker, _ := delegate.(wlog.LevelChecker)
 	return &defaultLogger{
-		name:          name,
-		version:       version,
-		creator:       creator.NewLogger,
-		writer:        w,
-		logger:        creator.NewLogger(w),
-		levellogger:   levelLogger,
-		levelProvider: levelProvider,
+		name:        name,
+		version:     version,
+		creator:     creator.NewLogger,
+		writer:      w,
+		logger:      creator.NewLogger(w),
+		levellogger: delegate,
+		level:       levelChecker,
 	}
 }

@@ -50,9 +50,9 @@ func ErrorLevelParam() wlog.Param {
 }
 
 type defaultLogger struct {
-	logger        wlog.LeveledLogger
-	levelProvider wlog.LevelProvider
-	params        []Param
+	logger wlog.LeveledLogger
+	level  wlog.LevelChecker
+	params []Param
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
@@ -84,7 +84,7 @@ func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 }
 
 func (l *defaultLogger) enabled(level wlog.LogLevel) bool {
-	return l.levelProvider == nil || l.levelProvider.LogLevel().Enabled(level)
+	return l.level == nil || l.level.Enabled(level)
 }
 
 func ToParams(level wlog.Param, inParams []Param) []wlog.Param {

@@ -24,8 +24,8 @@ type wrappedSvc1Logger struct {
 	version string
 	params  []svc1log.Param
 
-	logger        wlog.LeveledLogger
-	levelProvider wlog.LevelProvider
+	logger wlog.LeveledLogger
+	level  wlog.LevelChecker
 }
 
 func (l *wrappedSvc1Logger) Debug(msg string, params ...svc1log.Param) {
@@ -57,7 +57,7 @@ func (l *wrappedSvc1Logger) SetLevel(level wlog.LogLevel) {
 }
 
 func (l *wrappedSvc1Logger) enabled(level wlog.LogLevel) bool {
-	return l.levelProvider == nil || l.levelProvider.LogLevel().Enabled(level)
+	return l.level == nil || l.level.Enabled(level)
 }
 
 func (l *wrappedSvc1Logger) toServiceParams(message string, levelParam wlog.Param, inParams []svc1log.Param) []wlog.Param {

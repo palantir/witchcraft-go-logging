@@ -50,8 +50,10 @@ type LeveledLogger interface {
 	SetLevel(level LogLevel)
 }
 
-type LevelProvider interface {
-	LogLevel() LogLevel
+type LevelChecker interface {
+	// Enabled determines whether the provided level should be logged.
+	// If implemented with LeveledLogger or SetLevel, they must remain consistent with Enabled.
+	Enabled(level LogLevel) bool
 }
 
 type MapValueEntries struct {

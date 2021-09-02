@@ -15,7 +15,6 @@
 package zeroimpl
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -30,35 +29,13 @@ type loggerProvider struct{}
 
 func (lp *loggerProvider) NewLogger(w io.Writer) wlog.Logger {
 	return &zeroLogger{
-		logger: newZeroLogger(w, wlog.InfoLevel),
+		logger: zerolog.New(w),
 	}
 }
 
 func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &zeroLogger{
-		logger:    newZeroLogger(w, level),
-		wlogLevel: level,
-		zeroLevel: toZeroLevel(level),
-	}
-}
-
-func newZeroLogger(w io.Writer, level wlog.LogLevel) zerolog.Logger {
-	return zerolog.New(w).Level(toZeroLevel(level))
-}
-
-func toZeroLevel(lvl wlog.LogLevel) zerolog.Level {
-	switch lvl {
-	case wlog.DebugLevel:
-		return zerolog.DebugLevel
-	case wlog.LogLevel(""), wlog.InfoLevel:
-		return zerolog.InfoLevel
-	case wlog.WarnLevel:
-		return zerolog.WarnLevel
-	case wlog.ErrorLevel:
-		return zerolog.ErrorLevel
-	case wlog.FatalLevel:
-		return zerolog.FatalLevel
-	default:
-		panic(fmt.Errorf("Invalid log level %q", lvl))
+		logger:         zerolog.New(w),
+		AtomicLogLevel: wlog.NewAtomicLogLevel(level),
 	}
 }

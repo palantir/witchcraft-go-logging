@@ -38,8 +38,8 @@ type defaultLogger struct {
 
 	logger wlog.Logger
 	// levellogger is only used by the service logger which supports logging at different log levels
-	levellogger   wlog.LeveledLogger
-	levelProvider wlog.LevelProvider
+	levellogger wlog.LeveledLogger
+	level       wlog.LevelChecker
 }
 
 func (l *defaultLogger) Audit() audit2log.Logger {
@@ -89,11 +89,11 @@ func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Lo
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 	return &wrappedSvc1Logger{
-		params:        params,
-		name:          l.name,
-		version:       l.version,
-		logger:        l.levellogger,
-		levelProvider: l.levelProvider,
+		params:  params,
+		name:    l.name,
+		version: l.version,
+		logger:  l.levellogger,
+		level:   l.level,
 	}
 }
 

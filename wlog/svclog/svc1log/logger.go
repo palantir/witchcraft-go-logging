@@ -34,10 +34,11 @@ func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 
 func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
 	delegate := creator(w, level)
-	levelProvider, _ := delegate.(wlog.LevelProvider)
+	// We ignore the second return value because 'level: nil' is a valid state handled in the implementation.
+	levelChecker, _ := delegate.(wlog.LevelChecker)
 	return WithParams(&defaultLogger{
-		logger:        delegate,
-		levelProvider: levelProvider,
+		logger: delegate,
+		level:  levelChecker,
 	}, params...)
 }
 

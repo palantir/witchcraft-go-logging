@@ -1,5 +1,7 @@
 type: improvement
 improvement:
-  description: Update leveled logger implementations to check that the requested log level is enabled and skip parameter evaluation if the log would not be emitted.
+  description: >
+    Update all leveled logger implementations to track level atomically and, when a logger implements wlog.LevelChecker,
+    quickly skip disabled levels before parameter evaluation.
   links:
   - https://github.com/palantir/witchcraft-go-logging/pull/157

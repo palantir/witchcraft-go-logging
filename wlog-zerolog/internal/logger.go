@@ -157,9 +157,8 @@ func (e *zeroLogEntry) Evt() *zerolog.Event {
 }
 
 type zeroLogger struct {
-	logger    zerolog.Logger
-	wlogLevel wlog.LogLevel
-	zeroLevel zerolog.Level
+	logger zerolog.Logger
+	wlog.AtomicLogLevel
 }
 
 func (l *zeroLogger) Log(params ...wlog.Param) {
@@ -167,37 +166,27 @@ func (l *zeroLogger) Log(params ...wlog.Param) {
 }
 
 func (l *zeroLogger) Debug(msg string, params ...wlog.Param) {
-	if l.wlogLevel.Enabled(wlog.DebugLevel) {
+	if l.Enabled(wlog.DebugLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
 func (l *zeroLogger) Info(msg string, params ...wlog.Param) {
-	if l.wlogLevel.Enabled(wlog.InfoLevel) {
+	if l.Enabled(wlog.InfoLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
 func (l *zeroLogger) Warn(msg string, params ...wlog.Param) {
-	if l.wlogLevel.Enabled(wlog.WarnLevel) {
+	if l.Enabled(wlog.WarnLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
 func (l *zeroLogger) Error(msg string, params ...wlog.Param) {
-	if l.wlogLevel.Enabled(wlog.ErrorLevel) {
+	if l.Enabled(wlog.ErrorLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
-}
-
-func (l *zeroLogger) SetLevel(level wlog.LogLevel) {
-	l.wlogLevel = level
-	l.zeroLevel = toZeroLevel(level)
-	l.logger = l.logger.Level(toZeroLevel(level))
-}
-
-func (l *zeroLogger) LogLevel() wlog.LogLevel {
-	return l.wlogLevel
 }
 
 func reverseParams(params []wlog.Param) {
