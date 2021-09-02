@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Check log level enabled before evaluating parameters
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/157
