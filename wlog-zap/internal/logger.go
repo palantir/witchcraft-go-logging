@@ -112,8 +112,9 @@ func (e *zapLogEntry) Fields() []zapcore.Field {
 }
 
 type zapLogger struct {
-	logger *zap.Logger
-	level  *zap.AtomicLevel
+	logger    *zap.Logger
+	wlogLevel wlog.LogLevel
+	zapLevel  *zap.AtomicLevel
 }
 
 func (l *zapLogger) Log(params ...wlog.Param) {
@@ -121,35 +122,36 @@ func (l *zapLogger) Log(params ...wlog.Param) {
 }
 
 func (l *zapLogger) Debug(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.DebugLevel) {
+	if l.wlogLevel.Enabled(wlog.DebugLevel) {
 		logOutput(l.logger.Debug, msg, params)
 	}
 }
 
 func (l *zapLogger) Info(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.InfoLevel) {
+	if l.wlogLevel.Enabled(wlog.InfoLevel) {
 		logOutput(l.logger.Info, msg, params)
 	}
 }
 
 func (l *zapLogger) Warn(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.WarnLevel) {
+	if l.wlogLevel.Enabled(wlog.WarnLevel) {
 		logOutput(l.logger.Warn, msg, params)
 	}
 }
 
 func (l *zapLogger) Error(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.ErrorLevel) {
+	if l.wlogLevel.Enabled(wlog.ErrorLevel) {
 		logOutput(l.logger.Error, msg, params)
 	}
 }
 
 func (l *zapLogger) SetLevel(level wlog.LogLevel) {
-	l.level.SetLevel(toZapLevel(level))
+	l.wlogLevel = level
+	l.zapLevel.SetLevel(toZapLevel(level))
 }
 
-func (l *zapLogger) Enabled(level wlog.LogLevel) bool {
-	return l.level.Enabled(toZapLevel(level))
+func (l *zapLogger) LogLevel() wlog.LogLevel {
+	return l.wlogLevel
 }
 
 func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param) {

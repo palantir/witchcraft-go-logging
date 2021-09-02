@@ -70,7 +70,11 @@ func (l *jsonMapLogger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
-func (l *jsonMapLogger) Enabled(level LogLevel) bool {
+func (l *jsonMapLogger) LogLevel() LogLevel {
+	return l.level
+}
+
+func (l *jsonMapLogger) enabled(level LogLevel) bool {
 	return l.level.Enabled(level)
 }
 

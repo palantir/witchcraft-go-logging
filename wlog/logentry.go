@@ -48,7 +48,10 @@ type LeveledLogger interface {
 	Warn(msg string, params ...Param)
 	Error(msg string, params ...Param)
 	SetLevel(level LogLevel)
-	Enabled(level LogLevel) bool
+}
+
+type LevelProvider interface {
+	LogLevel() LogLevel
 }
 
 type MapValueEntries struct {

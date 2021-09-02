@@ -36,8 +36,9 @@ func (lp *loggerProvider) NewLogger(w io.Writer) wlog.Logger {
 		EncodeDuration: zapcore.NanosDurationEncoder,
 	})
 	return &zapLogger{
-		logger: logger,
-		level:  atomicLevel,
+		logger:    logger,
+		wlogLevel: wlog.InfoLevel,
+		zapLevel:  atomicLevel,
 	}
 }
 
@@ -48,8 +49,9 @@ func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlo
 		EncodeLevel:    zapcore.CapitalLevelEncoder,
 	})
 	return &zapLogger{
-		logger: logger,
-		level:  atomicLevel,
+		logger:    logger,
+		wlogLevel: level,
+		zapLevel:  atomicLevel,
 	}
 }
 

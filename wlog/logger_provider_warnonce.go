@@ -35,7 +35,6 @@ func (l *warnOnceLogger) Info(msg string, params ...Param)  { l.once.Do(l.printW
 func (l *warnOnceLogger) Warn(msg string, params ...Param)  { l.once.Do(l.printWarning) }
 func (l *warnOnceLogger) Error(msg string, params ...Param) { l.once.Do(l.printWarning) }
 func (l *warnOnceLogger) SetLevel(level LogLevel)           { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) Enabled(level LogLevel) bool       { return true }
 
 func (l *warnOnceLogger) printWarning() {
 	_, _ = fmt.Fprintln(l.w, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. `+

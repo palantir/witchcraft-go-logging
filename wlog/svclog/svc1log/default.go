@@ -49,7 +49,7 @@ type warnLogger struct {
 }
 
 func (l *warnLogger) Debug(msg string, params ...Param) {
-	if l.Enabled(wlog.DebugLevel) {
+	if l.enabled(wlog.DebugLevel) {
 		l.log(func(logger Logger) {
 			logger.Debug(msg, params...)
 		})
@@ -57,7 +57,7 @@ func (l *warnLogger) Debug(msg string, params ...Param) {
 }
 
 func (l *warnLogger) Info(msg string, params ...Param) {
-	if l.Enabled(wlog.InfoLevel) {
+	if l.enabled(wlog.InfoLevel) {
 		l.log(func(logger Logger) {
 			logger.Info(msg, params...)
 		})
@@ -65,7 +65,7 @@ func (l *warnLogger) Info(msg string, params ...Param) {
 }
 
 func (l *warnLogger) Warn(msg string, params ...Param) {
-	if l.Enabled(wlog.WarnLevel) {
+	if l.enabled(wlog.WarnLevel) {
 		l.log(func(logger Logger) {
 			logger.Warn(msg, params...)
 		})
@@ -73,7 +73,7 @@ func (l *warnLogger) Warn(msg string, params ...Param) {
 }
 
 func (l *warnLogger) Error(msg string, params ...Param) {
-	if l.Enabled(wlog.ErrorLevel) {
+	if l.enabled(wlog.ErrorLevel) {
 		l.log(func(logger Logger) {
 			logger.Error(msg, params...)
 		})
@@ -84,7 +84,11 @@ func (l *warnLogger) SetLevel(level wlog.LogLevel) {
 	l.level = level
 }
 
-func (l *warnLogger) Enabled(level wlog.LogLevel) bool {
+func (l *warnLogger) LogLevel() wlog.LogLevel {
+	return l.level
+}
+
+func (l *warnLogger) enabled(level wlog.LogLevel) bool {
 	return l.level.Enabled(level)
 }
 
