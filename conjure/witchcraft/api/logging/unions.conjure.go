@@ -5,9 +5,9 @@ package logging
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/dj"
 )
 
 type Diagnostic struct {
@@ -16,80 +16,192 @@ type Diagnostic struct {
 	threadDump *ThreadDumpV1
 }
 
-type diagnosticDeserializer struct {
-	Type       string             `json:"type"`
-	Generic    *GenericDiagnostic `json:"generic"`
-	ThreadDump *ThreadDumpV1      `json:"threadDump"`
-}
-
-func (u *diagnosticDeserializer) toStruct() Diagnostic {
-	return Diagnostic{typ: u.Type, generic: u.Generic, threadDump: u.ThreadDump}
-}
-
-func (u *Diagnostic) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "generic":
-		if u.generic == nil {
-			return nil, fmt.Errorf("field \"generic\" is required")
-		}
-		return struct {
-			Type    string            `json:"type"`
-			Generic GenericDiagnostic `json:"generic"`
-		}{Type: "generic", Generic: *u.generic}, nil
-	case "threadDump":
-		if u.threadDump == nil {
-			return nil, fmt.Errorf("field \"threadDump\" is required")
-		}
-		return struct {
-			Type       string       `json:"type"`
-			ThreadDump ThreadDumpV1 `json:"threadDump"`
-		}{Type: "threadDump", ThreadDump: *u.threadDump}, nil
-	}
-}
-
 func (u Diagnostic) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u Diagnostic) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "generic":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"generic\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.generic != nil {
+			n2, err := dj.WriteLiteral(w, ",\"generic\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.generic
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "threadDump":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"threadDump\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.threadDump != nil {
+			n5, err := dj.WriteLiteral(w, ",\"threadDump\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.threadDump
+			n6, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+		}
+	default:
+		n7, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+		n8, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	n9, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n9
+	return out, nil
+}
+
+func (u Diagnostic) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
 }
 
 func (u *Diagnostic) UnmarshalJSON(data []byte) error {
-	var deser diagnosticDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "generic":
-		if u.generic == nil {
-			return fmt.Errorf("field \"generic\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Diagnostic) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Diagnostic) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Diagnostic) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Diagnostic) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenGeneric bool
+	var seenThreadDump bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "threadDump":
-		if u.threadDump == nil {
-			return fmt.Errorf("field \"threadDump\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Diagnostic[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Diagnostic[\"type\"]", err)
+			}
+		case "generic":
+			if seenGeneric {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Diagnostic[\"generic\"]")
+			}
+			seenGeneric = true
+			var unionVal GenericDiagnostic
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Diagnostic[\"generic\"]", err)
+			}
+			u.generic = &unionVal
+		case "threadDump":
+			if seenThreadDump {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Diagnostic[\"threadDump\"]")
+			}
+			seenThreadDump = true
+			var unionVal ThreadDumpV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Diagnostic[\"threadDump\"]", err)
+			}
+			u.threadDump = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "generic" && !seenGeneric {
+		missingFields = append(missingFields, "generic")
+	}
+	if u.typ == "threadDump" && !seenThreadDump {
+		missingFields = append(missingFields, "threadDump")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "Diagnostic", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "Diagnostic", unknownFields)
 	}
 	return nil
 }
 
-func (u Diagnostic) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
 func (u *Diagnostic) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *Diagnostic) AcceptFuncs(genericFunc func(GenericDiagnostic) error, threadDumpFunc func(ThreadDumpV1) error, unknownFunc func(string) error) error {
@@ -112,11 +224,11 @@ func (u *Diagnostic) AcceptFuncs(genericFunc func(GenericDiagnostic) error, thre
 	}
 }
 
-func (u *Diagnostic) GenericNoopSuccess(GenericDiagnostic) error {
+func (u *Diagnostic) GenericNoopSuccess(_ GenericDiagnostic) error {
 	return nil
 }
 
-func (u *Diagnostic) ThreadDumpNoopSuccess(ThreadDumpV1) error {
+func (u *Diagnostic) ThreadDumpNoopSuccess(_ ThreadDumpV1) error {
 	return nil
 }
 
@@ -190,80 +302,192 @@ type RequestLog struct {
 	v2  *RequestLogV2
 }
 
-type requestLogDeserializer struct {
-	Type string        `json:"type"`
-	V1   *RequestLogV1 `json:"v1"`
-	V2   *RequestLogV2 `json:"v2"`
-}
-
-func (u *requestLogDeserializer) toStruct() RequestLog {
-	return RequestLog{typ: u.Type, v1: u.V1, v2: u.V2}
-}
-
-func (u *RequestLog) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "v1":
-		if u.v1 == nil {
-			return nil, fmt.Errorf("field \"v1\" is required")
-		}
-		return struct {
-			Type string       `json:"type"`
-			V1   RequestLogV1 `json:"v1"`
-		}{Type: "v1", V1: *u.v1}, nil
-	case "v2":
-		if u.v2 == nil {
-			return nil, fmt.Errorf("field \"v2\" is required")
-		}
-		return struct {
-			Type string       `json:"type"`
-			V2   RequestLogV2 `json:"v2"`
-		}{Type: "v2", V2: *u.v2}, nil
-	}
-}
-
 func (u RequestLog) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u RequestLog) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "v1":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"v1\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.v1 != nil {
+			n2, err := dj.WriteLiteral(w, ",\"v1\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.v1
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "v2":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"v2\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.v2 != nil {
+			n5, err := dj.WriteLiteral(w, ",\"v2\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.v2
+			n6, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+		}
+	default:
+		n7, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+		n8, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	n9, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n9
+	return out, nil
+}
+
+func (u RequestLog) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
 }
 
 func (u *RequestLog) UnmarshalJSON(data []byte) error {
-	var deser requestLogDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "v1":
-		if u.v1 == nil {
-			return fmt.Errorf("field \"v1\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *RequestLog) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *RequestLog) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *RequestLog) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *RequestLog) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenV1 bool
+	var seenV2 bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "v2":
-		if u.v2 == nil {
-			return fmt.Errorf("field \"v2\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field RequestLog[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field RequestLog[\"type\"]", err)
+			}
+		case "v1":
+			if seenV1 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field RequestLog[\"v1\"]")
+			}
+			seenV1 = true
+			var unionVal RequestLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field RequestLog[\"v1\"]", err)
+			}
+			u.v1 = &unionVal
+		case "v2":
+			if seenV2 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field RequestLog[\"v2\"]")
+			}
+			seenV2 = true
+			var unionVal RequestLogV2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field RequestLog[\"v2\"]", err)
+			}
+			u.v2 = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "v1" && !seenV1 {
+		missingFields = append(missingFields, "v1")
+	}
+	if u.typ == "v2" && !seenV2 {
+		missingFields = append(missingFields, "v2")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "RequestLog", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "RequestLog", unknownFields)
 	}
 	return nil
 }
 
-func (u RequestLog) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
 func (u *RequestLog) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *RequestLog) AcceptFuncs(v1Func func(RequestLogV1) error, v2Func func(RequestLogV2) error, unknownFunc func(string) error) error {
@@ -286,11 +510,11 @@ func (u *RequestLog) AcceptFuncs(v1Func func(RequestLogV1) error, v2Func func(Re
 	}
 }
 
-func (u *RequestLog) V1NoopSuccess(RequestLogV1) error {
+func (u *RequestLog) V1NoopSuccess(_ RequestLogV1) error {
 	return nil
 }
 
-func (u *RequestLog) V2NoopSuccess(RequestLogV2) error {
+func (u *RequestLog) V2NoopSuccess(_ RequestLogV2) error {
 	return nil
 }
 
@@ -366,93 +590,225 @@ type UnionEventLog struct {
 	beaconLog  *BeaconLogV1
 }
 
-type unionEventLogDeserializer struct {
-	Type       string       `json:"type"`
-	EventLog   *EventLogV1  `json:"eventLog"`
-	EventLogV2 *EventLogV2  `json:"eventLogV2"`
-	BeaconLog  *BeaconLogV1 `json:"beaconLog"`
-}
-
-func (u *unionEventLogDeserializer) toStruct() UnionEventLog {
-	return UnionEventLog{typ: u.Type, eventLog: u.EventLog, eventLogV2: u.EventLogV2, beaconLog: u.BeaconLog}
-}
-
-func (u *UnionEventLog) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "eventLog":
-		if u.eventLog == nil {
-			return nil, fmt.Errorf("field \"eventLog\" is required")
-		}
-		return struct {
-			Type     string     `json:"type"`
-			EventLog EventLogV1 `json:"eventLog"`
-		}{Type: "eventLog", EventLog: *u.eventLog}, nil
-	case "eventLogV2":
-		if u.eventLogV2 == nil {
-			return nil, fmt.Errorf("field \"eventLogV2\" is required")
-		}
-		return struct {
-			Type       string     `json:"type"`
-			EventLogV2 EventLogV2 `json:"eventLogV2"`
-		}{Type: "eventLogV2", EventLogV2: *u.eventLogV2}, nil
-	case "beaconLog":
-		if u.beaconLog == nil {
-			return nil, fmt.Errorf("field \"beaconLog\" is required")
-		}
-		return struct {
-			Type      string      `json:"type"`
-			BeaconLog BeaconLogV1 `json:"beaconLog"`
-		}{Type: "beaconLog", BeaconLog: *u.beaconLog}, nil
-	}
-}
-
 func (u UnionEventLog) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u UnionEventLog) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "eventLog":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"eventLog\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.eventLog != nil {
+			n2, err := dj.WriteLiteral(w, ",\"eventLog\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.eventLog
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "eventLogV2":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"eventLogV2\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.eventLogV2 != nil {
+			n5, err := dj.WriteLiteral(w, ",\"eventLogV2\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.eventLogV2
+			n6, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+		}
+	case "beaconLog":
+		n7, err := dj.WriteLiteral(w, "\"type\":\"beaconLog\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+		if u.beaconLog != nil {
+			n8, err := dj.WriteLiteral(w, ",\"beaconLog\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n8
+			unionVal := *u.beaconLog
+			n9, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n9
+		}
+	default:
+		n10, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+		n11, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n11
+	}
+	n12, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n12
+	return out, nil
+}
+
+func (u UnionEventLog) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
 }
 
 func (u *UnionEventLog) UnmarshalJSON(data []byte) error {
-	var deser unionEventLogDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "eventLog":
-		if u.eventLog == nil {
-			return fmt.Errorf("field \"eventLog\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *UnionEventLog) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *UnionEventLog) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *UnionEventLog) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *UnionEventLog) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenEventLog bool
+	var seenEventLogV2 bool
+	var seenBeaconLog bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "eventLogV2":
-		if u.eventLogV2 == nil {
-			return fmt.Errorf("field \"eventLogV2\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
-	case "beaconLog":
-		if u.beaconLog == nil {
-			return fmt.Errorf("field \"beaconLog\" is required")
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field UnionEventLog[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field UnionEventLog[\"type\"]", err)
+			}
+		case "eventLog":
+			if seenEventLog {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field UnionEventLog[\"eventLog\"]")
+			}
+			seenEventLog = true
+			var unionVal EventLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field UnionEventLog[\"eventLog\"]", err)
+			}
+			u.eventLog = &unionVal
+		case "eventLogV2":
+			if seenEventLogV2 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field UnionEventLog[\"eventLogV2\"]")
+			}
+			seenEventLogV2 = true
+			var unionVal EventLogV2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field UnionEventLog[\"eventLogV2\"]", err)
+			}
+			u.eventLogV2 = &unionVal
+		case "beaconLog":
+			if seenBeaconLog {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field UnionEventLog[\"beaconLog\"]")
+			}
+			seenBeaconLog = true
+			var unionVal BeaconLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field UnionEventLog[\"beaconLog\"]", err)
+			}
+			u.beaconLog = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
 		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "eventLog" && !seenEventLog {
+		missingFields = append(missingFields, "eventLog")
+	}
+	if u.typ == "eventLogV2" && !seenEventLogV2 {
+		missingFields = append(missingFields, "eventLogV2")
+	}
+	if u.typ == "beaconLog" && !seenBeaconLog {
+		missingFields = append(missingFields, "beaconLog")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "UnionEventLog", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "UnionEventLog", unknownFields)
 	}
 	return nil
 }
 
-func (u UnionEventLog) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
 func (u *UnionEventLog) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *UnionEventLog) AcceptFuncs(eventLogFunc func(EventLogV1) error, eventLogV2Func func(EventLogV2) error, beaconLogFunc func(BeaconLogV1) error, unknownFunc func(string) error) error {
@@ -480,15 +836,15 @@ func (u *UnionEventLog) AcceptFuncs(eventLogFunc func(EventLogV1) error, eventLo
 	}
 }
 
-func (u *UnionEventLog) EventLogNoopSuccess(EventLogV1) error {
+func (u *UnionEventLog) EventLogNoopSuccess(_ EventLogV1) error {
 	return nil
 }
 
-func (u *UnionEventLog) EventLogV2NoopSuccess(EventLogV2) error {
+func (u *UnionEventLog) EventLogV2NoopSuccess(_ EventLogV2) error {
 	return nil
 }
 
-func (u *UnionEventLog) BeaconLogNoopSuccess(BeaconLogV1) error {
+func (u *UnionEventLog) BeaconLogNoopSuccess(_ BeaconLogV1) error {
 	return nil
 }
 
@@ -583,145 +939,357 @@ type WrappedLogV1Payload struct {
 	diagnosticLogV1 *DiagnosticLogV1
 }
 
-type wrappedLogV1PayloadDeserializer struct {
-	Type            string           `json:"type"`
-	ServiceLogV1    *ServiceLogV1    `json:"serviceLogV1"`
-	RequestLogV2    *RequestLogV2    `json:"requestLogV2"`
-	TraceLogV1      *TraceLogV1      `json:"traceLogV1"`
-	EventLogV2      *EventLogV2      `json:"eventLogV2"`
-	MetricLogV1     *MetricLogV1     `json:"metricLogV1"`
-	AuditLogV2      *AuditLogV2      `json:"auditLogV2"`
-	DiagnosticLogV1 *DiagnosticLogV1 `json:"diagnosticLogV1"`
-}
-
-func (u *wrappedLogV1PayloadDeserializer) toStruct() WrappedLogV1Payload {
-	return WrappedLogV1Payload{typ: u.Type, serviceLogV1: u.ServiceLogV1, requestLogV2: u.RequestLogV2, traceLogV1: u.TraceLogV1, eventLogV2: u.EventLogV2, metricLogV1: u.MetricLogV1, auditLogV2: u.AuditLogV2, diagnosticLogV1: u.DiagnosticLogV1}
-}
-
-func (u *WrappedLogV1Payload) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "serviceLogV1":
-		if u.serviceLogV1 == nil {
-			return nil, fmt.Errorf("field \"serviceLogV1\" is required")
-		}
-		return struct {
-			Type         string       `json:"type"`
-			ServiceLogV1 ServiceLogV1 `json:"serviceLogV1"`
-		}{Type: "serviceLogV1", ServiceLogV1: *u.serviceLogV1}, nil
-	case "requestLogV2":
-		if u.requestLogV2 == nil {
-			return nil, fmt.Errorf("field \"requestLogV2\" is required")
-		}
-		return struct {
-			Type         string       `json:"type"`
-			RequestLogV2 RequestLogV2 `json:"requestLogV2"`
-		}{Type: "requestLogV2", RequestLogV2: *u.requestLogV2}, nil
-	case "traceLogV1":
-		if u.traceLogV1 == nil {
-			return nil, fmt.Errorf("field \"traceLogV1\" is required")
-		}
-		return struct {
-			Type       string     `json:"type"`
-			TraceLogV1 TraceLogV1 `json:"traceLogV1"`
-		}{Type: "traceLogV1", TraceLogV1: *u.traceLogV1}, nil
-	case "eventLogV2":
-		if u.eventLogV2 == nil {
-			return nil, fmt.Errorf("field \"eventLogV2\" is required")
-		}
-		return struct {
-			Type       string     `json:"type"`
-			EventLogV2 EventLogV2 `json:"eventLogV2"`
-		}{Type: "eventLogV2", EventLogV2: *u.eventLogV2}, nil
-	case "metricLogV1":
-		if u.metricLogV1 == nil {
-			return nil, fmt.Errorf("field \"metricLogV1\" is required")
-		}
-		return struct {
-			Type        string      `json:"type"`
-			MetricLogV1 MetricLogV1 `json:"metricLogV1"`
-		}{Type: "metricLogV1", MetricLogV1: *u.metricLogV1}, nil
-	case "auditLogV2":
-		if u.auditLogV2 == nil {
-			return nil, fmt.Errorf("field \"auditLogV2\" is required")
-		}
-		return struct {
-			Type       string     `json:"type"`
-			AuditLogV2 AuditLogV2 `json:"auditLogV2"`
-		}{Type: "auditLogV2", AuditLogV2: *u.auditLogV2}, nil
-	case "diagnosticLogV1":
-		if u.diagnosticLogV1 == nil {
-			return nil, fmt.Errorf("field \"diagnosticLogV1\" is required")
-		}
-		return struct {
-			Type            string          `json:"type"`
-			DiagnosticLogV1 DiagnosticLogV1 `json:"diagnosticLogV1"`
-		}{Type: "diagnosticLogV1", DiagnosticLogV1: *u.diagnosticLogV1}, nil
-	}
-}
-
 func (u WrappedLogV1Payload) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u WrappedLogV1Payload) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "serviceLogV1":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"serviceLogV1\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.serviceLogV1 != nil {
+			n2, err := dj.WriteLiteral(w, ",\"serviceLogV1\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.serviceLogV1
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "requestLogV2":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"requestLogV2\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.requestLogV2 != nil {
+			n5, err := dj.WriteLiteral(w, ",\"requestLogV2\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.requestLogV2
+			n6, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+		}
+	case "traceLogV1":
+		n7, err := dj.WriteLiteral(w, "\"type\":\"traceLogV1\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+		if u.traceLogV1 != nil {
+			n8, err := dj.WriteLiteral(w, ",\"traceLogV1\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n8
+			unionVal := *u.traceLogV1
+			n9, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n9
+		}
+	case "eventLogV2":
+		n10, err := dj.WriteLiteral(w, "\"type\":\"eventLogV2\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+		if u.eventLogV2 != nil {
+			n11, err := dj.WriteLiteral(w, ",\"eventLogV2\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n11
+			unionVal := *u.eventLogV2
+			n12, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n12
+		}
+	case "metricLogV1":
+		n13, err := dj.WriteLiteral(w, "\"type\":\"metricLogV1\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n13
+		if u.metricLogV1 != nil {
+			n14, err := dj.WriteLiteral(w, ",\"metricLogV1\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n14
+			unionVal := *u.metricLogV1
+			n15, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n15
+		}
+	case "auditLogV2":
+		n16, err := dj.WriteLiteral(w, "\"type\":\"auditLogV2\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n16
+		if u.auditLogV2 != nil {
+			n17, err := dj.WriteLiteral(w, ",\"auditLogV2\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n17
+			unionVal := *u.auditLogV2
+			n18, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n18
+		}
+	case "diagnosticLogV1":
+		n19, err := dj.WriteLiteral(w, "\"type\":\"diagnosticLogV1\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n19
+		if u.diagnosticLogV1 != nil {
+			n20, err := dj.WriteLiteral(w, ",\"diagnosticLogV1\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n20
+			unionVal := *u.diagnosticLogV1
+			n21, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n21
+		}
+	default:
+		n22, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n22
+		n23, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n23
+	}
+	n24, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n24
+	return out, nil
+}
+
+func (u WrappedLogV1Payload) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
 }
 
 func (u *WrappedLogV1Payload) UnmarshalJSON(data []byte) error {
-	var deser wrappedLogV1PayloadDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "serviceLogV1":
-		if u.serviceLogV1 == nil {
-			return fmt.Errorf("field \"serviceLogV1\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *WrappedLogV1Payload) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *WrappedLogV1Payload) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *WrappedLogV1Payload) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *WrappedLogV1Payload) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenServiceLogV1 bool
+	var seenRequestLogV2 bool
+	var seenTraceLogV1 bool
+	var seenEventLogV2 bool
+	var seenMetricLogV1 bool
+	var seenAuditLogV2 bool
+	var seenDiagnosticLogV1 bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "requestLogV2":
-		if u.requestLogV2 == nil {
-			return fmt.Errorf("field \"requestLogV2\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
-	case "traceLogV1":
-		if u.traceLogV1 == nil {
-			return fmt.Errorf("field \"traceLogV1\" is required")
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"type\"]", err)
+			}
+		case "serviceLogV1":
+			if seenServiceLogV1 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"serviceLogV1\"]")
+			}
+			seenServiceLogV1 = true
+			var unionVal ServiceLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"serviceLogV1\"]", err)
+			}
+			u.serviceLogV1 = &unionVal
+		case "requestLogV2":
+			if seenRequestLogV2 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"requestLogV2\"]")
+			}
+			seenRequestLogV2 = true
+			var unionVal RequestLogV2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"requestLogV2\"]", err)
+			}
+			u.requestLogV2 = &unionVal
+		case "traceLogV1":
+			if seenTraceLogV1 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"traceLogV1\"]")
+			}
+			seenTraceLogV1 = true
+			var unionVal TraceLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"traceLogV1\"]", err)
+			}
+			u.traceLogV1 = &unionVal
+		case "eventLogV2":
+			if seenEventLogV2 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"eventLogV2\"]")
+			}
+			seenEventLogV2 = true
+			var unionVal EventLogV2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"eventLogV2\"]", err)
+			}
+			u.eventLogV2 = &unionVal
+		case "metricLogV1":
+			if seenMetricLogV1 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"metricLogV1\"]")
+			}
+			seenMetricLogV1 = true
+			var unionVal MetricLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"metricLogV1\"]", err)
+			}
+			u.metricLogV1 = &unionVal
+		case "auditLogV2":
+			if seenAuditLogV2 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"auditLogV2\"]")
+			}
+			seenAuditLogV2 = true
+			var unionVal AuditLogV2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"auditLogV2\"]", err)
+			}
+			u.auditLogV2 = &unionVal
+		case "diagnosticLogV1":
+			if seenDiagnosticLogV1 {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field WrappedLogV1Payload[\"diagnosticLogV1\"]")
+			}
+			seenDiagnosticLogV1 = true
+			var unionVal DiagnosticLogV1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field WrappedLogV1Payload[\"diagnosticLogV1\"]", err)
+			}
+			u.diagnosticLogV1 = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
 		}
-	case "eventLogV2":
-		if u.eventLogV2 == nil {
-			return fmt.Errorf("field \"eventLogV2\" is required")
-		}
-	case "metricLogV1":
-		if u.metricLogV1 == nil {
-			return fmt.Errorf("field \"metricLogV1\" is required")
-		}
-	case "auditLogV2":
-		if u.auditLogV2 == nil {
-			return fmt.Errorf("field \"auditLogV2\" is required")
-		}
-	case "diagnosticLogV1":
-		if u.diagnosticLogV1 == nil {
-			return fmt.Errorf("field \"diagnosticLogV1\" is required")
-		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "serviceLogV1" && !seenServiceLogV1 {
+		missingFields = append(missingFields, "serviceLogV1")
+	}
+	if u.typ == "requestLogV2" && !seenRequestLogV2 {
+		missingFields = append(missingFields, "requestLogV2")
+	}
+	if u.typ == "traceLogV1" && !seenTraceLogV1 {
+		missingFields = append(missingFields, "traceLogV1")
+	}
+	if u.typ == "eventLogV2" && !seenEventLogV2 {
+		missingFields = append(missingFields, "eventLogV2")
+	}
+	if u.typ == "metricLogV1" && !seenMetricLogV1 {
+		missingFields = append(missingFields, "metricLogV1")
+	}
+	if u.typ == "auditLogV2" && !seenAuditLogV2 {
+		missingFields = append(missingFields, "auditLogV2")
+	}
+	if u.typ == "diagnosticLogV1" && !seenDiagnosticLogV1 {
+		missingFields = append(missingFields, "diagnosticLogV1")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "WrappedLogV1Payload", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "WrappedLogV1Payload", unknownFields)
 	}
 	return nil
 }
 
-func (u WrappedLogV1Payload) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
 func (u *WrappedLogV1Payload) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *WrappedLogV1Payload) AcceptFuncs(serviceLogV1Func func(ServiceLogV1) error, requestLogV2Func func(RequestLogV2) error, traceLogV1Func func(TraceLogV1) error, eventLogV2Func func(EventLogV2) error, metricLogV1Func func(MetricLogV1) error, auditLogV2Func func(AuditLogV2) error, diagnosticLogV1Func func(DiagnosticLogV1) error, unknownFunc func(string) error) error {
@@ -769,31 +1337,31 @@ func (u *WrappedLogV1Payload) AcceptFuncs(serviceLogV1Func func(ServiceLogV1) er
 	}
 }
 
-func (u *WrappedLogV1Payload) ServiceLogV1NoopSuccess(ServiceLogV1) error {
+func (u *WrappedLogV1Payload) ServiceLogV1NoopSuccess(_ ServiceLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) RequestLogV2NoopSuccess(RequestLogV2) error {
+func (u *WrappedLogV1Payload) RequestLogV2NoopSuccess(_ RequestLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) TraceLogV1NoopSuccess(TraceLogV1) error {
+func (u *WrappedLogV1Payload) TraceLogV1NoopSuccess(_ TraceLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) EventLogV2NoopSuccess(EventLogV2) error {
+func (u *WrappedLogV1Payload) EventLogV2NoopSuccess(_ EventLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) MetricLogV1NoopSuccess(MetricLogV1) error {
+func (u *WrappedLogV1Payload) MetricLogV1NoopSuccess(_ MetricLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) AuditLogV2NoopSuccess(AuditLogV2) error {
+func (u *WrappedLogV1Payload) AuditLogV2NoopSuccess(_ AuditLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) DiagnosticLogV1NoopSuccess(DiagnosticLogV1) error {
+func (u *WrappedLogV1Payload) DiagnosticLogV1NoopSuccess(_ DiagnosticLogV1) error {
 	return nil
 }
 
