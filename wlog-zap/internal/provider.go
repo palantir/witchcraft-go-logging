@@ -54,7 +54,7 @@ func rfc3339NanoTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 }
 
 func newZapLogger(w io.Writer, encoderConfig zapcore.EncoderConfig) *zap.Logger {
-	// We do our own enforcement in the level-specific methods; no need for zap to check again.
+	// *zapLogger performs its own enforcement in the level-specific methods; no need for zap to check again.
 	level := zap.LevelEnablerFunc(func(zapcore.Level) bool { return true })
 
 	return zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(w), level))

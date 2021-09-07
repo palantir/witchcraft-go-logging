@@ -51,6 +51,7 @@ func (l *LogLevel) UnmarshalText(b []byte) error {
 		return fmt.Errorf("invalid log level: %q", string(b))
 	}
 }
+
 func (l LogLevel) Enabled(other LogLevel) bool {
 	switch l {
 	case DebugLevel:
@@ -86,8 +87,8 @@ type AtomicLogLevel struct {
 	value atomic.Value
 }
 
-func NewAtomicLogLevel(level LogLevel) AtomicLogLevel {
-	a := AtomicLogLevel{}
+func NewAtomicLogLevel(level LogLevel) *AtomicLogLevel {
+	a := &AtomicLogLevel{}
 	a.SetLevel(level)
 	return a
 }

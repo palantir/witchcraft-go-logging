@@ -27,7 +27,7 @@ import (
 type tmplLogger struct {
 	w   io.Writer
 	cfg *Config
-	wlog.AtomicLogLevel
+	*wlog.AtomicLogLevel
 
 	delegate   wlog.LoggerCreator
 	bufferPool bytesbuffers.Pool

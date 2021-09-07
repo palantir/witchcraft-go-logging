@@ -113,7 +113,7 @@ func (e *zapLogEntry) Fields() []zapcore.Field {
 
 type zapLogger struct {
 	logger *zap.Logger
-	wlog.AtomicLogLevel
+	*wlog.AtomicLogLevel
 }
 
 func (l *zapLogger) Log(params ...wlog.Param) {

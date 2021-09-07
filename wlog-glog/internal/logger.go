@@ -23,7 +23,7 @@ import (
 )
 
 type gLogger struct {
-	wlog.AtomicLogLevel
+	*wlog.AtomicLogLevel
 }
 
 func (*gLogger) Log(params ...wlog.Param) {

@@ -31,7 +31,7 @@ func NewJSONMarshalLoggerProvider() LoggerProvider {
 
 type jsonMapLogger struct {
 	w io.Writer
-	AtomicLogLevel
+	*AtomicLogLevel
 }
 
 func (l *jsonMapLogger) Log(params ...Param) {

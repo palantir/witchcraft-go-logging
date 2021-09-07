@@ -158,7 +158,7 @@ func (e *zeroLogEntry) Evt() *zerolog.Event {
 
 type zeroLogger struct {
 	logger zerolog.Logger
-	wlog.AtomicLogLevel
+	*wlog.AtomicLogLevel
 }
 
 func (l *zeroLogger) Log(params ...wlog.Param) {
