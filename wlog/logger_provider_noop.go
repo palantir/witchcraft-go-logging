@@ -25,13 +25,14 @@ func NewNoopLoggerProvider() LoggerProvider {
 	return &noopLoggerProvider{}
 }
 
-type nooplogger struct{ AtomicLogLevel }
+type nooplogger struct{}
 
 func (*nooplogger) Log(params ...Param)               {}
 func (*nooplogger) Debug(msg string, params ...Param) {}
 func (*nooplogger) Info(msg string, params ...Param)  {}
 func (*nooplogger) Warn(msg string, params ...Param)  {}
 func (*nooplogger) Error(msg string, params ...Param) {}
+func (*nooplogger) SetLevel(level LogLevel)           {}
 
 type noopLoggerProvider struct{}
 

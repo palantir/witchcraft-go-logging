@@ -22,8 +22,6 @@ import (
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
-	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
@@ -38,6 +36,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log/req2logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
+	conjuresvc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log_conjure"
+	conjuresvc1logtests "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log_conjure/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
@@ -129,6 +129,16 @@ func BenchmarkReq2Log(b *testing.B) {
 }
 
 func BenchmarkSvc1Log(b *testing.B) {
+		for _, tc := range conjuresvc1logtests.TestCases() {
+			b.Run(tc.Name+"/conjure", func(b *testing.B) {
+				b.ReportAllocs()
+				logger := conjuresvc1log.NewConjureLogger(ioutil.Discard, wlog.InfoLevel)
+				for n := 0; n < b.N; n++ {
+					logger.Info(tc.Message, tc.LogParams...)
+				}
+			})
+		}
+	})
 	for _, tc := range svc1logtests.TestCases() {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
@@ -176,8 +186,8 @@ func BenchmarkTrc1Log(b *testing.B) {
 func RunBenchmarks(b *testing.B, benchmark func(*testing.B, wlog.LoggerProvider)) {
 	b.Run("noop", func(b *testing.B) { benchmark(b, wlog.NewNoopLoggerProvider()) })
 	b.Run("json.Marshal", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
-	b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
+	//b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
 	b.Run("zap", func(b *testing.B) { benchmark(b, wlogzap.LoggerProvider()) })
 	b.Run("zerolog", func(b *testing.B) { benchmark(b, wlogzerolog.LoggerProvider()) })
-	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
+	//b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
 }
