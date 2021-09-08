@@ -83,6 +83,10 @@ func (l LogLevel) Enabled(other LogLevel) bool {
 	return false
 }
 
+// AtomicLogLevel wraps atomic.Value containing a LogLevel.
+// Always use NewAtomicLogLevel to create it.
+// Once created, the struct value should never be shallow-copied because
+// it will copy the atomic.Value and lose the reference.
 type AtomicLogLevel struct {
 	value atomic.Value
 }
