@@ -1,0 +1,13 @@
+./godelw verify failed after updating godel plugins and assets
+
+Command that caused error:
+./godelw verify --skip-test --skip-check
+
+Output:
+Running format...
+Running mod...
+Running conjure...
+Error: Get "https://repo1.maven.org/maven2/com/palantir/witchcraft/api/witchcraft-logging-api/1.3.0/witchcraft-logging-api-1.3.0.conjure.json": dial tcp: lookup repo1.maven.org on 10.2.218.16:53: server misbehaving
+Running license...
+Failed tasks:
+	conjure
