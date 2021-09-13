@@ -85,10 +85,9 @@ func (l LogLevel) Enabled(other LogLevel) bool {
 
 // AtomicLogLevel wraps atomic.Value containing a LogLevel.
 // Always use NewAtomicLogLevel to create it.
-// Once created, the struct value should never be shallow-copied because
-// it will copy the atomic.Value and lose the reference.
 type AtomicLogLevel struct {
 	value atomic.Value
+	noCopy
 }
 
 func NewAtomicLogLevel(level LogLevel) *AtomicLogLevel {
@@ -108,3 +107,15 @@ func (l *AtomicLogLevel) SetLevel(level LogLevel) {
 func (l *AtomicLogLevel) Enabled(other LogLevel) bool {
 	return l.LogLevel().Enabled(other)
 }
+
+// noCopy may be embedded into structs which must not be copied
+// after the first use.
+//
+// See https://golang.org/issues/8005#issuecomment-190753527
+// for details.
+// Copied from the standard library's sync package.
+type noCopy struct{}
+
+// Lock is a no-op used by -copylocks checker from `go vet`.
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}
