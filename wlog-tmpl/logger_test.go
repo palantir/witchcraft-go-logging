@@ -56,21 +56,21 @@ func TestLogger(t *testing.T) {
 			LogFn: func(ctx context.Context) {
 				svc1log.FromContext(ctx).Info("An info message about foo", svc1log.UnsafeParam("foo", "bar"))
 			},
-			Expected: regexp.MustCompile(`^INFO  \[[0-9TZ:.-]+] origin: An info message about foo \(foo: bar\)$`),
+			Expected: regexp.MustCompile(`^INFO  \[[0-9TZ:.-]+] ? origin: An info message about foo \(foo: bar\)$`),
 		},
 		{
 			Name: "svc1log error no substitution",
 			LogFn: func(ctx context.Context) {
 				svc1log.FromContext(ctx).Error("An error message about foo", svc1log.UnsafeParam("foo", "bar"))
 			},
-			Expected: regexp.MustCompile(`^ERROR \[[0-9TZ:.-]+] origin: An error message about foo \(foo: bar\)$`),
+			Expected: regexp.MustCompile(`^ERROR \[[0-9TZ:.-]+] ? origin: An error message about foo \(foo: bar\)$`),
 		},
 		{
 			Name: "svc1log info with substitution",
 			LogFn: func(ctx context.Context) {
 				svc1log.FromContext(ctx).Info("An info message about {}", svc1log.UnsafeParam("0", "bar"))
 			},
-			Expected: regexp.MustCompile(`^INFO  \[[0-9TZ:.-]+] origin: An info message about bar \(0: bar\)$`),
+			Expected: regexp.MustCompile(`^INFO  \[[0-9TZ:.-]+] ? origin: An info message about bar \(0: bar\)$`),
 		},
 		{
 			Name: "custom config",
@@ -80,7 +80,7 @@ func TestLogger(t *testing.T) {
 			LogFn: func(ctx context.Context) {
 				svc1log.FromContext(ctx).Info("An info message about foo", svc1log.UnsafeParam("foo", "bar"))
 			},
-			Expected: regexp.MustCompile(`^CUSTOM INFO  \[[0-9TZ:.-]+] origin: An info message about foo$`),
+			Expected: regexp.MustCompile(`^CUSTOM INFO  \[[0-9TZ:.-]+] ? origin: An info message about foo$`),
 		},
 		{
 			Name: "diag1log",
@@ -90,21 +90,21 @@ func TestLogger(t *testing.T) {
 					Value:          "hello world",
 				}))
 			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] hello world$`),
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] ? hello world$`),
 		},
 		{
 			Name: "evt2log",
 			LogFn: func(ctx context.Context) {
 				evt2log.FromContext(ctx).Event("MY_EVENT", evt2log.UnsafeParam("foo", "bar"))
 			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] MY_EVENT \(foo: bar\)$`),
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] ? MY_EVENT \(foo: bar\)$`),
 		},
 		{
 			Name: "metric1log",
 			LogFn: func(ctx context.Context) {
 				metric1log.FromContext(ctx).Metric("com.palantir.foo", "gauge", metric1log.Value("value", 1))
 			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] METRIC com.palantir.foo gauge \(value: 1\)$`),
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] ? METRIC com.palantir.foo gauge \(value: 1\)$`),
 		},
 		{
 			Name: "req2log",
@@ -124,7 +124,7 @@ func TestLogger(t *testing.T) {
 					Duration:       time.Millisecond,
 				})
 			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] "GET /foo/bar HTTP/1.1" 200 64 1000$`),
+			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] ? "GET /foo/bar HTTP/1.1" 200 64 1000$`),
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
