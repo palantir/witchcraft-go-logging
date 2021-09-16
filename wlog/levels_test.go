@@ -16,6 +16,7 @@ package wlog_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -81,5 +82,47 @@ func TestUnmarshalYAMLError(t *testing.T) {
 		var got wlog.LogLevel
 		err := yaml.Unmarshal([]byte(tc.in), &got)
 		assert.EqualError(t, err, tc.wantError, "Case %d", i)
+	}
+}
+
+func TestEnabled(t *testing.T) {
+	for _, tc := range []struct {
+		in    wlog.LogLevel
+		other wlog.LogLevel
+		want  bool
+	}{
+		{wlog.FatalLevel, wlog.FatalLevel, true},
+		{wlog.FatalLevel, wlog.ErrorLevel, false},
+		{wlog.FatalLevel, wlog.WarnLevel, false},
+		{wlog.FatalLevel, wlog.InfoLevel, false},
+		{wlog.FatalLevel, wlog.DebugLevel, false},
+
+		{wlog.ErrorLevel, wlog.FatalLevel, true},
+		{wlog.ErrorLevel, wlog.ErrorLevel, true},
+		{wlog.ErrorLevel, wlog.WarnLevel, false},
+		{wlog.ErrorLevel, wlog.InfoLevel, false},
+		{wlog.ErrorLevel, wlog.DebugLevel, false},
+
+		{wlog.WarnLevel, wlog.FatalLevel, true},
+		{wlog.WarnLevel, wlog.ErrorLevel, true},
+		{wlog.WarnLevel, wlog.WarnLevel, true},
+		{wlog.WarnLevel, wlog.InfoLevel, false},
+		{wlog.WarnLevel, wlog.DebugLevel, false},
+
+		{wlog.InfoLevel, wlog.FatalLevel, true},
+		{wlog.InfoLevel, wlog.ErrorLevel, true},
+		{wlog.InfoLevel, wlog.WarnLevel, true},
+		{wlog.InfoLevel, wlog.InfoLevel, true},
+		{wlog.InfoLevel, wlog.DebugLevel, false},
+
+		{wlog.DebugLevel, wlog.FatalLevel, true},
+		{wlog.DebugLevel, wlog.ErrorLevel, true},
+		{wlog.DebugLevel, wlog.WarnLevel, true},
+		{wlog.DebugLevel, wlog.InfoLevel, true},
+		{wlog.DebugLevel, wlog.DebugLevel, true},
+	} {
+		t.Run(fmt.Sprintf("%s enables %s", tc.in, tc.other), func(t *testing.T) {
+			assert.Equal(t, tc.want, tc.in.Enabled(tc.other))
+		})
 	}
 }

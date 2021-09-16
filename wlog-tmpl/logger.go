@@ -25,9 +25,9 @@ import (
 )
 
 type tmplLogger struct {
-	w     io.Writer
-	level wlog.LogLevel
-	cfg   *Config
+	w   io.Writer
+	cfg *Config
+	*wlog.AtomicLogLevel
 
 	delegate   wlog.LoggerCreator
 	bufferPool bytesbuffers.Pool
@@ -38,35 +38,27 @@ func (l *tmplLogger) Log(params ...wlog.Param) {
 }
 
 func (l *tmplLogger) Debug(msg string, params ...wlog.Param) {
-	switch l.level {
-	case wlog.DebugLevel:
+	if l.Enabled(wlog.DebugLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "DEBUG")))
 	}
 }
 
 func (l *tmplLogger) Info(msg string, params ...wlog.Param) {
-	switch l.level {
-	case wlog.DebugLevel, wlog.InfoLevel:
+	if l.Enabled(wlog.InfoLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "INFO")))
 	}
 }
 
 func (l *tmplLogger) Warn(msg string, params ...wlog.Param) {
-	switch l.level {
-	case wlog.DebugLevel, wlog.InfoLevel, wlog.WarnLevel:
+	if l.Enabled(wlog.WarnLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "WARN")))
 	}
 }
 
 func (l *tmplLogger) Error(msg string, params ...wlog.Param) {
-	switch l.level {
-	case wlog.DebugLevel, wlog.InfoLevel, wlog.WarnLevel, wlog.ErrorLevel:
+	if l.Enabled(wlog.ErrorLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "ERROR")))
 	}
-}
-
-func (l *tmplLogger) SetLevel(level wlog.LogLevel) {
-	l.level = level
 }
 
 func (l *tmplLogger) logOutput(params []wlog.Param) {

@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: >
+    Update all leveled logger implementations to track level atomically and, when a logger implements wlog.LevelChecker,
+    quickly skip disabled levels before parameter evaluation.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/157

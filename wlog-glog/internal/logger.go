@@ -22,30 +22,36 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
-type gLogger struct{}
+type gLogger struct {
+	*wlog.AtomicLogLevel
+}
 
 func (*gLogger) Log(params ...wlog.Param) {
 	glog.Info(createGLogMsg("", params))
 }
 
-func (*gLogger) Debug(msg string, params ...wlog.Param) {
-	glog.Info(createGLogMsg(msg, params))
+func (l *gLogger) Debug(msg string, params ...wlog.Param) {
+	if l.Enabled(wlog.DebugLevel) {
+		glog.Info(createGLogMsg(msg, params))
+	}
 }
 
-func (*gLogger) Info(msg string, params ...wlog.Param) {
-	glog.Info(createGLogMsg(msg, params))
+func (l *gLogger) Info(msg string, params ...wlog.Param) {
+	if l.Enabled(wlog.InfoLevel) {
+		glog.Info(createGLogMsg(msg, params))
+	}
 }
 
-func (*gLogger) Warn(msg string, params ...wlog.Param) {
-	glog.Warning(createGLogMsg(msg, params))
+func (l *gLogger) Warn(msg string, params ...wlog.Param) {
+	if l.Enabled(wlog.WarnLevel) {
+		glog.Warning(createGLogMsg(msg, params))
+	}
 }
 
-func (*gLogger) Error(msg string, params ...wlog.Param) {
-	glog.Error(createGLogMsg(msg, params))
-}
-
-func (*gLogger) SetLevel(level wlog.LogLevel) {
-	// intentionally not implemented as glog uses the globally defined level
+func (l *gLogger) Error(msg string, params ...wlog.Param) {
+	if l.Enabled(wlog.ErrorLevel) {
+		glog.Error(createGLogMsg(msg, params))
+	}
 }
 
 func createGLogMsg(msg string, params []wlog.Param) string {

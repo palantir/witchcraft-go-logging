@@ -79,10 +79,10 @@ func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
 
 func (p *tmplLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
 	return &tmplLogger{
-		w:          w,
-		level:      level,
-		cfg:        p.cfg,
-		delegate:   p.cfg.DelegateLogger.NewLogger,
-		bufferPool: bytesbuffers.NewSyncPool(128),
+		w:              w,
+		cfg:            p.cfg,
+		AtomicLogLevel: wlog.NewAtomicLogLevel(level),
+		delegate:       p.cfg.DelegateLogger.NewLogger,
+		bufferPool:     bytesbuffers.NewSyncPool(128),
 	}
 }
