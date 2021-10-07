@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Collapse wapp.Run* stack frames.
+
+    This makes for shorter threaddumps and shallower profiles.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/162
