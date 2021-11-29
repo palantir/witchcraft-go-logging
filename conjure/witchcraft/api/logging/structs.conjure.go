@@ -3,10 +3,10 @@
 package logging
 
 import (
-	datetime "github.com/palantir/pkg/datetime"
-	safejson "github.com/palantir/pkg/safejson"
-	safelong "github.com/palantir/pkg/safelong"
-	safeyaml "github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 // A Zipkin-compatible Annotation object.
@@ -37,7 +37,7 @@ func (o *Annotation) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Definition of the audit.2 format.
 type AuditLogV2 struct {
 	// "audit.2"
-	Type string            `conjure-docs:""audit.2"" json:"type"`
+	Type string            `conjure-docs:"\"audit.2\"" json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// User id (if available). This is the most downstream caller.
 	Uid *UserId `conjure-docs:"User id (if available). This is the most downstream caller." json:"uid"`
@@ -48,12 +48,12 @@ type AuditLogV2 struct {
 	// Zipkin trace id (if available)
 	TraceId *TraceId `conjure-docs:"Zipkin trace id (if available)" json:"traceId"`
 	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
-	OtherUids []UserId `conjure-docs:"All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the "uid"." json:"otherUids"`
+	OtherUids []UserId `conjure-docs:"All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the \"uid\"." json:"otherUids"`
 	/*
 	   Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier,
 	   or similar
 	*/
-	Origin *string "conjure-docs:\"Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier,\nor similar\" json:\"origin\""
+	Origin *string `conjure-docs:"Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier,\nor similar" json:"origin"`
 	// Name of the audit event, e.g. PUT_FILE
 	Name string `conjure-docs:"Name of the audit event, e.g. PUT_FILE" json:"name"`
 	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
@@ -118,7 +118,7 @@ type BeaconLogV1 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name for the structure of the params block, e.g. `compass.SearchEvent.v1`
-	EventType string `conjure-docs:"Dot-delimited name for the structure of the params block, e.g. "compass.SearchEvent.v1"" json:"eventType"`
+	EventType string `conjure-docs:"Dot-delimited name for the structure of the params block, e.g. \"compass.SearchEvent.v1\"" json:"eventType"`
 	// Name of the application that created the log
 	AppName string `conjure-docs:"Name of the application that created the log" json:"appName"`
 	// Version of the application that created the log
@@ -183,7 +183,7 @@ func (o *BeaconLogV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Definition of the diagnostic.1 format.
 type DiagnosticLogV1 struct {
 	// "diagnostic.1"
-	Type string            `conjure-docs:""diagnostic.1"" json:"type"`
+	Type string            `conjure-docs:"\"diagnostic.1\"" json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// The diagnostic being logged.
 	Diagnostic Diagnostic `conjure-docs:"The diagnostic being logged." json:"diagnostic"`
@@ -232,7 +232,7 @@ type Endpoint struct {
 	// Name of the service that generated the annotation
 	ServiceName string `conjure-docs:"Name of the service that generated the annotation" json:"serviceName"`
 	// IPv4 address of the machine that generated this annotation (`xxx.xxx.xxx.xxx`)
-	Ipv4 *string `conjure-docs:"IPv4 address of the machine that generated this annotation ("xxx.xxx.xxx.xxx")" json:"ipv4"`
+	Ipv4 *string `conjure-docs:"IPv4 address of the machine that generated this annotation (\"xxx.xxx.xxx.xxx\")" json:"ipv4"`
 	// IPv6 address of the machine that generated this annotation (standard hextet form)
 	Ipv6 *string `conjure-docs:"IPv6 address of the machine that generated this annotation (standard hextet form)" json:"ipv6"`
 }
@@ -258,9 +258,9 @@ type EventLogV1 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name of event, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
-	EventName string `conjure-docs:"Dot-delimited name of event, e.g. "com.foundry.compass.api.Compass.http.ping.failures"" json:"eventName"`
+	EventName string `conjure-docs:"Dot-delimited name of event, e.g. \"com.foundry.compass.api.Compass.http.ping.failures\"" json:"eventName"`
 	// Type of event being represented, e.g. `gauge`, `histogram`, `counter`
-	EventType string `conjure-docs:"Type of event being represented, e.g. "gauge", "histogram", "counter"" json:"eventType"`
+	EventType string `conjure-docs:"Type of event being represented, e.g. \"gauge\", \"histogram\", \"counter\"" json:"eventType"`
 	// Observations, measurements and context associated with the event
 	Values map[string]interface{} `conjure-docs:"Observations, measurements and context associated with the event" json:"values"`
 	// User id (if available)
@@ -321,7 +321,7 @@ type EventLogV2 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name of event, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
-	EventName string `conjure-docs:"Dot-delimited name of event, e.g. "com.foundry.compass.api.Compass.http.ping.failures"" json:"eventName"`
+	EventName string `conjure-docs:"Dot-delimited name of event, e.g. \"com.foundry.compass.api.Compass.http.ping.failures\"" json:"eventName"`
 	// Observations, measurements and context associated with the event
 	Values map[string]interface{} `conjure-docs:"Observations, measurements and context associated with the event" json:"values"`
 	// User id (if available)
@@ -415,9 +415,9 @@ type MetricLogV1 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name of metric, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
-	MetricName string `conjure-docs:"Dot-delimited name of metric, e.g. "com.foundry.compass.api.Compass.http.ping.failures"" json:"metricName"`
+	MetricName string `conjure-docs:"Dot-delimited name of metric, e.g. \"com.foundry.compass.api.Compass.http.ping.failures\"" json:"metricName"`
 	// Type of metric being represented, e.g. `gauge`, `histogram`, `counter`
-	MetricType string `conjure-docs:"Type of metric being represented, e.g. "gauge", "histogram", "counter"" json:"metricType"`
+	MetricType string `conjure-docs:"Type of metric being represented, e.g. \"gauge\", \"histogram\", \"counter\"" json:"metricType"`
 	// Observations, measurements and context associated with the metric
 	Values map[string]interface{} `conjure-docs:"Observations, measurements and context associated with the metric" json:"values"`
 	// Additional dimensions that describe the instance of the metric
@@ -488,9 +488,9 @@ type RequestLogV1 struct {
 	// HTTP method of request
 	Method *string `conjure-docs:"HTTP method of request" json:"method"`
 	// Protocol, e.g. `HTTP/1.1`, `HTTP/2`
-	Protocol string `conjure-docs:"Protocol, e.g. "HTTP/1.1", "HTTP/2"" json:"protocol"`
+	Protocol string `conjure-docs:"Protocol, e.g. \"HTTP/1.1\", \"HTTP/2\"" json:"protocol"`
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
-	Path string `conjure-docs:"Path of request. If templated, the unrendered path, e.g.: "/catalog/dataset/{datasetId}", "/{rid}/paths/contents/{path:.*}"." json:"path"`
+	Path string `conjure-docs:"Path of request. If templated, the unrendered path, e.g.: \"/catalog/dataset/{datasetId}\", \"/{rid}/paths/contents/{path:.*}\"." json:"path"`
 	// Known-safe path parameters
 	PathParams map[string]interface{} `conjure-docs:"Known-safe path parameters" json:"pathParams"`
 	// Known-safe query parameters
@@ -587,9 +587,9 @@ type RequestLogV2 struct {
 	// HTTP method of request
 	Method *string `conjure-docs:"HTTP method of request" json:"method"`
 	// Protocol, e.g. `HTTP/1.1`, `HTTP/2`
-	Protocol string `conjure-docs:"Protocol, e.g. "HTTP/1.1", "HTTP/2"" json:"protocol"`
+	Protocol string `conjure-docs:"Protocol, e.g. \"HTTP/1.1\", \"HTTP/2\"" json:"protocol"`
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
-	Path string `conjure-docs:"Path of request. If templated, the unrendered path, e.g.: "/catalog/dataset/{datasetId}", "/{rid}/paths/contents/{path:.*}"." json:"path"`
+	Path string `conjure-docs:"Path of request. If templated, the unrendered path, e.g.: \"/catalog/dataset/{datasetId}\", \"/{rid}/paths/contents/{path:.*}\"." json:"path"`
 	// Known-safe parameters
 	Params map[string]interface{} `conjure-docs:"Known-safe parameters" json:"params"`
 	// HTTP status code of response
@@ -658,7 +658,7 @@ func (o *RequestLogV2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Definition of the service.1 format.
 type ServiceLogV1 struct {
 	// "service.1"
-	Type string `conjure-docs:""service.1"" json:"type"`
+	Type string `conjure-docs:"\"service.1\"" json:"type"`
 	// The logger output level. One of {FATAL,ERROR,WARN,INFO,DEBUG,TRACE}.
 	Level LogLevel `conjure-docs:"The logger output level. One of {FATAL,ERROR,WARN,INFO,DEBUG,TRACE}." json:"level"`
 	// RFC3339Nano UTC datetime string when the log event was emitted
@@ -668,7 +668,7 @@ type ServiceLogV1 struct {
 	// Thread name
 	Thread *string `conjure-docs:"Thread name" json:"thread"`
 	// Log message. Palantir Java services using slf4j should not use slf4j placeholders ({}). Logs obtained from 3rd party libraries or services that use slf4j and contain slf4j placeholders will always produce `unsafeParams` with numeric indexes corresponding to the zero-indexed order of placeholders. Renderers should substitute numeric parameters from `unsafeParams` and may leave placeholders that do not match indexes as the original placeholder text.
-	Message string `conjure-docs:"Log message. Palantir Java services using slf4j should not use slf4j placeholders ({}). Logs obtained from 3rd party libraries or services that use slf4j and contain slf4j placeholders will always produce "unsafeParams" with numeric indexes corresponding to the zero-indexed order of placeholders. Renderers should substitute numeric parameters from "unsafeParams" and may leave placeholders that do not match indexes as the original placeholder text." json:"message"`
+	Message string `conjure-docs:"Log message. Palantir Java services using slf4j should not use slf4j placeholders ({}). Logs obtained from 3rd party libraries or services that use slf4j and contain slf4j placeholders will always produce \"unsafeParams\" with numeric indexes corresponding to the zero-indexed order of placeholders. Renderers should substitute numeric parameters from \"unsafeParams\" and may leave placeholders that do not match indexes as the original placeholder text." json:"message"`
 	// Known-safe parameters (redaction may be used to make params knowably safe, but is not required).
 	Params map[string]interface{} `conjure-docs:"Known-safe parameters (redaction may be used to make params knowably safe, but is not required)." json:"params"`
 	// User id (if available).
@@ -850,7 +850,7 @@ func (o *StackFrameV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ThreadDumpV1 struct {
 	// Information about each of the threads in the thread dump. "Thread" may refer to a userland thread such as a goroutine, or an OS-level thread.
-	Threads []ThreadInfoV1 `conjure-docs:"Information about each of the threads in the thread dump. "Thread" may refer to a userland thread such as a goroutine, or an OS-level thread." json:"threads"`
+	Threads []ThreadInfoV1 `conjure-docs:"Information about each of the threads in the thread dump. \"Thread\" may refer to a userland thread such as a goroutine, or an OS-level thread." json:"threads"`
 }
 
 func (o ThreadDumpV1) MarshalJSON() ([]byte, error) {
@@ -995,7 +995,7 @@ func (o *TraceLogV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Wraps a log entry with entity information.
 type WrappedLogV1 struct {
 	// "wrapped.1"
-	Type    string              `conjure-docs:""wrapped.1"" json:"type"`
+	Type    string              `conjure-docs:"\"wrapped.1\"" json:"type"`
 	Payload WrappedLogV1Payload `json:"payload"`
 	// Artifact part of entity's maven coordinate
 	EntityName    string `conjure-docs:"Artifact part of entity's maven coordinate" json:"entityName"`
