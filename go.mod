@@ -15,7 +15,7 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/witchcraft-go-error v1.5.0
-	github.com/palantir/witchcraft-go-health v1.12.0
+	github.com/palantir/witchcraft-go-health v1.13.0
 	github.com/palantir/witchcraft-go-params v1.2.0
 	github.com/palantir/witchcraft-go-tracing v1.4.0
 	github.com/rs/zerolog v1.26.1
