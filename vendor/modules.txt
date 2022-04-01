@@ -59,8 +59,8 @@ github.com/palantir/pkg/transform
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.13.0
-## explicit; go 1.17
+# github.com/palantir/witchcraft-go-health v1.14.0
+## explicit; go 1.18
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
