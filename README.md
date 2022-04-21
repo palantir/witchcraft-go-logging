@@ -15,7 +15,7 @@ used for logging and some default implementation and adapters
 - [glog](https://github.com/golang/glog).
 
 **Adapters** wrap our go logging implementation (svc1log, ev2log, req2log) to implement a go logging interface. We currently provide
-- [go-logr](https://github.com/go-logr/logr) interface that uses svc1log inside.
+- [svc1zap](adapters/svc1zap) wraps a svc1log.Logger to provide a [zap](https://github.com/uber-go/zap) Logger.
 
 Architecture
 ------------
