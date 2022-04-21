@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add `adapters/svc1zap` for code that accepts `*zap.Logger`
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/198
