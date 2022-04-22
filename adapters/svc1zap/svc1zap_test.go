@@ -30,7 +30,7 @@ import (
 	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
 )
 
-func TestSvc1LogrWrapper(t *testing.T) {
+func TestSvc1ZapWrapper(t *testing.T) {
 
 	prefixParamFunc := func(key string, value interface{}) svc1log.Param {
 		if strings.HasPrefix(key, "safe") {

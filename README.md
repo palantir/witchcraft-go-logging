@@ -7,15 +7,15 @@ witchcraft-go-logging
 [![](https://godoc.org/github.com/palantir/witchcraft-go-logging?status.svg)](http://godoc.org/github.com/palantir/witchcraft-go-logging)
 
 `witchcraft-go-logging` is a Go implementation of the Witchcraft logging specification. It provides an API that can be
-used for logging and some default implementation and adapters
+used for logging along with several implementations and adapters.
 
-**Implementations** wrap an existing go logging library to implement the wlog interface. We currently provide
+**Implementations** wrap existing Go logging libraries in order to implement the wlog interface. We currently provide
 - [zap](https://github.com/uber-go/zap) via [wlog-zap](wlog-zap)
 - [zerolog](https://github.com/rs/zerolog) via [wlog-zerolog](wlog-zerolog)
 - [glog](https://github.com/golang/glog) via [wlog-glog](wlog-glog)
 - [wlog-tmpl](wlog-tmpl) for rendering structured logging using human-friendly templates.
 
-**Adapters** wrap our go logging implementation (svc1log, ev2log, req2log) to implement a go logging interface. We currently provide
+**Adapters** wrap the witchcraft-go-logging logger implementations (svc1log, ev2log, req2log, etc) to allow interoperability with other Go logging interfaces. We currently provide
 - [svc1zap](adapters/svc1zap) wraps a svc1log.Logger to provide a [zap](https://github.com/uber-go/zap) Logger.
 
 Architecture

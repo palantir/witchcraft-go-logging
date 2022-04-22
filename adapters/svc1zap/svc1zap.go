@@ -31,7 +31,7 @@ type svc1zapCore struct {
 }
 
 // New returns a zap logger that delegates to the provided svc1log logger.
-// Enabled/disabled level configuration on the zap logger is ignored in favor of the svc1log configuration.
+// The enabled/disabled log level configuration on the returned zap logger is ignored in favor of the svc1log configuration.
 func New(logger svc1log.Logger, opts ...Option) *zap.Logger {
 	core := NewCore(logger, opts...)
 	z := zap.New(core)
