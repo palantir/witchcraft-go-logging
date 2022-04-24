@@ -1,6 +1,5 @@
 type: improvement
 improvement:
-  description: 'Svc1zap: Add WithEntryMutatorFunc for dynamically modifying or skipping
-    entries'
+  description: 'svc1zap: Add WithEntryMutatorFunc for dynamically modifying or skipping entries'
   links:
   - https://github.com/palantir/witchcraft-go-logging/pull/199
