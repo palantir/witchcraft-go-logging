@@ -26,7 +26,6 @@ import (
 
 type svc1zapCore struct {
 	log                svc1log.Logger
-	filter             func()
 	mutator            func(entry zapcore.Entry) (zapcore.Entry, bool)
 	originFromCallLine bool
 	newParamFunc       func(key string, value interface{}) svc1log.Param
