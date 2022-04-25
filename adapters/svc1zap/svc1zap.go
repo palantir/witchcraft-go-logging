@@ -36,7 +36,7 @@ func New(logger svc1log.Logger, opts ...Option) *zap.Logger {
 	core := NewCore(logger, opts...)
 	z := zap.New(core)
 	if core.(*svc1zapCore).originFromCallLine {
-		z.WithOptions(zap.AddCaller())
+		z = z.WithOptions(zap.AddCaller())
 	}
 	return z
 }
@@ -81,7 +81,9 @@ func (c svc1zapCore) Enabled(level zapcore.Level) bool {
 }
 
 func (c svc1zapCore) With(fields []zapcore.Field) zapcore.Core {
-	return svc1zapCore{log: svc1log.WithParams(c.log, c.fieldsToWlogParams(fields)...)}
+	clone := c
+	clone.log = svc1log.WithParams(c.log, c.fieldsToWlogParams(fields)...)
+	return &clone
 }
 
 func (c svc1zapCore) Check(entry zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
