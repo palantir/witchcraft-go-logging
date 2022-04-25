@@ -62,7 +62,7 @@ func TestSvc1ZapWrapper(t *testing.T) {
 
 	t.Run("caller origin and custom params", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		logger := svc1log.New(buf, wlog.DebugLevel, svc1log.Origin("base origin"))
+		logger := svc1log.New(buf, wlog.DebugLevel)
 		logr2 := New(logger, WithOriginFromZapCaller(), WithNewParamFunc(prefixParamFunc))
 		logr2 = logr2.With(zap.String("attached", "value"))
 		logr2.Info("logr 2", zap.String("safeString", "string"), zap.String("forbiddenToken", "token"), zap.Int("unsafeInt", 42))
