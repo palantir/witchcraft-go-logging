@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix svc1zap object references
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/200
