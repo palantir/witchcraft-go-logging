@@ -25,6 +25,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	// Use zap as logger implementation
 	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
@@ -107,6 +108,39 @@ func TestSvc1ZapWrapper(t *testing.T) {
 		logr4 := New(logger)
 		logr4.Debug("logr 4")
 		assert.Empty(t, buf.String())
+	})
+
+	t.Run("logger with mutator", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		logger := svc1log.New(buf, wlog.DebugLevel)
+		logr5 := New(logger, WithEntryMutatorFunc(func(entry zapcore.Entry) (out zapcore.Entry, ok bool) {
+			if entry.Message == "skip me" {
+				return entry, false
+			}
+			if entry.Message == "drop to debug" {
+				entry.Level = zapcore.DebugLevel
+			}
+			return entry, true
+		}))
+		logr5.Info("logr 5")
+		logr5.Warn("skip me")
+		logr5.Warn("drop to debug")
+
+		lines := bytes.Split(bytes.TrimSpace(buf.Bytes()), []byte("\n"))
+		if assert.Len(t, lines, 2) {
+			assertLogLine(t, lines[0], objmatcher.MapMatcher{
+				"type":    objmatcher.NewEqualsMatcher(svc1log.TypeValue),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"level":   objmatcher.NewEqualsMatcher("INFO"),
+				"message": objmatcher.NewEqualsMatcher("logr 5"),
+			})
+			assertLogLine(t, lines[1], objmatcher.MapMatcher{
+				"type":    objmatcher.NewEqualsMatcher(svc1log.TypeValue),
+				"time":    objmatcher.NewRegExpMatcher(".+"),
+				"level":   objmatcher.NewEqualsMatcher("DEBUG"),
+				"message": objmatcher.NewEqualsMatcher("drop to debug"),
+			})
+		}
 	})
 }
 

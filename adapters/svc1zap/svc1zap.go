@@ -26,6 +26,7 @@ import (
 
 type svc1zapCore struct {
 	log                svc1log.Logger
+	mutator            func(entry zapcore.Entry) (zapcore.Entry, bool)
 	originFromCallLine bool
 	newParamFunc       func(key string, value interface{}) svc1log.Param
 }
@@ -64,6 +65,12 @@ func WithNewParamFunc(newParam func(key string, value interface{}) svc1log.Param
 	return func(core *svc1zapCore) { core.newParamFunc = newParam }
 }
 
+// WithEntryMutatorFunc provides a function for modifying or skipping entries dynamically.
+// If mutator is set, ok must return true for the message to be logged.
+func WithEntryMutatorFunc(mutator func(entry zapcore.Entry) (out zapcore.Entry, ok bool)) Option {
+	return func(core *svc1zapCore) { core.mutator = mutator }
+}
+
 func (c svc1zapCore) Enabled(level zapcore.Level) bool {
 	if checker, ok := c.log.(wlog.LevelChecker); ok {
 		switch level {
@@ -87,6 +94,13 @@ func (c svc1zapCore) With(fields []zapcore.Field) zapcore.Core {
 }
 
 func (c svc1zapCore) Check(entry zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	if c.mutator != nil {
+		var ok bool
+		entry, ok = c.mutator(entry)
+		if !ok {
+			return ce
+		}
+	}
 	return ce.AddCore(entry, c)
 }
 
