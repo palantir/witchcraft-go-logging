@@ -55,7 +55,7 @@ github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.0.0
 ## explicit; go 1.13
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.7.0
+# github.com/palantir/witchcraft-go-error v1.8.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
@@ -65,10 +65,10 @@ github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-params v1.4.0
+# github.com/palantir/witchcraft-go-params v1.5.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.6.0
+# github.com/palantir/witchcraft-go-tracing v1.7.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
