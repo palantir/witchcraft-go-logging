@@ -94,6 +94,10 @@ func (c svc1zapCore) With(fields []zapcore.Field) zapcore.Core {
 }
 
 func (c svc1zapCore) Check(entry zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	if !c.Enabled(entry.Level) {
+		return ce
+	}
+
 	if c.mutator != nil {
 		var ok bool
 		entry, ok = c.mutator(entry)
