@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: 'Adapters/svc1zap: Check enabled level before adding core'
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/205
