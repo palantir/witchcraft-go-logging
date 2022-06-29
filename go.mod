@@ -20,7 +20,7 @@ require (
 	github.com/palantir/witchcraft-go-tracing v1.8.0
 	github.com/rs/zerolog v1.27.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.4.0
 )
