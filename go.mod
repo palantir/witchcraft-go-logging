@@ -14,10 +14,10 @@ require (
 	github.com/palantir/pkg/safejson v1.0.1
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
-	github.com/palantir/witchcraft-go-error v1.10.0
+	github.com/palantir/witchcraft-go-error v1.11.0
 	github.com/palantir/witchcraft-go-health v1.14.0
-	github.com/palantir/witchcraft-go-params v1.7.0
-	github.com/palantir/witchcraft-go-tracing v1.9.0
+	github.com/palantir/witchcraft-go-params v1.8.0
+	github.com/palantir/witchcraft-go-tracing v1.10.0
 	github.com/rs/zerolog v1.27.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.8.0
