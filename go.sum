@@ -70,8 +70,8 @@ github.com/palantir/pkg/safeyaml v1.0.1 h1:4cSUj9Ttnwydq4vxB8NSxe+qhquBYYtMuJbw6
 github.com/palantir/pkg/safeyaml v1.0.1/go.mod h1:rwADKpvXsYupKvXJg4pOuPrwK8F4Ki95VIq6lHjUqyA=
 github.com/palantir/pkg/transform v1.0.0 h1:21MzkUg9fQgIdadTYMM1Z1qrml2MVdpNY5ai27G15LM=
 github.com/palantir/pkg/transform v1.0.0/go.mod h1:YH2PQUzswoDayk4rTvKt6B+NcnUJgZRNr9MEqfAMCo0=
-github.com/palantir/witchcraft-go-error v1.13.0 h1:PKNx7rGYoNPcIeZtHP3LS4QhB/qfcZg2lP8wYLAPt4s=
-github.com/palantir/witchcraft-go-error v1.13.0/go.mod h1:Nb999in5fSZosuq5u3SQjXhbNoQbOWtTVA5Ze59/e/4=
+github.com/palantir/witchcraft-go-error v1.14.0 h1:dAY1RoYgTJM/KZMunJdxrC6UI0oFtF2pxt1TWRjbWi0=
+github.com/palantir/witchcraft-go-error v1.14.0/go.mod h1:2zz9S0F57JtSohd1u9pBwOAUlyjJy9HhWxd2H0cfwUc=
 github.com/palantir/witchcraft-go-health v1.14.0 h1:AVfnquZI5O2KG6d0XWJRJWIPADq5GhQ4p0z1P3jvqdA=
 github.com/palantir/witchcraft-go-health v1.14.0/go.mod h1:PWD1g86lkqVXRtZIqe+YY/dzuCcaQ1ubQ55cp+kDj+c=
 github.com/palantir/witchcraft-go-params v1.11.0 h1:e/mlH+ecC4wGWvvyCX9IvaysAbHZvwCGdh+FS8DLbJM=
