@@ -55,7 +55,7 @@ github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.0.0
 ## explicit; go 1.13
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.13.0
+# github.com/palantir/witchcraft-go-error v1.14.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
