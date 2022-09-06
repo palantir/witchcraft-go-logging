@@ -52,7 +52,7 @@ github.com/palantir/pkg/safelong
 # github.com/palantir/pkg/safeyaml v1.0.1
 ## explicit; go 1.13
 github.com/palantir/pkg/safeyaml
-# github.com/palantir/pkg/transform v1.0.0
+# github.com/palantir/pkg/transform v1.0.1
 ## explicit; go 1.13
 github.com/palantir/pkg/transform
 # github.com/palantir/witchcraft-go-error v1.14.0
