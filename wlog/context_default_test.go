@@ -39,9 +39,9 @@ import (
 // as a set of tests run on for each logger that supports being stored in and retrieved from a context.
 //
 // There are 3 cases that are tested:
-//   * No default logger is set for the logger type and no global logger provider is set
-//   * No default logger is set for the logger type and a JSON-writing global logger provider is set
-//   * A no-op default logger is set for the logger type
+//   - No default logger is set for the logger type and no global logger provider is set
+//   - No default logger is set for the logger type and a JSON-writing global logger provider is set
+//   - A no-op default logger is set for the logger type
 //
 // See the comments on the test cases in testFromContextFromEmptyContextForSingleLogger for more details on the tests
 // and the expected behavior that is tested.
