@@ -1,6 +1,6 @@
 module github.com/palantir/witchcraft-go-logging
 
-go 1.18
+go 1.19
 
 require (
 	github.com/fatih/color v1.9.0
