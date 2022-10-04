@@ -14,7 +14,7 @@ require (
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
-	github.com/palantir/witchcraft-go-error v1.16.0
+	github.com/palantir/witchcraft-go-error v1.17.0
 	github.com/palantir/witchcraft-go-health v1.14.0
 	github.com/palantir/witchcraft-go-params v1.13.0
 	github.com/palantir/witchcraft-go-tracing v1.15.0
