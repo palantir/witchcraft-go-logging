@@ -65,10 +65,10 @@ github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-params v1.13.0
+# github.com/palantir/witchcraft-go-params v1.14.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.15.0
+# github.com/palantir/witchcraft-go-tracing v1.16.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
