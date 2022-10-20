@@ -7,6 +7,9 @@ github.com/fatih/color
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
 github.com/golang/glog
+# github.com/google/uuid v1.3.0
+## explicit
+github.com/google/uuid
 # github.com/gorilla/mux v1.7.3
 ## explicit
 # github.com/mattn/go-colorable v0.1.12
@@ -83,9 +86,6 @@ github.com/pmezard/go-difflib/difflib
 github.com/rs/zerolog
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
-# github.com/satori/go.uuid v1.2.0
-## explicit
-github.com/satori/go.uuid
 # github.com/stretchr/testify v1.8.0
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
