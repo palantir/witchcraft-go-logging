@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/fatih/color v1.9.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/google/uuid v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.0
 	github.com/palantir/go-metrics v1.1.1
 	github.com/palantir/pkg/bytesbuffers v1.1.0
@@ -15,6 +14,7 @@ require (
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
+	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.17.0
 	github.com/palantir/witchcraft-go-health v1.14.0
 	github.com/palantir/witchcraft-go-params v1.14.0

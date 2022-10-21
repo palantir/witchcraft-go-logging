@@ -15,21 +15,13 @@
 package extractor
 
 import (
-	"encoding/base64"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_uuidFromBase64StdEncodedString(t *testing.T) {
 	in := "vp9kXVLgSem6MdsyknYV2w=="
-	inBytes, err := base64.StdEncoding.DecodeString(in)
-	require.NoError(t, err)
 	expected := "be9f645d-52e0-49e9-ba31-db32927615db"
-	got, err := uuid.FromBytes(inBytes)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, got.String())
 	assert.Equal(t, expected, uuidFromBase64StdEncodedString(in))
 }

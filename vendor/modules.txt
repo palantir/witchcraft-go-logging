@@ -7,9 +7,6 @@ github.com/fatih/color
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
 github.com/golang/glog
-# github.com/google/uuid v1.3.0
-## explicit
-github.com/google/uuid
 # github.com/gorilla/mux v1.7.3
 ## explicit
 # github.com/mattn/go-colorable v0.1.12
@@ -58,6 +55,10 @@ github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
+# github.com/palantir/pkg/uuid v1.2.0
+## explicit; go 1.19
+github.com/palantir/pkg/uuid
+github.com/palantir/pkg/uuid/internal/uuid
 # github.com/palantir/witchcraft-go-error v1.17.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-error
