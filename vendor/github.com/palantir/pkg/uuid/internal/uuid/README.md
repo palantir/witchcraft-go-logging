@@ -1,3 +1,9 @@
+**Provenance**: This package was adapted from https://github.com/google/uuid/tree/v1.1.0
+to minimize external dependencies of generated code. We use a subset of the API and have
+removed all references to non-V4 UUIDs.
+
+---
+
 # uuid ![build status](https://travis-ci.org/google/uuid.svg?branch=master)
 The uuid package generates and inspects UUIDs based on
 [RFC 4122](http://tools.ietf.org/html/rfc4122)
@@ -16,4 +22,4 @@ change is the ability to represent an invalid UUID (vs a NIL UUID).
 
 Full `go doc` style documentation for the package can be viewed online without
 installing this package by using the GoDoc site here: 
-http://pkg.go.dev/github.com/google/uuid
+http://godoc.org/github.com/google/uuid
