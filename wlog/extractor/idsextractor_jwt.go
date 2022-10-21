@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	_ "github.com/palantir/pkg/uuid"
 )
 
 const (

@@ -16,6 +16,7 @@ package extractor
 
 import (
 	"encoding/base64"
+	puuid "github.com/palantir/pkg/uuid"
 	"testing"
 
 	"github.com/google/uuid"
@@ -32,4 +33,12 @@ func Test_uuidFromBase64StdEncodedString(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, got.String())
 	assert.Equal(t, expected, uuidFromBase64StdEncodedString(in))
+
+	_, err = puuid.ParseUUID(string(inBytes))
+	// doesn't pass
+	assert.NoError(t, err)
+
+	_, err = puuid.ParseUUID(in)
+	// doesn't pass
+	assert.NoError(t, err)
 }
