@@ -28,6 +28,8 @@ import (
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/audit3logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -54,6 +56,21 @@ func BenchmarkAudit2Log(b *testing.B) {
 				logger := audit2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
 				for n := 0; n < b.N; n++ {
 					logger.Audit(tc.AuditName, tc.AuditResult, params...)
+				}
+			})
+		})
+	}
+}
+
+func BenchmarkAudit3Log(b *testing.B) {
+	for _, tc := range audit3logtests.TestCases() {
+		b.Run(tc.Name, func(b *testing.B) {
+			params := tc.Params()
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+				b.ReportAllocs()
+				logger := audit3log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				for n := 0; n < b.N; n++ {
+					logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Host, tc.Product, tc.ProductVersion, params...)
 				}
 			})
 		})

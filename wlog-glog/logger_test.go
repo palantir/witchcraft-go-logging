@@ -26,6 +26,8 @@ import (
 	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/audit3logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -177,6 +179,24 @@ func TestAudit2Log(t *testing.T) {
 		)
 
 		logger.Audit(tc.AuditName, tc.AuditResult, tc.Params()...)
+	}
+}
+
+func TestAudit3Log(t *testing.T) {
+	os.Args = []string{
+		os.Args[0],
+		"-logtostderr=true",
+	}
+	flag.Parse()
+
+	for _, tc := range audit3logtests.TestCases() {
+		// TODO: test output
+		logger := audit3log.NewFromCreator(
+			os.Stdout,
+			wlogglog.LoggerProvider().NewLogger,
+		)
+
+		logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Host, tc.Product, tc.ProductVersion, tc.Params()...)
 	}
 }
 
