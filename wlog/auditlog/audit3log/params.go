@@ -24,13 +24,12 @@ import (
 const (
 	TypeValue = "audit.3"
 
-	OtherUIDsKey     = "otherUids"
-	OriginKey        = "origin"
-	NameKey          = "name"
-	ResultKey        = "result"
-	RequestParamsKey = "requestParams"
-	ResultParamsKey  = "resultParams"
-	//
+	OtherUIDsKey      = "otherUids"
+	OriginKey         = "origin"
+	NameKey           = "name"
+	ResultKey         = "result"
+	RequestParamsKey  = "requestParams"
+	ResultParamsKey   = "resultParams"
 	DeploymentKey     = "deployment"
 	HostKey           = "host"
 	ProductKey        = "product"
@@ -47,16 +46,6 @@ const (
 	UsersKey          = "users"
 	OriginsKey        = "origins"
 	SourceOriginKey   = "sourceOrigin"
-	// requestParams
-	// resultParams
-	// time
-	// uid
-	// sid
-	// tokenId
-	// traceId
-	// origin
-	// name
-	// result
 )
 
 type Param interface {
@@ -139,7 +128,7 @@ func Categories(categories ...string) Param {
 	})
 }
 
-func Entities(entities []any) Param {
+func Entities(entities ...interface{}) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		entry.ObjectValue(EntitiesKey, entities, reflect.TypeOf(entities))
 	})

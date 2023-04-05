@@ -38,9 +38,20 @@ type TestCase struct {
 	AuditName      string
 	AuditResult    audit3log.AuditResultType
 	Deployment     string
-	Host           string
 	Product        string
 	ProductVersion string
+	Stack          string
+	Service        string
+	Environment    string
+	ProducerType   audit3log.AuditProducerType
+	Organizations  []audit3log.AuditOrganizationType
+	EventId        string
+	UserAgent      string
+	Categories     []string
+	Entities       []interface{}
+	Users          []audit3log.AuditContextualizedUserType
+	Origins        []string
+	SourceOrigin   string
 	RequestParams  map[string]interface{}
 	ResultParams   map[string]interface{}
 	JSONMatcher    objmatcher.MapMatcher
@@ -56,6 +67,18 @@ func (tc TestCase) Params() []audit3log.Param {
 		audit3log.Origin(tc.Origin),
 		audit3log.RequestParams(tc.RequestParams),
 		audit3log.ResultParams(tc.ResultParams),
+		audit3log.Stack(tc.Stack),
+		audit3log.Service(tc.Service),
+		audit3log.Environment(tc.Environment),
+		audit3log.ProducerType(tc.ProducerType),
+		audit3log.Organizations(tc.Organizations...),
+		audit3log.EventID(tc.EventId),
+		audit3log.UserAgent(tc.UserAgent),
+		audit3log.Categories(tc.Categories...),
+		audit3log.Entities(tc.Entities...),
+		audit3log.Users(tc.Users...),
+		audit3log.Origins(tc.Origins...),
+		audit3log.SourceOrigin(tc.SourceOrigin),
 	}
 }
 
@@ -72,9 +95,27 @@ func TestCases() []TestCase {
 			AuditName:      "AUDITED_ACTION_NAME",
 			AuditResult:    audit3log.AuditResultSuccess,
 			Deployment:     "deployment-1",
-			Host:           "host-1",
 			Product:        "product-1",
 			ProductVersion: "1.0.0",
+			Stack:          "stack-1",
+			Service:        "service-1",
+			Environment:    "environment-1",
+			ProducerType:   audit3log.AuditProducerServer,
+			Organizations:  []audit3log.AuditOrganizationType{{ID: "organization-1", Reason: "reason"}},
+			EventId:        "event-id-1",
+			UserAgent:      "user-agent-1",
+			Categories:     []string{"DATA_LOAD", "USER_LOGIN"},
+			Entities:       []interface{}{"entity-1", "entity-2"},
+			Users: []audit3log.AuditContextualizedUserType{{
+				UID:       "user-1",
+				UserName:  "username",
+				FirstName: "User",
+				LastName:  "Name",
+				Groups:    []string{"group-1", "group-2"},
+				Realm:     "realm-1",
+			}},
+			Origins:      []string{"0.0.0.0", "1.2.3.4"},
+			SourceOrigin: "0.0.0.0",
 			RequestParams: map[string]interface{}{
 				"requestKey": audit3log.AuditSensitivityTaggedValueType{Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, Payload: "requestValue"},
 			},
@@ -92,9 +133,27 @@ func TestCases() []TestCase {
 				"name":           objmatcher.NewEqualsMatcher("AUDITED_ACTION_NAME"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
-				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
+				"stack":          objmatcher.NewEqualsMatcher("stack-1"),
+				"service":        objmatcher.NewEqualsMatcher("service-1"),
+				"environment":    objmatcher.NewEqualsMatcher("environment-1"),
+				"producerType":   objmatcher.NewEqualsMatcher("SERVER"),
+				"organizations":  objmatcher.NewEqualsMatcher([]interface{}{map[string]string{"id": "organization-1", "reason": "reason"}}),
+				"eventId":        objmatcher.NewEqualsMatcher("event-id-1"),
+				"userAgent":      objmatcher.NewEqualsMatcher("user-agent-1"),
+				"categories":     objmatcher.NewEqualsMatcher([]interface{}{"DATA_LOAD", "USER_LOGIN"}),
+				"entities":       objmatcher.NewEqualsMatcher([]interface{}{"entity-1", "entity-2"}),
+				"users": objmatcher.NewEqualsMatcher([]interface{}{map[string]interface{}{
+					"uid":       "user-1",
+					"userName":  "username",
+					"firstName": "User",
+					"lastName":  "Name",
+					"groups":    []interface{}{"group-1", "group-2"},
+					"realm":     "realm-1",
+				}}),
+				"origins":      objmatcher.NewEqualsMatcher([]interface{}{"0.0.0.0", "1.2.3.4"}),
+				"sourceOrigin": objmatcher.NewEqualsMatcher("0.0.0.0"),
 				"requestParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"requestKey": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 						"level":   objmatcher.NewEqualsMatcher([]interface{}{"UserInput"}),
@@ -190,7 +249,6 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
-				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				"resultParams":   mapFieldMatcher,
@@ -218,7 +276,6 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
-				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				"requestParams":  mapFieldMatcher,

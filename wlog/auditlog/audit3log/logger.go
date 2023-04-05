@@ -25,17 +25,17 @@ type AuditProducerType string
 type AuditSensitivityType string
 
 type AuditOrganizationType struct {
-	ID     string
-	Reason string
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
 }
 
 type AuditContextualizedUserType struct {
-	UID       string
-	UserName  string
-	FirstName string
-	LastName  string
-	Groups    []string
-	Realm     string
+	UID       string   `json:"uid"`
+	UserName  string   `json:"userName"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	Groups    []string `json:"groups"`
+	Realm     string   `json:"realm"`
 }
 
 type AuditSensitivityTaggedValueType struct {
