@@ -16,6 +16,7 @@ package audit3logtests
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -40,8 +41,8 @@ type TestCase struct {
 	Host           string
 	Product        string
 	ProductVersion string
-	RequestParams  map[string]audit3log.AuditSensitivityTaggedValueType
-	ResultParams   map[string]audit3log.AuditSensitivityTaggedValueType
+	RequestParams  map[string]interface{}
+	ResultParams   map[string]interface{}
 	JSONMatcher    objmatcher.MapMatcher
 }
 
@@ -74,11 +75,11 @@ func TestCases() []TestCase {
 			Host:           "host-1",
 			Product:        "product-1",
 			ProductVersion: "1.0.0",
-			RequestParams: map[string]audit3log.AuditSensitivityTaggedValueType{
-				"requestKey": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, Payload: "requestValue"},
+			RequestParams: map[string]interface{}{
+				"requestKey": audit3log.AuditSensitivityTaggedValueType{Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, Payload: "requestValue"},
 			},
-			ResultParams: map[string]audit3log.AuditSensitivityTaggedValueType{
-				"resultKey": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "resultValue"},
+			ResultParams: map[string]interface{}{
+				"resultKey": audit3log.AuditSensitivityTaggedValueType{Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "resultValue"},
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"time":           objmatcher.NewRegExpMatcher(".+"),
@@ -115,7 +116,7 @@ func TestCases() []TestCase {
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	rParamIsntOverwrittenByRParamsTest(t, loggerProvider)
-	// extraRParamsDoNotAppear(t, loggerProvider)
+	extraRParamsDoNotAppear(t, loggerProvider)
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
@@ -128,7 +129,6 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Lo
 				tc.AuditName,
 				tc.AuditResult,
 				tc.Deployment,
-				tc.Host,
 				tc.Product,
 				tc.ProductVersion,
 				audit3log.UID(tc.UID),
@@ -177,8 +177,11 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 						Payload: "val1",
 					},
 				),
-				audit3log.ResultParams(map[string]audit3log.AuditSensitivityTaggedValueType{
-					"key2": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "val2"},
+				audit3log.ResultParams(map[string]interface{}{
+					"key2": audit3log.AuditSensitivityTaggedValueType{
+						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
+						Payload: "val2",
+					},
 				}),
 			},
 			want: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -202,8 +205,11 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 						Payload: "val1",
 					},
 				),
-				audit3log.RequestParams(map[string]audit3log.AuditSensitivityTaggedValueType{
-					"key2": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "val2"},
+				audit3log.RequestParams(map[string]interface{}{
+					"key2": audit3log.AuditSensitivityTaggedValueType{
+						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
+						Payload: "val2",
+					},
 				}),
 			},
 			want: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -227,7 +233,6 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"audited action name",
 				audit3log.AuditResultSuccess,
 				"deployment-1",
-				"host-1",
 				"product-1",
 				"1.0.0",
 				tc.params...,
@@ -248,110 +253,121 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 	}
 }
 
-// // Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
-// // are modified by making a logger call).
-// func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
-// 	const (
-// 		resultParamsKey  = "resultParams"
-// 		requestParamsKey = "requestParams"
-// 	)
+// Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
+// are modified by making a logger call).
+func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	const (
+		resultParamsKey  = "resultParams"
+		requestParamsKey = "requestParams"
+	)
 
-// 	for i, tc := range []struct {
-// 		name       string
-// 		paramKey   string
-// 		paramFunc  func(key string, val interface{}) audit3log.Param
-// 		paramsFunc func(map[string]interface{}) audit3log.Param
-// 	}{
-// 		{
-// 			name:       "Params stay separate across calls for ResultParam",
-// 			paramKey:   resultParamsKey,
-// 			paramFunc:  audit3log.ResultParam,
-// 			paramsFunc: audit3log.ResultParams,
-// 		},
-// 		{
-// 			name:       "Params stay separate across calls for RequestParam",
-// 			paramKey:   requestParamsKey,
-// 			paramFunc:  audit3log.RequestParam,
-// 			paramsFunc: audit3log.RequestParams,
-// 		},
-// 	} {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			var buf bytes.Buffer
-// 			logger := loggerProvider(&buf)
+	for i, tc := range []struct {
+		name       string
+		paramKey   string
+		paramFunc  func(key string, val interface{}) audit3log.Param
+		paramsFunc func(map[string]interface{}) audit3log.Param
+	}{
+		{
+			name:       "Params stay separate across calls for ResultParam",
+			paramKey:   resultParamsKey,
+			paramFunc:  audit3log.ResultParam,
+			paramsFunc: audit3log.ResultParams,
+		},
+		{
+			name:       "Params stay separate across calls for RequestParam",
+			paramKey:   requestParamsKey,
+			paramFunc:  audit3log.RequestParam,
+			paramsFunc: audit3log.RequestParams,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			logger := loggerProvider(&buf)
 
-// 			reusedParams := tc.paramsFunc(map[string]interface{}{"key1": "val1"})
+			reusedParams := tc.paramsFunc(map[string]interface{}{"key2": audit3log.AuditSensitivityTaggedValueType{
+				Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput},
+				Payload: "key1",
+			}})
 
-// 			logger.Audit(
-// 				"audited action name",
-// 				audit3log.AuditResultSuccess,
-// 				"deployment-1",
-// 				"host-1",
-// 				"product-1",
-// 				"1.0.0",
-// 				reusedParams,
-// 				tc.paramFunc("key2", "val2"))
-// 			want := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-// 				"time":           objmatcher.NewRegExpMatcher(".+"),
-// 				"name":           objmatcher.NewEqualsMatcher("audited action name"),
-// 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
-// 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
-// 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
-// 				"host":           objmatcher.NewEqualsMatcher("host-1"),
-// 				"product":        objmatcher.NewEqualsMatcher("product-1"),
-// 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
-// 				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-// 					"key1": objmatcher.NewEqualsMatcher("val1"),
-// 					"key2": objmatcher.NewEqualsMatcher("val2"),
-// 				}),
-// 			})
-// 			auditLog := map[string]interface{}{}
-// 			logEntry := buf.Bytes()
-// 			err := json.Unmarshal(logEntry, &auditLog)
-// 			require.NoError(
-// 				t,
-// 				err,
-// 				"Case %d: %s\nAudit log is not a valid map: %v",
-// 				i,
-// 				tc.name,
-// 				string(logEntry))
-// 			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			logger.Audit(
+				"audited action name",
+				audit3log.AuditResultSuccess,
+				"deployment-1",
+				"product-1",
+				"1.0.0",
+				reusedParams,
+				tc.paramFunc("key2", audit3log.AuditSensitivityTaggedValueType{
+					Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
+					Payload: "val2",
+				}))
+			want := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":           objmatcher.NewRegExpMatcher(".+"),
+				"name":           objmatcher.NewEqualsMatcher("audited action name"),
+				"type":           objmatcher.NewEqualsMatcher("audit.3"),
+				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
+				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"product":        objmatcher.NewEqualsMatcher("product-1"),
+				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
+				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key1": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"level":   objmatcher.NewEqualsMatcher([]interface{}{"UserInput"}),
+						"payload": objmatcher.NewEqualsMatcher("val1"),
+					}),
+					"key2": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"level":   objmatcher.NewEqualsMatcher([]interface{}{"Data"}),
+						"payload": objmatcher.NewEqualsMatcher("val2"),
+					}),
+				}),
+			})
+			auditLog := map[string]interface{}{}
+			logEntry := buf.Bytes()
+			err := json.Unmarshal(logEntry, &auditLog)
+			require.NoError(
+				t,
+				err,
+				"Case %d: %s\nAudit log is not a valid map: %v",
+				i,
+				tc.name,
+				string(logEntry))
+			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
 
-// 			buf.Reset()
-// 			logger.Audit(
-// 				"audited action name",
-// 				audit3log.AuditResultSuccess,
-// 				"deployment-1",
-// 				"host-1",
-// 				"product-1",
-// 				"1.0.0",
-// 				reusedParams,
-// 			)
+			buf.Reset()
+			logger.Audit(
+				"audited action name",
+				audit3log.AuditResultSuccess,
+				"deployment-1",
+				"product-1",
+				"1.0.0",
+				reusedParams,
+			)
 
-// 			want = objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-// 				"time":           objmatcher.NewRegExpMatcher(".+"),
-// 				"name":           objmatcher.NewEqualsMatcher("audited action name"),
-// 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
-// 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
-// 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
-// 				"host":           objmatcher.NewEqualsMatcher("host-1"),
-// 				"product":        objmatcher.NewEqualsMatcher("product-1"),
-// 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
-// 				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-// 					"key1": objmatcher.NewEqualsMatcher("val1"),
-// 				}),
-// 			})
+			want = objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"time":           objmatcher.NewRegExpMatcher(".+"),
+				"name":           objmatcher.NewEqualsMatcher("audited action name"),
+				"type":           objmatcher.NewEqualsMatcher("audit.3"),
+				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
+				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"product":        objmatcher.NewEqualsMatcher("product-1"),
+				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
+				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key1": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"level":   objmatcher.NewEqualsMatcher([]interface{}{"UserInput"}),
+						"payload": objmatcher.NewEqualsMatcher("val1"),
+					}),
+				}),
+			})
 
-// 			auditLog = map[string]interface{}{}
-// 			logEntry = buf.Bytes()
-// 			err = json.Unmarshal(logEntry, &auditLog)
-// 			require.NoError(
-// 				t,
-// 				err,
-// 				"Case %d: %s\nAudit log is not a valid map: %v",
-// 				i,
-// 				tc.name,
-// 				string(logEntry))
-// 			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
-// 		})
-// 	}
-// }
+			auditLog = map[string]interface{}{}
+			logEntry = buf.Bytes()
+			err = json.Unmarshal(logEntry, &auditLog)
+			require.NoError(
+				t,
+				err,
+				"Case %d: %s\nAudit log is not a valid map: %v",
+				i,
+				tc.name,
+				string(logEntry))
+			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+		})
+	}
+}

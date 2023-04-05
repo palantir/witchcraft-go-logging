@@ -70,7 +70,7 @@ func BenchmarkAudit3Log(b *testing.B) {
 				b.ReportAllocs()
 				logger := audit3log.NewFromCreator(ioutil.Discard, provider.NewLogger)
 				for n := 0; n < b.N; n++ {
-					logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Host, tc.Product, tc.ProductVersion, params...)
+					logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Product, tc.ProductVersion, params...)
 				}
 			})
 		})

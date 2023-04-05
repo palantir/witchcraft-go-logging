@@ -196,7 +196,7 @@ func TestAudit3Log(t *testing.T) {
 			wlogglog.LoggerProvider().NewLogger,
 		)
 
-		logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Host, tc.Product, tc.ProductVersion, tc.Params()...)
+		logger.Audit(tc.AuditName, tc.AuditResult, tc.Deployment, tc.Product, tc.ProductVersion, tc.Params()...)
 	}
 }
 

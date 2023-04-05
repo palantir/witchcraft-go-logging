@@ -55,7 +55,7 @@ const (
 )
 
 type Logger interface {
-	Audit(name string, result AuditResultType, deployment string, host string, product string, productVersion string, params ...Param)
+	Audit(name string, result AuditResultType, deployment string, product string, productVersion string, params ...Param)
 }
 
 func New(w io.Writer) Logger {

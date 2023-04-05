@@ -15,6 +15,7 @@
 package audit3log
 
 import (
+	"os"
 	"reflect"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -75,12 +76,16 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
-func auditRequiredParam(name string, resultType AuditResultType, deployment string, host string, product string, productVersion string) Param {
+func auditRequiredParams(name string, resultType AuditResultType, deployment string, product string, productVersion string) Param {
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = ""
+	}
 	return paramFunc(func(logger wlog.LogEntry) {
 		logger.StringValue(NameKey, name)
 		logger.StringValue(ResultKey, string(resultType))
 		logger.StringValue(DeploymentKey, deployment)
-		logger.StringValue(HostKey, host)
+		logger.StringValue(HostKey, hostname)
 		logger.StringValue(ProductKey, product)
 		logger.StringValue(ProductVersionKey, productVersion)
 	})
@@ -190,26 +195,28 @@ func Origin(origin string) Param {
 	})
 }
 
-func RequestParam(key string, value AuditSensitivityTaggedValueType) Param {
-	return RequestParams(map[string]AuditSensitivityTaggedValueType{
+func RequestParam(key string, value interface{}) Param {
+	return RequestParams(map[string]interface{}{
 		key: value,
 	})
 }
 
-func RequestParams(requestParams map[string]AuditSensitivityTaggedValueType) Param {
+func RequestParams(requestParams map[string]interface{}) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.ObjectValue(RequestParamsKey, requestParams, reflect.TypeOf(requestParams))
+		entry.AnyMapValue(RequestParamsKey, requestParams)
 	})
 }
 
-func ResultParam(key string, value AuditSensitivityTaggedValueType) Param {
-	return ResultParams(map[string]AuditSensitivityTaggedValueType{
+// key="key1", value={"level": "Data", "payload": "val2" }
+func ResultParam(key string, value interface{}) Param {
+	return ResultParams(map[string]interface{}{
 		key: value,
 	})
 }
 
-func ResultParams(resultParams map[string]AuditSensitivityTaggedValueType) Param {
+// resultParams={ "key1": { "level": "UserInput", "payload": "val1" }, "key2": { "level": "Data", "payload": "val2" } }
+func ResultParams(resultParams map[string]interface{}) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.ObjectValue(ResultParamsKey, resultParams, reflect.TypeOf(resultParams))
+		entry.AnyMapValue(ResultParamsKey, resultParams)
 	})
 }
