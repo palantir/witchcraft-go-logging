@@ -43,10 +43,10 @@ const (
 	EventIdKey        = "eventId"
 	UserAgentKey      = "userAgent"
 	CategoriesKey     = "categories"
-	// EntitiesKey       = "entities"
-	UsersKey        = "users"
-	OriginsKey      = "origins"
-	SourceOriginKey = "sourceOrigin"
+	EntitiesKey       = "entities"
+	UsersKey          = "users"
+	OriginsKey        = "origins"
+	SourceOriginKey   = "sourceOrigin"
 	// requestParams
 	// resultParams
 	// time
@@ -139,7 +139,11 @@ func Categories(categories ...string) Param {
 	})
 }
 
-// TODO entities
+func Entities(entities []any) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		entry.ObjectValue(EntitiesKey, entities, reflect.TypeOf(entities))
+	})
+}
 
 func Users(users ...AuditContextualizedUserType) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
