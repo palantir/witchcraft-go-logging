@@ -38,7 +38,7 @@ const (
 	EnvironmentKey    = "environment"
 	ProducerTypeKey   = "producerType"
 	OrganizationsKey  = "organizations"
-	EventIdKey        = "eventId"
+	EventIDKey        = "eventId"
 	UserAgentKey      = "userAgent"
 	CategoriesKey     = "categories"
 	EntitiesKey       = "entities"
@@ -107,7 +107,7 @@ func Organizations(organizations ...AuditOrganizationType) Param {
 
 func EventID(eventID string) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(EventIdKey, eventID)
+		entry.OptionalStringValue(EventIDKey, eventID)
 	})
 }
 

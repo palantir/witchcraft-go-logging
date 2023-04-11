@@ -46,7 +46,7 @@ type TestCase struct {
 	Environment    string
 	ProducerType   audit3log.AuditProducerType
 	Organizations  []audit3log.AuditOrganizationType
-	EventId        string
+	EventID        string
 	UserAgent      string
 	Categories     []string
 	Entities       []interface{}
@@ -73,7 +73,7 @@ func (tc TestCase) Params() []audit3log.Param {
 		audit3log.Environment(tc.Environment),
 		audit3log.ProducerType(tc.ProducerType),
 		audit3log.Organizations(tc.Organizations...),
-		audit3log.EventID(tc.EventId),
+		audit3log.EventID(tc.EventID),
 		audit3log.UserAgent(tc.UserAgent),
 		audit3log.Categories(tc.Categories...),
 		audit3log.Entities(tc.Entities...),
@@ -104,7 +104,7 @@ func TestCases() []TestCase {
 			Environment:    "environment-1",
 			ProducerType:   audit3log.AuditProducerServer,
 			Organizations:  []audit3log.AuditOrganizationType{{ID: "organization-1", Reason: "reason"}},
-			EventId:        "event-id-1",
+			EventID:        "event-id-1",
 			UserAgent:      "user-agent-1",
 			Categories:     []string{"DATA_LOAD", "USER_LOGIN"},
 			Entities:       []interface{}{"entity-1", "entity-2"},
@@ -207,7 +207,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Lo
 				audit3log.Environment(tc.Environment),
 				audit3log.ProducerType(tc.ProducerType),
 				audit3log.Organizations(tc.Organizations...),
-				audit3log.EventID(tc.EventId),
+				audit3log.EventID(tc.EventID),
 				audit3log.UserAgent(tc.UserAgent),
 				audit3log.Categories(tc.Categories...),
 				audit3log.Entities(tc.Entities...),
