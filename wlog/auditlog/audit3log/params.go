@@ -15,7 +15,6 @@
 package audit3log
 
 import (
-	"os"
 	"reflect"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -65,16 +64,12 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
-func auditRequiredParams(name string, resultType AuditResultType, deployment string, product string, productVersion string) Param {
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = ""
-	}
+func auditRequiredParams(name string, resultType AuditResultType, deployment string, host string, product string, productVersion string) Param {
 	return paramFunc(func(logger wlog.LogEntry) {
 		logger.StringValue(NameKey, name)
 		logger.StringValue(ResultKey, string(resultType))
 		logger.StringValue(DeploymentKey, deployment)
-		logger.StringValue(HostKey, hostname)
+		logger.StringValue(HostKey, host)
 		logger.StringValue(ProductKey, product)
 		logger.StringValue(ProductVersionKey, productVersion)
 	})
@@ -100,7 +95,7 @@ func Environment(environment string) Param {
 
 func ProducerType(producerType AuditProducerType) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(ServiceKey, string(producerType))
+		entry.OptionalStringValue(ProducerTypeKey, string(producerType))
 	})
 }
 
@@ -188,28 +183,34 @@ func Origin(origin string) Param {
 	})
 }
 
-func RequestParam(key string, value interface{}) Param {
-	return RequestParams(map[string]interface{}{
-		key: value,
+func RequestParam(key string, levels []AuditSensitivityType, payload interface{}) Param {
+	return RequestParams(map[string]AuditSensitivityTaggedValueType{
+		key: {levels, payload},
 	})
 }
 
-func RequestParams(requestParams map[string]interface{}) Param {
+func RequestParams(requestParams map[string]AuditSensitivityTaggedValueType) Param {
+	requestParamsInterface := make(map[string]interface{})
+	for key, val := range requestParams {
+		requestParamsInterface[key] = val
+	}
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(RequestParamsKey, requestParams)
+		entry.AnyMapValue(RequestParamsKey, requestParamsInterface)
 	})
 }
 
-// key="key1", value={"level": "Data", "payload": "val2" }
-func ResultParam(key string, value interface{}) Param {
-	return ResultParams(map[string]interface{}{
-		key: value,
+func ResultParam(key string, levels []AuditSensitivityType, payload interface{}) Param {
+	return ResultParams(map[string]AuditSensitivityTaggedValueType{
+		key: {levels, payload},
 	})
 }
 
-// resultParams={ "key1": { "level": "UserInput", "payload": "val1" }, "key2": { "level": "Data", "payload": "val2" } }
-func ResultParams(resultParams map[string]interface{}) Param {
+func ResultParams(resultParams map[string]AuditSensitivityTaggedValueType) Param {
+	resultParamsInterface := make(map[string]interface{})
+	for key, val := range resultParams {
+		resultParamsInterface[key] = val
+	}
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ResultParamsKey, resultParams)
+		entry.AnyMapValue(ResultParamsKey, resultParamsInterface)
 	})
 }

@@ -38,6 +38,7 @@ type TestCase struct {
 	AuditName      string
 	AuditResult    audit3log.AuditResultType
 	Deployment     string
+	Host           string
 	Product        string
 	ProductVersion string
 	Stack          string
@@ -52,8 +53,8 @@ type TestCase struct {
 	Users          []audit3log.AuditContextualizedUserType
 	Origins        []string
 	SourceOrigin   string
-	RequestParams  map[string]interface{}
-	ResultParams   map[string]interface{}
+	RequestParams  map[string]audit3log.AuditSensitivityTaggedValueType
+	ResultParams   map[string]audit3log.AuditSensitivityTaggedValueType
 	JSONMatcher    objmatcher.MapMatcher
 }
 
@@ -95,17 +96,19 @@ func TestCases() []TestCase {
 			AuditName:      "AUDITED_ACTION_NAME",
 			AuditResult:    audit3log.AuditResultSuccess,
 			Deployment:     "deployment-1",
+			Host:           "host-1",
 			Product:        "product-1",
 			ProductVersion: "1.0.0",
 			Stack:          "stack-1",
 			Service:        "service-1",
 			Environment:    "environment-1",
 			ProducerType:   audit3log.AuditProducerServer,
-			Organizations:  []audit3log.AuditOrganizationType{{ID: "organization-1", Reason: "reason"}},
-			EventId:        "event-id-1",
-			UserAgent:      "user-agent-1",
-			Categories:     []string{"DATA_LOAD", "USER_LOGIN"},
-			Entities:       []interface{}{"entity-1", "entity-2"},
+			// Organizations:  []audit3log.AuditOrganizationType{},
+			Organizations: []audit3log.AuditOrganizationType{{ID: "organization-1", Reason: "reason"}},
+			EventId:       "event-id-1",
+			UserAgent:     "user-agent-1",
+			Categories:    []string{"DATA_LOAD", "USER_LOGIN"},
+			Entities:      []interface{}{"entity-1", "entity-2"},
 			Users: []audit3log.AuditContextualizedUserType{{
 				UID:       "user-1",
 				UserName:  "username",
@@ -116,11 +119,11 @@ func TestCases() []TestCase {
 			}},
 			Origins:      []string{"0.0.0.0", "1.2.3.4"},
 			SourceOrigin: "0.0.0.0",
-			RequestParams: map[string]interface{}{
-				"requestKey": audit3log.AuditSensitivityTaggedValueType{Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, Payload: "requestValue"},
+			RequestParams: map[string]audit3log.AuditSensitivityTaggedValueType{
+				"requestKey": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, Payload: "requestValue"},
 			},
-			ResultParams: map[string]interface{}{
-				"resultKey": audit3log.AuditSensitivityTaggedValueType{Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "resultValue"},
+			ResultParams: map[string]audit3log.AuditSensitivityTaggedValueType{
+				"resultKey": {Level: []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, Payload: "resultValue"},
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"time":           objmatcher.NewRegExpMatcher(".+"),
@@ -133,17 +136,19 @@ func TestCases() []TestCase {
 				"name":           objmatcher.NewEqualsMatcher("AUDITED_ACTION_NAME"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				"stack":          objmatcher.NewEqualsMatcher("stack-1"),
 				"service":        objmatcher.NewEqualsMatcher("service-1"),
 				"environment":    objmatcher.NewEqualsMatcher("environment-1"),
 				"producerType":   objmatcher.NewEqualsMatcher("SERVER"),
-				"organizations":  objmatcher.NewEqualsMatcher([]interface{}{map[string]string{"id": "organization-1", "reason": "reason"}}),
-				"eventId":        objmatcher.NewEqualsMatcher("event-id-1"),
-				"userAgent":      objmatcher.NewEqualsMatcher("user-agent-1"),
-				"categories":     objmatcher.NewEqualsMatcher([]interface{}{"DATA_LOAD", "USER_LOGIN"}),
-				"entities":       objmatcher.NewEqualsMatcher([]interface{}{"entity-1", "entity-2"}),
+				// "organizations":  objmatcher.NewEqualsMatcher([]interface{}{}),
+				"organizations": objmatcher.NewEqualsMatcher([]interface{}{map[string]interface{}{"id": "organization-1", "reason": "reason"}}),
+				"eventId":       objmatcher.NewEqualsMatcher("event-id-1"),
+				"userAgent":     objmatcher.NewEqualsMatcher("user-agent-1"),
+				"categories":    objmatcher.NewEqualsMatcher([]interface{}{"DATA_LOAD", "USER_LOGIN"}),
+				"entities":      objmatcher.NewEqualsMatcher([]interface{}{"entity-1", "entity-2"}),
 				"users": objmatcher.NewEqualsMatcher([]interface{}{map[string]interface{}{
 					"uid":       "user-1",
 					"userName":  "username",
@@ -188,6 +193,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Lo
 				tc.AuditName,
 				tc.AuditResult,
 				tc.Deployment,
+				tc.Host,
 				tc.Product,
 				tc.ProductVersion,
 				audit3log.UID(tc.UID),
@@ -197,7 +203,20 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Lo
 				audit3log.OtherUIDs(tc.OtherUIDs...),
 				audit3log.Origin(tc.Origin),
 				audit3log.RequestParams(tc.RequestParams),
-				audit3log.ResultParams(tc.ResultParams))
+				audit3log.ResultParams(tc.ResultParams),
+				audit3log.Stack(tc.Stack),
+				audit3log.Service(tc.Service),
+				audit3log.Environment(tc.Environment),
+				audit3log.ProducerType(tc.ProducerType),
+				audit3log.Organizations(tc.Organizations...),
+				audit3log.EventID(tc.EventId),
+				audit3log.UserAgent(tc.UserAgent),
+				audit3log.Categories(tc.Categories...),
+				audit3log.Entities(tc.Entities...),
+				audit3log.Users(tc.Users...),
+				audit3log.Origins(tc.Origins...),
+				audit3log.SourceOrigin(tc.SourceOrigin),
+			)
 
 			gotAuditLog := map[string]interface{}{}
 			logEntry := buf.Bytes()
@@ -230,14 +249,9 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 		{
 			name: "ResultParam params are additive",
 			params: []audit3log.Param{
-				audit3log.ResultParam(
-					"key1", audit3log.AuditSensitivityTaggedValueType{
-						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput},
-						Payload: "val1",
-					},
-				),
-				audit3log.ResultParams(map[string]interface{}{
-					"key2": audit3log.AuditSensitivityTaggedValueType{
+				audit3log.ResultParam("key1", []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, "val1"),
+				audit3log.ResultParams(map[string]audit3log.AuditSensitivityTaggedValueType{
+					"key2": {
 						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
 						Payload: "val2",
 					},
@@ -249,6 +263,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				"resultParams":   mapFieldMatcher,
@@ -257,14 +272,9 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 		{
 			name: "RequestParam params are additive",
 			params: []audit3log.Param{
-				audit3log.RequestParam(
-					"key1", audit3log.AuditSensitivityTaggedValueType{
-						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput},
-						Payload: "val1",
-					},
-				),
-				audit3log.RequestParams(map[string]interface{}{
-					"key2": audit3log.AuditSensitivityTaggedValueType{
+				audit3log.RequestParam("key1", []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput}, "val1"),
+				audit3log.RequestParams(map[string]audit3log.AuditSensitivityTaggedValueType{
+					"key2": {
 						Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
 						Payload: "val2",
 					},
@@ -276,6 +286,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				"requestParams":  mapFieldMatcher,
@@ -290,6 +301,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, loggerProvider func(w io.W
 				"audited action name",
 				audit3log.AuditResultSuccess,
 				"deployment-1",
+				"host-1",
 				"product-1",
 				"1.0.0",
 				tc.params...,
@@ -321,8 +333,8 @@ func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audi
 	for i, tc := range []struct {
 		name       string
 		paramKey   string
-		paramFunc  func(key string, val interface{}) audit3log.Param
-		paramsFunc func(map[string]interface{}) audit3log.Param
+		paramFunc  func(key string, levels []audit3log.AuditSensitivityType, payload interface{}) audit3log.Param
+		paramsFunc func(map[string]audit3log.AuditSensitivityTaggedValueType) audit3log.Param
 	}{
 		{
 			name:       "Params stay separate across calls for ResultParam",
@@ -341,28 +353,27 @@ func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audi
 			var buf bytes.Buffer
 			logger := loggerProvider(&buf)
 
-			reusedParams := tc.paramsFunc(map[string]interface{}{"key2": audit3log.AuditSensitivityTaggedValueType{
+			reusedParams := tc.paramsFunc(map[string]audit3log.AuditSensitivityTaggedValueType{"key1": {
 				Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityUserInput},
-				Payload: "key1",
+				Payload: "val1",
 			}})
 
 			logger.Audit(
 				"audited action name",
 				audit3log.AuditResultSuccess,
 				"deployment-1",
+				"host-1",
 				"product-1",
 				"1.0.0",
 				reusedParams,
-				tc.paramFunc("key2", audit3log.AuditSensitivityTaggedValueType{
-					Level:   []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData},
-					Payload: "val2",
-				}))
+				tc.paramFunc("key2", []audit3log.AuditSensitivityType{audit3log.AuditSensitivityData}, "val2"))
 			want := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"time":           objmatcher.NewRegExpMatcher(".+"),
 				"name":           objmatcher.NewEqualsMatcher("audited action name"),
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -393,6 +404,7 @@ func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audi
 				"audited action name",
 				audit3log.AuditResultSuccess,
 				"deployment-1",
+				"host-1",
 				"product-1",
 				"1.0.0",
 				reusedParams,
@@ -404,6 +416,7 @@ func extraRParamsDoNotAppear(t *testing.T, loggerProvider func(w io.Writer) audi
 				"type":           objmatcher.NewEqualsMatcher("audit.3"),
 				"result":         objmatcher.NewEqualsMatcher("SUCCESS"),
 				"deployment":     objmatcher.NewEqualsMatcher("deployment-1"),
+				"host":           objmatcher.NewEqualsMatcher("host-1"),
 				"product":        objmatcher.NewEqualsMatcher("product-1"),
 				"productVersion": objmatcher.NewEqualsMatcher("1.0.0"),
 				tc.paramKey: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
