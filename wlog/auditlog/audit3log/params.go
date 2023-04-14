@@ -64,32 +64,22 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
-func auditRequiredParams(name string, resultType AuditResultType, deployment string, host string, product string, productVersion string) Param {
+func auditRequiredParams(name string, resultType AuditResultType) Param {
 	return paramFunc(func(logger wlog.LogEntry) {
 		logger.StringValue(NameKey, name)
 		logger.StringValue(ResultKey, string(resultType))
-		logger.StringValue(DeploymentKey, deployment)
-		logger.StringValue(HostKey, host)
-		logger.StringValue(ProductKey, product)
-		logger.StringValue(ProductVersionKey, productVersion)
 	})
 }
 
-func Stack(stack string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(StackKey, stack)
-	})
-}
-
-func Service(service string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(ServiceKey, service)
-	})
-}
-
-func Environment(environment string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(EnvironmentKey, environment)
+func Environment(vals EnvironmentValues) Param {
+	return paramFunc(func(logger wlog.LogEntry) {
+		logger.StringValue(DeploymentKey, vals.Deployment)
+		logger.StringValue(EnvironmentKey, vals.Environment)
+		logger.StringValue(StackKey, vals.Stack)
+		logger.StringValue(ServiceKey, vals.Service)
+		logger.StringValue(HostKey, vals.Host)
+		logger.StringValue(ProductKey, vals.Product)
+		logger.StringValue(ProductVersionKey, vals.ProductVersion)
 	})
 }
 

@@ -20,6 +20,16 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
+type EnvironmentValues struct {
+	Deployment     string
+	Environment    string
+	Service        string
+	Stack          string
+	Host           string
+	Product        string
+	ProductVersion string
+}
+
 type AuditResultType string
 type AuditProducerType string
 type AuditSensitivityType string
@@ -55,17 +65,15 @@ const (
 )
 
 type Logger interface {
-	Audit(name string, result AuditResultType, deployment string, host string, product string, productVersion string, params ...Param)
+	Audit(name string, result AuditResultType, params ...Param)
 }
 
-func New(w io.Writer) Logger {
-	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
+func New(w io.Writer, env EnvironmentValues) Logger {
+	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger, env)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
-	return &defaultLogger{
-		logger: creator(w),
-	}
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator, env EnvironmentValues) Logger {
+	return WithParams(&defaultLogger{logger: creator(w)}, Environment(env))
 }
 
 func WithParams(logger Logger, params ...Param) Logger {

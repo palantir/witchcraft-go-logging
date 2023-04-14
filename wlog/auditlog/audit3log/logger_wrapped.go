@@ -19,6 +19,6 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w *wrappedLogger) Audit(name string, result AuditResultType, deployment string, host string, product string, productVersion string, params ...Param) {
-	w.logger.Audit(name, result, deployment, host, product, productVersion, append(w.params, params...)...)
+func (w *wrappedLogger) Audit(name string, result AuditResultType, params ...Param) {
+	w.logger.Audit(name, result, append(w.params, params...)...)
 }

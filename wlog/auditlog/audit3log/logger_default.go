@@ -24,14 +24,14 @@ type defaultLogger struct {
 	logger wlog.Logger
 }
 
-func (l *defaultLogger) Audit(name string, result AuditResultType, deployment string, host string, product string, productVersion string, params ...Param) {
-	l.logger.Log(ToParams(name, result, deployment, host, product, productVersion, params)...)
+func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
+	l.logger.Log(ToParams(name, result, params)...)
 }
 
-func ToParams(name string, result AuditResultType, deployment string, host string, product string, productVersion string, inParams []Param) []wlog.Param {
+func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
 	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
 	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(auditRequiredParams(name, result, deployment, host, product, productVersion).apply)
+	outParams[len(defaultTypeParam)] = wlog.NewParam(auditRequiredParams(name, result).apply)
 	for idx := range inParams {
 		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
 	}

@@ -46,8 +46,8 @@ type warnLogger struct {
 	creator wlog.LoggerCreator
 }
 
-func (l *warnLogger) Audit(name string, result AuditResultType, deployment string, host string, product string, productVersion string, params ...Param) {
+func (l *warnLogger) Audit(name string, result AuditResultType, params ...Param) {
 	buf := &bytes.Buffer{}
-	NewFromCreator(buf, l.creator).Audit(name, result, deployment, host, product, productVersion, params...)
+	NewFromCreator(buf, l.creator, EnvironmentValues{}).Audit(name, result, params...)
 	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("audit3log", buf.String(), 2))
 }
