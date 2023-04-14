@@ -184,8 +184,10 @@ func Origin(origin string) Param {
 }
 
 func RequestParam(key string, levels []AuditSensitivityType, payload interface{}) Param {
-	return RequestParams(map[string]AuditSensitivityTaggedValueType{
-		key: {levels, payload},
+	return paramFunc(func(entry wlog.LogEntry) {
+		entry.AnyMapValue(RequestParamsKey, map[string]interface{}{
+			key: AuditSensitivityTaggedValueType{levels, payload},
+		})
 	})
 }
 
@@ -200,8 +202,10 @@ func RequestParams(requestParams map[string]AuditSensitivityTaggedValueType) Par
 }
 
 func ResultParam(key string, levels []AuditSensitivityType, payload interface{}) Param {
-	return ResultParams(map[string]AuditSensitivityTaggedValueType{
-		key: {levels, payload},
+	return paramFunc(func(entry wlog.LogEntry) {
+		entry.AnyMapValue(ResultParamsKey, map[string]interface{}{
+			key: AuditSensitivityTaggedValueType{levels, payload},
+		})
 	})
 }
 
