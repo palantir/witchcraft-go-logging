@@ -33,6 +33,7 @@ type TestCase struct {
 	UID          string
 	SID          string
 	TokenID      string
+	OrgID        string
 	UnsafeParams map[string]interface{}
 	JSONMatcher  objmatcher.MapMatcher
 }
@@ -44,6 +45,7 @@ func (tc TestCase) Params() []evt2log.Param {
 		evt2log.SID(tc.SID),
 		evt2log.Tag("tagName", "tagValue"),
 		evt2log.TokenID(tc.TokenID),
+		evt2log.OrgID(tc.OrgID),
 		evt2log.UnsafeParams(tc.UnsafeParams),
 	}
 }
@@ -59,6 +61,7 @@ func TestCases() []TestCase {
 				"dataset": "my-cool-dataset",
 			},
 			TokenID: "X-Y-Z",
+			OrgID:   "org-1",
 			UnsafeParams: map[string]interface{}{
 				"Password": "HelloWorld!",
 			},
@@ -75,6 +78,7 @@ func TestCases() []TestCase {
 					"tagName": objmatcher.NewEqualsMatcher("tagValue"),
 				}),
 				"tokenId": objmatcher.NewEqualsMatcher("X-Y-Z"),
+				"orgId":   objmatcher.NewEqualsMatcher("org-1"),
 				"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"Password": objmatcher.NewEqualsMatcher("HelloWorld!"),
 				}),
