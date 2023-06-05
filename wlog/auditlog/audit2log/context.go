@@ -17,7 +17,6 @@ package audit2log
 import (
 	"context"
 
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
@@ -65,14 +64,6 @@ func FromContext(ctx context.Context) Logger {
 		params = append(params, TraceID(string(traceID)))
 	}
 	return WithParams(logger, params...)
-}
-
-func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {
-	logEntry := wlog.NewMapLogEntry()
-	for _, currParam := range params {
-		currParam.apply(logEntry)
-	}
-	return logEntry.AnyMapValues()[ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
