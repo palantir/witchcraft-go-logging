@@ -1,0 +1,5 @@
+type: improvement
+feature:
+  description: Add logs for WithLoggerParams functionality to audit logs
+  links:
+    - https://github.com/palantir/witchcraft-go-logging/pull/297

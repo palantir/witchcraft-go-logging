@@ -17,6 +17,7 @@ package audit2log_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -141,6 +142,43 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("EVENT_2", "manually-set-trace-id")
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+	buf.Reset()
+}
+
+func TestWithLoggerParams(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("foo", "bar"))
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("ten", 10))
+
+	logger := audit2log.FromContext(ctx)
+	logger.Audit("EVENT_0", audit2log.AuditResultSuccess)
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	createMatcher := func(name, traceID string) objmatcher.Matcher {
+		matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"time":   objmatcher.NewRegExpMatcher(".+"),
+			"type":   objmatcher.NewEqualsMatcher("audit.2"),
+			"name":   objmatcher.NewEqualsMatcher(name),
+			"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+			"requestParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"foo": objmatcher.NewEqualsMatcher("bar"),
+				"ten": objmatcher.NewEqualsMatcher(json.Number("10")),
+			}),
+		})
+		if traceID != "" {
+			matcher["traceId"] = objmatcher.NewEqualsMatcher(traceID)
+		}
+		return matcher
+	}
+
+	assert.Equal(t, 1, len(entries))
+
+	matcher := createMatcher("EVENT_0", "")
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
