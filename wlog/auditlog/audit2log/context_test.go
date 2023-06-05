@@ -25,7 +25,6 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
-	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/stretchr/testify/assert"
@@ -151,8 +150,8 @@ func TestFromContextSetsTraceID(t *testing.T) {
 func TestWithLoggerParams(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
 
-	ctx = audit2log.WithLoggerParams(ctx, audit2log.SafeParam("foo", "bar"))
-	ctx = audit2log.WithLoggerParams(ctx, audit2log.SafeParam("ten", 10))
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("foo", "bar"))
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("ten", 10))
 
 	logger := audit2log.FromContext(ctx)
 	logger.Audit("EVENT_0", audit2log.AuditResultSuccess)
@@ -166,7 +165,7 @@ func TestWithLoggerParams(t *testing.T) {
 			"type":   objmatcher.NewEqualsMatcher("audit.2"),
 			"name":   objmatcher.NewEqualsMatcher(name),
 			"result": objmatcher.NewEqualsMatcher("SUCCESS"),
-			"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"requestParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"foo": objmatcher.NewEqualsMatcher("bar"),
 				"ten": objmatcher.NewEqualsMatcher(json.Number("10")),
 			}),
@@ -183,21 +182,6 @@ func TestWithLoggerParams(t *testing.T) {
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
-}
-
-func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
-	_, ctx := newBufAndCtxWithLogger()
-
-	ctx = audit2log.WithLoggerParams(ctx, audit2log.SafeParam("foo", "bar"))
-	ctx = audit2log.WithLoggerParams(ctx, audit2log.UnsafeParam("ten", 10))
-
-	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
-	assert.Equal(t, map[string]interface{}{
-		"foo": "bar",
-	}, safe)
-	assert.Equal(t, map[string]interface{}{
-		"ten": 10,
-	}, unsafe)
 }
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {

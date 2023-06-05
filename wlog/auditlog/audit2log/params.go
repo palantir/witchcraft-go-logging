@@ -112,27 +112,3 @@ func ResultParams(resultParams map[string]interface{}) Param {
 		entry.AnyMapValue(ResultParamsKey, resultParams)
 	})
 }
-
-func SafeParam(key string, value interface{}) Param {
-	return SafeParams(map[string]interface{}{
-		key: value,
-	})
-}
-
-func SafeParams(safe map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ParamsKey, safe)
-	})
-}
-
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
-		key: value,
-	})
-}
-
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
-	})
-}
