@@ -23,10 +23,7 @@ import (
 
 type audit2LogContextKeyType string
 
-const (
-	contextKey = audit2LogContextKeyType(TypeValue)
-	ParamsKey  = "params"
-)
+const contextKey = audit2LogContextKeyType(TypeValue)
 
 // WithLogger returns a copy of the provided context with the provided Logger included as a value. This operation will
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
