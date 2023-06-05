@@ -17,19 +17,40 @@ package audit2log
 import (
 	"context"
 
+	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 type audit2LogContextKeyType string
 
-const contextKey = audit2LogContextKeyType(TypeValue)
+const (
+	contextKey = audit2LogContextKeyType(TypeValue)
+	ParamsKey  = "params"
+)
 
 // WithLogger returns a copy of the provided context with the provided Logger included as a value. This operation will
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
 // logger).
 func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
+}
+
+// WithLoggerParams returns a copy of the provided context whose logger is configured with the provided parameters. If
+// no parameters are provided, the original context is returned unmodified. If the provided context did not have a
+// logger set on it, the returned context will contain the default logger configured with the provided parameters. If
+// any of the provided parameters set safe or unsafe values, the returned context will also have those values set on it
+// using the wparams.ContextWithSafeAndUnsafeParams function.
+func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
+	if len(params) == 0 {
+		return ctx
+	}
+	// if the provided params set any safe or unsafe values, set those as wparams on the context
+	if safeParams, unsafeParams := safeAndUnsafeParamsFromParams(params); len(safeParams) > 0 || len(unsafeParams) > 0 {
+		ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safeParams, unsafeParams)
+	}
+	return WithLogger(ctx, WithParams(loggerFromContext(ctx), params...))
 }
 
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
@@ -51,6 +72,14 @@ func FromContext(ctx context.Context) Logger {
 		params = append(params, TraceID(string(traceID)))
 	}
 	return WithParams(logger, params...)
+}
+
+func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {
+	logEntry := wlog.NewMapLogEntry()
+	for _, currParam := range params {
+		currParam.apply(logEntry)
+	}
+	return logEntry.AnyMapValues()[ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
