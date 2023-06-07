@@ -63,6 +63,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"Fooheaderparamname": objmatcher.NewEqualsMatcher("fooHeaderParamVal"),
 							"fooQueryVarName":    objmatcher.NewEqualsMatcher("fooQueryVarVal"),
@@ -94,6 +95,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"fooQueryVarName": objmatcher.NewEqualsMatcher("fooQueryVarVal"),
 							"barQueryVarName": objmatcher.NewEqualsMatcher("barQueryVarVal"),
@@ -127,6 +129,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"fooQueryVarName": objmatcher.NewEqualsMatcher("fooQueryVarVal"),
 							"barQueryVarName": objmatcher.NewEqualsMatcher("barQueryVarVal"),
@@ -160,6 +163,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"Fooheaderparamname": objmatcher.NewEqualsMatcher("fooHeaderParamVal"),
 							"barQueryVarName":    objmatcher.NewEqualsMatcher("barQueryVarVal"),
@@ -199,6 +203,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"Fooheaderparamname": objmatcher.NewEqualsMatcher("fooHeaderParamVal"),
 							"barQueryVarName":    objmatcher.NewEqualsMatcher([]interface{}{"barQueryVarVal", "extra-val-bar"}),
@@ -232,6 +237,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"uid":          objmatcher.NewEqualsMatcher("be9f645d-52e0-49e9-ba31-db32927615db"),
 						"sid":          objmatcher.NewEqualsMatcher("ad4d4ae6-65af-4e2a-91a3-cf401acb1d4c"),
 						"tokenId":      objmatcher.NewEqualsMatcher("9277f9af-8d99-408a-94ef-f51e82be2ff8"),
+						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"fooQueryVarName":    objmatcher.NewEqualsMatcher("fooQueryVarVal"),
 							"barQueryVarName":    objmatcher.NewEqualsMatcher("barQueryVarVal"),
@@ -253,7 +259,7 @@ func req2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 		t.Run(tc.Name, func(t *testing.T) {
 
 			req := req2logtests.GenerateRequest(map[string]string{
-				"Authorization":      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0ifQ.JTD36MhcwmSuvfdCkfSYc-LHOGNA1UQ-0FKLKqdXbF4",
+				"Authorization":      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0iLCJvcmciOiJDWmpsY3pIWFNabUwrUXZGOUZrdHVRPT0ifQ.GMqKu_zrkgNR5I-jAWdR6x0G2gObVYRbqw7iJJatI4A",
 				"FooHeaderParamName": "fooHeaderParamVal",
 			}, tc.ExtraQueryParams, tc.ExtraHeaderParams)
 

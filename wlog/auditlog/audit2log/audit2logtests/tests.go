@@ -32,6 +32,7 @@ type TestCase struct {
 	UID           string
 	SID           string
 	TokenID       string
+	OrgID         string
 	TraceID       string
 	OtherUIDs     []string
 	Origin        string
@@ -47,6 +48,7 @@ func (tc TestCase) Params() []audit2log.Param {
 		audit2log.UID(tc.UID),
 		audit2log.SID(tc.SID),
 		audit2log.TokenID(tc.TokenID),
+		audit2log.OrgID(tc.OrgID),
 		audit2log.TraceID(tc.TraceID),
 		audit2log.OtherUIDs(tc.OtherUIDs...),
 		audit2log.Origin(tc.Origin),
@@ -62,6 +64,7 @@ func TestCases() []TestCase {
 			UID:           "user-1",
 			SID:           "session-1",
 			TokenID:       "X-Y-Z",
+			OrgID:         "org-1",
 			TraceID:       "trace-id-1",
 			OtherUIDs:     []string{"user-2", "user-3"},
 			Origin:        "0.0.0.0",
@@ -74,6 +77,7 @@ func TestCases() []TestCase {
 				"uid":       objmatcher.NewEqualsMatcher("user-1"),
 				"sid":       objmatcher.NewEqualsMatcher("session-1"),
 				"tokenId":   objmatcher.NewEqualsMatcher("X-Y-Z"),
+				"orgId":     objmatcher.NewEqualsMatcher("org-1"),
 				"traceId":   objmatcher.NewEqualsMatcher("trace-id-1"),
 				"otherUids": objmatcher.NewEqualsMatcher([]interface{}{"user-2", "user-3"}),
 				"origin":    objmatcher.NewEqualsMatcher("0.0.0.0"),
@@ -109,6 +113,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit2log.Lo
 				audit2log.UID(tc.UID),
 				audit2log.SID(tc.SID),
 				audit2log.TokenID(tc.TokenID),
+				audit2log.OrgID(tc.OrgID),
 				audit2log.TraceID(tc.TraceID),
 				audit2log.OtherUIDs(tc.OtherUIDs...),
 				audit2log.Origin(tc.Origin),

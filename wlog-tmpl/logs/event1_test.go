@@ -23,7 +23,7 @@ func TestEvent1Logs(t *testing.T) {
 		{
 			name: "Event log entry",
 			input: []string{
-				`{"type":"event.1","time":"2017-05-08T21:34:03.571Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"event.1","time":"2017-05-08T21:34:03.571Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
 			},
 			output: []string{
 				`[2017-05-08T21:34:03.571Z] com.palantir.lime.searchResult gauge (resultIndex: 2) (searchTerm: unsafeVal)`,
@@ -32,9 +32,9 @@ func TestEvent1Logs(t *testing.T) {
 		{
 			name: "Align output lines",
 			input: []string{
-				`{"type":"event.1","time":"2017-05-08T21:34:03.5Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
-				`{"type":"event.1","time":"2017-05-08T21:34:03.57Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
-				`{"type":"event.1","time":"2017-05-08T21:34:03.571Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"event.1","time":"2017-05-08T21:34:03.5Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"event.1","time":"2017-05-08T21:34:03.57Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"event.1","time":"2017-05-08T21:34:03.571Z","eventName":"com.palantir.lime.searchResult","eventType":"gauge","values":{"resultIndex":2},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
 			},
 			output: []string{
 				`[2017-05-08T21:34:03.5Z]   com.palantir.lime.searchResult gauge (resultIndex: 2) (searchTerm: unsafeVal)`,

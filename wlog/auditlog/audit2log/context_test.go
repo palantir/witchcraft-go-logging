@@ -56,7 +56,7 @@ func TestFromContext(t *testing.T) {
 	assert.NoError(t, err, "%v", err)
 }
 
-// Tests that the logger returned by audit2log.FromContext has UID, SID and TokenID parameters set on it if the context
+// Tests that the logger returned by audit2log.FromContext has UID, SID, TokenID, and OrgID parameters set on it if the context
 // has those values set on it using wlog.
 func TestFromContextUsesCommonIDs(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -64,6 +64,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 	ctx = wlog.ContextWithUID(ctx, "test-UID")
 	ctx = wlog.ContextWithSID(ctx, "test-SID")
 	ctx = wlog.ContextWithTokenID(ctx, "test-TokenID")
+	ctx = wlog.ContextWithOrgID(ctx, "test-OrgID")
 
 	logger := audit2log.FromContext(ctx)
 	logger.Audit("TEST_ENTRY", audit2log.AuditResultSuccess)
@@ -81,6 +82,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 		"uid":     objmatcher.NewEqualsMatcher("test-UID"),
 		"sid":     objmatcher.NewEqualsMatcher("test-SID"),
 		"tokenId": objmatcher.NewEqualsMatcher("test-TokenID"),
+		"orgId":   objmatcher.NewEqualsMatcher("test-OrgID"),
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
