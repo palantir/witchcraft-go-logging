@@ -17,8 +17,8 @@ require (
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.25.0
 	github.com/palantir/witchcraft-go-health v1.15.0
-	github.com/palantir/witchcraft-go-params v1.22.0
-	github.com/palantir/witchcraft-go-tracing v1.24.0
+	github.com/palantir/witchcraft-go-params v1.23.0
+	github.com/palantir/witchcraft-go-tracing v1.25.0
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.15.0
