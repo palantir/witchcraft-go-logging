@@ -59,7 +59,7 @@ github.com/palantir/pkg/transform
 ## explicit; go 1.19
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
-# github.com/palantir/witchcraft-go-error v1.25.0
+# github.com/palantir/witchcraft-go-error v1.26.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
@@ -69,10 +69,10 @@ github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-params v1.23.0
+# github.com/palantir/witchcraft-go-params v1.24.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.25.0
+# github.com/palantir/witchcraft-go-tracing v1.26.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
