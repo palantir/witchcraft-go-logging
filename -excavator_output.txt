@@ -1,0 +1,60 @@
+go mod operation failed. This may mean that there are legitimate dependency issues with the "go.mod" definition in the repository and the updates performed by the gomod check. This branch can be cloned locally to debug the issue.
+
+Command that caused error:
+./godelw mod
+
+Output:
+go: downloading golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	golang.org/x/tools/go/analysis: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	golang.org/x/lint/golint imports
+	golang.org/x/lint imports
+	golang.org/x/tools/go/ast/astutil: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	golang.org/x/lint/golint imports
+	golang.org/x/lint imports
+	golang.org/x/tools/go/gcexportdata: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/lint imports
+	golang.org/x/tools/go/packages: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/lint imports
+	golang.org/x/tools/go/types/objectpath: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/lint/lintutil imports
+	golang.org/x/tools/go/buildutil: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/simple imports
+	golang.org/x/tools/go/analysis/passes/inspect: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/simple imports
+	golang.org/x/tools/go/ast/inspector: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
+github.com/palantir/witchcraft-go-logging/adapters/svc1zap imports
+	go.uber.org/zap tested by
+	go.uber.org/zap.test imports
+	honnef.co/go/tools/cmd/staticcheck imports
+	honnef.co/go/tools/simple imports
+	golang.org/x/tools/go/types/typeutil: golang.org/x/tools@v0.0.0-20191029190741-b9c20aec41a5: read "https:/proxy.golang.org/@v/v0.0.0-20191029190741-b9c20aec41a5.zip": stream error: stream ID 1; NO_ERROR; received from peer
