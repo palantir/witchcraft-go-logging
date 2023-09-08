@@ -22,6 +22,8 @@ import (
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/audit3logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -91,6 +93,15 @@ func TestMetric1Log(t *testing.T) {
 func TestAudit2Log(t *testing.T) {
 	audit2logtests.JSONTestSuite(t, func(w io.Writer) audit2log.Logger {
 		return audit2log.NewFromCreator(
+			w,
+			wlogzerolog.LoggerProvider().NewLogger,
+		)
+	})
+}
+
+func TestAudit3Log(t *testing.T) {
+	audit3logtests.JSONTestSuite(t, func(w io.Writer) audit3log.Logger {
+		return audit3log.NewFromCreator(
 			w,
 			wlogzerolog.LoggerProvider().NewLogger,
 		)
