@@ -5,9 +5,7 @@
 package metrics
 
 import (
-	"bytes"
 	"context"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -102,10 +100,10 @@ var runtimeMemStats sync.Once
 //
 // Deprecated: use CaptureRuntimeMemStatsWithCancel instead. CaptureRuntimeMemStatsWithCancel has the following
 // advantages over this function:
-//   * Does not make assumptions about the concrete struct implementing of RootRegistry
-//   * Does not restrict the function to being called only once globally
-//   * Supports cancellation using a provided context
-//   * Can tell if provided RootRegistry does not support Go runtime metric collection based on return value
+//   - Does not make assumptions about the concrete struct implementing of RootRegistry
+//   - Does not restrict the function to being called only once globally
+//   - Supports cancellation using a provided context
+//   - Can tell if provided RootRegistry does not support Go runtime metric collection based on return value
 func CaptureRuntimeMemStats(registry RootRegistry, collectionFreq time.Duration) {
 	runtimeMemStats.Do(func() {
 		if reg, ok := registry.(*rootRegistry); ok {
@@ -253,7 +251,7 @@ func (r *rootRegistry) Subregistry(prefix string, tags ...Tag) Registry {
 	}
 	return &childRegistry{
 		prefix: prefix,
-		tags:   Tags(tags),
+		tags:   tags,
 		root:   r,
 	}
 }
@@ -270,7 +268,7 @@ func (r *rootRegistry) Each(f MetricVisitor) {
 		sortedMetricIDs = append(sortedMetricIDs, name)
 		allMetrics[name] = metric
 	})
-	sort.Strings(sortedMetricIDs)
+	sortStrings(sortedMetricIDs)
 
 	for _, id := range sortedMetricIDs {
 		r.idToMetricMutex.RLock()
@@ -332,7 +330,7 @@ func (r *rootRegistry) Timer(name string, tags ...Tag) metrics.Timer {
 }
 
 func (r *rootRegistry) Histogram(name string, tags ...Tag) metrics.Histogram {
-	return r.HistogramWithSample(name, DefaultSample(), tags...)
+	return getOrRegisterHistogram(r.registerMetric(name, tags), r.registry)
 }
 
 func (r *rootRegistry) HistogramWithSample(name string, sample metrics.Sample, tags ...Tag) metrics.Histogram {
@@ -345,6 +343,15 @@ func (r *rootRegistry) Registry() metrics.Registry {
 
 func DefaultSample() metrics.Sample {
 	return metrics.NewExpDecaySample(defaultReservoirSize, defaultAlpha)
+}
+
+// Uses lazy instantiation to avoid allocating a Sample when getting an existing Histogram.
+// Similar to metrics.GetOrRegisterHistogram
+func getOrRegisterHistogram(name string, r metrics.Registry) metrics.Histogram {
+	if nil == r {
+		r = metrics.DefaultRegistry
+	}
+	return r.GetOrRegister(name, func() metrics.Histogram { return metrics.NewHistogram(DefaultSample()) }).(metrics.Histogram)
 }
 
 func (r *rootRegistry) registerMetric(name string, tags Tags) string {
@@ -378,21 +385,23 @@ func toMetricTagsID(name string, tags Tags) metricTagsID {
 	// calculate how large to make our byte buffer below
 	bufSize := len(name)
 	for _, t := range tags {
-		bufSize += len(t.keyValue) + 1 // 1 for separator
+		bufSize += len(t.key) + len(t.value) + 2 // 2 for separators
 	}
-
-	buf := bytes.NewBuffer(make([]byte, 0, bufSize))
+	buf := strings.Builder{}
+	buf.Grow(bufSize)
 	_, _ = buf.WriteString(name)
 	for _, tag := range tags {
 		_, _ = buf.WriteRune('|')
-		_, _ = buf.WriteString(tag.keyValue)
+		_, _ = buf.WriteString(tag.key)
+		_, _ = buf.WriteRune(':')
+		_, _ = buf.WriteString(tag.value)
 	}
-	return metricTagsID(buf.Bytes())
+	return metricTagsID(buf.String())
 }
 
 // newSortedTags copies the tag slice before sorting so that in-place mutation does not affect the input slice.
 func newSortedTags(tags Tags) Tags {
 	tagsCopy := append(tags[:0:0], tags...)
-	sort.Sort(tagsCopy)
+	sortTags(tagsCopy)
 	return tagsCopy
 }

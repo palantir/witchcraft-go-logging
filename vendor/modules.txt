@@ -1,101 +1,116 @@
 # github.com/davecgh/go-spew v1.1.1
+## explicit
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.9.0
-## explicit
+## explicit; go 1.13
 github.com/fatih/color
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
 github.com/golang/glog
-# github.com/mattn/go-colorable v0.1.4
+# github.com/gorilla/mux v1.7.3
+## explicit
+# github.com/mattn/go-colorable v0.1.13
+## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.11
+# github.com/mattn/go-isatty v0.0.19
+## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/nmiyake/pkg/dirs v1.0.0
-## explicit
+## explicit; go 1.13
 github.com/nmiyake/pkg/dirs
 # github.com/openzipkin/zipkin-go v0.2.2
+## explicit; go 1.12
 github.com/openzipkin/zipkin-go
 github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/go-metrics v1.1.0
-## explicit
+# github.com/palantir/go-metrics v1.1.1
+## explicit; go 1.13
 github.com/palantir/go-metrics
-# github.com/palantir/pkg v1.0.1
+# github.com/palantir/pkg v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg
-# github.com/palantir/pkg/bytesbuffers v1.0.1
-## explicit
+# github.com/palantir/pkg/bytesbuffers v1.2.0
+## explicit; go 1.19
 github.com/palantir/pkg/bytesbuffers
-# github.com/palantir/pkg/datetime v1.0.1
-## explicit
+# github.com/palantir/pkg/datetime v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/datetime
-# github.com/palantir/pkg/metrics v1.0.1
-## explicit
+# github.com/palantir/pkg/metrics v1.7.0
+## explicit; go 1.21
 github.com/palantir/pkg/metrics
-# github.com/palantir/pkg/objmatcher v1.0.1
-## explicit
+# github.com/palantir/pkg/objmatcher v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/objmatcher
-# github.com/palantir/pkg/safejson v1.0.1
-## explicit
+# github.com/palantir/pkg/safejson v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/safejson
-# github.com/palantir/pkg/safelong v1.0.1
-## explicit
+# github.com/palantir/pkg/safelong v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/safelong
-# github.com/palantir/pkg/safeyaml v1.0.1
-## explicit
+# github.com/palantir/pkg/safeyaml v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/safeyaml
-# github.com/palantir/pkg/transform v1.0.0
+# github.com/palantir/pkg/transform v1.1.0
+## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.5.0
-## explicit
+# github.com/palantir/pkg/uuid v1.2.0
+## explicit; go 1.19
+github.com/palantir/pkg/uuid
+github.com/palantir/pkg/uuid/internal/uuid
+# github.com/palantir/witchcraft-go-error v1.29.0
+## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.8.0
-## explicit
+# github.com/palantir/witchcraft-go-health v1.15.0
+## explicit; go 1.20
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-params v1.2.0
-## explicit
+# github.com/palantir/witchcraft-go-params v1.27.0
+## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.4.0
-## explicit
+# github.com/palantir/witchcraft-go-tracing v1.29.0
+## explicit; go 1.21
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
-# github.com/pkg/errors v0.8.1
+# github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
-github.com/pmezard/go-difflib/difflib
-# github.com/rs/zerolog v1.20.0
 ## explicit
+github.com/pmezard/go-difflib/difflib
+# github.com/rs/zerolog v1.31.0
+## explicit; go 1.15
 github.com/rs/zerolog
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
-# github.com/satori/go.uuid v1.2.0
-## explicit
-github.com/satori/go.uuid
-# github.com/stretchr/testify v1.7.0
-## explicit
+# github.com/stretchr/testify v1.8.4
+## explicit; go 1.20
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # go.uber.org/atomic v1.6.0
+## explicit; go 1.13
 go.uber.org/atomic
 # go.uber.org/multierr v1.5.0
+## explicit; go 1.12
 go.uber.org/multierr
 # go.uber.org/zap v1.15.0
-## explicit
+## explicit; go 1.13
 go.uber.org/zap
 go.uber.org/zap/buffer
 go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/sys v0.0.0-20191026070338-33540a1f6037
+# golang.org/x/sys v0.12.0
+## explicit; go 1.17
 golang.org/x/sys/unix
-# gopkg.in/yaml.v2 v2.3.0
-## explicit
+# gopkg.in/yaml.v2 v2.4.0
+## explicit; go 1.15
 gopkg.in/yaml.v2
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+# gopkg.in/yaml.v3 v3.0.1
+## explicit
 gopkg.in/yaml.v3

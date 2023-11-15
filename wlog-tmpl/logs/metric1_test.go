@@ -23,7 +23,7 @@ func TestMetric1Logs(t *testing.T) {
 		{
 			name: "Metric log entry",
 			input: []string{
-				`{"type":"metric.1","time":"2017-05-08T21:34:03.571Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"metric.1","time":"2017-05-08T21:34:03.571Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
 			},
 			output: []string{
 				`[2017-05-08T21:34:03.571Z] METRIC com.palantir.lime.searchResult gauge (resultIndex: 2) (deployment: yellow, env: prod) (searchTerm: unsafeVal)`,
@@ -32,9 +32,9 @@ func TestMetric1Logs(t *testing.T) {
 		{
 			name: "Align output lines",
 			input: []string{
-				`{"type":"metric.1","time":"2017-05-08T21:34:03.5Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
-				`{"type":"metric.1","time":"2017-05-08T21:34:03.57Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
-				`{"type":"metric.1","time":"2017-05-08T21:34:03.571Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"metric.1","time":"2017-05-08T21:34:03.5Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"metric.1","time":"2017-05-08T21:34:03.57Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
+				`{"type":"metric.1","time":"2017-05-08T21:34:03.571Z","metricName":"com.palantir.lime.searchResult","metricType":"gauge","values":{"resultIndex":2},"tags":{"deployment":"yellow", "env":"prod"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"unsafeParams":{"searchTerm":"unsafeVal"}}`,
 			},
 			output: []string{
 				`[2017-05-08T21:34:03.5Z]   METRIC com.palantir.lime.searchResult gauge (resultIndex: 2) (deployment: yellow, env: prod) (searchTerm: unsafeVal)`,

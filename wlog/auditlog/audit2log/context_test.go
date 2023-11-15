@@ -17,6 +17,7 @@ package audit2log_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -55,7 +56,7 @@ func TestFromContext(t *testing.T) {
 	assert.NoError(t, err, "%v", err)
 }
 
-// Tests that the logger returned by audit2log.FromContext has UID, SID and TokenID parameters set on it if the context
+// Tests that the logger returned by audit2log.FromContext has UID, SID, TokenID, and OrgID parameters set on it if the context
 // has those values set on it using wlog.
 func TestFromContextUsesCommonIDs(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -63,6 +64,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 	ctx = wlog.ContextWithUID(ctx, "test-UID")
 	ctx = wlog.ContextWithSID(ctx, "test-SID")
 	ctx = wlog.ContextWithTokenID(ctx, "test-TokenID")
+	ctx = wlog.ContextWithOrgID(ctx, "test-OrgID")
 
 	logger := audit2log.FromContext(ctx)
 	logger.Audit("TEST_ENTRY", audit2log.AuditResultSuccess)
@@ -80,6 +82,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 		"uid":     objmatcher.NewEqualsMatcher("test-UID"),
 		"sid":     objmatcher.NewEqualsMatcher("test-SID"),
 		"tokenId": objmatcher.NewEqualsMatcher("test-TokenID"),
+		"orgId":   objmatcher.NewEqualsMatcher("test-OrgID"),
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
@@ -141,6 +144,43 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("EVENT_2", "manually-set-trace-id")
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+	buf.Reset()
+}
+
+func TestWithLoggerParams(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("foo", "bar"))
+	ctx = audit2log.WithLoggerParams(ctx, audit2log.RequestParam("ten", 10))
+
+	logger := audit2log.FromContext(ctx)
+	logger.Audit("EVENT_0", audit2log.AuditResultSuccess)
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	createMatcher := func(name, traceID string) objmatcher.Matcher {
+		matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"time":   objmatcher.NewRegExpMatcher(".+"),
+			"type":   objmatcher.NewEqualsMatcher("audit.2"),
+			"name":   objmatcher.NewEqualsMatcher(name),
+			"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+			"requestParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+				"foo": objmatcher.NewEqualsMatcher("bar"),
+				"ten": objmatcher.NewEqualsMatcher(json.Number("10")),
+			}),
+		})
+		if traceID != "" {
+			matcher["traceId"] = objmatcher.NewEqualsMatcher(traceID)
+		}
+		return matcher
+	}
+
+	assert.Equal(t, 1, len(entries))
+
+	matcher := createMatcher("EVENT_0", "")
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()

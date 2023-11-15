@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Use palantir/pkg/uuid
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/244

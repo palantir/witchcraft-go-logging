@@ -109,7 +109,7 @@ func BenchmarkReq2Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			req := req2log.Request{
 				Request: req2logtests.GenerateRequest(map[string]string{
-					"Authorization":      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0ifQ.JTD36MhcwmSuvfdCkfSYc-LHOGNA1UQ-0FKLKqdXbF4",
+					"Authorization":      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0iLCJvcmciOiJDWmpsY3pIWFNabUwrUXZGOUZrdHVRPT0ifQ.GMqKu_zrkgNR5I-jAWdR6x0G2gObVYRbqw7iJJatI4A",
 					"FooHeaderParamName": "fooHeaderParamVal",
 				}, tc.ExtraQueryParams, tc.ExtraHeaderParams),
 				RouteInfo:      req2log.RouteInfo{},

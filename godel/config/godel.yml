@@ -3,15 +3,15 @@ plugins:
     - https://github.com/{{index GroupParts 1}}/{{index GroupParts 2}}/releases/download/v{{Version}}/{{Product}}-{{Version}}-{{OS}}-{{Arch}}.tgz
   plugins:
     - locator:
-        id: com.palantir.godel-conjure-plugin:conjure-plugin:6.9.0
+        id: com.palantir.godel-conjure-plugin:conjure-plugin:6.56.0
         checksums:
-          darwin-amd64: dc0a971c6bbbe36b09d5266ff7bddbd78da9a501ca093b305881d2c791937974
-          linux-amd64: 9bd30e3b1ca67f166c50965e1c9194e65362b1b17f7913fe5e7d57a37038ae1b
+          darwin-amd64: 251b67b39ff43964dd59c171abdd9aecca4eea0fba6d9e0f34fd03d157749c3e
+          linux-amd64: ba1ae453729c0c64f27de9bd938cc3a35d92332a0ecec78a7c7d6c0368b69d62
     - locator:
-        id: com.palantir.godel-mod-plugin:mod-plugin:1.3.0
+        id: com.palantir.godel-mod-plugin:mod-plugin:1.33.0
         checksums:
-          darwin-amd64: 08a65d8db9555c4580dbf6cdfd954ffafc687ecbf5a71a643bc190baa9b774ad
-          linux-amd64: dda61df35df69154836b4f6caa14f88d6b1a59acdb99005e5f5de986fa33f37b
+          darwin-amd64: ccc2d3e011108ab5610281b31cd1bdcb04f76c346f957882dc747e90ad4de29d
+          linux-amd64: 97e97d474dbf08708bbb6e494699e0fe174cfb31bd6e0526f87804dffd1d97a5
 environment:
   GO111MODULE: "on"
   GOFLAGS: "-mod=vendor"

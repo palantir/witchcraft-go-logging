@@ -36,6 +36,7 @@ type Metric1TestCase struct {
 	UID          string
 	SID          string
 	TokenID      string
+	OrgID        string
 	UnsafeParams map[string]interface{}
 	JSONMatcher  objmatcher.MapMatcher
 }
@@ -46,6 +47,7 @@ func (tc Metric1TestCase) Params() []metric1log.Param {
 		metric1log.UID(tc.UID),
 		metric1log.SID(tc.SID),
 		metric1log.TokenID(tc.TokenID),
+		metric1log.OrgID(tc.OrgID),
 		metric1log.Tags(tc.Tags),
 		metric1log.UnsafeParams(tc.UnsafeParams),
 	}
@@ -72,6 +74,7 @@ func Metric1TestCases(entityName, entityVersion string) []Metric1TestCase {
 				"shardId": "shard-1234",
 			},
 			TokenID: "X-Y-Z",
+			OrgID:   "org-1",
 			UnsafeParams: map[string]interface{}{
 				"Password": "HelloWorld!",
 			},
@@ -101,6 +104,7 @@ func Metric1TestCases(entityName, entityVersion string) []Metric1TestCase {
 							"shardId": objmatcher.NewEqualsMatcher("shard-1234"),
 						}),
 						"tokenId": objmatcher.NewEqualsMatcher("X-Y-Z"),
+						"orgId":   objmatcher.NewEqualsMatcher("org-1"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"Password": objmatcher.NewEqualsMatcher("HelloWorld!"),
 						}),

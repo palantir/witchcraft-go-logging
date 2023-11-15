@@ -23,7 +23,7 @@ func TestService1Logs(t *testing.T) {
 		{
 			name: "Error level log",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":null}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":null}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5 (0: 8df8ace6-a068-4094-a7ff-0273469302f5, throwableMessage: <nil>)`,
@@ -104,7 +104,7 @@ func TestService1Logs(t *testing.T) {
 		{
 			name: "Stacktrace and message param substitution - stack trace substitutes from safe param",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Message"},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5"}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Message"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5"}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5, safe: {} (request: /foo, throwableMessage: Message) (0: 8df8ace6-a068-4094-a7ff-0273469302f5)
@@ -116,7 +116,7 @@ java.lang.NullPointerException: Message
 		{
 			name: "Stacktrace and message param substitution - stack trace substitutes from unsafe param",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo"},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":"Message"}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":"Message"}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5, safe: {} (request: /foo) (0: 8df8ace6-a068-4094-a7ff-0273469302f5, throwableMessage: Message)
@@ -128,7 +128,7 @@ java.lang.NullPointerException: Message
 		{
 			name: "Stacktrace and message param substitution - if stack trace element matches safe and unsafe params, prefer safe",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Safe message"},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":"Unsafe message"}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Safe message"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {throwableMessage}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":"Unsafe message"}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5, safe: {} (request: /foo, throwableMessage: Safe message) (0: 8df8ace6-a068-4094-a7ff-0273469302f5, throwableMessage: Unsafe message)
@@ -140,7 +140,7 @@ java.lang.NullPointerException: Safe message
 		{
 			name: "Stacktrace and message param substitution - nested param",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Message"},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {{{throwableMessage}}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5"}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}, safe: {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{"request": "/foo","throwableMessage":"Message"},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","stacktrace":"java.lang.NullPointerException: {{{throwableMessage}}\n\tcom.palantir.edu.profiles.resource.ProfileResource.getUserId(ProfileResource.java:36)\n","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5"}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5, safe: {} (request: /foo, throwableMessage: Message) (0: 8df8ace6-a068-4094-a7ff-0273469302f5)
@@ -189,7 +189,7 @@ java.lang.NullPointerException: {{Message}
 		{
 			name: "Test wrapped service log",
 			input: []string{
-				`{"type":"wrapped.1","payload":{"type":"serviceLogV1","serviceLogV1":{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":null}}},"entityName":"codex-hub","entityVersion":"v2.1.0"}`,
+				`{"type":"wrapped.1","payload":{"type":"serviceLogV1","serviceLogV1":{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","origin":"com.palantir.remoting2.servers.jersey.JsonExceptionMapper","thread":"qtp1360518503-16","params":{},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{"0":"8df8ace6-a068-4094-a7ff-0273469302f5","throwableMessage":null}}},"entityName":"codex-hub","entityVersion":"v2.1.0"}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] com.palantir.remoting2.servers.jersey.JsonExceptionMapper: Error handling request 8df8ace6-a068-4094-a7ff-0273469302f5 (0: 8df8ace6-a068-4094-a7ff-0273469302f5, throwableMessage: <nil>)`,
@@ -198,7 +198,7 @@ java.lang.NullPointerException: {{Message}
 		{
 			name: "Test service log with empty origin",
 			input: []string{
-				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","params":{},"uid":null,"sid":null,"tokenId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{}}`,
+				`{"type":"service.1","time":"2017-04-12T17:41:07.744Z","level":"ERROR","message":"Error handling request {}","params":{},"uid":null,"sid":null,"tokenId":null,"orgId":null,"traceId":"fa4f6a37ac662fbd","unsafeParams":{}}`,
 			},
 			output: []string{
 				`ERROR [2017-04-12T17:41:07.744Z] Error handling request {}`,
