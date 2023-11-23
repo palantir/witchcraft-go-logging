@@ -15,10 +15,10 @@ require (
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
-	github.com/palantir/witchcraft-go-error v1.29.0
+	github.com/palantir/witchcraft-go-error v1.30.0
 	github.com/palantir/witchcraft-go-health v1.15.0
-	github.com/palantir/witchcraft-go-params v1.27.0
-	github.com/palantir/witchcraft-go-tracing v1.29.0
+	github.com/palantir/witchcraft-go-params v1.28.0
+	github.com/palantir/witchcraft-go-tracing v1.30.0
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.15.0
