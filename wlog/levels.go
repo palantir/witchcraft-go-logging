@@ -51,6 +51,7 @@ func (l *LogLevel) UnmarshalText(b []byte) error {
 		return fmt.Errorf("invalid log level: %q", string(b))
 	}
 }
+
 func (l LogLevel) Enabled(other LogLevel) bool {
 	switch l {
 	case DebugLevel:
