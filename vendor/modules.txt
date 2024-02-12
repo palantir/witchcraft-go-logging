@@ -25,9 +25,6 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/go-metrics v1.1.1
-## explicit; go 1.13
-github.com/palantir/go-metrics
 # github.com/palantir/pkg v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg
@@ -37,9 +34,6 @@ github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/datetime v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/datetime
-# github.com/palantir/pkg/metrics v1.7.0
-## explicit; go 1.21
-github.com/palantir/pkg/metrics
 # github.com/palantir/pkg/objmatcher v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/objmatcher
@@ -63,12 +57,6 @@ github.com/palantir/pkg/uuid/internal/uuid
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.15.0
-## explicit; go 1.20
-github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
-github.com/palantir/witchcraft-go-health/sources
-github.com/palantir/witchcraft-go-health/sources/window
-github.com/palantir/witchcraft-go-health/status
 # github.com/palantir/witchcraft-go-params v1.31.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
@@ -76,9 +64,6 @@ github.com/palantir/witchcraft-go-params
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
-# github.com/pkg/errors v0.9.1
-## explicit
-github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
