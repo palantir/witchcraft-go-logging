@@ -1,6 +1,7 @@
 package svc1log
 
 import (
+	"github.com/palantir/conjure-go/v6/dj"
 	"io"
 	golog "log"
 	"sync"
@@ -40,7 +41,7 @@ type Logger interface {
 
 func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 	return &conjureLogger{
-		marshaler:      (*logging.ServiceLogV1).AppendJSON,
+		marshaler:      (*logging.ServiceLogV1).WriteJSON,
 		output:         w,
 		params:         params,
 		nl:             []byte("\n"),
@@ -48,14 +49,14 @@ func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger 
 	}
 }
 
-type encoderFunc func(log *logging.ServiceLogV1, buf []byte) ([]byte, error)
+type encoderFunc func(log *logging.ServiceLogV1, writer io.Writer) (int, error)
 
 type conjureLogger struct {
 	marshaler encoderFunc
 	output    io.Writer
 	params    []Param
 	nl        []byte
-	wlog.AtomicLogLevel
+	*wlog.AtomicLogLevel
 }
 
 func (l *conjureLogger) Debug(msg string, params ...Param) {
@@ -117,21 +118,21 @@ func (l *conjureLogger) applyParams(log *logging.ServiceLogV1, params ...Param) 
 
 func (l *conjureLogger) write(log *logging.ServiceLogV1) {
 	buf := svclogBufPool.Get().(*[]byte)
-	out, err := l.marshaler(log, (*buf)[:0])
+	defer svclogBufPool.Put(buf)
+	*buf = (*buf)[:0]
+	_, err := l.marshaler(log, dj.NewAppender(buf))
 	if err != nil {
 		golog.Printf("failed to marshal service.1 log: %v", err)
-		svclogBufPool.Put(buf)
 		return
 	}
-	defer svclogBufPool.Put(&out)
-	if _, err := l.output.Write(out); err != nil {
+	if _, err := l.output.Write(*buf); err != nil {
 		golog.Printf("failed to write service.1 log: %v", err)
-		golog.Println(string(out))
+		golog.Println(string(*buf))
 	}
 }
 
 func resetSvc1Log(log *logging.ServiceLogV1) {
-	log.Type = "service.1"
+	log.Type = TypeValue
 	log.Level = logging.New_LogLevel(logging.LogLevel_UNKNOWN)
 	log.Time = datetime.DateTime{}
 	log.Origin = nil
