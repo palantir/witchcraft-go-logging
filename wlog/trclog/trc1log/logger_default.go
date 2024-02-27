@@ -85,7 +85,7 @@ func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog
 		entry.ObjectValue(SpanAnnotationsKey, []map[string]interface{}{
 			spanAnnotationFields(startVal, span.Timestamp, span.LocalEndpoint),
 			spanAnnotationFields(endVal, span.Timestamp.Add(span.Duration), span.LocalEndpoint),
-		}, nil)
+		})
 	})
 }
 

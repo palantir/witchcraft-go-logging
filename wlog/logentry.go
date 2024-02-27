@@ -16,7 +16,6 @@ package wlog
 
 import (
 	"io"
-	"reflect"
 )
 
 type LogEntry interface {
@@ -31,7 +30,7 @@ type LogEntry interface {
 	// ObjectValue logs the provided value associated with the specified key. If marshalerType is non-nil, then if a
 	// custom marshaler is registered for that type, it may be used to log the entry. If marshalerType is nil or no
 	// marshaler is registered for the provided type, the entry should be logged using reflection.
-	ObjectValue(k string, v interface{}, marshalerType reflect.Type)
+	ObjectValue(k string, v interface{})
 }
 
 type Logger interface {
@@ -79,9 +78,6 @@ func (m *MapValueEntries) StringMapValue(key string, values map[string]string) {
 }
 
 func (m *MapValueEntries) AnyMapValue(key string, values map[string]interface{}) {
-	if len(values) == 0 {
-		return
-	}
 	if len(values) == 0 {
 		return
 	}

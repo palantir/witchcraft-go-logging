@@ -14,10 +14,6 @@
 
 package wlog
 
-import (
-	"reflect"
-)
-
 type MapLogEntry interface {
 	LogEntry
 
@@ -36,8 +32,7 @@ type MapLogEntry interface {
 }
 
 type ObjectValue struct {
-	Value         interface{}
-	MarshalerType reflect.Type
+	Value interface{}
 }
 
 func NewMapLogEntry() MapLogEntry {
@@ -178,14 +173,11 @@ func (le *mapLogEntry) AnyMapValue(k string, v map[string]interface{}) {
 	le.anyMapValues[k] = newMapVal
 }
 
-func (le *mapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (le *mapLogEntry) ObjectValue(k string, v interface{}) {
 	le.clearKey(k)
 
 	le.allKeys[k] = struct{}{}
-	le.objectValues[k] = ObjectValue{
-		Value:         v,
-		MarshalerType: marshalerType,
-	}
+	le.objectValues[k] = ObjectValue{Value: v}
 }
 
 func (le *mapLogEntry) Apply(logEntry LogEntry) {
@@ -208,7 +200,7 @@ func (le *mapLogEntry) Apply(logEntry LogEntry) {
 		logEntry.AnyMapValue(k, v)
 	}
 	for k, v := range le.objectValues {
-		logEntry.ObjectValue(k, v.Value, v.MarshalerType)
+		logEntry.ObjectValue(k, v.Value)
 	}
 }
 

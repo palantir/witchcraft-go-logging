@@ -15,8 +15,6 @@
 package zeroimpl
 
 import (
-	"reflect"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/rs/zerolog"
 )
@@ -72,7 +70,7 @@ func (e *zeroLogEntry) IntValue(key string, value int32) {
 	e.evt = e.evt.Int32(key, value)
 }
 
-func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (e *zeroLogEntry) ObjectValue(k string, v interface{}) {
 	if e.keyExists(k) {
 		return
 	}

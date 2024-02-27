@@ -16,7 +16,6 @@ package zapimpl
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 	"time"
 
@@ -64,7 +63,7 @@ func (e *zapLogEntry) IntValue(key string, value int32) {
 	e.fields[key] = &s
 }
 
-func (e *zapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (e *zapLogEntry) ObjectValue(k string, v interface{}) {
 	s := zap.Reflect(k, v)
 	e.fields[k] = &s
 }
