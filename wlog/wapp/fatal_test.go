@@ -152,7 +152,7 @@ github\.com/palantir/witchcraft-go-logging/wlog/wapp_test\.TestRunWithRecoveryLo
 	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
 testing\.tRunner\(\.\.\.\)
 	testing/testing\.go:\d+ \+0x[0-9a-f]+
-created by testing\.\(\*T\)\.Run in goroutine \d+\(\.\.\.\)
+created by testing\.\(\*T\)\.Run( in goroutine \d+\(\.\.\.\))?
 	testing/testing\.go:\d+ \+0x[0-9a-f]+
 `)
 		assert.Regexp(t, p.String(), *msg.Stacktrace)
