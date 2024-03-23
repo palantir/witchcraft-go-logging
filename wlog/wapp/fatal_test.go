@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 	"testing"
 
 	"github.com/palantir/pkg/safejson"
@@ -123,4 +124,37 @@ func TestRunRunWithFatalLoggingNoErrors(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Empty(t, buf.String())
+}
+
+func TestRunWithRecoveryLogging_NilPointer(t *testing.T) {
+	buf := &bytes.Buffer{}
+	ctx := getContextWithLogger(context.Background(), buf)
+	wapp.RunWithRecoveryLogging(ctx, func(ctx context.Context) {
+		var s *string
+		_ = *s
+	})
+	var msg logging.ServiceLogV1
+	err := safejson.Unmarshal(buf.Bytes(), &msg)
+	assert.NoError(t, err)
+	assert.Equal(t, msg.Message, "panic recovered")
+	assert.Equal(t, "invalid memory address or nil pointer dereference", msg.UnsafeParams["recovered"])
+	if assert.NotNil(t, msg.Stacktrace, "Expected stacktrace to be present") {
+		p := regexp.MustCompile(`panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine \d+ \[running]:
+panic\(\.\.\.\)
+	runtime/panic\.go:\d+ \+0x[0-9a-f]+
+github\.com/palantir/witchcraft-go-logging/wlog/wapp_test\.TestRunWithRecoveryLogging_NilPointer\.func1\(\.\.\.\)
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
+github\.com/palantir/witchcraft-go-logging/wlog/wapp\.RunWithRecoveryLogging\(\.\.\.\)
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal\.go:\d+ \+0x[0-9a-f]+
+github\.com/palantir/witchcraft-go-logging/wlog/wapp_test\.TestRunWithRecoveryLogging_NilPointer\(\.\.\.\)
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
+testing\.tRunner\(\.\.\.\)
+	testing/testing\.go:\d+ \+0x[0-9a-f]+
+created by testing\.\(\*T\)\.Run in goroutine \d+\(\.\.\.\)
+	testing/testing\.go:\d+ \+0x[0-9a-f]+
+`)
+		assert.Regexp(t, p.String(), *msg.Stacktrace)
+	}
 }

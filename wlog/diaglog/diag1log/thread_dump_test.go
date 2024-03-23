@@ -25,9 +25,10 @@ import (
 
 func TestThreadDumpV1FromGoroutines(t *testing.T) {
 	for _, test := range []struct {
-		Name     string
-		Input    string
-		Expected logging.ThreadDumpV1
+		Name      string
+		Input     string
+		Marshaled string
+		Expected  logging.ThreadDumpV1
 	}{
 		{
 			Name: "single goroutine",
@@ -36,6 +37,12 @@ net/http.(*persistConn).writeLoop(0xc0000bd0e0)
 	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go:1885 +0x113
 created by net/http.(*Transport).dialConn
 	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go:1339 +0x966
+`,
+			Marshaled: `goroutine 14 [select]:
+net/http.(*persistConn).writeLoop(...)
+	net/http/transport.go:1885 +0x113
+created by net/http.(*Transport).dialConn(...)
+	net/http/transport.go:1339 +0x966
 `,
 			Expected: logging.ThreadDumpV1{
 				Threads: []logging.ThreadInfoV1{
@@ -73,6 +80,11 @@ net/http.(*persistConn).writeLoop(0xc0000bd0e0)
 created by net/http.(*Transport).dialConn
 	/usr/local/Cellar/go/1.11.2/libexec/src/net/http/transport.go +0x966
 `,
+			Marshaled: `goroutine 14 [select]:
+net/http.(*persistConn).writeLoop(...)
+	net/http/transport.go:1885
+created by net/http.(*Transport).dialConn(...)
+`,
 			Expected: logging.ThreadDumpV1{
 				Threads: []logging.ThreadInfoV1{
 					{
@@ -105,6 +117,8 @@ created by net/http.(*Transport).dialConn
 		t.Run(test.Name, func(t *testing.T) {
 			dump := diag1log.ThreadDumpV1FromGoroutines([]byte(test.Input))
 			require.Equal(t, test.Expected, dump)
+			out := diag1log.ThreadDumpV1ToGoroutines(dump)
+			require.Equal(t, test.Marshaled, out)
 		})
 	}
 }
