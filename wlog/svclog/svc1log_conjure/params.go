@@ -79,7 +79,7 @@ func OriginFromInitLine() Param {
 // origin would be "github.com/palantir/witchcraft-go-logging/wlog", while with skipPkg=1 the origin would be
 // "github.com/palantir/witchcraft-go-logging".
 func OriginFromInitPkg(skipPkg int) Param {
-	return Origin(CallerPkg(1, 0))
+	return Origin(CallerPkg(1, skipPkg))
 }
 
 // OriginFromCallLine sets the "origin" field to be the filename and line of the location at which the logger invocation

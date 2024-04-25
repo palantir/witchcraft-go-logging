@@ -20,10 +20,10 @@ var (
 	svclogObjPool = &sync.Pool{New: func() interface{} {
 		return &logging.ServiceLogV1{Type: TypeValue}
 	}}
-	svclogBufPool = &sync.Pool{New: func() interface{} {
-		b := make([]byte, 0, 128)
-		return &b
-	}}
+	//svclogBufPool = &sync.Pool{New: func() interface{} {
+	//	b := make([]byte, 0, 1024)
+	//	return &b
+	//}}
 
 	levelDebug = logging.New_LogLevel(logging.LogLevel_DEBUG)
 	levelInfo  = logging.New_LogLevel(logging.LogLevel_INFO)
@@ -41,7 +41,7 @@ type Logger interface {
 
 func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 	return &conjureLogger{
-		marshaler:      (*logging.ServiceLogV1).WriteJSON,
+		//marshaler:      (*logging.ServiceLogV1).WriteJSON,
 		output:         w,
 		params:         params,
 		nl:             []byte("\n"),
@@ -49,13 +49,13 @@ func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger 
 	}
 }
 
-type encoderFunc func(log *logging.ServiceLogV1, writer io.Writer) (int, error)
+//type encoderFunc func(log *logging.ServiceLogV1, writer io.Writer) (int, error)
 
 type conjureLogger struct {
-	marshaler encoderFunc
-	output    io.Writer
-	params    []Param
-	nl        []byte
+	//marshaler encoderFunc
+	output io.Writer
+	params []Param
+	nl     []byte
 	*wlog.AtomicLogLevel
 }
 
@@ -75,6 +75,7 @@ func (l *conjureLogger) Info(msg string, params ...Param) {
 	if l.Enabled(wlog.InfoLevel) {
 		log := svclogObjPool.Get().(*logging.ServiceLogV1)
 		defer resetSvc1Log(log)
+		log.Type = TypeValue
 		log.Time = datetime.DateTime(time.Now())
 		log.Level = levelInfo
 		log.Message = msg
@@ -117,23 +118,24 @@ func (l *conjureLogger) applyParams(log *logging.ServiceLogV1, params ...Param) 
 }
 
 func (l *conjureLogger) write(log *logging.ServiceLogV1) {
-	buf := svclogBufPool.Get().(*[]byte)
-	defer svclogBufPool.Put(buf)
-	*buf = (*buf)[:0]
-	_, err := l.marshaler(log, dj.NewAppender(buf))
+	//buf := svclogBufPool.Get().(*[]byte)
+	//defer svclogBufPool.Put(buf)
+	//*buf = (*buf)[:0]
+	//_, err := l.marshaler(log, dj.NewAppender(buf))
+	out, err := log.MarshalJSON()
 	if err != nil {
 		golog.Printf("failed to marshal service.1 log: %v", err)
 		return
 	}
-	if _, err := l.output.Write(*buf); err != nil {
+	if _, err := l.output.Write(out); err != nil {
 		golog.Printf("failed to write service.1 log: %v", err)
-		golog.Println(string(*buf))
+		golog.Println(string(out))
 	}
 }
 
 func resetSvc1Log(log *logging.ServiceLogV1) {
 	log.Type = TypeValue
-	log.Level = logging.New_LogLevel(logging.LogLevel_UNKNOWN)
+	log.Level = logging.LogLevel{}
 	log.Time = datetime.DateTime{}
 	log.Origin = nil
 	log.Thread = nil
@@ -152,5 +154,6 @@ func resetSvc1Log(log *logging.ServiceLogV1) {
 	for k := range log.Tags {
 		delete(log.Tags, k)
 	}
+	// return log to pool
 	svclogObjPool.Put(log)
 }
