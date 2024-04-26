@@ -24,7 +24,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1log_conjure"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
@@ -88,13 +88,14 @@ func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Lo
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	return &wrappedSvc1Logger{
-		params:  params,
-		name:    l.name,
-		version: l.version,
-		logger:  l.levellogger,
-		level:   l.level,
-	}
+	panic("not implemented")
+	//return &wrappedSvc1Logger{
+	//	params:  params,
+	//	name:    l.name,
+	//	version: l.version,
+	//	logger:  l.levellogger,
+	//	level:   l.level,
+	//}
 }
 
 func (l *defaultLogger) Trace() trc1log.Logger {

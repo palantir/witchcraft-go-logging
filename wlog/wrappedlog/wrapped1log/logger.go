@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1log_conjure"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
 
