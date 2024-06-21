@@ -32,14 +32,10 @@ type Logger interface {
 	Warn(msg string, params ...Param)
 	Error(msg string, params ...Param)
 	SetLevel(level wlog.LogLevel)
-}
-
-type LoggerWithParams interface {
-	Logger
 	WithParams(params ...Param) Logger
 }
 
-func New(w io.Writer, level wlog.LogLevel, params ...Param) LoggerWithParams {
+func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 	return &defaultLogger{
 		logger: wlog.NewDefaultLogger[logging.ServiceLogV1](w).WithParams(Type(), TimeNow()).WithParams(params...),
 		level:  wlog.NewAtomicLogLevel(level),
@@ -51,13 +47,29 @@ type defaultLogger struct {
 	logger wlog.ConjureLogger[logging.ServiceLogV1]
 }
 
-func (l *defaultLogger) Debug(msg string, params ...Param) { l.log(wlog.DebugLevel, msg, params...) }
+func (l *defaultLogger) Debug(msg string, params ...Param) {
+	if l.level.Enabled(wlog.DebugLevel) {
+		l.logger.Log(append([]Param{Level(wlog.DebugLevel), Message(msg)}, params...)...)
+	}
+}
 
-func (l *defaultLogger) Info(msg string, params ...Param) { l.log(wlog.InfoLevel, msg, params...) }
+func (l *defaultLogger) Info(msg string, params ...Param) {
+	if l.level.Enabled(wlog.InfoLevel) {
+		l.logger.Log(append([]Param{Level(wlog.InfoLevel), Message(msg)}, params...)...)
+	}
+}
 
-func (l *defaultLogger) Warn(msg string, params ...Param) { l.log(wlog.WarnLevel, msg, params...) }
+func (l *defaultLogger) Warn(msg string, params ...Param) {
+	if l.level.Enabled(wlog.WarnLevel) {
+		l.logger.Log(append([]Param{Level(wlog.WarnLevel), Message(msg)}, params...)...)
+	}
+}
 
-func (l *defaultLogger) Error(msg string, params ...Param) { l.log(wlog.ErrorLevel, msg, params...) }
+func (l *defaultLogger) Error(msg string, params ...Param) {
+	if l.level.Enabled(wlog.ErrorLevel) {
+		l.logger.Log(append([]Param{Level(wlog.ErrorLevel), Message(msg)}, params...)...)
+	}
+}
 
 func (l *defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
 	if l.level.Enabled(level) {

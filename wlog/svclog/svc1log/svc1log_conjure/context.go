@@ -24,20 +24,44 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
-func Debug(ctx context.Context, msg string, params ...Param) {
-	FromContext(ctx).Debug(msg, params...) // TODO this will have the wrong caller stack frames skipped
+// A private type that can only be instantiated by a string literal or constant.
+// This ensures all log messages are safe for exporting.
+type stringConst string
+
+func Debug(ctx context.Context, msg stringConst, params ...Param) {
+	logger := FromContext(ctx)
+	if l, ok := logger.(*defaultLogger); ok {
+		l.log(wlog.DebugLevel, string(msg), params...)
+	} else {
+		logger.Debug(string(msg), params...)
+	}
 }
 
-func Info(ctx context.Context, msg string, params ...Param) {
-	FromContext(ctx).Info(msg, params...)
+func Info(ctx context.Context, msg stringConst, params ...Param) {
+	logger := FromContext(ctx)
+	if l, ok := logger.(*defaultLogger); ok {
+		l.log(wlog.InfoLevel, string(msg), params...)
+	} else {
+		logger.Info(string(msg), params...)
+	}
 }
 
-func Warn(ctx context.Context, msg string, params ...Param) {
-	FromContext(ctx).Warn(msg, params...)
+func Warn(ctx context.Context, msg stringConst, params ...Param) {
+	logger := FromContext(ctx)
+	if l, ok := logger.(*defaultLogger); ok {
+		l.log(wlog.WarnLevel, string(msg), params...)
+	} else {
+		logger.Warn(string(msg), params...)
+	}
 }
 
-func Error(ctx context.Context, msg string, params ...Param) {
-	FromContext(ctx).Error(msg, params...)
+func Error(ctx context.Context, msg stringConst, params ...Param) {
+	logger := FromContext(ctx)
+	if l, ok := logger.(*defaultLogger); ok {
+		l.log(wlog.ErrorLevel, string(msg), params...)
+	} else {
+		logger.Error(string(msg), params...)
+	}
 }
 
 type contextKey struct{}
@@ -62,7 +86,7 @@ func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
 	if safeParams, unsafeParams := safeAndUnsafeParamsFromParams(params); len(safeParams) > 0 || len(unsafeParams) > 0 {
 		ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safeParams, unsafeParams)
 	}
-	return WithLogger(ctx, WithParams(loggerFromContext(ctx), params...))
+	return WithLogger(ctx, loggerFromContext(ctx).WithParams(params...))
 }
 
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
@@ -86,12 +110,12 @@ func FromContext(ctx context.Context) Logger {
 	}
 	if orgID := wloginternal.IDFromContext(ctx, wloginternal.OrgIDKey); orgID != nil {
 		// TODO: Add OrgID to svc1log
-		// params = append(params, OrgID(*orgID))
+		params = append(params, OrgID(*orgID))
 	}
 	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
 		params = append(params, TraceID(string(traceID)))
 	}
-	return WithParams(logger, params...)
+	return logger.WithParams(params...)
 }
 
 func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {
