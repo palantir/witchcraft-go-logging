@@ -151,6 +151,25 @@ func SafeParam(key string, value interface{}) Param {
 }
 
 func SafeParams(safe map[string]interface{}) Param {
+	safetyMap := IsParamSafe(safe)
+	// strip out map
+	newParams := make(map[string]interface{})
+	paramsCensored := false
+	for key, val := range safe {
+		safety, _ := safetyMap[key]
+		if !safety.Safe {
+			paramsCensored = true
+			newParams[key] = safety.Message
+		} else {
+			newParams[key] = val
+		}
+	}
+	if paramsCensored {
+		return paramFunc(func(entry wlog.LogEntry) {
+			entry.AnyMapValue(ParamsKey, newParams)
+		})
+	}
+
 	return paramFunc(func(entry wlog.LogEntry) {
 		entry.AnyMapValue(ParamsKey, safe)
 	})
