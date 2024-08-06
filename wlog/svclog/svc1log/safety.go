@@ -35,7 +35,6 @@ type LogSafety struct {
 // if at any point a type is interface... the answer is no
 
 func IsParamSafe(paramsMap map[string]interface{}) map[string]LogSafety {
-	// This is probably not quite right. We should evaluate other types that could include structs
 	safetyMap := make(map[string]LogSafety)
 	for key, val := range paramsMap {
 		safe, message := isSafeRecursive(val)
@@ -86,7 +85,6 @@ func isSafeRecursive(val interface{}) (bool, string) {
 			newVal := reflect.New(valT.Elem())
 			mapSafe, message = isSafeRecursive(newVal.Elem().Interface())
 		}
-		// still idk
 		return mapSafe, message
 	}
 
