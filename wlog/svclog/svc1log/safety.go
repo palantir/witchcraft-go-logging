@@ -64,12 +64,6 @@ func isSafeRecursive(val interface{}) (bool, string) {
 		return true, ""
 	}
 
-	// This is a choice... personally I think that interface types can never be safe, due to
-	// the unknown nature of what can be put in it. Always return false if a type contains one.
-	//if valT.Kind() == reflect.Interface {
-	//	return false, interfaceInSafeArgMessage(valT.Name())
-	//}
-
 	// one inner type - array, slice, chan, or pointer
 	if valT.Kind() == reflect.Array || valT.Kind() == reflect.Slice || valT.Kind() == reflect.Chan || valT.Kind() == reflect.Pointer {
 		if isPrimitiveType(valT.Elem().Kind()) {
@@ -111,7 +105,8 @@ func isSafeRecursive(val interface{}) (bool, string) {
 		return safe, message
 	}
 
-	// This is a base case that should never get hit.
+	// This is a base case that should never get hit. Should remove this once it is no longer possible to hit...
+	// Currently Kind() == Interface hits it, which I'm still not sure what actually has that type.
 	return true, ""
 }
 
