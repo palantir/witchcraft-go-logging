@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package svc1log
+package wlog
 
 import (
 	"fmt"
@@ -36,6 +36,7 @@ type LogSafety struct {
 
 type SafetyChecker interface {
 	ParamsSafe(safeParams map[string]interface{}) map[string]LogSafety
+	OmitUnsafeParams(safeParams map[string]interface{}) map[string]interface{}
 }
 
 type defaultSafetyChecker struct {
@@ -47,6 +48,20 @@ func NewSafetyChecker() SafetyChecker {
 	return &defaultSafetyChecker{
 		cache: make(map[string]struct{}),
 	}
+}
+
+func (d *defaultSafetyChecker) OmitUnsafeParams(safeParams map[string]interface{}) map[string]interface{} {
+	safetyMap := d.ParamsSafe(safeParams)
+	newParams := make(map[string]interface{})
+	for key, val := range safeParams {
+		safety, _ := safetyMap[key]
+		if !safety.Safe {
+			newParams[key] = safety.Message
+		} else {
+			newParams[key] = val
+		}
+	}
+	return newParams
 }
 
 func (d *defaultSafetyChecker) ParamsSafe(safeParams map[string]interface{}) map[string]LogSafety {

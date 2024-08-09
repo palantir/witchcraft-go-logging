@@ -83,7 +83,7 @@ func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{},
 	for _, currParam := range params {
 		currParam.apply(logEntry)
 	}
-	return logEntry.AnyMapValues()[ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
+	return logEntry.AnyMapValues()[wlog.ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the

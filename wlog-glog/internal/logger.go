@@ -24,42 +24,47 @@ import (
 
 type gLogger struct {
 	*wlog.AtomicLogLevel
+	safetyChecker wlog.SafetyChecker
 }
 
-func (*gLogger) Log(params ...wlog.Param) {
-	glog.Info(createGLogMsg("", params))
+func (l *gLogger) Log(params ...wlog.Param) {
+	glog.Info(l.createGLogMsg("", params))
 }
 
 func (l *gLogger) Debug(msg string, params ...wlog.Param) {
 	if l.Enabled(wlog.DebugLevel) {
-		glog.Info(createGLogMsg(msg, params))
+		glog.Info(l.createGLogMsg(msg, params))
 	}
 }
 
 func (l *gLogger) Info(msg string, params ...wlog.Param) {
 	if l.Enabled(wlog.InfoLevel) {
-		glog.Info(createGLogMsg(msg, params))
+		glog.Info(l.createGLogMsg(msg, params))
 	}
 }
 
 func (l *gLogger) Warn(msg string, params ...wlog.Param) {
 	if l.Enabled(wlog.WarnLevel) {
-		glog.Warning(createGLogMsg(msg, params))
+		glog.Warning(l.createGLogMsg(msg, params))
 	}
 }
 
 func (l *gLogger) Error(msg string, params ...wlog.Param) {
 	if l.Enabled(wlog.ErrorLevel) {
-		glog.Error(createGLogMsg(msg, params))
+		glog.Error(l.createGLogMsg(msg, params))
 	}
 }
 
-func createGLogMsg(msg string, params []wlog.Param) string {
+func (l *gLogger) createGLogMsg(msg string, params []wlog.Param) string {
 	entry := wlog.NewMapLogEntry()
 	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 
 	// TODO: ignore/omit unsafe params?
 	// Omit ^
+	safeParams, ok := entry.AnyMapValues()[wlog.ParamsKey]
+	if ok {
+		entry.AnyMapValue(wlog.ParamsKey, l.safetyChecker.OmitUnsafeParams(safeParams))
+	}
 	return strings.Join(paramsToLog(entry), ", ")
 }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package svc1logtests
+package wlog
 
 import (
 	"reflect"
@@ -60,7 +60,7 @@ func TestParamsSafe(t *testing.T) {
 		name              string
 		safeParams        map[string]interface{}
 		allPass           bool
-		expectedSafetyMap map[string]svc1log.LogSafety
+		expectedSafetyMap map[string]LogSafety
 	}{
 		{
 			name: "Simple safe struct passes",
@@ -81,7 +81,7 @@ func TestParamsSafe(t *testing.T) {
 			safeParams: map[string]interface{}{
 				"param1": unsafeStruct{},
 			},
-			expectedSafetyMap: map[string]svc1log.LogSafety{
+			expectedSafetyMap: map[string]LogSafety{
 				"param1": {
 					Safe:    false,
 					Message: "'unsafeStringArr' was passed as a safe arg, but is actually tagged as unsafe.",
@@ -95,7 +95,7 @@ func TestParamsSafe(t *testing.T) {
 					InterfaceVal: unsafeInnerStruct{},
 				},
 			},
-			expectedSafetyMap: map[string]svc1log.LogSafety{
+			expectedSafetyMap: map[string]LogSafety{
 				"param1": {
 					Safe:    false,
 					Message: "'unsafeStringArr' was passed as a safe arg, but is actually tagged as unsafe.",
@@ -114,7 +114,7 @@ func TestParamsSafe(t *testing.T) {
 			safeParams: map[string]interface{}{
 				"param1": &unsafeInnerStruct{},
 			},
-			expectedSafetyMap: map[string]svc1log.LogSafety{
+			expectedSafetyMap: map[string]LogSafety{
 				"param1": {
 					Safe:    false,
 					Message: "'unsafeStringArr' was passed as a safe arg, but is actually tagged as unsafe.",
@@ -124,7 +124,7 @@ func TestParamsSafe(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			safetyChecker := svc1log.NewSafetyChecker()
+			safetyChecker := NewSafetyChecker()
 			safetyMap := safetyChecker.ParamsSafe(tt.safeParams)
 
 			if tt.allPass {
