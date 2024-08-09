@@ -24,7 +24,7 @@ import (
 
 type gLogger struct {
 	*wlog.AtomicLogLevel
-	safetyChecker wlog.SafetyChecker
+	wlog.SafetyChecker
 }
 
 func (l *gLogger) Log(params ...wlog.Param) {
@@ -63,7 +63,7 @@ func (l *gLogger) createGLogMsg(msg string, params []wlog.Param) string {
 	// Omit ^
 	safeParams, ok := entry.AnyMapValues()[wlog.ParamsKey]
 	if ok {
-		entry.AnyMapValue(wlog.ParamsKey, l.safetyChecker.OmitUnsafeParams(safeParams))
+		entry.AnyMapValue(wlog.ParamsKey, l.OmitUnsafeParams(safeParams))
 	}
 	return strings.Join(paramsToLog(entry), ", ")
 }
