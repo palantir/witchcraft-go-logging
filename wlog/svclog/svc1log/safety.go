@@ -53,11 +53,19 @@ func (d *defaultSafetyChecker) ParamsSafe(safeParams map[string]interface{}) map
 	safetyMap := make(map[string]LogSafety)
 	for key, val := range safeParams {
 		cache := d.getCachedSafeStructs()
-		safe, message, _ := isSafeRecursive(val, cache)
+		safe, message, safeStructs := isSafeRecursive(val, cache)
 		safetyMap[key] = LogSafety{
 			Safe:    safe,
 			Message: message,
 		}
+		// TODO(awerner): Consider moving this out of the for loop.
+		// Advantages:
+		//  Repopulating and copying the map each loop means that structs that appear in multiple params will be O(1)
+		//  in computing if it is safe.
+		// Disadvantages:
+		//  We recopy + lock the map to write each iteration of the loop.
+		// Should benchmark to decide which is actually faster on realistically sized param maps.
+		d.putSafeStructsInCache(safeStructs)
 	}
 
 	return safetyMap
