@@ -61,7 +61,7 @@ func (d *defaultSafetyChecker) ParamsSafe(safeParams map[string]interface{}) map
 		// TODO(awerner): Consider moving this out of the for loop.
 		// Advantages:
 		//  Repopulating and copying the map each loop means that structs that appear in multiple params will be O(1)
-		//  in computing if it is safe.
+		//  in computing if it is safe when looking in a subsequent struct.
 		// Disadvantages:
 		//  We recopy + lock the map to write each iteration of the loop.
 		// Should benchmark to decide which is actually faster on realistically sized param maps.
@@ -75,14 +75,20 @@ func (d *defaultSafetyChecker) getCachedSafeStructs() map[string]struct{} {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 
+	// TODO(awerner): Also reconsider this... might be quite memory intensive. Not sure if the tradeoffs are really
+	//   worth it. Other option is to pass the real cache and lock it every time. Likely solved by benchmarking.
 	// Return a copy of the map so that other threads can interact with the map at the same time, no need to
-	// grab a lock on every map read.
+	//   grab a lock on every map read.
 	cacheCopy := make(map[string]struct{})
 	maps.Copy(d.cache, cacheCopy)
 	return cacheCopy
 }
 
 func (d *defaultSafetyChecker) putSafeStructsInCache(structNames []string) {
+	if len(structNames) == 0 {
+		return
+	}
+
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, structName := range structNames {
@@ -102,10 +108,6 @@ func IsParamSafe(paramsMap map[string]interface{}) map[string]LogSafety {
 	return safetyMap
 }
 
-func IsSafe(val interface{}) (bool, string, []string) {
-	return isSafeRecursive(val, map[string]struct{}{})
-}
-
 func isSafeRecursive(val interface{}, cachedSafeStructs map[string]struct{}) (bool, string, []string) {
 	if val == nil {
 		// Nil vals are safe
@@ -117,6 +119,10 @@ func isSafeRecursive(val interface{}, cachedSafeStructs map[string]struct{}) (bo
 
 	if isPrimitiveType(valT.Kind()) {
 		return true, "", []string{}
+	}
+	// For now
+	if valT.Kind() == reflect.Interface {
+		return false, "", []string{}
 	}
 
 	// one inner type - array, slice, chan, or pointer
@@ -205,17 +211,19 @@ func structFieldIsSafe(field reflect.StructField, fieldVal reflect.Value, cached
 
 func isPrimitiveType(kind reflect.Kind) bool {
 	switch kind {
-	case reflect.Array:
-		return false
 	case reflect.Interface:
 		return false
+	case reflect.Array:
+		return false
 	case reflect.Slice:
+		return false
+	case reflect.Chan:
+		return false
+	case reflect.Pointer:
 		return false
 	case reflect.Map:
 		return false
 	case reflect.Struct:
-		return false
-	case reflect.Chan:
 		return false
 	default:
 		return true
