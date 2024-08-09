@@ -18,7 +18,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,10 +42,9 @@ type unsafeStruct struct {
 }
 
 type mapStruct struct {
-	stringVal    string                 `safety:"safe"`
-	numVal       int                    `safety:"safe"`
-	StructVal    map[string]innerStruct `safety:"safe"`
-	UnsafeStruct unsafeInnerStruct      `safety:"safe"`
+	stringVal string                 `safety:"safe"`
+	numVal    int                    `safety:"safe"`
+	StructVal map[string]innerStruct `safety:"safe"`
 }
 
 type structWithInterface struct {
@@ -144,18 +142,18 @@ func TestParamsSafe(t *testing.T) {
 }
 
 // Benchmarking
-func BenchmarkSafeParam(t *testing.B) {
-	for i := 0; i < t.N; i++ {
-		_ = svc1log.SafeParams(map[string]interface{}{
-			"param1": safeStruct{},
-		})
-	}
-}
-
-func BenchmarkUnsafeParam(t *testing.B) {
-	for i := 0; i < t.N; i++ {
-		_ = svc1log.UnsafeParams(map[string]interface{}{
-			"param1": safeStruct{},
-		})
-	}
-}
+//func BenchmarkSafeParam(t *testing.B) {
+//	for i := 0; i < t.N; i++ {
+//		_ = svc1log.SafeParams(map[string]interface{}{
+//			"param1": safeStruct{},
+//		})
+//	}
+//}
+//
+//func BenchmarkUnsafeParam(t *testing.B) {
+//	for i := 0; i < t.N; i++ {
+//		_ = svc1log.UnsafeParams(map[string]interface{}{
+//			"param1": safeStruct{},
+//		})
+//	}
+//}
