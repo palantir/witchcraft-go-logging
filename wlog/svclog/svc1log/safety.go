@@ -16,7 +16,9 @@ package svc1log
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
+	"sync"
 )
 
 const (
@@ -27,17 +29,63 @@ const (
 )
 
 type LogSafety struct {
-	Safe    bool
-	Message string
+	Safe      bool
+	Message   string
+	cacheable bool
 }
 
-// ok, next thing is whether or not the value is cacheable
-// if at any point a type is interface... the answer is no
+type SafetyChecker interface {
+	ParamsSafe(safeParams map[string]interface{}) map[string]LogSafety
+}
+
+type defaultSafetyChecker struct {
+	cache map[string]struct{}
+	lock  sync.RWMutex
+}
+
+func NewSafetyChecker() SafetyChecker {
+	return &defaultSafetyChecker{
+		cache: make(map[string]struct{}),
+	}
+}
+
+func (d *defaultSafetyChecker) ParamsSafe(safeParams map[string]interface{}) map[string]LogSafety {
+	safetyMap := make(map[string]LogSafety)
+	for key, val := range safeParams {
+		cache := d.getCachedSafeStructs()
+		safe, message, _ := isSafeRecursive(val, cache)
+		safetyMap[key] = LogSafety{
+			Safe:    safe,
+			Message: message,
+		}
+	}
+
+	return safetyMap
+}
+
+func (d *defaultSafetyChecker) getCachedSafeStructs() map[string]struct{} {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	// Return a copy of the map so that other threads can interact with the map at the same time, no need to
+	// grab a lock on every map read.
+	cacheCopy := make(map[string]struct{})
+	maps.Copy(d.cache, cacheCopy)
+	return cacheCopy
+}
+
+func (d *defaultSafetyChecker) putSafeStructsInCache(structNames []string) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+	for _, structName := range structNames {
+		d.cache[structName] = struct{}{}
+	}
+}
 
 func IsParamSafe(paramsMap map[string]interface{}) map[string]LogSafety {
 	safetyMap := make(map[string]LogSafety)
 	for key, val := range paramsMap {
-		safe, message := isSafeRecursive(val)
+		safe, message, _ := isSafeRecursive(val, map[string]struct{}{})
 		safetyMap[key] = LogSafety{
 			Safe:    safe,
 			Message: message,
@@ -46,30 +94,30 @@ func IsParamSafe(paramsMap map[string]interface{}) map[string]LogSafety {
 	return safetyMap
 }
 
-func IsSafe(val interface{}) (bool, string) {
-	return isSafeRecursive(val)
+func IsSafe(val interface{}) (bool, string, []string) {
+	return isSafeRecursive(val, map[string]struct{}{})
 }
 
-func isSafeRecursive(val interface{}) (bool, string) {
+func isSafeRecursive(val interface{}, cachedSafeStructs map[string]struct{}) (bool, string, []string) {
 	if val == nil {
 		// Nil vals are safe
-		return true, ""
+		return true, "", []string{}
 	}
 
 	valT := reflect.TypeOf(val)
 	valV := reflect.ValueOf(val)
 
 	if isPrimitiveType(valT.Kind()) {
-		return true, ""
+		return true, "", []string{}
 	}
 
 	// one inner type - array, slice, chan, or pointer
 	if valT.Kind() == reflect.Array || valT.Kind() == reflect.Slice || valT.Kind() == reflect.Chan || valT.Kind() == reflect.Pointer {
 		if isPrimitiveType(valT.Elem().Kind()) {
-			return true, ""
+			return true, "", []string{}
 		}
 		newVal := reflect.New(valT.Elem())
-		return isSafeRecursive(newVal.Elem().Interface())
+		return isSafeRecursive(newVal.Elem().Interface(), cachedSafeStructs)
 	}
 
 	// two inner types - map
@@ -77,38 +125,52 @@ func isSafeRecursive(val interface{}) (bool, string) {
 		// need to check key and values
 		mapSafe := true
 		message := ""
+		safeStructs := make([]string, 0)
 		if !isPrimitiveType(valT.Key().Kind()) {
 			newVal := reflect.New(valT.Key())
-			mapSafe, message = isSafeRecursive(newVal.Elem().Interface())
+			mapSafe, message, safeStructs = isSafeRecursive(newVal.Elem().Interface(), cachedSafeStructs)
 		}
 		if mapSafe && !isPrimitiveType(valT.Elem().Kind()) {
 			newVal := reflect.New(valT.Elem())
-			mapSafe, message = isSafeRecursive(newVal.Elem().Interface())
+			mapSafe, message, safeStructs = isSafeRecursive(newVal.Elem().Interface(), cachedSafeStructs)
 		}
-		return mapSafe, message
+		return mapSafe, message, safeStructs
 	}
 
 	// struct
 	if valT.Kind() == reflect.Struct {
+		if _, present := cachedSafeStructs[valT.Name()]; present {
+			return true, "", []string{}
+		}
+
 		safe := true
 		message := ""
+		safeStructs := make([]string, 0)
 		for i := 0; i < valT.NumField(); i++ {
-			structFieldSafe, msg := structFieldIsSafe(valT.Field(i), valV.Field(i))
+			structFieldSafe, msg, structs := structFieldIsSafe(valT.Field(i), valV.Field(i), cachedSafeStructs)
 
 			safe = safe && structFieldSafe
 			if !structFieldSafe {
 				message = msg
 			}
+
+			safeStructs = append(safeStructs, structs...)
 		}
-		return safe, message
+
+		// TODO(awerner): add this to the cached safe structs for usage if encounter duplicate structs in same parent obj
+		if safe {
+			safeStructs = append(safeStructs, valT.Name())
+		}
+
+		return safe, message, safeStructs
 	}
 
 	// This is a base case that should never get hit. Should remove this once it is no longer possible to hit...
 	// Currently Kind() == Interface hits it, which I'm still not sure what actually has that type.
-	return true, ""
+	return true, "", []string{}
 }
 
-func structFieldIsSafe(field reflect.StructField, fieldVal reflect.Value) (bool, string) {
+func structFieldIsSafe(field reflect.StructField, fieldVal reflect.Value, cachedSafeStructs map[string]struct{}) (bool, string, []string) {
 	tagVal, ok := field.Tag.Lookup(safetyTag)
 	if !ok {
 		// If no tag is set, set it to safe.
@@ -116,20 +178,21 @@ func structFieldIsSafe(field reflect.StructField, fieldVal reflect.Value) (bool,
 	}
 
 	if tagVal == unsafeValue {
-		return false, unsafeArgMessage(field)
+		return false, unsafeArgMessage(field), []string{}
 	}
 
 	fieldValIsSafe := true
 	message := ""
+	safeStructs := make([]string, 0)
 	if !isPrimitiveType(fieldVal.Kind()) {
 		// If cannot interface (non-exported field), don't dive further.
 		// Default marshalling won't include this field either.
 		if fieldVal.CanInterface() {
-			fieldValIsSafe, message = isSafeRecursive(fieldVal.Interface())
+			fieldValIsSafe, message, safeStructs = isSafeRecursive(fieldVal.Interface(), cachedSafeStructs)
 		}
 	}
 
-	return tagVal == safeValue && fieldValIsSafe, message
+	return fieldValIsSafe, message, safeStructs
 }
 
 func isPrimitiveType(kind reflect.Kind) bool {

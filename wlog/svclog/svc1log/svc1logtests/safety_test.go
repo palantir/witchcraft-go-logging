@@ -43,9 +43,10 @@ type unsafeStruct struct {
 }
 
 type mapStruct struct {
-	stringVal string                 `safety:"safe"`
-	numVal    int                    `safety:"safe"`
-	StructVal map[string]innerStruct `safety:"safe"`
+	stringVal    string                 `safety:"safe"`
+	numVal       int                    `safety:"safe"`
+	StructVal    map[string]innerStruct `safety:"safe"`
+	UnsafeStruct unsafeInnerStruct      `safety:"safe"`
 }
 
 type structWithInterface struct {
@@ -56,35 +57,56 @@ type structWithInterface struct {
 func TestSafetyRecursion(t *testing.T) {
 	someStruct := safeStruct{}
 
-	isSafe, msg := svc1log.IsSafe(someStruct)
+	isSafe, msg, safeStructs := svc1log.IsSafe(someStruct)
 	fmt.Println(msg)
+	fmt.Println(safeStructs)
 	assert.True(t, isSafe)
 }
 
 func TestArrayRecrusion(t *testing.T) {
 	someSlice := make([]safeStruct, 0)
 
-	isSafe, msg := svc1log.IsSafe(someSlice)
+	isSafe, msg, safeStructs := svc1log.IsSafe(someSlice)
 	fmt.Println(msg)
+	fmt.Println(safeStructs)
 	assert.True(t, isSafe)
 }
 
 func TestMapRecrusion(t *testing.T) {
-	isSafe, msg := svc1log.IsSafe(mapStruct{})
+	isSafe, msg, safeStructs := svc1log.IsSafe(mapStruct{})
 	fmt.Println(msg)
+	fmt.Println(safeStructs)
 	assert.True(t, isSafe)
 }
 
 func TestUnsafeComplexType(t *testing.T) {
-	isSafe, msg := svc1log.IsSafe(unsafeStruct{})
+	isSafe, msg, safeStructs := svc1log.IsSafe(unsafeStruct{})
 	fmt.Println(msg)
+	fmt.Println(safeStructs)
 	assert.False(t, isSafe)
 }
 
 func TestStructWithInterface(t *testing.T) {
-	isSafe, msg := svc1log.IsSafe(structWithInterface{
+	isSafe, msg, safeStructs := svc1log.IsSafe(structWithInterface{
 		InterfaceVal: unsafeInnerStruct{},
 	})
 	fmt.Print(msg)
+	fmt.Println(safeStructs)
 	assert.False(t, isSafe)
+}
+
+func BenchmarkSafeParam(t *testing.B) {
+	for i := 0; i < t.N; i++ {
+		_ = svc1log.SafeParams(map[string]interface{}{
+			"param1": safeStruct{},
+		})
+	}
+}
+
+func BenchmarkUnsafeParam(t *testing.B) {
+	for i := 0; i < t.N; i++ {
+		_ = svc1log.UnsafeParams(map[string]interface{}{
+			"param1": safeStruct{},
+		})
+	}
 }

@@ -59,6 +59,7 @@ func createGLogMsg(msg string, params []wlog.Param) string {
 	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 
 	// TODO: ignore/omit unsafe params?
+	// Omit ^
 	return strings.Join(paramsToLog(entry), ", ")
 }
 
