@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build ignore
+
 package svc1logtests
 
 import (
@@ -25,7 +27,7 @@ import (
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log_conjure"
+	"github.com/palantir/witchcraft-go-logging/wlog2/svclog/svc1log_literal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -78,7 +80,7 @@ type TestCase struct {
 	Name        string
 	Message     string
 	Origin      string
-	LogParams   []svc1log.Param
+	LogParams   []svc1log_literal.Param
 	JSONMatcher objmatcher.MapMatcher
 }
 
@@ -87,18 +89,18 @@ func TestCases() []TestCase {
 		{
 			Name:    "basic service log entry",
 			Message: "this is a test",
-			LogParams: []svc1log.Param{
-				svc1log.UID("user-1"),
-				svc1log.SID("session-1"),
-				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.UID("user-1"),
+				svc1log_literal.SID("session-1"),
+				svc1log_literal.TraceID("X-Y-Z"),
+				svc1log_literal.SafeParams(map[string]interface{}{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log_literal.UnsafeParams(map[string]interface{}{
 					"Password": "HelloWorld!",
 				}),
-				svc1log.Tags(map[string]string{
+				svc1log_literal.Tags(map[string]string{
 					"key1": "value1",
 					"key2": "value2",
 				}),
@@ -127,11 +129,11 @@ func TestCases() []TestCase {
 		{
 			Name:    "service log entry with non-primitive objects in params map",
 			Message: "this is a test",
-			LogParams: []svc1log.Param{
-				svc1log.UID("user-1"),
-				svc1log.SID("session-1"),
-				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.UID("user-1"),
+				svc1log_literal.SID("session-1"),
+				svc1log_literal.TraceID("X-Y-Z"),
+				svc1log_literal.SafeParams(map[string]interface{}{
 					"structKey": testStruct{
 						NumVal:            13,
 						ExportedStringVal: "exportedFoo",
@@ -143,7 +145,7 @@ func TestCases() []TestCase {
 					"sliceKey":  []string{"one", "two", "three"},
 					"stringKey": "stringVal",
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log_literal.UnsafeParams(map[string]interface{}{
 					"structKey": testStruct{
 						NumVal:            13,
 						ExportedStringVal: "exportedFoo",
@@ -194,12 +196,12 @@ func TestCases() []TestCase {
 			Name:    "service log entry with origin set on base logger",
 			Message: "this is a test",
 			Origin:  "github.com/palantir/witchcraft-go-logging",
-			LogParams: []svc1log.Param{
-				svc1log.SafeParams(map[string]interface{}{
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.SafeParams(map[string]interface{}{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log_literal.UnsafeParams(map[string]interface{}{
 					"Password": "HelloWorld!",
 				}),
 			},
@@ -222,7 +224,7 @@ func TestCases() []TestCase {
 			Name:      "parameter that is set manually overrides base value",
 			Message:   "this is a test",
 			Origin:    "github.com/palantir/witchcraft-go-logging",
-			LogParams: []svc1log.Param{svc1log.Origin("custom-origin")},
+			LogParams: []svc1log_literal.Param{svc1log_literal.Origin("custom-origin")},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"level":   objmatcher.NewEqualsMatcher("INFO"),
 				"time":    objmatcher.NewRegExpMatcher(".+"),
@@ -235,8 +237,8 @@ func TestCases() []TestCase {
 			Name:    "stacktrace includes error parameters",
 			Message: "something happened",
 			Origin:  "github.com/palantir/witchcraft-go-logging",
-			LogParams: []svc1log.Param{
-				svc1log.Stacktrace(
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.Stacktrace(
 					testError{
 						message: "some error message",
 						stacktrace: `Failed to open file
@@ -269,8 +271,8 @@ something/something:123`,
 			Name:    "parameters included from ParamStorer parameter",
 			Message: "something happened",
 			Origin:  "github.com/palantir/witchcraft-go-logging",
-			LogParams: []svc1log.Param{
-				svc1log.Params(testParamStorerObject{
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.Params(testParamStorerObject{
 					safeParams: map[string]interface{}{
 						"safeObjectParamKey": "safeObjectParamValue",
 					},
@@ -296,9 +298,9 @@ something/something:123`,
 		{
 			Name:    "param isn't overwritten by params",
 			Message: "msg",
-			LogParams: []svc1log.Param{
-				svc1log.SafeParam("param", "value"),
-				svc1log.SafeParams(map[string]interface{}{"params": "values"}),
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.SafeParam("param", "value"),
+				svc1log_literal.SafeParams(map[string]interface{}{"params": "values"}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"level":   objmatcher.NewEqualsMatcher("INFO"),
@@ -314,20 +316,20 @@ something/something:123`,
 		{
 			Name:    "duplicate origin",
 			Message: "this is a test",
-			LogParams: []svc1log.Param{
-				svc1log.Origin("origin.0"),
-				svc1log.Origin("origin.1"),
-				svc1log.UID("user-1"),
-				svc1log.SID("session-1"),
-				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+			LogParams: []svc1log_literal.Param{
+				svc1log_literal.Origin("origin.0"),
+				svc1log_literal.Origin("origin.1"),
+				svc1log_literal.UID("user-1"),
+				svc1log_literal.SID("session-1"),
+				svc1log_literal.TraceID("X-Y-Z"),
+				svc1log_literal.SafeParams(map[string]interface{}{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log_literal.UnsafeParams(map[string]interface{}{
 					"Password": "HelloWorld!",
 				}),
-				svc1log.Tags(map[string]string{
+				svc1log_literal.Tags(map[string]string{
 					"key1": "value1",
 					"key2": "value2",
 				}),
@@ -357,7 +359,7 @@ something/something:123`,
 	}
 }
 
-func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	jsonOutputTests(t, loggerProvider)
 	jsonParamsOnlyMarshaledIfLoggedTest(t, loggerProvider)
 	paramStorerOnlyEvaluatedIfLoggedTest(t, loggerProvider)
@@ -366,7 +368,7 @@ func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, level wlog.Log
 	jsonLoggerUpdateTest(t, loggerProvider)
 }
 
-func jsonLoggerUpdateTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func jsonLoggerUpdateTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	t.Run("update JSON logger", func(t *testing.T) {
 		currCase := TestCases()[0]
 
@@ -395,7 +397,7 @@ func jsonLoggerUpdateTest(t *testing.T, loggerProvider func(w io.Writer, level w
 	})
 }
 
-func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	for i, tc := range TestCases() {
 		t.Run(tc.Name, func(t *testing.T) {
 			buf := bytes.Buffer{}
@@ -416,32 +418,32 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, level wlog.L
 	}
 }
 
-func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	t.Run("Params only marshaled if logged", func(t *testing.T) {
 		logger := loggerProvider(&bytes.Buffer{}, wlog.InfoLevel, "")
 		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
 		// parameters (if marshal occurred, this would panic).
-		logger.Debug("Test Message", svc1log.SafeParam("testType", jsonMarshalPanicType{}))
+		logger.Debug("Test Message", svc1log_literal.SafeParam("testType", jsonMarshalPanicType{}))
 	})
 }
 
-func paramStorerOnlyEvaluatedIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func paramStorerOnlyEvaluatedIfLoggedTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	t.Run("Params only evaluated if logged", func(t *testing.T) {
 		logger := loggerProvider(&bytes.Buffer{}, wlog.InfoLevel, "")
 		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
 		// parameters (if marshal occurred, this would panic).
-		logger.Debug("Test Message", svc1log.Params(paramStorerPanicType{}))
+		logger.Debug("Test Message", svc1log_literal.Params(paramStorerPanicType{}))
 	})
 }
 
 // Verifies that if different parameters are specified using SafeParam and SafeParams params, all of the values are
 // present in the final output (that is, these parameters should be additive).
-func paramIsntOverwrittenByParams(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func paramIsntOverwrittenByParams(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	t.Run("SafeParam and SafeParams params are additive", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.InfoLevel, "")
 
-		logger.Info("msg", svc1log.SafeParam("param", "value"), svc1log.SafeParams(map[string]interface{}{"params": "values"}))
+		logger.Info("msg", svc1log_literal.SafeParam("param", "value"), svc1log_literal.SafeParams(map[string]interface{}{"params": "values"}))
 
 		gotServiceLog := map[string]interface{}{}
 		logEntry := buf.Bytes()
@@ -463,13 +465,13 @@ func paramIsntOverwrittenByParams(t *testing.T, loggerProvider func(w io.Writer,
 
 // Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
 // are modified by making a logger call).
-func extraParamsDoNotAppearTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger) {
+func extraParamsDoNotAppearTest(t *testing.T, loggerProvider func(w io.Writer, level wlog.LogLevel, origin string) svc1log_literal.Logger) {
 	t.Run("SafeParam and SafeParams params stay separate across logger calls", func(t *testing.T) {
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.DebugLevel, "")
 
-		reusedParams := svc1log.SafeParams(map[string]interface{}{"params": "values"})
-		logger.Info("msg", reusedParams, svc1log.SafeParam("param", "value"))
+		reusedParams := svc1log_literal.SafeParams(map[string]interface{}{"params": "values"})
+		logger.Info("msg", reusedParams, svc1log_literal.SafeParam("param", "value"))
 		gotServiceLog := map[string]interface{}{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)

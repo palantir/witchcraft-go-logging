@@ -11,7 +11,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
@@ -24,8 +24,12 @@ func Type() Param {
 }
 
 func Level(level wlog.LogLevel) Param {
+	return withLevel(logging.New_LogLevel(logging.LogLevel_Value(level)))
+}
+
+func withLevel(level logging.LogLevel) Param {
 	return func(l *logging.ServiceLogV1) {
-		l.Level = logging.New_LogLevel(logging.LogLevel_Value(level))
+		l.Level = level
 	}
 }
 

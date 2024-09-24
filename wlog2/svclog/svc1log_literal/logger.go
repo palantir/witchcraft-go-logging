@@ -1,4 +1,4 @@
-package svc1log
+package svc1log_literal
 
 import (
 	"io"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 )
 
 const (
@@ -40,7 +40,6 @@ type Logger interface {
 
 func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 	return &conjureLogger{
-		//marshaler:      (*logging.ServiceLogV1).WriteJSON,
 		output:         w,
 		params:         params,
 		nl:             []byte("\n"),
@@ -48,10 +47,7 @@ func NewConjureLogger(w io.Writer, level wlog.LogLevel, params ...Param) Logger 
 	}
 }
 
-//type encoderFunc func(log *logging.ServiceLogV1, writer io.Writer) (int, error)
-
 type conjureLogger struct {
-	//marshaler encoderFunc
 	output io.Writer
 	params []Param
 	nl     []byte
@@ -59,76 +55,45 @@ type conjureLogger struct {
 }
 
 func (l *conjureLogger) Debug(msg string, params ...Param) {
-	if l.Enabled(wlog.DebugLevel) {
-		log := svclogObjPool.Get().(*logging.ServiceLogV1)
-		defer resetSvc1Log(log)
-		log.Time = datetime.DateTime(time.Now())
-		log.Level = levelDebug
-		log.Message = msg
-		l.applyParams(log, params...)
-		l.write(log)
-	}
+	l.doLog(wlog.DebugLevel, levelDebug, msg, params...)
 }
 
 func (l *conjureLogger) Info(msg string, params ...Param) {
-	if l.Enabled(wlog.InfoLevel) {
+	l.doLog(wlog.InfoLevel, levelInfo, msg, params...)
+}
+
+func (l *conjureLogger) Warn(msg string, params ...Param) {
+	l.doLog(wlog.WarnLevel, levelWarn, msg, params...)
+}
+
+func (l *conjureLogger) Error(msg string, params ...Param) {
+	l.doLog(wlog.ErrorLevel, levelError, msg, params...)
+}
+
+func (l *conjureLogger) doLog(wLevel wlog.LogLevel, cLevel logging.LogLevel, msg string, params ...Param) {
+	if l.Enabled(wLevel) {
 		log := svclogObjPool.Get().(*logging.ServiceLogV1)
 		defer resetSvc1Log(log)
 		log.Type = TypeValue
 		log.Time = datetime.DateTime(time.Now())
-		log.Level = levelInfo
+		log.Level = cLevel
 		log.Message = msg
-		l.applyParams(log, params...)
-		l.write(log)
-	}
-}
+		for _, p := range l.params {
+			p.apply(log)
+		}
+		for _, p := range params {
+			p.apply(log)
+		}
 
-func (l *conjureLogger) Warn(msg string, params ...Param) {
-	if l.Enabled(wlog.WarnLevel) {
-		log := svclogObjPool.Get().(*logging.ServiceLogV1)
-		defer resetSvc1Log(log)
-		log.Time = datetime.DateTime(time.Now())
-		log.Level = levelWarn
-		log.Message = msg
-		l.applyParams(log, params...)
-		l.write(log)
-	}
-}
-
-func (l *conjureLogger) Error(msg string, params ...Param) {
-	if l.Enabled(wlog.ErrorLevel) {
-		log := svclogObjPool.Get().(*logging.ServiceLogV1)
-		defer resetSvc1Log(log)
-		log.Time = datetime.DateTime(time.Now())
-		log.Level = levelError
-		log.Message = msg
-		l.applyParams(log, params...)
-		l.write(log)
-	}
-}
-
-func (l *conjureLogger) applyParams(log *logging.ServiceLogV1, params ...Param) {
-	for _, p := range l.params {
-		p.apply(log)
-	}
-	for _, p := range params {
-		p.apply(log)
-	}
-}
-
-func (l *conjureLogger) write(log *logging.ServiceLogV1) {
-	//buf := svclogBufPool.Get().(*[]byte)
-	//defer svclogBufPool.Put(buf)
-	//*buf = (*buf)[:0]
-	//_, err := l.marshaler(log, dj.NewAppender(buf))
-	out, err := log.MarshalJSON()
-	if err != nil {
-		golog.Printf("failed to marshal service.1 log: %v", err)
-		return
-	}
-	if _, err := l.output.Write(out); err != nil {
-		golog.Printf("failed to write service.1 log: %v", err)
-		golog.Println(string(out))
+		out, err := log.MarshalJSON() // TODO: reuse memory with a different json writer interface
+		if err != nil {
+			golog.Printf("failed to marshal service.1 log: %v", err)
+			return
+		}
+		if _, err := l.output.Write(out); err != nil {
+			golog.Printf("failed to write service.1 log: %v", err)
+			golog.Println(string(out))
+		}
 	}
 }
 
@@ -139,20 +104,14 @@ func resetSvc1Log(log *logging.ServiceLogV1) {
 	log.Origin = nil
 	log.Thread = nil
 	log.Message = ""
-	for k := range log.Params {
-		delete(log.Params, k)
-	}
+	clear(log.Params)
 	log.Uid = nil
 	log.Sid = nil
 	log.TokenId = nil
 	log.TraceId = nil
 	log.Stacktrace = nil
-	for k := range log.UnsafeParams {
-		delete(log.UnsafeParams, k)
-	}
-	for k := range log.Tags {
-		delete(log.Tags, k)
-	}
+	clear(log.UnsafeParams)
+	clear(log.Tags)
 	// return log to pool
 	svclogObjPool.Put(log)
 }

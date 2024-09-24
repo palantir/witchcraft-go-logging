@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog2/internal"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
@@ -31,7 +31,7 @@ type stringConst string
 func Debug(ctx context.Context, msg stringConst, params ...Param) {
 	logger := FromContext(ctx)
 	if l, ok := logger.(*defaultLogger); ok {
-		l.log(wlog.DebugLevel, string(msg), params...)
+		l.doLog(wlog.DebugLevel, levelDebug, string(msg), params...)
 	} else {
 		logger.Debug(string(msg), params...)
 	}
@@ -40,7 +40,7 @@ func Debug(ctx context.Context, msg stringConst, params ...Param) {
 func Info(ctx context.Context, msg stringConst, params ...Param) {
 	logger := FromContext(ctx)
 	if l, ok := logger.(*defaultLogger); ok {
-		l.log(wlog.InfoLevel, string(msg), params...)
+		l.doLog(wlog.InfoLevel, levelInfo, string(msg), params...)
 	} else {
 		logger.Info(string(msg), params...)
 	}
@@ -49,7 +49,7 @@ func Info(ctx context.Context, msg stringConst, params ...Param) {
 func Warn(ctx context.Context, msg stringConst, params ...Param) {
 	logger := FromContext(ctx)
 	if l, ok := logger.(*defaultLogger); ok {
-		l.log(wlog.WarnLevel, string(msg), params...)
+		l.doLog(wlog.WarnLevel, levelWarn, string(msg), params...)
 	} else {
 		logger.Warn(string(msg), params...)
 	}
@@ -58,7 +58,7 @@ func Warn(ctx context.Context, msg stringConst, params ...Param) {
 func Error(ctx context.Context, msg stringConst, params ...Param) {
 	logger := FromContext(ctx)
 	if l, ok := logger.(*defaultLogger); ok {
-		l.log(wlog.ErrorLevel, string(msg), params...)
+		l.doLog(wlog.ErrorLevel, levelError, string(msg), params...)
 	} else {
 		logger.Error(string(msg), params...)
 	}
@@ -109,7 +109,6 @@ func FromContext(ctx context.Context) Logger {
 		params = append(params, TokenID(*tokenID))
 	}
 	if orgID := wloginternal.IDFromContext(ctx, wloginternal.OrgIDKey); orgID != nil {
-		// TODO: Add OrgID to svc1log
 		params = append(params, OrgID(*orgID))
 	}
 	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {

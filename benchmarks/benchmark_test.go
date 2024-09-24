@@ -77,7 +77,15 @@ func BenchmarkDiag1Log(b *testing.B) {
 func BenchmarkEvt2Log(b *testing.B) {
 	for _, tc := range evt2logtests.TestCases() {
 		params := tc.Params()
+		params2 := evt2log.ConvertWLogParams(params)
 		b.Run(tc.Name, func(b *testing.B) {
+			b.Run("JSON", func(b *testing.B) {
+				b.ReportAllocs()
+				logger := evt2log.New(ioutil.Discard)
+				for n := 0; n < b.N; n++ {
+					logger.Event(tc.Name, params2...)
+				}
+			})
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
 				logger := evt2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
