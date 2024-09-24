@@ -11,6 +11,7 @@ require (
 	github.com/palantir/pkg/objmatcher v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.1.0
+	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.39.0
 	github.com/palantir/witchcraft-go-params v1.36.0
@@ -29,7 +30,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
-	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
@@ -37,5 +37,3 @@ require (
 	golang.org/x/sys v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/palantir/conjure-go/v6 => ../conjure-go

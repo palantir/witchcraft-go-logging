@@ -1,7 +1,6 @@
 package svc1log
 
 import (
-	"github.com/palantir/conjure-go/v6/dj"
 	"io"
 	golog "log"
 	"sync"
