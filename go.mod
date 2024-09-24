@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/fatih/color v1.9.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/nmiyake/pkg/dirs v1.1.0
+	github.com/nmiyake/pkg/dirs v1.0.0
 	github.com/palantir/pkg/bytesbuffers v1.2.0
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/pkg/objmatcher v1.1.0
@@ -25,7 +25,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
