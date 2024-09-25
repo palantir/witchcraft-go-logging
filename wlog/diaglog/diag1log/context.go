@@ -18,9 +18,9 @@ import (
 	"context"
 )
 
-type diag1LogContextKeyType string
+type diag1LogContextKeyType struct{}
 
-const contextKey = diag1LogContextKeyType(TypeValue)
+var contextKey diag1LogContextKeyType
 
 func FromContext(ctx context.Context) Logger {
 	untypedLogger := ctx.Value(contextKey)

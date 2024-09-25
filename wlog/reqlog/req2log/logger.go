@@ -15,6 +15,7 @@
 package req2log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"io"
 	"net/http"
 	"time"
@@ -89,6 +90,20 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator, params ...LoggerCre
 		p.Apply(loggerBuilder)
 	}
 	return loggerBuilder.build(w)
+}
+
+func New(w io.Writer, params ...LoggerCreatorParam) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())},
+		params: params,
+	}
+}
+
+func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.RequestLogV2], params ...LoggerCreatorParam) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
+		params: params,
+	}
 }
 
 type LoggerBuilder interface {

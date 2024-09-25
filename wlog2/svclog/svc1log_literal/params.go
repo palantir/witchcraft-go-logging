@@ -20,8 +20,8 @@ import (
 	"strconv"
 
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 

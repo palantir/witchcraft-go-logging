@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 )
 
@@ -81,21 +81,9 @@ func Name(name string) Param {
 	}
 }
 
-func ResultSuccess() Param {
+func Result(result AuditResultType) Param {
 	return func(l *logging.AuditLogV2) {
-		l.Result = logging.New_AuditResult(logging.AuditResult_SUCCESS)
-	}
-}
-
-func ResultUnauthorized() Param {
-	return func(l *logging.AuditLogV2) {
-		l.Result = logging.New_AuditResult(logging.AuditResult_UNAUTHORIZED)
-	}
-}
-
-func ResultError() Param {
-	return func(l *logging.AuditLogV2) {
-		l.Result = logging.New_AuditResult(logging.AuditResult_ERROR)
+		l.Result = logging.New_AuditResult(logging.AuditResult_Value(result))
 	}
 }
 

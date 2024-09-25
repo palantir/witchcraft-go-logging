@@ -1,13 +1,15 @@
 package wlog
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"sync"
 
+	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
 // ConjureLogType is a constraint for generic types that combines all the Conjure log types.
@@ -18,7 +20,6 @@ type ConjureLogType interface {
 // ConjureLogger is a generic logger that can log all Conjure log types.
 type ConjureLogger[T ConjureLogType] interface {
 	Log(params ...ConjureLogParam[T])
-	WithParams(params ...ConjureLogParam[T]) ConjureLogger[T]
 }
 
 // ConjureLogParam is a function that modifies a Conjure log object.
@@ -170,4 +171,74 @@ func (l *defaultLogger[T]) resetLogObject(in *T) {
 		panic(fmt.Sprintf("unexpected log type: %T", log))
 	}
 	l.objPool.Put(in)
+}
+
+// WithParams returns a new logger that logs with the provided parameters.
+func WithParams[T ConjureLogType](logger ConjureLogger[T], params ...ConjureLogParam[T]) ConjureLogger[T] {
+	switch logger := logger.(type) {
+	case *defaultLogger[T]:
+		return &defaultLogger[T]{
+			printer: logger.printer,
+			params:  append(append([]ConjureLogParam[T]{}, logger.params...), params...),
+			objPool: logger.objPool,
+		}
+	case *wrappedLogger[T]:
+		return &wrappedLogger[T]{
+			logger: logger,
+			params: append(append([]ConjureLogParam[T]{}, logger.params...), params...),
+		}
+	default:
+		return &wrappedLogger[T]{
+			logger: logger,
+			params: params,
+		}
+	}
+}
+
+type wrappedLogger[T ConjureLogType] struct {
+	params []ConjureLogParam[T]
+	logger ConjureLogger[T]
+}
+
+func (l *wrappedLogger[T]) Log(params ...ConjureLogParam[T]) {
+	l.logger.Log(append(l.params, params...)...)
+}
+
+// ConjureLogPrinter is a generic interface for printing Conjure log objects.
+type ConjureLogPrinter[T ConjureLogType] interface {
+	Print(log T) error
+}
+
+// The size of buffers allocated to consume log data.
+// This is a tradeoff between memory usage and the number of allocations.
+// Lines longer than this limit will not have their buffers reused.
+const bytesBufferPoolAllocSize = 4096
+
+var bytesBufferPool = bytesbuffers.NewSyncPool(bytesBufferPoolAllocSize)
+
+// jsonPrinter is a ConjureLogPrinter that writes JSON-marshaled log objects to an output.
+// It minimizes allocations by using a shared buffer pool.
+type jsonPrinter[T ConjureLogType] struct {
+	output io.Writer
+}
+
+func (p jsonPrinter[T]) Print(log T) error {
+	buf := bytesBufferPool.Get()
+	defer bytesBufferPool.Put(buf)
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(log); err != nil {
+		return err
+	}
+	out := buf.Bytes()
+	if out[len(out)-1] != '\n' {
+		_ = buf.WriteByte('\n')
+		out = buf.Bytes()
+	}
+	// write to output
+	if _, err := p.output.Write(out); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to write log: %v\n", err)
+		return err
+	}
+	return nil
 }

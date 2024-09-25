@@ -15,19 +15,28 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	wlog2 "github.com/palantir/witchcraft-go-logging/wlog2"
 )
 
 type wrappedAudit2Logger struct {
 	name    string
 	version string
 
-	logger wlog.Logger
+	logger wlog2.ConjureLogger[logging.WrappedLogV1]
 }
 
 func (l *wrappedAudit2Logger) Audit(name string, result audit2log.AuditResultType, params ...audit2log.Param) {
 	l.logger.Log(l.toAuditParams(name, result, params)...)
+
+	l.logger.Log(func(log *logging.WrappedLogV1) {
+		log.Type = "wrapped.1"
+		log.EntityName = l.name
+		log.EntityVersion = l.version
+		log.Payload = logging.NewWrappedLogV1PayloadFromAuditLogV2()
+	})
 }
 
 func (l *wrappedAudit2Logger) toAuditParams(name string, result audit2log.AuditResultType, params []audit2log.Param) []wlog.Param {

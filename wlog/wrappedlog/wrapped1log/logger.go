@@ -15,6 +15,7 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -38,7 +39,13 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
-	return NewFromProvider(w, level, wlog.DefaultLoggerProvider(), name, version)
+	delegate := wlog.NewDefaultLogger(w, Type(), EntityName(name), EntityVersion(version))
+	return newDelegateLogger(delegate, level)
+}
+
+func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.WrappedLogV1], level wlog.LogLevel, name, version string) Logger {
+	delegate := wlog.NewDefaultLoggerWithPrinter(printer, Type(), EntityName(name), EntityVersion(version))
+	return newDelegateLogger(delegate, level)
 }
 
 func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
@@ -54,4 +61,54 @@ func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvid
 		levellogger: delegate,
 		level:       levelChecker,
 	}
+}
+
+type delegateLogger struct {
+	Audit2      audit2log.Logger
+	Diagnostic1 diag1log.Logger
+	Event2      evt2log.Logger
+	Metric1     metric1log.Logger
+	Request2    req2log.Logger
+	Service1    svc1log.Logger
+	Trace1      trc1log.Logger
+}
+
+func newDelegateLogger(delegate wlog.ConjureLogger[logging.WrappedLogV1], level wlog.LogLevel) *delegateLogger {
+	return &delegateLogger{
+		Audit2:      audit2log.NewWithPrinter(audit2Printer(delegate)),
+		Diagnostic1: diag1log.NewWithPrinter(diag1Printer(delegate)),
+		Event2:      evt2log.NewWithPrinter(evt2Printer(delegate)),
+		Metric1:     metric1log.NewWithPrinter(metric1Printer(delegate)),
+		Request2:    req2log.NewWithPrinter(req2Printer(delegate)),
+		Service1:    svc1log.NewWithPrinter(svc1Printer(delegate), level),
+		Trace1:      trc1log.NewWithPrinter(trc1Printer(delegate)),
+	}
+}
+
+func (l *delegateLogger) Audit() audit2log.Logger {
+	return l.Audit2
+}
+
+func (l *delegateLogger) Diagnostic() diag1log.Logger {
+	return l.Diagnostic1
+}
+
+func (l *delegateLogger) Event() evt2log.Logger {
+	return l.Event2
+}
+
+func (l *delegateLogger) Metric() metric1log.Logger {
+	return l.Metric1
+}
+
+func (l *delegateLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+	return l.Request2
+}
+
+func (l *delegateLogger) Service(params ...svc1log.Param) svc1log.Logger {
+	return svc1log.WithParams(l.Service1, params...)
+}
+
+func (l *delegateLogger) Trace() trc1log.Logger {
+	return l.Trace1
 }

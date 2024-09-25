@@ -17,7 +17,7 @@ package req2log
 import (
 	"strings"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 )

@@ -32,7 +32,7 @@ import (
 )
 
 func newTestLogger(w io.Writer) audit2log.Logger {
-	return audit2log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
+	return audit2log.New(w)
 }
 
 func TestFromContext(t *testing.T) {

@@ -15,106 +15,136 @@
 package audit2log
 
 import (
+	"maps"
+	"time"
+
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
 const (
 	TypeValue = "audit.2"
-
-	OtherUIDsKey     = "otherUids"
-	OriginKey        = "origin"
-	NameKey          = "name"
-	ResultKey        = "result"
-	RequestParamsKey = "requestParams"
-	ResultParamsKey  = "resultParams"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wlog.ConjureLogParam[logging.AuditLogV2]
 
-func ApplyParam(p Param, entry wlog.LogEntry) {
-	if p == nil {
-		return
+func Type() Param {
+	return func(l *logging.AuditLogV2) {
+		l.Type = TypeValue
 	}
-	p.apply(entry)
 }
 
-type paramFunc func(entry wlog.LogEntry)
-
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+func Time(time time.Time) Param {
+	return func(l *logging.AuditLogV2) {
+		l.Time = datetime.DateTime(time)
+	}
 }
 
-func auditNameResultParam(name string, resultType AuditResultType) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
-		logger.StringValue(NameKey, name)
-		logger.StringValue(ResultKey, string(resultType))
-	})
+func TimeNow() Param {
+	// Defer execution of time.Now() until the log is actually written
+	return func(l *logging.AuditLogV2) {
+		l.Time = datetime.DateTime(time.Now())
+	}
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
-	})
+	return func(l *logging.AuditLogV2) {
+		l.Uid = (*logging.UserId)(&uid)
+	}
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
-	})
+	return func(l *logging.AuditLogV2) {
+		l.Sid = (*logging.SessionId)(&sid)
+	}
 }
 
-func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
-	})
+func TokenID(tokenId string) Param {
+	return func(l *logging.AuditLogV2) {
+		l.TokenId = (*logging.TokenId)(&tokenId)
+	}
 }
 
-func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
-	})
+func OrgID(orgId string) Param {
+	return func(l *logging.AuditLogV2) {
+		// TODO: Add OrgID to svc1log
+		// l.OrgId = (*logging.OrgId)(&orgId)
+	}
 }
 
-func TraceID(traceID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TraceIDKey, traceID)
-	})
+func TraceID(traceId string) Param {
+	return func(l *logging.AuditLogV2) {
+		l.TraceId = (*logging.TraceId)(&traceId)
+	}
 }
 
-func OtherUIDs(otherUIDs ...string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringListValue(OtherUIDsKey, otherUIDs)
-	})
+func OtherUIDs(uids ...string) Param {
+	return func(l *logging.AuditLogV2) {
+		for _, uid := range uids {
+			l.OtherUids = append(l.OtherUids, logging.UserId(uid))
+		}
+	}
 }
 
 func Origin(origin string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(OriginKey, origin)
-	})
+	return func(l *logging.AuditLogV2) {
+		l.Origin = &origin
+	}
 }
 
-func RequestParam(key string, value interface{}) Param {
-	return RequestParams(map[string]interface{}{
-		key: value,
-	})
+func Name(name string) Param {
+	return func(l *logging.AuditLogV2) {
+		l.Name = name
+	}
 }
 
-func RequestParams(requestParams map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(RequestParamsKey, requestParams)
-	})
+func Result(result AuditResultType) Param {
+	return func(l *logging.AuditLogV2) {
+		l.Result = result
+	}
 }
 
-func ResultParam(key string, value interface{}) Param {
-	return ResultParams(map[string]interface{}{
-		key: value,
-	})
+func ResultParams(params map[string]any) Param {
+	return func(l *logging.AuditLogV2) {
+		if l.ResultParams == nil {
+			l.ResultParams = maps.Clone(params)
+		} else {
+			for k, v := range params {
+				l.ResultParams[k] = v
+			}
+		}
+	}
 }
 
-func ResultParams(resultParams map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ResultParamsKey, resultParams)
-	})
+func ResultParam(key string, value any) Param {
+	return func(l *logging.AuditLogV2) {
+		if l.ResultParams == nil {
+			l.ResultParams = map[string]any{key: value}
+		} else {
+			l.ResultParams[key] = value
+		}
+	}
+}
+
+func RequestParams(params map[string]any) Param {
+	return func(l *logging.AuditLogV2) {
+		if l.RequestParams == nil {
+			l.RequestParams = maps.Clone(params)
+		} else {
+			for k, v := range params {
+				l.RequestParams[k] = v
+			}
+		}
+	}
+}
+
+func RequestParam(key string, value any) Param {
+	return func(l *logging.AuditLogV2) {
+		if l.RequestParams == nil {
+			l.RequestParams = map[string]any{key: value}
+		} else {
+			l.RequestParams[key] = value
+		}
+	}
 }

@@ -20,5 +20,5 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Audit(name string, result AuditResultType, params ...Param) {
-	w.logger.Audit(name, result, append(w.params, params...)...)
+	w.logger.Audit(name, result, append(append([]Param{}, w.params...), params...)...)
 }

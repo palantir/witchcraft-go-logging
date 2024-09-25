@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/stretchr/testify/require"
 )

@@ -16,46 +16,54 @@ package audit2log
 
 import (
 	"io"
+	"slices"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
-type AuditResultType string
+type AuditResultType = logging.AuditResult
 
 const (
-	AuditResultSuccess      AuditResultType = "SUCCESS"
-	AuditResultUnauthorized AuditResultType = "UNAUTHORIZED"
-	AuditResultError        AuditResultType = "ERROR"
+	AuditResultSuccess      = logging.AuditResultSUCCESS
+	AuditResultUnauthorized = logging.AuditResultUNAUTHORIZED
+	AuditResultError        = logging.AuditResultERROR
 )
 
 type Logger interface {
 	Audit(name string, result AuditResultType, params ...Param)
 }
 
-func New(w io.Writer) Logger {
-	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
+func New(w io.Writer, params ...Param) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())},
+		params: params,
+	}
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
-	return &defaultLogger{
-		logger: creator(w),
+func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.AuditLogV2], params ...Param) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
+		params: params,
 	}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
-	if len(params) == 0 {
-		return logger
-	}
-
-	if innerWrapped, ok := logger.(*wrappedLogger); ok {
+	switch logger := logger.(type) {
+	case *defaultLogger:
 		return &wrappedLogger{
-			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			logger: logger,
+			params: slices.Clone(params),
 		}
-	}
-
-	return &wrappedLogger{
-		logger: logger,
-		params: params,
+	case *wrappedLogger:
+		return &wrappedLogger{
+			logger: logger.logger,
+			params: append(slices.Clone(logger.params), params...),
+		}
+	default:
+		return &wrappedLogger{
+			logger: logger,
+			params: slices.Clone(params),
+		}
 	}
 }

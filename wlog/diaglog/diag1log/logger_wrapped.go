@@ -14,15 +14,13 @@
 
 package diag1log
 
-import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
-)
+import "github.com/palantir/witchcraft-go-logging/wapi/logging"
 
-type defaultLogger struct {
-	logger wlog.ConjureLogger[logging.DiagnosticLogV1]
+type wrappedLogger struct {
+	logger Logger
+	params []Param
 }
 
-func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
-	l.logger.Log(append([]Param{Diagnostic(diagnostic)}, params...)...)
+func (w *wrappedLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+	w.logger.Diagnostic(diagnostic, append(append([]Param{}, w.params...), params...)...)
 }

@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
 // ThreadDumpV1FromGoroutines unmarshals a "goroutine dump" (as formatted by panic or the runtime package)

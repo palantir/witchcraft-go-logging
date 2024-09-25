@@ -6,7 +6,7 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 )
 

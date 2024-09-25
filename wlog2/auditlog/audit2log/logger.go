@@ -18,7 +18,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wlog "github.com/palantir/witchcraft-go-logging/wlog2"
 )
 
@@ -26,17 +26,24 @@ var (
 	DefaultOutput = os.Stdout
 )
 
-type Logger interface {
-	Success(name string, params ...Param)
-	Unauthorized(name string, params ...Param)
-	Error(name string, params ...Param)
+type AuditResultType logging.AuditResult_Value
 
-	WithParams(params ...Param) Logger
+const (
+	AuditResultSuccess      = AuditResultType(logging.AuditResult_SUCCESS)
+	AuditResultUnauthorized = AuditResultType(logging.AuditResult_UNAUTHORIZED)
+	AuditResultError        = AuditResultType(logging.AuditResult_ERROR)
+)
+
+type Logger interface {
+	Audit(name string, result AuditResultType, params ...Param)
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return &defaultLogger{
-		logger: wlog.NewDefaultLogger(w, Type(), TimeNow()).WithParams(params...),
+	return &wrappedLogger{
+		logger: &defaultLogger{
+			logger: wlog.NewDefaultLogger(w, Type(), TimeNow()),
+		},
+		params: params,
 	}
 }
 
@@ -44,20 +51,35 @@ type defaultLogger struct {
 	logger wlog.ConjureLogger[logging.AuditLogV2]
 }
 
-func (l *defaultLogger) Success(name string, params ...Param) {
-	l.logger.Log(append([]Param{Name(name), ResultSuccess()}, params...)...)
+func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
+	l.logger.Log(append([]Param{Name(name), Result(result)}, params...)...)
 }
 
-func (l *defaultLogger) Unauthorized(name string, params ...Param) {
-	l.logger.Log(append([]Param{Name(name), ResultUnauthorized()}, params...)...)
-}
-
-func (l *defaultLogger) Error(name string, params ...Param) {
-	l.logger.Log(append([]Param{Name(name), ResultError()}, params...)...)
-}
-
-func (l *defaultLogger) WithParams(params ...Param) Logger {
-	return &defaultLogger{
-		logger: l.logger.WithParams(params...),
+func WithParams(logger Logger, params ...Param) Logger {
+	switch logger := logger.(type) {
+	case *defaultLogger:
+		return &wrappedLogger{
+			logger: logger,
+			params: params,
+		}
+	case *wrappedLogger:
+		return &wrappedLogger{
+			logger: logger.logger,
+			params: append(append([]Param{}, logger.params...), params...),
+		}
+	default:
+		return &wrappedLogger{
+			logger: logger,
+			params: params,
+		}
 	}
+}
+
+type wrappedLogger struct {
+	logger Logger
+	params []Param
+}
+
+func (l *wrappedLogger) Audit(name string, result AuditResultType, params ...Param) {
+	l.logger.Audit(name, result, append(append([]Param{}, l.params...), params...)...)
 }

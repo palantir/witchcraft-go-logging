@@ -16,8 +16,9 @@ package diag1log
 
 import (
 	"io"
+	"slices"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
@@ -25,12 +26,36 @@ type Logger interface {
 	Diagnostic(diagnostic logging.Diagnostic, params ...Param)
 }
 
-func New(w io.Writer) Logger {
-	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
+func New(w io.Writer, params ...Param) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())},
+		params: params,
+	}
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
-	return &defaultLogger{
-		logger: creator(w),
+func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.DiagnosticLogV1], params ...Param) Logger {
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
+		params: params,
+	}
+}
+
+func WithParams(logger Logger, params ...Param) Logger {
+	switch logger := logger.(type) {
+	case *defaultLogger:
+		return &wrappedLogger{
+			logger: logger,
+			params: slices.Clone(params),
+		}
+	case *wrappedLogger:
+		return &wrappedLogger{
+			logger: logger.logger,
+			params: append(slices.Clone(logger.params), params...),
+		}
+	default:
+		return &wrappedLogger{
+			logger: logger,
+			params: slices.Clone(params),
+		}
 	}
 }

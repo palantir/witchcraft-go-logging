@@ -15,102 +15,147 @@
 package evt2log
 
 import (
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wparams "github.com/palantir/witchcraft-go-params"
+	"maps"
+	"time"
 )
 
 const (
 	TypeValue = "event.2"
-
-	EventNameKey = "eventName"
-	ValuesKey    = "values"
-	TagsKey      = "tags"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wlog.ConjureLogParam[logging.EventLogV2]
 
-func ApplyParam(p Param, entry wlog.LogEntry) {
-	if p == nil {
-		return
+func Type() Param {
+	return func(l *logging.EventLogV2) {
+		l.Type = TypeValue
 	}
-	p.apply(entry)
 }
 
-type paramFunc func(entry wlog.LogEntry)
-
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+func Time(time time.Time) Param {
+	return func(l *logging.EventLogV2) {
+		l.Time = datetime.DateTime(time)
+	}
 }
 
-func eventNameParam(name string) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
-		logger.OptionalStringValue(EventNameKey, name)
-	})
+func TimeNow() Param {
+	// Defer execution of time.Now() until the log is actually written
+	return func(l *logging.EventLogV2) {
+		l.Time = datetime.DateTime(time.Now())
+	}
 }
 
-func Value(key string, value interface{}) Param {
-	return Values(map[string]interface{}{
-		key: value,
-	})
+func EventName(event string) Param {
+	return func(l *logging.EventLogV2) {
+		l.EventName = event
+	}
 }
 
-func Values(values map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ValuesKey, values)
-	})
+func Params(params wparams.ParamStorer) Param {
+	return func(l *logging.EventLogV2) {
+		if params != nil {
+			SafeParams(params.SafeParams())(l)
+			UnsafeParams(params.UnsafeParams())(l)
+		}
+	}
 }
 
-func Tag(key, value string) Param {
-	return Tags(map[string]string{
-		key: value,
-	})
+func SafeParams(params map[string]any) Param {
+	return func(l *logging.EventLogV2) {
+		if l.Values == nil {
+			l.Values = maps.Clone(params)
+		} else {
+			for k, v := range params {
+				l.Values[k] = v
+			}
+		}
+	}
 }
 
-func Tags(values map[string]string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringMapValue(TagsKey, values)
-	})
+func SafeParam(key string, value any) Param {
+	return func(l *logging.EventLogV2) {
+		if l.Values == nil {
+			l.Values = map[string]any{key: value}
+		} else {
+			l.Values[key] = value
+		}
+	}
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
-	})
+	return func(l *logging.EventLogV2) {
+		l.Uid = (*logging.UserId)(&uid)
+	}
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
-	})
+	return func(l *logging.EventLogV2) {
+		l.Sid = (*logging.SessionId)(&sid)
+	}
 }
 
-func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
-	})
+func TokenID(tokenId string) Param {
+	return func(l *logging.EventLogV2) {
+		l.TokenId = (*logging.TokenId)(&tokenId)
+	}
 }
 
-func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
-	})
+func OrgID(orgId string) Param {
+	return func(l *logging.EventLogV2) {
+		// TODO: Add OrgID to svc1log
+		// l.OrgId = (*logging.OrgId)(&orgId)
+	}
 }
 
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
-		key: value,
-	})
+func TraceID(traceId string) Param {
+	return func(l *logging.EventLogV2) {
+		l.TraceId = (*logging.TraceId)(&traceId)
+	}
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
-	})
+func UnsafeParams(unsafeParams map[string]any) Param {
+	return func(l *logging.EventLogV2) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = maps.Clone(unsafeParams)
+		} else {
+			for k, v := range unsafeParams {
+				l.UnsafeParams[k] = v
+			}
+		}
+	}
 }
 
-func TraceID(traceID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TraceIDKey, traceID)
-	})
+func UnsafeParam(key string, value any) Param {
+	return func(l *logging.EventLogV2) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = map[string]any{key: value}
+		} else {
+			l.UnsafeParams[key] = value
+		}
+	}
+}
+
+func Tags(tags map[string]string) Param {
+	return func(l *logging.EventLogV2) {
+		if l.Tags == nil {
+			l.Tags = maps.Clone(tags)
+		} else {
+			for k, v := range tags {
+				l.Tags[k] = v
+			}
+		}
+	}
+}
+
+func Tag(key, value string) Param {
+	return func(l *logging.EventLogV2) {
+		if l.Tags == nil {
+			l.Tags = map[string]string{key: value}
+		} else {
+			l.Tags[key] = value
+		}
+	}
 }

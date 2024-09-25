@@ -21,9 +21,9 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
-type audit2LogContextKeyType string
+type audit2LogContextKeyType struct{}
 
-const contextKey = audit2LogContextKeyType(TypeValue)
+var contextKey audit2LogContextKeyType
 
 // WithLogger returns a copy of the provided context with the provided Logger included as a value. This operation will
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
