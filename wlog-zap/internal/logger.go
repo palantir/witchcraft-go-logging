@@ -116,35 +116,35 @@ type zapLogger struct {
 	*wlog.AtomicLogLevel
 }
 
-func (l *zapLogger) Log(params ...wlog.Param) {
+func (l *zapLogger) Log(params ...wlog.ZZParam) {
 	logOutput(l.logger.Info, "", params)
 }
 
-func (l *zapLogger) Debug(msg string, params ...wlog.Param) {
+func (l *zapLogger) Debug(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.DebugLevel) {
 		logOutput(l.logger.Debug, msg, params)
 	}
 }
 
-func (l *zapLogger) Info(msg string, params ...wlog.Param) {
+func (l *zapLogger) Info(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.InfoLevel) {
 		logOutput(l.logger.Info, msg, params)
 	}
 }
 
-func (l *zapLogger) Warn(msg string, params ...wlog.Param) {
+func (l *zapLogger) Warn(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.WarnLevel) {
 		logOutput(l.logger.Warn, msg, params)
 	}
 }
 
-func (l *zapLogger) Error(msg string, params ...wlog.Param) {
+func (l *zapLogger) Error(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.ErrorLevel) {
 		logOutput(l.logger.Error, msg, params)
 	}
 }
 
-func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param) {
+func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.ZZParam) {
 	entry := newZapLogEntry()
 	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 	// Empty string is used for the "message" because the message is added to params above if present

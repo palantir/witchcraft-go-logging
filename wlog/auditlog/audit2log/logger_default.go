@@ -20,7 +20,7 @@ import (
 )
 
 type defaultLogger struct {
-	logger wlog.ConjureLogger[logging.AuditLogV2]
+	logger wlog.Logger[logging.AuditLogV2]
 }
 
 func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {

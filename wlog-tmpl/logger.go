@@ -33,39 +33,39 @@ type tmplLogger struct {
 	bufferPool bytesbuffers.Pool
 }
 
-func (l *tmplLogger) Log(params ...wlog.Param) {
+func (l *tmplLogger) Log(params ...wlog.ZZParam) {
 	l.logOutput(params)
 }
 
-func (l *tmplLogger) Debug(msg string, params ...wlog.Param) {
+func (l *tmplLogger) Debug(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.DebugLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "DEBUG")))
 	}
 }
 
-func (l *tmplLogger) Info(msg string, params ...wlog.Param) {
+func (l *tmplLogger) Info(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.InfoLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "INFO")))
 	}
 }
 
-func (l *tmplLogger) Warn(msg string, params ...wlog.Param) {
+func (l *tmplLogger) Warn(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.WarnLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "WARN")))
 	}
 }
 
-func (l *tmplLogger) Error(msg string, params ...wlog.Param) {
+func (l *tmplLogger) Error(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.ErrorLevel) {
 		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "ERROR")))
 	}
 }
 
-func (l *tmplLogger) logOutput(params []wlog.Param) {
+func (l *tmplLogger) logOutput(params []wlog.ZZParam) {
 	_, _ = fmt.Fprintln(l.w, l.formatOutput(params))
 }
 
-func (l *tmplLogger) formatOutput(params []wlog.Param) string {
+func (l *tmplLogger) formatOutput(params []wlog.ZZParam) string {
 	params = append(params, wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)))
 
 	buf := l.bufferPool.Get()

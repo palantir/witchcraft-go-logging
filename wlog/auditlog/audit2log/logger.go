@@ -41,7 +41,7 @@ func New(w io.Writer, params ...Param) Logger {
 	}
 }
 
-func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.AuditLogV2], params ...Param) Logger {
+func NewWithPrinter(printer wlog.LogPrinter[logging.AuditLogV2], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
 		params: params,

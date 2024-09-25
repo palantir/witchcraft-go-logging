@@ -21,15 +21,15 @@ import (
 )
 
 type defaultLogger struct {
-	logger wlog.Logger
+	logger wlog.ZZLogger
 }
 
 func (l *defaultLogger) Metric(name, typ string, params ...Param) {
 	l.logger.Log(ToParams(name, typ, params)...)
 }
 
-func ToParams(metricName, metricType string, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+func ToParams(metricName, metricType string, inParams []Param) []wlog.ZZParam {
+	outParams := make([]wlog.ZZParam, len(defaultTypeParam)+1+len(inParams))
 	copy(outParams, defaultTypeParam)
 	outParams[len(defaultTypeParam)] = wlog.NewParam(metricNameTypeParam(metricName, metricType).apply)
 	for idx := range inParams {
@@ -38,7 +38,7 @@ func ToParams(metricName, metricType string, inParams []Param) []wlog.Param {
 	return outParams
 }
 
-var defaultTypeParam = []wlog.Param{
+var defaultTypeParam = []wlog.ZZParam{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
 		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))

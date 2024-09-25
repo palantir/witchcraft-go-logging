@@ -30,31 +30,7 @@ type wrappedReq2Logger struct {
 	queryParamPerms  req2log.ParamPerms
 	headerParamPerms req2log.ParamPerms
 
-	logger wlog.Logger
-}
-
-func (l *wrappedReq2Logger) Request(r req2log.Request) {
-	l.logger.Log(l.toRequestParams(r)...)
-}
-
-func (l *wrappedReq2Logger) PathParamPerms() req2log.ParamPerms {
-	return l.pathParamPerms
-}
-
-func (l *wrappedReq2Logger) QueryParamPerms() req2log.ParamPerms {
-	return l.queryParamPerms
-}
-
-func (l *wrappedReq2Logger) HeaderParamPerms() req2log.ParamPerms {
-	return l.headerParamPerms
-}
-
-func (l *wrappedReq2Logger) toRequestParams(r req2log.Request) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(req2PayloadParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms).apply)
-	return outParams
+	logger wlog.ZZLogger
 }
 
 type req2LoggerBuilder struct {

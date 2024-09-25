@@ -27,7 +27,7 @@ const (
 	TypeValue = "audit.2"
 )
 
-type Param = wlog.ConjureLogParam[logging.AuditLogV2]
+type Param = wlog.Param[logging.AuditLogV2]
 
 func Type() Param {
 	return func(l *logging.AuditLogV2) {

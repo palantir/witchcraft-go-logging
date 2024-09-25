@@ -14,7 +14,9 @@
 
 package diag1log
 
-import "github.com/palantir/witchcraft-go-logging/wapi/logging"
+import (
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+)
 
 type wrappedLogger struct {
 	logger Logger

@@ -36,7 +36,7 @@ type defaultLogger struct {
 	creator wlog.LoggerCreator
 	writer  io.Writer
 
-	logger wlog.Logger
+	logger wlog.ZZLogger
 	// levellogger is only used by the service logger which supports logging at different log levels
 	levellogger wlog.LeveledLogger
 	level       wlog.LevelChecker
@@ -106,7 +106,7 @@ func (l *defaultLogger) Trace() trc1log.Logger {
 	}
 }
 
-var defaultTypeParam = []wlog.Param{
+var defaultTypeParam = []wlog.ZZParam{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
 	}),

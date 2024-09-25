@@ -34,35 +34,35 @@ type jsonMapLogger struct {
 	*AtomicLogLevel
 }
 
-func (l *jsonMapLogger) Log(params ...Param) {
+func (l *jsonMapLogger) Log(params ...ZZParam) {
 	l.logOutput(params)
 }
 
-func (l *jsonMapLogger) Debug(msg string, params ...Param) {
+func (l *jsonMapLogger) Debug(msg string, params ...ZZParam) {
 	if l.Enabled(DebugLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
-func (l *jsonMapLogger) Info(msg string, params ...Param) {
+func (l *jsonMapLogger) Info(msg string, params ...ZZParam) {
 	if l.Enabled(InfoLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
-func (l *jsonMapLogger) Warn(msg string, params ...Param) {
+func (l *jsonMapLogger) Warn(msg string, params ...ZZParam) {
 	if l.Enabled(WarnLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
-func (l *jsonMapLogger) Error(msg string, params ...Param) {
+func (l *jsonMapLogger) Error(msg string, params ...ZZParam) {
 	if l.Enabled(ErrorLevel) {
 		l.logOutput(ParamsWithMessage(msg, params))
 	}
 }
 
-func (l *jsonMapLogger) logOutput(params []Param) {
+func (l *jsonMapLogger) logOutput(params []ZZParam) {
 	params = append(params, StringParam(TimeKey, time.Now().Format(time.RFC3339Nano)))
 
 	entry := NewMapLogEntry()
@@ -73,7 +73,7 @@ func (l *jsonMapLogger) logOutput(params []Param) {
 
 type jsonMarshalLoggerProvider struct{}
 
-func (*jsonMarshalLoggerProvider) NewLogger(w io.Writer) Logger {
+func (*jsonMarshalLoggerProvider) NewLogger(w io.Writer) ZZLogger {
 	return &jsonMapLogger{
 		w: w,
 	}

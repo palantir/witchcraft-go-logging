@@ -23,7 +23,7 @@ import (
 )
 
 type defaultLogger struct {
-	logger       wlog.Logger
+	logger       wlog.ZZLogger
 	idsExtractor extractor.IDsFromRequest
 
 	pathParamPerms   ParamPerms
@@ -47,7 +47,7 @@ func (l *defaultLogger) HeaderParamPerms() ParamPerms {
 	return l.headerParamPerms
 }
 
-func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) []wlog.Param {
+func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) []wlog.ZZParam {
 	safeParams, unsafeParams := parseRequestParams(r, pathParamPerms, queryParamPerms, headerParamPerms)
 
 	reqPath := r.Request.URL.Path
@@ -58,7 +58,7 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 	// extract IDs from request
 	idsMap := idsExtractor.ExtractIDs(r.Request)
 
-	return []wlog.Param{
+	return []wlog.ZZParam{
 		wlog.StringParam(wlog.TypeKey, TypeValue),
 		wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)),
 		wlog.OptionalStringParam(methodKey, r.Request.Method),
@@ -82,7 +82,7 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 // "forbidden" list, they are not logged at all. Otherwise, if a parameter is whitelisted it is added to safeParams and
 // is added to unsafeParams otherwise. If a single key has multiple values, the value for that key in the returned field
 // will be a slice that contains all of the values for the key.
-func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams wlog.Param, unsafeParams wlog.Param) {
+func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams wlog.ZZParam, unsafeParams wlog.ZZParam) {
 	safeMap := make(map[string]interface{})
 	unsafeMap := make(map[string]interface{})
 

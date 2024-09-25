@@ -161,41 +161,41 @@ type zeroLogger struct {
 	*wlog.AtomicLogLevel
 }
 
-func (l *zeroLogger) Log(params ...wlog.Param) {
+func (l *zeroLogger) Log(params ...wlog.ZZParam) {
 	logOutput(l.logger.Log, "", params)
 }
 
-func (l *zeroLogger) Debug(msg string, params ...wlog.Param) {
+func (l *zeroLogger) Debug(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.DebugLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
-func (l *zeroLogger) Info(msg string, params ...wlog.Param) {
+func (l *zeroLogger) Info(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.InfoLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
-func (l *zeroLogger) Warn(msg string, params ...wlog.Param) {
+func (l *zeroLogger) Warn(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.WarnLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
-func (l *zeroLogger) Error(msg string, params ...wlog.Param) {
+func (l *zeroLogger) Error(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.ErrorLevel) {
 		logOutput(l.logger.Log, msg, params)
 	}
 }
 
-func reverseParams(params []wlog.Param) {
+func reverseParams(params []wlog.ZZParam) {
 	for i, j := 0, len(params)-1; i < j; i, j = i+1, j-1 {
 		params[i], params[j] = params[j], params[i]
 	}
 }
 
-func logOutput(newEvt func() *zerolog.Event, msg string, params []wlog.Param) {
+func logOutput(newEvt func() *zerolog.Event, msg string, params []wlog.ZZParam) {
 	entry := &zeroLogEntry{
 		evt:  newEvt(),
 		keys: make(map[string]struct{}),

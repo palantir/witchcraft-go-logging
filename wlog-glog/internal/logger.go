@@ -26,35 +26,35 @@ type gLogger struct {
 	*wlog.AtomicLogLevel
 }
 
-func (*gLogger) Log(params ...wlog.Param) {
+func (*gLogger) Log(params ...wlog.ZZParam) {
 	glog.Info(createGLogMsg("", params))
 }
 
-func (l *gLogger) Debug(msg string, params ...wlog.Param) {
+func (l *gLogger) Debug(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.DebugLevel) {
 		glog.Info(createGLogMsg(msg, params))
 	}
 }
 
-func (l *gLogger) Info(msg string, params ...wlog.Param) {
+func (l *gLogger) Info(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.InfoLevel) {
 		glog.Info(createGLogMsg(msg, params))
 	}
 }
 
-func (l *gLogger) Warn(msg string, params ...wlog.Param) {
+func (l *gLogger) Warn(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.WarnLevel) {
 		glog.Warning(createGLogMsg(msg, params))
 	}
 }
 
-func (l *gLogger) Error(msg string, params ...wlog.Param) {
+func (l *gLogger) Error(msg string, params ...wlog.ZZParam) {
 	if l.Enabled(wlog.ErrorLevel) {
 		glog.Error(createGLogMsg(msg, params))
 	}
 }
 
-func createGLogMsg(msg string, params []wlog.Param) string {
+func createGLogMsg(msg string, params []wlog.ZZParam) string {
 	entry := wlog.NewMapLogEntry()
 	wlog.ApplyParams(entry, wlog.ParamsWithMessage(msg, params))
 

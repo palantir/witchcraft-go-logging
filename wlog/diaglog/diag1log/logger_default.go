@@ -20,7 +20,7 @@ import (
 )
 
 type defaultLogger struct {
-	logger wlog.ConjureLogger[logging.DiagnosticLogV1]
+	logger wlog.Logger[logging.DiagnosticLogV1]
 }
 
 func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {

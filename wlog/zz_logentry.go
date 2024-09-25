@@ -34,19 +34,19 @@ type LogEntry interface {
 	ObjectValue(k string, v interface{}, marshalerType reflect.Type)
 }
 
-type Logger interface {
-	Log(params ...Param)
+type ZZLogger interface {
+	Log(params ...ZZParam)
 }
 
-type LoggerCreator func(w io.Writer) Logger
+type LoggerCreator func(w io.Writer) ZZLogger
 
 type LeveledLoggerCreator func(w io.Writer, level LogLevel) LeveledLogger
 
 type LeveledLogger interface {
-	Debug(msg string, params ...Param)
-	Info(msg string, params ...Param)
-	Warn(msg string, params ...Param)
-	Error(msg string, params ...Param)
+	Debug(msg string, params ...ZZParam)
+	Info(msg string, params ...ZZParam)
+	Warn(msg string, params ...ZZParam)
+	Error(msg string, params ...ZZParam)
 	SetLevel(level LogLevel)
 }
 

@@ -15,18 +15,19 @@
 package diag1log
 
 import (
+	"maps"
+	"time"
+
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"maps"
-	"time"
 )
 
 const (
 	TypeValue = "diagnostic.1"
 )
 
-type Param = wlog.ConjureLogParam[logging.DiagnosticLogV1]
+type Param = wlog.Param[logging.DiagnosticLogV1]
 
 func Type() Param {
 	return func(l *logging.DiagnosticLogV1) {

@@ -23,7 +23,7 @@ const (
 	TypeValue = "wrapped.1"
 )
 
-type Param = wlog.ConjureLogParam[logging.WrappedLogV1]
+type Param = wlog.Param[logging.WrappedLogV1]
 
 func Type() Param {
 	return func(l *logging.WrappedLogV1) {

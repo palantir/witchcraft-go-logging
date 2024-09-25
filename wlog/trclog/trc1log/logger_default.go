@@ -22,19 +22,19 @@ import (
 )
 
 type defaultLogger struct {
-	logger wlog.Logger
+	logger wlog.ZZLogger
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
 	l.logger.Log(ToParams(span, params)...)
 }
 
-func ToParams(span wtracing.SpanModel, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(inParams))
+func ToParams(span wtracing.SpanModel, inParams []Param) []wlog.ZZParam {
+	outParams := make([]wlog.ZZParam, len(inParams))
 	for idx := range inParams {
 		outParams[idx] = wlog.NewParam(inParams[idx].apply)
 	}
-	return append([]wlog.Param{
+	return append([]wlog.ZZParam{
 		wlog.NewParam(func(entry wlog.LogEntry) {
 			entry.StringValue(wlog.TypeKey, TypeValue)
 			entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
@@ -51,7 +51,7 @@ func (l *defaultLogger) Close() error {
 	return nil
 }
 
-func spanParam(span wtracing.SpanModel) wlog.Param {
+func spanParam(span wtracing.SpanModel) wlog.ZZParam {
 	return wlog.NewParam(func(entry wlog.LogEntry) {
 		spanEntry := wlog.NewMapLogEntry()
 		spanEntry.StringValue(wlog.TraceIDKey, string(span.TraceID))
@@ -67,9 +67,9 @@ func spanParam(span wtracing.SpanModel) wlog.Param {
 		if kind := span.Kind; kind != "" {
 			switch kind {
 			case wtracing.Server:
-				wlog.ApplyParams(spanEntry, []wlog.Param{spanAnnotationsParam("sr", "ss", span)})
+				wlog.ApplyParams(spanEntry, []wlog.ZZParam{spanAnnotationsParam("sr", "ss", span)})
 			case wtracing.Client:
-				wlog.ApplyParams(spanEntry, []wlog.Param{spanAnnotationsParam("cs", "cr", span)})
+				wlog.ApplyParams(spanEntry, []wlog.ZZParam{spanAnnotationsParam("cs", "cr", span)})
 			}
 		}
 
@@ -80,7 +80,7 @@ func spanParam(span wtracing.SpanModel) wlog.Param {
 	})
 }
 
-func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog.Param {
+func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog.ZZParam {
 	return wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.ObjectValue(SpanAnnotationsKey, []map[string]interface{}{
 			spanAnnotationFields(startVal, span.Timestamp, span.LocalEndpoint),

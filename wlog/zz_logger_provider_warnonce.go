@@ -18,7 +18,10 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"testing"
 )
+
+var isTest = testing.Testing()
 
 func newWarnOnceLoggerProvider() LoggerProvider {
 	return &warnOnceLoggerProvider{}
@@ -29,12 +32,12 @@ type warnOnceLogger struct {
 	once sync.Once
 }
 
-func (l *warnOnceLogger) Log(params ...Param)               { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) Debug(msg string, params ...Param) { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) Info(msg string, params ...Param)  { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) Warn(msg string, params ...Param)  { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) Error(msg string, params ...Param) { l.once.Do(l.printWarning) }
-func (l *warnOnceLogger) SetLevel(level LogLevel)           { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) Log(params ...ZZParam)               { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) Debug(msg string, params ...ZZParam) { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) Info(msg string, params ...ZZParam)  { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) Warn(msg string, params ...ZZParam)  { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) Error(msg string, params ...ZZParam) { l.once.Do(l.printWarning) }
+func (l *warnOnceLogger) SetLevel(level LogLevel)             { l.once.Do(l.printWarning) }
 
 func (l *warnOnceLogger) printWarning() {
 	_, _ = fmt.Fprintln(l.w, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. `+
@@ -44,7 +47,7 @@ func (l *warnOnceLogger) printWarning() {
 
 type warnOnceLoggerProvider struct{}
 
-func (*warnOnceLoggerProvider) NewLogger(w io.Writer) Logger {
+func (*warnOnceLoggerProvider) NewLogger(w io.Writer) ZZLogger {
 	return &warnOnceLogger{
 		w: w,
 	}

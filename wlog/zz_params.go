@@ -14,39 +14,39 @@
 
 package wlog
 
-type Param interface {
+type ZZParam interface {
 	apply(logger LogEntry)
 }
 
-func StringParam(key, value string) Param {
+func StringParam(key, value string) ZZParam {
 	return NewParam(func(logger LogEntry) {
 		logger.StringValue(key, value)
 	})
 }
 
-func OptionalStringParam(key, value string) Param {
+func OptionalStringParam(key, value string) ZZParam {
 	return NewParam(func(logger LogEntry) {
 		logger.OptionalStringValue(key, value)
 	})
 }
 
-func IntParam(key string, value int32) Param {
+func IntParam(key string, value int32) ZZParam {
 	return NewParam(func(logger LogEntry) {
 		logger.IntValue(key, value)
 	})
 }
 
-func Int64Param(key string, value int64) Param {
+func Int64Param(key string, value int64) ZZParam {
 	return NewParam(func(logger LogEntry) {
 		logger.SafeLongValue(key, value)
 	})
 }
 
-func NewParam(fn func(entry LogEntry)) Param {
+func NewParam(fn func(entry LogEntry)) ZZParam {
 	return paramFunc(fn)
 }
 
-func ApplyParams(logger LogEntry, params []Param) {
+func ApplyParams(logger LogEntry, params []ZZParam) {
 	for _, p := range params {
 		if p == nil {
 			continue
@@ -58,7 +58,7 @@ func ApplyParams(logger LogEntry, params []Param) {
 // ParamsWithMessage returns a new slice that appends a StringParam with the key "message" and
 // value of the provided msg parameter if it is non-empty. If msg is empty, returns the provided slice
 // without modification.
-func ParamsWithMessage(msg string, params []Param) []Param {
+func ParamsWithMessage(msg string, params []ZZParam) []ZZParam {
 	if msg != "" {
 		return append(params, StringParam("message", msg))
 	}

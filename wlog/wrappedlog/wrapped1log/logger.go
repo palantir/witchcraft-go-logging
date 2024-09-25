@@ -15,9 +15,9 @@
 package wrapped1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"io"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -43,7 +43,7 @@ func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
 	return newDelegateLogger(delegate, level)
 }
 
-func NewWithPrinter(printer wlog.ConjureLogPrinter[logging.WrappedLogV1], level wlog.LogLevel, name, version string) Logger {
+func NewWithPrinter(printer wlog.LogPrinter[logging.WrappedLogV1], level wlog.LogLevel, name, version string) Logger {
 	delegate := wlog.NewDefaultLoggerWithPrinter(printer, Type(), EntityName(name), EntityVersion(version))
 	return newDelegateLogger(delegate, level)
 }
@@ -73,7 +73,7 @@ type delegateLogger struct {
 	Trace1      trc1log.Logger
 }
 
-func newDelegateLogger(delegate wlog.ConjureLogger[logging.WrappedLogV1], level wlog.LogLevel) *delegateLogger {
+func newDelegateLogger(delegate wlog.Logger[logging.WrappedLogV1], level wlog.LogLevel) *delegateLogger {
 	return &delegateLogger{
 		Audit2:      audit2log.NewWithPrinter(audit2Printer(delegate)),
 		Diagnostic1: diag1log.NewWithPrinter(diag1Printer(delegate)),

@@ -15,19 +15,20 @@
 package evt2log
 
 import (
+	"maps"
+	"time"
+
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wparams "github.com/palantir/witchcraft-go-params"
-	"maps"
-	"time"
 )
 
 const (
 	TypeValue = "event.2"
 )
 
-type Param = wlog.ConjureLogParam[logging.EventLogV2]
+type Param = wlog.Param[logging.EventLogV2]
 
 func Type() Param {
 	return func(l *logging.EventLogV2) {

@@ -20,7 +20,7 @@ import (
 )
 
 type defaultLogger struct {
-	logger wlog.ConjureLogger[logging.EventLogV2]
+	logger wlog.Logger[logging.EventLogV2]
 }
 
 func (l *defaultLogger) Event(name string, params ...Param) {

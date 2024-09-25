@@ -27,16 +27,16 @@ func NewNoopLoggerProvider() LoggerProvider {
 
 type nooplogger struct{}
 
-func (*nooplogger) Log(params ...Param)               {}
-func (*nooplogger) Debug(msg string, params ...Param) {}
-func (*nooplogger) Info(msg string, params ...Param)  {}
-func (*nooplogger) Warn(msg string, params ...Param)  {}
-func (*nooplogger) Error(msg string, params ...Param) {}
-func (*nooplogger) SetLevel(level LogLevel)           {}
+func (*nooplogger) Log(params ...ZZParam)               {}
+func (*nooplogger) Debug(msg string, params ...ZZParam) {}
+func (*nooplogger) Info(msg string, params ...ZZParam)  {}
+func (*nooplogger) Warn(msg string, params ...ZZParam)  {}
+func (*nooplogger) Error(msg string, params ...ZZParam) {}
+func (*nooplogger) SetLevel(level LogLevel)             {}
 
 type noopLoggerProvider struct{}
 
-func (*noopLoggerProvider) NewLogger(w io.Writer) Logger {
+func (*noopLoggerProvider) NewLogger(w io.Writer) ZZLogger {
 	return &nooplogger{}
 }
 

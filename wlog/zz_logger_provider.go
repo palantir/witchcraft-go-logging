@@ -19,6 +19,6 @@ import (
 )
 
 type LoggerProvider interface {
-	NewLogger(w io.Writer) Logger
+	NewLogger(w io.Writer) ZZLogger
 	NewLeveledLogger(w io.Writer, level LogLevel) LeveledLogger
 }

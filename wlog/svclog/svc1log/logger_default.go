@@ -36,16 +36,16 @@ var (
 	})
 )
 
-func DebugLevelParam() wlog.Param {
+func DebugLevelParam() wlog.ZZParam {
 	return debugLevelParam
 }
-func InfoLevelParam() wlog.Param {
+func InfoLevelParam() wlog.ZZParam {
 	return infoLevelParam
 }
-func WarnLevelParam() wlog.Param {
+func WarnLevelParam() wlog.ZZParam {
 	return warnLevelParam
 }
-func ErrorLevelParam() wlog.Param {
+func ErrorLevelParam() wlog.ZZParam {
 	return errorLevelParam
 }
 
@@ -86,8 +86,8 @@ func (l *defaultLogger) Enabled(level wlog.LogLevel) bool {
 	return l.level == nil || l.level.Enabled(level)
 }
 
-func ToParams(level wlog.Param, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
+func ToParams(level wlog.ZZParam, inParams []Param) []wlog.ZZParam {
+	outParams := make([]wlog.ZZParam, len(defaultTypeParam)+1+len(inParams))
 	copy(outParams, defaultTypeParam)
 	outParams[len(defaultTypeParam)] = level
 	for idx := range inParams {
@@ -96,7 +96,7 @@ func ToParams(level wlog.Param, inParams []Param) []wlog.Param {
 	return outParams
 }
 
-var defaultTypeParam = []wlog.Param{
+var defaultTypeParam = []wlog.ZZParam{
 	wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, TypeValue)
 		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))

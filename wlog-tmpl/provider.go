@@ -68,7 +68,7 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 	}
 }
 
-func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
+func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.ZZLogger {
 	return &tmplLogger{
 		w:          w,
 		cfg:        p.cfg,
