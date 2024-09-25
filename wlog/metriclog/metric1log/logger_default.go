@@ -15,32 +15,14 @@
 package metric1log
 
 import (
-	"time"
-
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
 type defaultLogger struct {
-	logger wlog.ZZLogger
+	logger wlog.Logger[logging.MetricLogV1]
 }
 
 func (l *defaultLogger) Metric(name, typ string, params ...Param) {
-	l.logger.Log(ToParams(name, typ, params)...)
-}
-
-func ToParams(metricName, metricType string, inParams []Param) []wlog.ZZParam {
-	outParams := make([]wlog.ZZParam, len(defaultTypeParam)+1+len(inParams))
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(metricNameTypeParam(metricName, metricType).apply)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
-	return outParams
-}
-
-var defaultTypeParam = []wlog.ZZParam{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
+	l.logger.Log(append([]Param{MetricName(name), MetricType(typ)}, params...)...)
 }

@@ -218,6 +218,7 @@ const (
 	LogLevelINFO  LogLevel = "INFO"
 	LogLevelWARN  LogLevel = "WARN"
 	LogLevelERROR LogLevel = "ERROR"
+	LogLevelFATAL LogLevel = "FATAL"
 )
 
 // trace.1

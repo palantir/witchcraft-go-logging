@@ -75,13 +75,13 @@ type delegateLogger struct {
 
 func newDelegateLogger(delegate wlog.Logger[logging.WrappedLogV1], level wlog.LogLevel) *delegateLogger {
 	return &delegateLogger{
-		Audit2:      audit2log.NewWithPrinter(audit2Printer(delegate)),
-		Diagnostic1: diag1log.NewWithPrinter(diag1Printer(delegate)),
-		Event2:      evt2log.NewWithPrinter(evt2Printer(delegate)),
-		Metric1:     metric1log.NewWithPrinter(metric1Printer(delegate)),
-		Request2:    req2log.NewWithPrinter(req2Printer(delegate)),
-		Service1:    svc1log.NewWithPrinter(svc1Printer(delegate), level),
-		Trace1:      trc1log.NewWithPrinter(trc1Printer(delegate)),
+		Audit2:      audit2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2)),
+		Diagnostic1: diag1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1)),
+		Event2:      evt2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromEventLogV2)),
+		Metric1:     metric1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1)),
+		Request2:    req2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2)),
+		Service1:    svc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1), level),
+		Trace1:      trc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1)),
 	}
 }
 

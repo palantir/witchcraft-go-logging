@@ -17,6 +17,7 @@ package svc1log
 import (
 	"io"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
@@ -29,17 +30,13 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
-	return NewFromCreator(w, level, wlog.DefaultLoggerProvider().NewLeveledLogger, params...)
+	l := &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow()), level: wlog.NewAtomicLogLevel(level)}
+	return WithParams(l, params...)
 }
 
-func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
-	delegate := creator(w, level)
-	// The second return value is ignored because 'level: nil' is a valid state handled in the implementation.
-	levelChecker, _ := delegate.(wlog.LevelChecker)
-	return WithParams(&defaultLogger{
-		logger: delegate,
-		level:  levelChecker,
-	}, params...)
+func NewWithPrinter(printer wlog.LogPrinter[logging.ServiceLogV1], level wlog.LogLevel, params ...Param) Logger {
+	l := &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow()), level: wlog.NewAtomicLogLevel(level)}
+	return WithParams(l, params...)
 }
 
 func WithParams(logger Logger, params ...Param) Logger {

@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 	"sync/atomic"
+
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
 type LogLevel string
@@ -81,6 +83,23 @@ func (l LogLevel) Enabled(other LogLevel) bool {
 		}
 	}
 	return false
+}
+
+func (l LogLevel) ToLoggingType() logging.LogLevel {
+	switch l {
+	case DebugLevel:
+		return logging.LogLevelDEBUG
+	case InfoLevel:
+		return logging.LogLevelINFO
+	case WarnLevel:
+		return logging.LogLevelWARN
+	case ErrorLevel:
+		return logging.LogLevelERROR
+	case FatalLevel:
+		return logging.LogLevelFATAL
+	default:
+		panic(fmt.Sprintf("unknown log level: %s", l))
+	}
 }
 
 // AtomicLogLevel wraps atomic.Value containing a LogLevel.

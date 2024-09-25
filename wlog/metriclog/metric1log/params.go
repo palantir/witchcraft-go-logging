@@ -15,98 +15,138 @@
 package metric1log
 
 import (
+	"maps"
+	"time"
+
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
 const (
 	TypeValue = "metric.1"
-
-	MetricNameKey = "metricName"
-	MetricTypeKey = "metricType"
-	ValuesKey     = "values"
-	TagsKey       = "tags"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wlog.Param[logging.MetricLogV1]
 
-func ApplyParam(p Param, entry wlog.LogEntry) {
-	if p == nil {
-		return
+func Type() Param {
+	return func(l *logging.MetricLogV1) {
+		l.Type = "metric.1"
 	}
-	p.apply(entry)
 }
 
-type paramFunc func(entry wlog.LogEntry)
-
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+func Time(time time.Time) Param {
+	return func(l *logging.MetricLogV1) {
+		l.Time = datetime.DateTime(time)
+	}
 }
 
-func metricNameTypeParam(name, typ string) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
-		logger.StringValue(MetricNameKey, name)
-		logger.StringValue(MetricTypeKey, typ)
-	})
+func TimeNow() Param {
+	// Defer execution of time.Now() until the log is actually written
+	return func(l *logging.MetricLogV1) {
+		l.Time = datetime.DateTime(time.Now())
+	}
 }
 
-func Value(key string, value interface{}) Param {
-	return Values(map[string]interface{}{
-		key: value,
-	})
+func MetricName(name string) Param {
+	return func(l *logging.MetricLogV1) {
+		l.MetricName = name
+	}
 }
 
-func Values(values map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ValuesKey, values)
-	})
+func MetricType(metric string) Param {
+	return func(l *logging.MetricLogV1) {
+		l.MetricType = metric
+	}
+}
+
+func Values(params map[string]any) Param {
+	return func(l *logging.MetricLogV1) {
+		if l.Values == nil {
+			l.Values = maps.Clone(params)
+		} else {
+			for k, v := range params {
+				l.Values[k] = v
+			}
+		}
+	}
+}
+
+func Value(key string, value any) Param {
+	return func(l *logging.MetricLogV1) {
+		if l.Values == nil {
+			l.Values = map[string]any{key: value}
+		} else {
+			l.Values[key] = value
+		}
+	}
+}
+
+func Tags(tags map[string]string) Param {
+	return func(l *logging.MetricLogV1) {
+		if l.Tags == nil {
+			l.Tags = maps.Clone(tags)
+		} else {
+			for k, v := range tags {
+				l.Tags[k] = v
+			}
+		}
+	}
 }
 
 func Tag(key, value string) Param {
-	return Tags(map[string]string{
-		key: value,
-	})
-}
-
-func Tags(values map[string]string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringMapValue(TagsKey, values)
-	})
+	return func(l *logging.MetricLogV1) {
+		if l.Tags == nil {
+			l.Tags = map[string]string{key: value}
+		} else {
+			l.Tags[key] = value
+		}
+	}
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
-	})
+	return func(l *logging.MetricLogV1) {
+		l.Uid = (*logging.UserId)(&uid)
+	}
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
-	})
+	return func(l *logging.MetricLogV1) {
+		l.Sid = (*logging.SessionId)(&sid)
+	}
 }
 
-func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
-	})
+func TokenID(tokenId string) Param {
+	return func(l *logging.MetricLogV1) {
+		l.TokenId = (*logging.TokenId)(&tokenId)
+	}
 }
 
-func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
-	})
+func OrgID(orgId string) Param {
+	return func(l *logging.MetricLogV1) {
+		// TODO: Add OrgID to svc1log
+		// l.OrgId = (*logging.OrgId)(&orgId)
+	}
 }
 
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
-		key: value,
-	})
+func UnsafeParams(unsafeParams map[string]any) Param {
+	return func(l *logging.MetricLogV1) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = maps.Clone(unsafeParams)
+		} else {
+			for k, v := range unsafeParams {
+				l.UnsafeParams[k] = v
+			}
+		}
+	}
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
-	})
+func UnsafeParam(key string, value any) Param {
+	return func(l *logging.MetricLogV1) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = map[string]any{key: value}
+		} else {
+			l.UnsafeParams[key] = value
+		}
+	}
 }
