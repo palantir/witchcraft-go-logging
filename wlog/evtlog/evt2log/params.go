@@ -21,7 +21,6 @@ import (
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 const (
@@ -55,16 +54,17 @@ func EventName(event string) Param {
 	}
 }
 
-func Params(params wparams.ParamStorer) Param {
+func Value(key string, value any) Param {
 	return func(l *logging.EventLogV2) {
-		if params != nil {
-			SafeParams(params.SafeParams())(l)
-			UnsafeParams(params.UnsafeParams())(l)
+		if l.Values == nil {
+			l.Values = map[string]any{key: value}
+		} else {
+			l.Values[key] = value
 		}
 	}
 }
 
-func SafeParams(params map[string]any) Param {
+func Values(params map[string]any) Param {
 	return func(l *logging.EventLogV2) {
 		if l.Values == nil {
 			l.Values = maps.Clone(params)
@@ -72,16 +72,6 @@ func SafeParams(params map[string]any) Param {
 			for k, v := range params {
 				l.Values[k] = v
 			}
-		}
-	}
-}
-
-func SafeParam(key string, value any) Param {
-	return func(l *logging.EventLogV2) {
-		if l.Values == nil {
-			l.Values = map[string]any{key: value}
-		} else {
-			l.Values[key] = value
 		}
 	}
 }
@@ -98,22 +88,22 @@ func SID(sid string) Param {
 	}
 }
 
-func TokenID(tokenId string) Param {
+func TokenID(tokenID string) Param {
 	return func(l *logging.EventLogV2) {
-		l.TokenId = (*logging.TokenId)(&tokenId)
+		l.TokenId = (*logging.TokenId)(&tokenID)
 	}
 }
 
-func OrgID(orgId string) Param {
+func OrgID(orgID string) Param {
 	return func(l *logging.EventLogV2) {
 		// TODO: Add OrgID to svc1log
 		// l.OrgId = (*logging.OrgId)(&orgId)
 	}
 }
 
-func TraceID(traceId string) Param {
+func TraceID(traceID string) Param {
 	return func(l *logging.EventLogV2) {
-		l.TraceId = (*logging.TraceId)(&traceId)
+		l.TraceId = (*logging.TraceId)(&traceID)
 	}
 }
 

@@ -10,11 +10,6 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
-// logging.LogTypes is a constraint for generic types that combines all the Conjure log types.
-//type logging.LogTypes interface {
-//	logging.AuditLogV2 | logging.DiagnosticLogV1 | logging.EventLogV2 | logging.MetricLogV1 | logging.RequestLogV2 | logging.ServiceLogV1 | logging.TraceLogV1 | logging.WrappedLogV1
-//}
-
 // Logger is a generic logger that can log all Conjure log types.
 type Logger[T logging.LogTypes] interface {
 	Log(params ...Param[T])
@@ -25,7 +20,7 @@ type Param[T logging.LogTypes] func(*T)
 
 // NewDefaultLogger creates a new logger that writes JSON-marshaled lines to the provided output.
 func NewDefaultLogger[T logging.LogTypes](output io.Writer, params ...Param[T]) Logger[T] {
-	return NewDefaultLoggerWithPrinter(jsonPrinter[T]{output}, params...)
+	return NewDefaultLoggerWithPrinter(JSONPrinter[T](output), params...)
 }
 
 // NewDefaultLoggerWithPrinter creates a new logger that writes log objects using the provided printer.

@@ -15,13 +15,11 @@
 package wrapped1log
 
 import (
-	"io"
-
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
-	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -29,85 +27,64 @@ import (
 )
 
 type defaultLogger struct {
-	name    string
-	version string
+	Audit2      audit2log.Logger
+	Diagnostic1 diag1log.Logger
+	Event2      evt2log.Logger
+	Metric1     metric1log.Logger
+	Request2    req2log.Logger
+	Service1    svc1log.Logger
+	Trace1      trc1log.Logger
+}
 
-	// creator and writer are used only by the request logger, to allow consumers to override the default creator with a Param
-	creator wlog.LoggerCreator
-	writer  io.Writer
-
-	logger wlog.ZZLogger
-	// levellogger is only used by the service logger which supports logging at different log levels
-	levellogger wlog.LeveledLogger
-	level       wlog.LevelChecker
+func newDefaultLogger(delegate wlog.Logger[logging.WrappedLogV1], level wlog.LogLevel) *defaultLogger {
+	return &defaultLogger{
+		Audit2:      audit2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2)),
+		Diagnostic1: diag1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1)),
+		Event2:      evt2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromEventLogV2)),
+		Metric1:     metric1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1)),
+		Request2:    req2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2)),
+		Service1:    svc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1), level),
+		Trace1:      trc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1)),
+	}
 }
 
 func (l *defaultLogger) Audit() audit2log.Logger {
-	return &wrappedAudit2Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return l.Audit2
 }
 
 func (l *defaultLogger) Diagnostic() diag1log.Logger {
-	return &wrappedDiag1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return l.Diagnostic1
 }
 
 func (l *defaultLogger) Event() evt2log.Logger {
-	return &wrappedEvt2Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return l.Event2
 }
 
 func (l *defaultLogger) Metric() metric1log.Logger {
-	return &wrappedMetric1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return l.Metric1
 }
 
 func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
-	loggerBuilder := &req2LoggerBuilder{
-		name:          l.name,
-		version:       l.version,
-		loggerCreator: l.creator,
-		idsExtractor:  extractor.NewDefaultIDsExtractor(),
-	}
-	for _, p := range params {
-		p.Apply(loggerBuilder)
-	}
-	return loggerBuilder.build(l.writer)
+	return l.Request2
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	panic("not implemented")
-	//return &wrappedSvc1Logger{
-	//	params:  params,
-	//	name:    l.name,
-	//	version: l.version,
-	//	logger:  l.levellogger,
-	//	level:   l.level,
-	//}
+	return svc1log.WithParams(l.Service1, params...)
 }
 
 func (l *defaultLogger) Trace() trc1log.Logger {
-	return &wrappedTrc1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return l.Trace1
 }
 
-var defaultTypeParam = []wlog.ZZParam{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-	}),
-}
+//func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+//	loggerBuilder := &req2LoggerBuilder{
+//		name:          l.name,
+//		version:       l.version,
+//		loggerCreator: l.creator,
+//		idsExtractor:  extractor.NewDefaultIDsExtractor(),
+//	}
+//	for _, p := range params {
+//		p.Apply(loggerBuilder)
+//	}
+//	return loggerBuilder.build(l.writer)
+//}
