@@ -26,16 +26,6 @@ import (
 
 const (
 	TypeValue = "request.2"
-
-	methodKey       = "method"
-	protocolKey     = "protocol"
-	pathKey         = "path"
-	paramsKey       = "params"
-	statusKey       = "status"
-	requestSizeKey  = "requestSize"
-	responseSizeKey = "responseSize"
-	durationKey     = "duration"
-	traceIDKey      = wlog.TraceIDKey
 )
 
 // Logger creates a request log entry based on the provided information.
@@ -78,10 +68,10 @@ type RouteInfo struct {
 }
 
 func New(w io.Writer, params ...LoggerCreatorParam) Logger {
-	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger, params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.RequestLogV2], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator, params ...LoggerCreatorParam) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.RequestLogV2], params ...LoggerCreatorParam) Logger {
 	loggerBuilder := &defaultLoggerBuilder{
 		loggerCreator: creator,
 		idsExtractor:  extractor.NewDefaultIDsExtractor(),
@@ -90,20 +80,6 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator, params ...LoggerCre
 		p.Apply(loggerBuilder)
 	}
 	return loggerBuilder.build(w)
-}
-
-func New(w io.Writer, params ...LoggerCreatorParam) Logger {
-	return &wrappedLogger{
-		logger: &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())},
-		params: params,
-	}
-}
-
-func NewWithPrinter(printer wlog.LogPrinter[logging.RequestLogV2], params ...LoggerCreatorParam) Logger {
-	return &wrappedLogger{
-		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
-		params: params,
-	}
 }
 
 type LoggerBuilder interface {
@@ -120,7 +96,7 @@ type LoggerBuilder interface {
 }
 
 type defaultLoggerBuilder struct {
-	loggerCreator wlog.LoggerCreator
+	loggerCreator wlog.LoggerCreator[logging.RequestLogV2]
 	idsExtractor  extractor.IDsFromRequest
 
 	safePathParams      []string

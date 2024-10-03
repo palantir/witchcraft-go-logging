@@ -27,64 +27,35 @@ import (
 )
 
 type defaultLogger struct {
-	Audit2      audit2log.Logger
-	Diagnostic1 diag1log.Logger
-	Event2      evt2log.Logger
-	Metric1     metric1log.Logger
-	Request2    req2log.Logger
-	Service1    svc1log.Logger
-	Trace1      trc1log.Logger
+	delegate wlog.Logger[logging.WrappedLogV1]
+	level    wlog.LogLevel
+	params   []Param
 }
 
-func newDefaultLogger(delegate wlog.Logger[logging.WrappedLogV1], level wlog.LogLevel) *defaultLogger {
-	return &defaultLogger{
-		Audit2:      audit2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2)),
-		Diagnostic1: diag1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1)),
-		Event2:      evt2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromEventLogV2)),
-		Metric1:     metric1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1)),
-		Request2:    req2log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2)),
-		Service1:    svc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1), level),
-		Trace1:      trc1log.NewWithPrinter(wrapPrinter(delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1)),
-	}
+func (l defaultLogger) Audit() audit2log.Logger {
+	return audit2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2, l.params))
 }
 
-func (l *defaultLogger) Audit() audit2log.Logger {
-	return l.Audit2
+func (l defaultLogger) Diagnostic() diag1log.Logger {
+	return diag1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1, l.params))
 }
 
-func (l *defaultLogger) Diagnostic() diag1log.Logger {
-	return l.Diagnostic1
+func (l defaultLogger) Event() evt2log.Logger {
+	return evt2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromEventLogV2, l.params))
 }
 
-func (l *defaultLogger) Event() evt2log.Logger {
-	return l.Event2
+func (l defaultLogger) Metric() metric1log.Logger {
+	return metric1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1, l.params))
 }
 
-func (l *defaultLogger) Metric() metric1log.Logger {
-	return l.Metric1
+func (l defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+	return req2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2, l.params), params...)
 }
 
-func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
-	return l.Request2
+func (l defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
+	return svc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1, l.params), l.level, params...)
 }
 
-func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	return svc1log.WithParams(l.Service1, params...)
+func (l defaultLogger) Trace() trc1log.Logger {
+	return trc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1, l.params))
 }
-
-func (l *defaultLogger) Trace() trc1log.Logger {
-	return l.Trace1
-}
-
-//func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
-//	loggerBuilder := &req2LoggerBuilder{
-//		name:          l.name,
-//		version:       l.version,
-//		loggerCreator: l.creator,
-//		idsExtractor:  extractor.NewDefaultIDsExtractor(),
-//	}
-//	for _, p := range params {
-//		p.Apply(loggerBuilder)
-//	}
-//	return loggerBuilder.build(l.writer)
-//}

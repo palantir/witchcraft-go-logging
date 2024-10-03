@@ -22,6 +22,12 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
+type LevelChecker interface {
+	// Enabled determines whether the provided level should be logged.
+	// If implemented with LeveledLogger or SetLevel, they must remain consistent with Enabled.
+	Enabled(level LogLevel) bool
+}
+
 type LogLevel string
 
 const (

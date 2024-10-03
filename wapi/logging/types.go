@@ -10,29 +10,56 @@ type LogTypes interface {
 	AuditLogV2 | DiagnosticLogV1 | EventLogV2 | MetricLogV1 | RequestLogV2 | ServiceLogV1 | TraceLogV1 | WrappedLogV1
 }
 
-// shared string aliases
-
-type SessionId string
-type TokenId string
-type TraceId string
-type UserId string
+// LogType is an interface satisfied by all the witchcraft log types.
+type LogType interface {
+	logType() // marker method for the sealed interface.
+}
 
 // audit.2
 
 type AuditLogV2 struct {
-	Type          string            `json:"type"`
-	Time          datetime.DateTime `json:"time"`
-	Name          string            `json:"name"`
-	Result        AuditResult       `json:"result"`
-	Uid           *UserId           `json:"uid,omitempty"`
-	Sid           *SessionId        `json:"sid,omitempty"`
-	TokenId       *TokenId          `json:"tokenId,omitempty"`
-	TraceId       *TraceId          `json:"traceId,omitempty"`
-	OtherUids     []UserId          `json:"otherUids,omitempty"`
-	Origin        *string           `json:"origin,omitempty"`
-	RequestParams map[string]any    `json:"requestParams,omitempty"`
-	ResultParams  map[string]any    `json:"resultParams,omitempty"`
+	// "audit.2"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
+	Time datetime.DateTime `json:"time"`
+	// Name of the audit event, e.g. PUT_FILE
+	Name string `json:"name"`
+	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
+	Result AuditResult `json:"result"`
+	// User id (if available). This is the most downstream caller.
+	Uid *UserId `json:"uid,omitempty"`
+	// Session id (if available)
+	Sid *SessionId `json:"sid,omitempty"`
+	// Token id (if available)
+	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Zipkin trace id (if available)
+	TraceId *TraceId `json:"traceId,omitempty"`
+	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
+	OtherUids []UserId `json:"otherUids,omitempty"`
+	// Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier, or similar
+	Origin *string `json:"origin,omitempty"`
+	// The parameters known at method invocation time.
+	RequestParams map[string]any `json:"requestParams,omitempty"`
+	// Information derived within a method, commonly parts of the return value.
+	ResultParams map[string]any `json:"resultParams,omitempty"`
 }
+
+func (log *AuditLogV2) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	log.TraceId = nil
+	log.OtherUids = nil
+	log.Origin = nil
+	log.Name = ""
+	log.Result = ""
+	clear(log.ResultParams)
+	clear(log.RequestParams)
+}
+
+func (AuditLogV2) logType() {}
 
 type AuditResult string
 
@@ -45,11 +72,24 @@ const (
 // diagnostic.1
 
 type DiagnosticLogV1 struct {
-	Type         string            `json:"type"`
-	Time         datetime.DateTime `json:"time"`
-	Diagnostic   Diagnostic        `json:"diagnostic"`
-	UnsafeParams map[string]any    `json:"unsafeParams,omitempty"`
+	// "diagnostic.1"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
+	Time datetime.DateTime `json:"time"`
+	// The diagnostic being logged.
+	Diagnostic Diagnostic `json:"diagnostic"`
+	// Unredacted parameters
+	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 }
+
+func (log *DiagnosticLogV1) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.Diagnostic = Diagnostic{}
+	clear(log.UnsafeParams)
+}
+
+func (DiagnosticLogV1) logType() {}
 
 type Diagnostic struct {
 	Type       string             `json:"type"`
@@ -66,8 +106,10 @@ func NewDiagnosticFromThreadDump(v ThreadDumpV1) Diagnostic {
 }
 
 type GenericDiagnostic struct {
+	// An identifier for the type of diagnostic represented.
 	DiagnosticType string `json:"diagnosticType"`
-	Value          any    `json:"value"`
+	// Observations, measurements and context associated with the diagnostic.
+	Value any `json:"value"`
 }
 
 type ThreadDumpV1 struct {
@@ -102,7 +144,9 @@ type StackFrameV1 struct {
 // event.2
 
 type EventLogV2 struct {
-	Type string            `json:"type"`
+	// "event.2"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name of event, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
 	EventName string `json:"eventName"`
@@ -122,10 +166,27 @@ type EventLogV2 struct {
 	Tags map[string]string `json:"tags,omitempty"`
 }
 
+func (log *EventLogV2) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.EventName = ""
+	clear(log.Values)
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	log.TraceId = nil
+	clear(log.UnsafeParams)
+	clear(log.Tags)
+}
+
+func (EventLogV2) logType() {}
+
 // metric.1
 
 type MetricLogV1 struct {
-	Type string            `json:"type"`
+	// "metric.1"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
 	Time datetime.DateTime `json:"time"`
 	// Dot-delimited name of metric, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
 	MetricName string `json:"metricName"`
@@ -145,10 +206,27 @@ type MetricLogV1 struct {
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 }
 
+func (log *MetricLogV1) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.MetricName = ""
+	log.MetricType = ""
+	clear(log.Values)
+	clear(log.Tags)
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	clear(log.UnsafeParams)
+}
+
+func (MetricLogV1) logType() {}
+
 // request.2
 
 type RequestLogV2 struct {
-	Type string            `json:"type"`
+	// "request.2"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
 	Time datetime.DateTime `json:"time"`
 	// HTTP method of request
 	Method *string `json:"method,omitempty"`
@@ -172,11 +250,33 @@ type RequestLogV2 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// API token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitempty"`
 	// Unredacted parameters such as path, query and header parameters
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 }
+
+func (log *RequestLogV2) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.Method = nil
+	log.Protocol = ""
+	log.Path = ""
+	clear(log.Params)
+	log.Status = 0
+	log.RequestSize = 0
+	log.ResponseSize = 0
+	log.Duration = 0
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	log.TraceId = nil
+	clear(log.UnsafeParams)
+}
+
+func (RequestLogV2) logType() {}
 
 // service.1
 
@@ -211,6 +311,25 @@ type ServiceLogV1 struct {
 	Tags map[string]string `json:"tags,omitempty"`
 }
 
+func (log *ServiceLogV1) Reset() {
+	log.Type = ""
+	log.Level = ""
+	log.Time = datetime.DateTime{}
+	log.Origin = nil
+	log.Thread = nil
+	log.Message = ""
+	clear(log.Params)
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	log.TraceId = nil
+	log.Stacktrace = nil
+	clear(log.UnsafeParams)
+	clear(log.Tags)
+}
+
+func (ServiceLogV1) logType() {}
+
 type LogLevel string
 
 const (
@@ -224,14 +343,40 @@ const (
 // trace.1
 
 type TraceLogV1 struct {
-	Type         string            `json:"type"`
-	Time         datetime.DateTime `json:"time"`
-	Uid          *UserId           `json:"uid,omitempty"`
-	Sid          *SessionId        `json:"sid,omitempty"`
-	TokenId      *TokenId          `json:"tokenId,omitempty"`
-	UnsafeParams map[string]any    `json:"unsafeParams,omitempty"`
-	Span         Span              `json:"span"`
+	// "trace.1"
+	Type string `json:"type"`
+	// RFC3339Nano timestamp when the log event was emitted
+	Time datetime.DateTime `json:"time"`
+	// User id (if available)
+	Uid *UserId `json:"uid,omitempty"`
+	// Session id (if available)
+	Sid *SessionId `json:"sid,omitempty"`
+	// Token id (if available)
+	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Unredacted parameters
+	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
+	// Span information
+	Span Span `json:"span"`
 }
+
+func (log *TraceLogV1) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	clear(log.UnsafeParams)
+	log.Span.TraceId = ""
+	log.Span.Id = ""
+	log.Span.Name = ""
+	log.Span.ParentId = nil
+	log.Span.Timestamp = 0
+	log.Span.Duration = 0
+	clear(log.Span.Annotations)
+	clear(log.Span.Tags)
+}
+
+func (TraceLogV1) logType() {}
 
 type Span struct {
 	// 16-digit hex trace identifier
@@ -245,8 +390,9 @@ type Span struct {
 	// Timestamp of the start of this span (epoch microsecond value)
 	Timestamp safelong.SafeLong `json:"timestamp"`
 	// Duration of this span (microseconds)
-	Duration    safelong.SafeLong `json:"duration"`
-	Annotations []Annotation      `json:"annotations,omitempty"`
+	Duration safelong.SafeLong `json:"duration"`
+	// Annotations that describe the instance of the trace span
+	Annotations []Annotation `json:"annotations,omitempty"`
 	// Additional dimensions that describe the instance of the trace span
 	Tags map[string]string `json:"tags,omitempty"`
 }
@@ -255,7 +401,8 @@ type Annotation struct {
 	// Time annotation was created (epoch microsecond value)
 	Timestamp safelong.SafeLong `json:"timestamp"`
 	// Value encapsulated by this annotation
-	Value    string   `json:"value"`
+	Value string `json:"value"`
+	// Endpoint that generated this annotation
 	Endpoint Endpoint `json:"endpoint"`
 }
 
@@ -272,10 +419,12 @@ type Endpoint struct {
 
 type WrappedLogV1 struct {
 	// "wrapped.1"
-	Type    string              `json:"type"`
+	Type string `json:"type"`
+	// The log event
 	Payload WrappedLogV1Payload `json:"payload"`
 	// Artifact part of entity's maven coordinate
-	EntityName    string `json:"entityName"`
+	EntityName string `json:"entityName"`
+	// Version part of entity's maven coordinate
 	EntityVersion string `json:"entityVersion"`
 }
 
@@ -289,6 +438,15 @@ type WrappedLogV1Payload struct {
 	AuditLogV2      *AuditLogV2      `json:"auditLogV2,omitempty"`
 	DiagnosticLogV1 *DiagnosticLogV1 `json:"diagnosticLogV1,omitempty"`
 }
+
+func (log *WrappedLogV1) Reset() {
+	log.Type = ""
+	log.Payload = WrappedLogV1Payload{}
+	log.EntityName = ""
+	log.EntityVersion = ""
+}
+
+func (WrappedLogV1) logType() {}
 
 func NewWrappedLogV1PayloadFromServiceLogV1(v ServiceLogV1) WrappedLogV1Payload {
 	return WrappedLogV1Payload{Type: "serviceLogV1", ServiceLogV1: &v}
@@ -318,111 +476,14 @@ func NewWrappedLogV1PayloadFromDiagnosticLogV1(v DiagnosticLogV1) WrappedLogV1Pa
 	return WrappedLogV1Payload{Type: "diagnosticLogV1", DiagnosticLogV1: &v}
 }
 
-// Clear methods
+// shared string aliases
 
-func (log *AuditLogV2) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	log.TraceId = nil
-	log.OtherUids = nil
-	log.Origin = nil
-	log.Name = ""
-	log.Result = ""
-	clear(log.ResultParams)
-	clear(log.RequestParams)
-}
+type OrgId string
+type SessionId string
+type TokenId string
+type TraceId string
+type UserId string
 
-func (log *DiagnosticLogV1) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.Diagnostic = Diagnostic{}
-	clear(log.UnsafeParams)
-}
-
-func (log *EventLogV2) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.EventName = ""
-	clear(log.Values)
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	log.TraceId = nil
-	clear(log.UnsafeParams)
-	clear(log.Tags)
-}
-
-func (log *MetricLogV1) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.MetricName = ""
-	log.MetricType = ""
-	clear(log.Values)
-	clear(log.Tags)
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	clear(log.UnsafeParams)
-}
-
-func (log *RequestLogV2) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.Method = nil
-	log.Protocol = ""
-	log.Path = ""
-	clear(log.Params)
-	log.Status = 0
-	log.RequestSize = 0
-	log.ResponseSize = 0
-	log.Duration = 0
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	log.TraceId = nil
-	clear(log.UnsafeParams)
-}
-
-func (log *ServiceLogV1) Reset() {
-	log.Type = ""
-	log.Level = ""
-	log.Time = datetime.DateTime{}
-	log.Origin = nil
-	log.Thread = nil
-	log.Message = ""
-	clear(log.Params)
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	log.TraceId = nil
-	log.Stacktrace = nil
-	clear(log.UnsafeParams)
-	clear(log.Tags)
-}
-
-func (log *TraceLogV1) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	clear(log.UnsafeParams)
-	log.Span.TraceId = ""
-	log.Span.Id = ""
-	log.Span.Name = ""
-	log.Span.ParentId = nil
-	log.Span.Timestamp = 0
-	log.Span.Duration = 0
-	clear(log.Span.Annotations)
-	clear(log.Span.Tags)
-}
-
-func (log *WrappedLogV1) Reset() {
-	log.Type = ""
-	log.Payload = WrappedLogV1Payload{}
-	log.EntityName = ""
-	log.EntityVersion = ""
-}
+// assert types
+var _, _, _, _, _, _, _, _ LogType = AuditLogV2{}, DiagnosticLogV1{}, EventLogV2{}, MetricLogV1{}, RequestLogV2{},
+	ServiceLogV1{}, TraceLogV1{}, WrappedLogV1{}

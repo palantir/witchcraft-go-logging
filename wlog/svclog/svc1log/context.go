@@ -80,9 +80,7 @@ func FromContext(ctx context.Context) Logger {
 
 func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {
 	logEntry := new(logging.ServiceLogV1)
-	for _, currParam := range params {
-		currParam(logEntry)
-	}
+	wloginternal.ApplyParams(logEntry, params...)
 	return logEntry.Params, logEntry.UnsafeParams
 }
 

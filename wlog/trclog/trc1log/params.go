@@ -15,80 +15,144 @@
 package trc1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	"maps"
+	"time"
+
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 const (
 	TypeValue = "trace.1"
-
-	SpanKey = "span"
-
-	SpanIDKey          = "id"
-	SpanNameKey        = "name"
-	SpanParentIDKey    = "parentId"
-	SpanTimestampKey   = "timestamp"
-	SpanDurationKey    = "duration"
-	SpanAnnotationsKey = "annotations"
-	SpanTagsKey        = "tags"
-
-	AnnotationTimestampKey = "timestamp"
-	AnnotationValueKey     = "value"
-	AnnotationEndpointKey  = "endpoint"
-
-	EndpointServiceNameKey = "serviceName"
-	EndpointIPv4Key        = "ipv4"
-	EndpointIPv6Key        = "ipv6"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
+type Param = wloginternal.Param[logging.TraceLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logging.TraceLogV1]
+
+func Type() Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Type = TypeValue
+	})
 }
 
-func ApplyParam(p Param, entry wlog.LogEntry) {
-	if p == nil {
-		return
+func Time(time time.Time) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Time = datetime.DateTime(time)
+	})
+}
+
+func TimeNow() Param {
+	// Defer execution of time.Now() until the log is actually written
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Time = datetime.DateTime(time.Now())
+	})
+}
+
+func Span(span wtracing.SpanModel) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Span = logging.Span{
+			TraceId:     string(span.TraceID),
+			Id:          string(span.ID),
+			Name:        span.Name,
+			ParentId:    (*string)(span.ParentID),
+			Timestamp:   safelong.SafeLong(span.Timestamp.Round(time.Microsecond).UnixNano() / 1e3),
+			Duration:    safelong.SafeLong(span.Duration / time.Microsecond),
+			Annotations: spanAnnotationsParam(span),
+			Tags:        span.Tags,
+		}
+	})
+}
+
+func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
+	var startVal, endVal string
+	switch span.Kind {
+	case wtracing.Server:
+		startVal, endVal = "sr", "ss"
+	case wtracing.Client:
+		startVal, endVal = "cs", "cr"
+	default:
+		return nil
 	}
-	p.apply(entry)
+	return []logging.Annotation{
+		{
+			Timestamp: timestampMicros(span.Timestamp),
+			Value:     startVal,
+			Endpoint:  spanEndpoint(span.LocalEndpoint),
+		},
+		{
+			Timestamp: timestampMicros(span.Timestamp.Add(span.Duration)),
+			Value:     endVal,
+			Endpoint:  spanEndpoint(span.LocalEndpoint),
+		},
+	}
 }
 
-type paramFunc func(entry wlog.LogEntry)
+func spanEndpoint(endpoint *wtracing.Endpoint) logging.Endpoint {
+	e := logging.Endpoint{}
+	if endpoint != nil {
+		e.ServiceName = endpoint.ServiceName
+		if endpoint.IPv4 != nil {
+			s := endpoint.IPv4.String()
+			e.Ipv4 = &s
+		}
+		if endpoint.IPv6 != nil {
+			s := endpoint.IPv6.String()
+			e.Ipv6 = &s
+		}
+	}
+	return e
+}
 
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+func timestampMicros(t time.Time) safelong.SafeLong {
+	return safelong.SafeLong(t.Round(time.Microsecond).UnixNano() / 1e3)
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Uid = (*logging.UserId)(&uid)
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Sid = (*logging.SessionId)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.TokenId = (*logging.TokenId)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
+	return paramFunc(func(l *logging.TraceLogV1) {
+		// TODO: Add orgId
 	})
 }
 
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
-		key: value,
+func UnsafeParams(unsafeParams map[string]any) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = maps.Clone(unsafeParams)
+		} else {
+			for k, v := range unsafeParams {
+				l.UnsafeParams[k] = v
+			}
+		}
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
+func UnsafeParam(key string, value any) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = map[string]any{key: value}
+		} else {
+			l.UnsafeParams[key] = value
+		}
 	})
 }

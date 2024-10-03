@@ -26,28 +26,28 @@ type Logger interface {
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	l := &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())}
-	return WithParams(l, params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.MetricLogV1], params...)
 }
 
-func NewWithPrinter(printer wlog.LogPrinter[logging.MetricLogV1], params ...Param) Logger {
-	l := &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())}
-	return WithParams(l, params...)
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.MetricLogV1], params ...Param) Logger {
+	return wrappedLogger{
+		logger: defaultLogger{logger: creator(w)},
+		params: params,
+	}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
 	if len(params) == 0 {
 		return logger
 	}
-
-	if innerWrapped, ok := logger.(*wrappedLogger); ok {
-		return &wrappedLogger{
+	// Re-wrap if it is already a wrapped logger to avoid unnecessary nesting
+	if innerWrapped, ok := logger.(wrappedLogger); ok {
+		return wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			params: append(append([]Param{}, innerWrapped.params...), params...),
 		}
 	}
-
-	return &wrappedLogger{
+	return wrappedLogger{
 		logger: logger,
 		params: params,
 	}

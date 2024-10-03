@@ -15,17 +15,14 @@
 package benchmarks
 
 import (
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
-	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
-	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
-	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -49,9 +46,9 @@ func BenchmarkAudit2Log(b *testing.B) {
 	for _, tc := range audit2logtests.TestCases() {
 		b.Run(tc.Name, func(b *testing.B) {
 			params := tc.Params()
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.AuditLogV2]) {
 				b.ReportAllocs()
-				logger := audit2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := audit2log.NewFromCreator(io.Discard, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Audit(tc.AuditName, tc.AuditResult, params...)
 				}
@@ -63,9 +60,9 @@ func BenchmarkAudit2Log(b *testing.B) {
 func BenchmarkDiag1Log(b *testing.B) {
 	for _, tc := range diag1logtests.TestCases() {
 		b.Run(tc.Name, func(b *testing.B) {
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.DiagnosticLogV1]) {
 				b.ReportAllocs()
-				logger := diag1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := diag1log.NewFromCreator(io.Discard, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Diagnostic(tc.Diagnostic, diag1log.UnsafeParams(tc.UnsafeParams))
 				}
@@ -77,18 +74,10 @@ func BenchmarkDiag1Log(b *testing.B) {
 func BenchmarkEvt2Log(b *testing.B) {
 	for _, tc := range evt2logtests.TestCases() {
 		params := tc.Params()
-		params2 := evt2log.ConvertWLogParams(params)
 		b.Run(tc.Name, func(b *testing.B) {
-			b.Run("JSON", func(b *testing.B) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.EventLogV2]) {
 				b.ReportAllocs()
-				logger := evt2log.New(ioutil.Discard)
-				for n := 0; n < b.N; n++ {
-					logger.Event(tc.Name, params2...)
-				}
-			})
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
-				b.ReportAllocs()
-				logger := evt2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := evt2log.NewFromCreator(io.Discard, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Event(tc.Name, params...)
 				}
@@ -101,9 +90,9 @@ func BenchmarkMetric1Log(b *testing.B) {
 	for _, tc := range metric1logtests.TestCases() {
 		params := tc.Params()
 		b.Run(tc.Name, func(b *testing.B) {
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.MetricLogV1]) {
 				b.ReportAllocs()
-				logger := metric1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := metric1log.NewFromCreator(io.Discard, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Metric(tc.MetricName, tc.MetricType, params...)
 				}
@@ -125,9 +114,9 @@ func BenchmarkReq2Log(b *testing.B) {
 				ResponseSize:   int64(100),
 				Duration:       1 * time.Second,
 			}
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.RequestLogV2]) {
 				b.ReportAllocs()
-				logger := req2log.New(ioutil.Discard, req2log.Creator(provider.NewLogger))
+				logger := req2log.NewFromCreator(io.Discard, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Request(req)
 				}
@@ -139,9 +128,9 @@ func BenchmarkReq2Log(b *testing.B) {
 func BenchmarkSvc1Log(b *testing.B) {
 	for _, tc := range svc1logtests.TestCases() {
 		b.Run(tc.Name, func(b *testing.B) {
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.ServiceLogV1]) {
 				b.ReportAllocs()
-				logger := svc1log.NewFromCreator(ioutil.Discard, wlog.InfoLevel, provider.NewLeveledLogger)
+				logger := svc1log.NewFromCreator(io.Discard, provider, wlog.InfoLevel)
 				for n := 0; n < b.N; n++ {
 					logger.Info(tc.Message, tc.LogParams...)
 				}
@@ -160,9 +149,9 @@ func BenchmarkTrc1Log(b *testing.B) {
 
 	for _, tc := range trc1logtests.TestCases(clientSpan) {
 		b.Run(tc.Name, func(b *testing.B) {
-			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.TraceLogV1]) {
 				b.ReportAllocs()
-				logger := trc1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := trc1log.NewFromCreator(io.Discard, provider)
 				tracer, err := wzipkin.NewTracer(
 					logger,
 					wtracing.WithLocalEndpoint(&wtracing.Endpoint{
@@ -181,11 +170,16 @@ func BenchmarkTrc1Log(b *testing.B) {
 	}
 }
 
-func RunBenchmarks(b *testing.B, benchmark func(*testing.B, wlog.LoggerProvider)) {
-	b.Run("noop", func(b *testing.B) { benchmark(b, wlog.NewNoopLoggerProvider()) })
-	b.Run("json.Marshal", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
-	b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
-	b.Run("zap", func(b *testing.B) { benchmark(b, wlogzap.LoggerProvider()) })
-	b.Run("zerolog", func(b *testing.B) { benchmark(b, wlogzerolog.LoggerProvider()) })
-	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
+func RunBenchmarks[T logging.LogTypes](b *testing.B, benchmark func(*testing.B, wlog.LoggerCreator[T])) {
+	b.Run("noop", func(b *testing.B) {
+		benchmark(b, func(w io.Writer) wlog.Logger[T] {
+			return wlog.NewDefaultLoggerWithPrinter[T](wlog.NoopPrinter())
+		})
+	})
+	b.Run("json", func(b *testing.B) {
+		benchmark(b, func(w io.Writer) wlog.Logger[T] {
+			return wlog.NewDefaultLoggerWithPrinter[T](wlog.JSONPrinter(w))
+		})
+	})
+	//b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
 }

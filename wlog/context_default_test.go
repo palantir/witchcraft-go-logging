@@ -27,6 +27,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -76,6 +77,26 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 					// technically, a truly no-op writer would implement the logger interface and do nothing, but it is
 					// easier to just return a new logger that writes to a no-op writer.
 					return audit2log.New(ioutil.Discard)
+				})
+			},
+		},
+		{
+			loggerPkg: "diag1log",
+			performLogging: func() {
+				logger := diag1log.FromContext(context.Background())
+				logger.Diagnostic(logging.NewDiagnosticFromGeneric(logging.GenericDiagnostic{DiagnosticType: "test", Value: map[string]any{"TEST_VAL": 2}}))
+			},
+			validateJSON: func(bytes []byte) {
+				var logEntry logging.DiagnosticLogV1
+				require.NoError(t, json.Unmarshal(bytes, &logEntry))
+				assert.Equal(t, "test", logEntry.Diagnostic.Generic.DiagnosticType)
+			},
+			setEmptyLoggerCreator: func() {
+				// set the default logger creator
+				diag1log.SetDefaultLoggerCreator(func() diag1log.Logger {
+					// technically, a truly no-op writer would implement the logger interface and do nothing, but it is
+					// easier to just return a new logger that writes to a no-op writer.
+					return diag1log.New(ioutil.Discard)
 				})
 			},
 		},
@@ -130,7 +151,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				var logEntry logging.ServiceLogV1
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "Test message", logEntry.Message)
-				assert.Equal(t, logging.LogLevel_Value("INFO"), logEntry.Level.Value())
+				assert.Equal(t, logging.LogLevelINFO, logEntry.Level)
 			},
 			setEmptyLoggerCreator: func() {
 				// set the default logger creator

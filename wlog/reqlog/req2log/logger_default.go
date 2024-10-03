@@ -15,15 +15,20 @@
 package req2log
 
 import (
+	"maps"
 	"strings"
 	"time"
 
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type defaultLogger struct {
-	logger       wlog.ZZLogger
+	logger       wlog.Logger[logging.RequestLogV2]
 	idsExtractor extractor.IDsFromRequest
 
 	pathParamPerms   ParamPerms
@@ -32,7 +37,7 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Request(r Request) {
-	l.logger.Log(ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms)...)
+	wloginternal.LogParams(l.logger.Log, ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
 }
 
 func (l *defaultLogger) PathParamPerms() ParamPerms {
@@ -47,7 +52,7 @@ func (l *defaultLogger) HeaderParamPerms() ParamPerms {
 	return l.headerParamPerms
 }
 
-func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) []wlog.ZZParam {
+func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) wloginternal.Param[logging.RequestLogV2] {
 	safeParams, unsafeParams := parseRequestParams(r, pathParamPerms, queryParamPerms, headerParamPerms)
 
 	reqPath := r.Request.URL.Path
@@ -58,31 +63,66 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 	// extract IDs from request
 	idsMap := idsExtractor.ExtractIDs(r.Request)
 
-	return []wlog.ZZParam{
-		wlog.StringParam(wlog.TypeKey, TypeValue),
-		wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)),
-		wlog.OptionalStringParam(methodKey, r.Request.Method),
-		wlog.StringParam(protocolKey, r.Request.Proto),
-		wlog.StringParam(pathKey, reqPath),
-		safeParams,
-		wlog.IntParam(statusKey, int32(r.ResponseStatus)),
-		wlog.Int64Param(requestSizeKey, r.Request.ContentLength),
-		wlog.Int64Param(responseSizeKey, r.ResponseSize),
-		wlog.Int64Param(durationKey, r.Duration.Nanoseconds()/1000),
-		wlog.OptionalStringParam(wlog.UIDKey, idsMap[wlog.UIDKey]),
-		wlog.OptionalStringParam(wlog.SIDKey, idsMap[wlog.SIDKey]),
-		wlog.OptionalStringParam(wlog.TokenIDKey, idsMap[wlog.TokenIDKey]),
-		wlog.OptionalStringParam(wlog.OrgIDKey, idsMap[wlog.OrgIDKey]),
-		wlog.OptionalStringParam(traceIDKey, idsMap[traceIDKey]),
-		unsafeParams,
-	}
+	return wloginternal.ParamFunc[logging.RequestLogV2](func(l *logging.RequestLogV2) {
+		l.Type = TypeValue
+
+		l.Time = datetime.DateTime(time.Now())
+
+		if method := r.Request.Method; method != "" {
+			l.Method = &method
+		}
+
+		l.Protocol = r.Request.Proto
+
+		l.Path = reqPath
+
+		if l.Params == nil {
+			l.Params = maps.Clone(safeParams)
+		} else {
+			for k, v := range safeParams {
+				l.Params[k] = v
+			}
+		}
+
+		l.Status = r.ResponseStatus
+
+		l.RequestSize = safelong.SafeLong(r.Request.ContentLength)
+
+		l.ResponseSize = safelong.SafeLong(r.ResponseSize)
+
+		l.Duration = safelong.SafeLong(r.Duration.Microseconds())
+
+		if uid := idsMap[extractor.UIDKey]; uid != "" {
+			l.Uid = (*logging.UserId)(&uid)
+		}
+
+		if sid := idsMap[extractor.SIDKey]; sid != "" {
+			l.Sid = (*logging.SessionId)(&sid)
+		}
+
+		if tokenID := idsMap[extractor.TokenIDKey]; tokenID != "" {
+			l.TokenId = (*logging.TokenId)(&tokenID)
+		}
+
+		if traceID := idsMap[extractor.TraceIDKey]; traceID != "" {
+			l.TraceId = (*logging.TraceId)(&traceID)
+		}
+
+		if l.UnsafeParams == nil {
+			l.UnsafeParams = maps.Clone(unsafeParams)
+		} else {
+			for k, v := range unsafeParams {
+				l.UnsafeParams[k] = v
+			}
+		}
+	})
 }
 
 // parseRequestParams parses the path, header and query parameters. If any of the parameters are in a respective
 // "forbidden" list, they are not logged at all. Otherwise, if a parameter is whitelisted it is added to safeParams and
 // is added to unsafeParams otherwise. If a single key has multiple values, the value for that key in the returned field
 // will be a slice that contains all of the values for the key.
-func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams wlog.ZZParam, unsafeParams wlog.ZZParam) {
+func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams map[string]any, unsafeParams map[string]any) {
 	safeMap := make(map[string]interface{})
 	unsafeMap := make(map[string]interface{})
 
@@ -97,15 +137,7 @@ func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamP
 	for k := range r.Request.Header {
 		processKeyValPair(k, r.Request.Header.Get(k), safeMap, unsafeMap, headerParamPerms, r.HeaderParamPerms)
 	}
-	return wlog.NewParam(func(entry wlog.LogEntry) {
-			if len(safeMap) > 0 {
-				entry.AnyMapValue(paramsKey, safeMap)
-			}
-		}), wlog.NewParam(func(entry wlog.LogEntry) {
-			if (len(unsafeMap)) > 0 {
-				entry.AnyMapValue(wlog.UnsafeParamsKey, unsafeMap)
-			}
-		})
+	return safeMap, unsafeMap
 }
 
 func processKeyValPair(k, v string, safeDst, unsafeDst map[string]interface{}, basePerms, reqPerms ParamPerms) {

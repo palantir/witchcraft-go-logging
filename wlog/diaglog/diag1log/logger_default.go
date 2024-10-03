@@ -17,12 +17,13 @@ package diag1log
 import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type defaultLogger struct {
 	logger wlog.Logger[logging.DiagnosticLogV1]
 }
 
-func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
-	l.logger.Log(append([]Param{Diagnostic(diagnostic)}, params...)...)
+func (l defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Diagnostic(diagnostic)}, params...)...)
 }

@@ -26,8 +26,6 @@ import (
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
-	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	wparams "github.com/palantir/witchcraft-go-params"
@@ -37,12 +35,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestLogger(w io.Writer, origin string, provider wlog.LoggerProvider) svc1log.Logger {
-	return svc1log.WithParams(svc1log.NewFromCreator(w, wlog.InfoLevel, provider.NewLeveledLogger), svc1log.Origin(origin))
+func newTestLogger(w io.Writer, origin string) svc1log.Logger {
+	return svc1log.WithParams(svc1log.New(w, wlog.InfoLevel), svc1log.Origin(origin))
 }
 
 func TestFromContext(t *testing.T) {
-	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+	buf, ctx := newBufAndCtxWithLogger()
 
 	logger := svc1log.FromContext(ctx)
 	logger.Info("Test")
@@ -66,7 +64,7 @@ func TestFromContext(t *testing.T) {
 // Tests that the logger returned by svc1log.FromContext has UID, SID, TokenID, and OrgID parameters set on it if the context
 // has those values set on it using wlog.
 func TestFromContextUsesCommonIDs(t *testing.T) {
-	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+	buf, ctx := newBufAndCtxWithLogger()
 
 	ctx = wlog.ContextWithUID(ctx, "test-UID")
 	ctx = wlog.ContextWithSID(ctx, "test-SID")
@@ -98,7 +96,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 
 // Tests that the logger returned by svc1log.FromContext has a TraceID set on it if the context has a wtracing TraceID.
 func TestFromContextSetsTraceID(t *testing.T) {
-	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+	buf, ctx := newBufAndCtxWithLogger()
 
 	// create a no-op tracer to use for the test
 	tracer, err := wzipkin.NewTracer(wtracing.NewNoopReporter())
@@ -158,7 +156,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 }
 
 func TestWithLoggerParams(t *testing.T) {
-	buf, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+	buf, ctx := newBufAndCtxWithLogger()
 
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.SafeParam("foo", "bar"))
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.SafeParam("ten", 10))
@@ -188,32 +186,7 @@ func TestWithLoggerParams(t *testing.T) {
 }
 
 func TestWParamsSafeAndUnsafeParamsUsed(t *testing.T) {
-	for _, test := range []struct {
-		name     string
-		provider wlog.LoggerProvider
-	}{
-		{
-			name:     "jsonMarshalLogger",
-			provider: wlog.NewJSONMarshalLoggerProvider(),
-		},
-		{
-			name:     "zap",
-			provider: wlogzap.LoggerProvider(),
-		},
-		{
-			name:     "zerolog",
-			provider: wlogzerolog.LoggerProvider(),
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			testWParamsSafeAndUnsafeParamsUsed(t, test.provider)
-		})
-	}
-}
-
-func testWParamsSafeAndUnsafeParamsUsed(t *testing.T, provider wlog.LoggerProvider) {
-
-	buf, ctx := newBufAndCtxWithLogger(provider)
+	buf, ctx := newBufAndCtxWithLogger()
 
 	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bar")
 	ctx = wparams.ContextWithSafeParam(ctx, "ten", 10)
@@ -246,32 +219,7 @@ func testWParamsSafeAndUnsafeParamsUsed(t *testing.T, provider wlog.LoggerProvid
 }
 
 func TestWParamsSafeAndUnsafeParamsOverwritten(t *testing.T) {
-	for _, test := range []struct {
-		name     string
-		provider wlog.LoggerProvider
-	}{
-		{
-			name:     "jsonMarshalLogger",
-			provider: wlog.NewJSONMarshalLoggerProvider(),
-		},
-		{
-			name:     "zap",
-			provider: wlogzap.LoggerProvider(),
-		},
-		{
-			name:     "zerolog",
-			provider: wlogzerolog.LoggerProvider(),
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t, test.provider)
-		})
-	}
-}
-
-func testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t *testing.T, provider wlog.LoggerProvider) {
-
-	buf, ctx := newBufAndCtxWithLogger(provider)
+	buf, ctx := newBufAndCtxWithLogger()
 
 	ctx = wparams.ContextWithSafeParam(ctx, "foo", "bath")
 	ctx = wparams.ContextWithSafeParam(ctx, "ten", 10)
@@ -304,7 +252,7 @@ func testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t *testing.T, provider wlo
 }
 
 func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
-	_, ctx := newBufAndCtxWithLogger(wlog.NewJSONMarshalLoggerProvider())
+	_, ctx := newBufAndCtxWithLogger()
 
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.SafeParam("foo", "bar"))
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.UnsafeParam("ten", 10))
@@ -319,98 +267,58 @@ func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
 }
 
 func TestWithLoggerOriginFromCallLine(t *testing.T) {
-	for _, test := range []struct {
-		name     string
-		provider wlog.LoggerProvider
-	}{
-		{
-			name:     "jsonMarshalLogger",
-			provider: wlog.NewJSONMarshalLoggerProvider(),
-		},
-		{
-			name:     "zap",
-			provider: wlogzap.LoggerProvider(),
-		},
-		{
-			name:     "zerolog",
-			provider: wlogzerolog.LoggerProvider(),
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			buf, ctx := newBufAndCtxWithLogger(test.provider)
+	buf, ctx := newBufAndCtxWithLogger()
 
-			ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLine())
 
-			logger := svc1log.FromContext(ctx)
-			file, line := getFileAndLine()
-			logger.Info("Test")
+	logger := svc1log.FromContext(ctx)
+	file, line := getFileAndLine()
+	logger.Info("Test")
 
-			entries, err := logreader.EntriesFromContent(buf.Bytes())
-			require.NoError(t, err)
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
 
-			assert.Equal(t, 1, len(entries))
-			matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"level":   objmatcher.NewEqualsMatcher("INFO"),
-				"time":    objmatcher.NewRegExpMatcher(".+"),
-				"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
-				"type":    objmatcher.NewEqualsMatcher("service.1"),
-				"message": objmatcher.NewEqualsMatcher("Test"),
-			})
-			err = matcher.Matches(map[string]interface{}(entries[0]))
-			assert.NoError(t, err, "%v", err)
-		})
-	}
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
 }
 
 func TestWithLoggerOriginFromCallLineWithSkip(t *testing.T) {
-	for _, test := range []struct {
-		name     string
-		provider wlog.LoggerProvider
-	}{
-		{
-			name:     "jsonMarshalLogger",
-			provider: wlog.NewJSONMarshalLoggerProvider(),
-		},
-		{
-			name:     "zap",
-			provider: wlogzap.LoggerProvider(),
-		},
-		{
-			name:     "zerolog",
-			provider: wlogzerolog.LoggerProvider(),
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			delegate := svc1log.NewFromCreator(buf, wlog.InfoLevel, test.provider.NewLeveledLogger)
-			ctx := svc1log.WithLogger(context.Background(), wrappedSvcLogger{delegate: delegate})
-			ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLineWithSkip(2))
+	buf := &bytes.Buffer{}
+	delegate := svc1log.New(buf, wlog.InfoLevel)
+	ctx := svc1log.WithLogger(context.Background(), wrappedSvcLogger{delegate: delegate})
+	ctx = svc1log.WithLoggerParams(ctx, svc1log.OriginFromCallLineWithSkip(2))
 
-			logger := svc1log.FromContext(ctx)
-			file, line := getFileAndLine()
-			logger.Info("Test")
+	logger := svc1log.FromContext(ctx)
+	file, line := getFileAndLine()
+	logger.Info("Test")
 
-			entries, err := logreader.EntriesFromContent(buf.Bytes())
-			require.NoError(t, err)
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
 
-			assert.Equal(t, 1, len(entries))
-			matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-				"level":   objmatcher.NewEqualsMatcher("INFO"),
-				"time":    objmatcher.NewRegExpMatcher(".+"),
-				"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
-				"type":    objmatcher.NewEqualsMatcher("service.1"),
-				"message": objmatcher.NewEqualsMatcher("Test"),
-			})
-			fmt.Println(entries[0])
-			err = matcher.Matches(map[string]interface{}(entries[0]))
-			assert.NoError(t, err, "%v", err)
-		})
-	}
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher(fmt.Sprintf("%s:%d", file, line+1)),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+	})
+	fmt.Println(entries[0])
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
 }
 
-func newBufAndCtxWithLogger(provider wlog.LoggerProvider) (*bytes.Buffer, context.Context) {
+func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := svc1log.WithLogger(context.Background(), newTestLogger(buf, "com.palantir.test", provider))
+	ctx := svc1log.WithLogger(context.Background(), newTestLogger(buf, "com.palantir.test"))
 	return buf, ctx
 }
 

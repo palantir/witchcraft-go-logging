@@ -6,66 +6,60 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
-type resettable interface {
-	// Reset resets the object to its zero state so that it can be reused.
-	Reset()
+func GetPooled[T logging.LogTypes]() (log *T, release func(*T)) {
+	pool := poolFor[T]()
+	return pool.Get(), pool.Put
 }
 
-var (
-	poolAuditLogV2   SyncPool[logging.AuditLogV2]      = new(syncPool[logging.AuditLogV2])
-	poolDiagLogV1    SyncPool[logging.DiagnosticLogV1] = new(syncPool[logging.DiagnosticLogV1])
-	poolEventLogV2   SyncPool[logging.EventLogV2]      = new(syncPool[logging.EventLogV2])
-	poolMetricLogV1  SyncPool[logging.MetricLogV1]     = new(syncPool[logging.MetricLogV1])
-	poolReqLogV2     SyncPool[logging.RequestLogV2]    = new(syncPool[logging.RequestLogV2])
-	poolSvcLogV1     SyncPool[logging.ServiceLogV1]    = new(syncPool[logging.ServiceLogV1])
-	poolTraceLogV1   SyncPool[logging.TraceLogV1]      = new(syncPool[logging.TraceLogV1])
-	poolWrappedLogV1 SyncPool[logging.WrappedLogV1]    = new(syncPool[logging.WrappedLogV1])
-)
-
-type SyncPool[T logging.LogTypes | []byte] interface {
-	Get() *T
-	Put(*T)
+type syncPool[T logging.LogTypes] struct {
+	pool  sync.Pool
+	reset func(*T)
 }
 
-// PoolFor returns a SyncPool for the provided log type.
-func PoolFor[T logging.LogTypes]() SyncPool[T] {
-	switch any(*new(T)).(type) {
-	case logging.AuditLogV2:
-		return any(poolAuditLogV2).(SyncPool[T])
-	case logging.DiagnosticLogV1:
-		return any(poolDiagLogV1).(SyncPool[T])
-	case logging.EventLogV2:
-		return any(poolEventLogV2).(SyncPool[T])
-	case logging.MetricLogV1:
-		return any(poolMetricLogV1).(SyncPool[T])
-	case logging.RequestLogV2:
-		return any(poolReqLogV2).(SyncPool[T])
-	case logging.ServiceLogV1:
-		return any(poolSvcLogV1).(SyncPool[T])
-	case logging.TraceLogV1:
-		return any(poolTraceLogV1).(SyncPool[T])
-	case logging.WrappedLogV1:
-		return any(poolWrappedLogV1).(SyncPool[T])
-	default:
-		// This should never happen, but just construct a new pool for short term use.
-		return new(syncPool[T])
-	}
-}
-
-type syncPool[T logging.LogTypes | []byte] struct {
-	pool sync.Pool
+func newPool[T logging.LogTypes](reset func(*T)) *syncPool[T] {
+	return &syncPool[T]{pool: sync.Pool{New: func() any { return new(T) }}, reset: reset}
 }
 
 func (p *syncPool[T]) Get() *T {
-	if v := p.pool.Get(); v != nil {
-		return v.(*T)
-	}
-	return new(T)
+	return p.pool.Get().(*T)
 }
 
 func (p *syncPool[T]) Put(obj *T) {
-	if r, ok := any(obj).(resettable); ok {
-		r.Reset()
-		p.pool.Put(obj)
+	p.reset(obj)
+	p.pool.Put(obj)
+}
+
+var (
+	poolAuditLogV2   = newPool((*logging.AuditLogV2).Reset)
+	poolDiagLogV1    = newPool((*logging.DiagnosticLogV1).Reset)
+	poolEventLogV2   = newPool((*logging.EventLogV2).Reset)
+	poolMetricLogV1  = newPool((*logging.MetricLogV1).Reset)
+	poolReqLogV2     = newPool((*logging.RequestLogV2).Reset)
+	poolSvcLogV1     = newPool((*logging.ServiceLogV1).Reset)
+	poolTraceLogV1   = newPool((*logging.TraceLogV1).Reset)
+	poolWrappedLogV1 = newPool((*logging.WrappedLogV1).Reset)
+)
+
+// poolFor exposes a generic entrypoint to the object pools.
+func poolFor[T logging.LogTypes]() *syncPool[T] {
+	switch any(*new(T)).(type) {
+	case logging.AuditLogV2:
+		return any(poolAuditLogV2).(*syncPool[T])
+	case logging.DiagnosticLogV1:
+		return any(poolDiagLogV1).(*syncPool[T])
+	case logging.EventLogV2:
+		return any(poolEventLogV2).(*syncPool[T])
+	case logging.MetricLogV1:
+		return any(poolMetricLogV1).(*syncPool[T])
+	case logging.RequestLogV2:
+		return any(poolReqLogV2).(*syncPool[T])
+	case logging.ServiceLogV1:
+		return any(poolSvcLogV1).(*syncPool[T])
+	case logging.TraceLogV1:
+		return any(poolTraceLogV1).(*syncPool[T])
+	case logging.WrappedLogV1:
+		return any(poolWrappedLogV1).(*syncPool[T])
+	default:
+		panic("unhandled log type")
 	}
 }

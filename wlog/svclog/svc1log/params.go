@@ -26,32 +26,22 @@ import (
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 const (
 	TypeValue = "service.1"
-
-	LevelKey        = "level"
-	LevelDebugValue = "DEBUG"
-	LevelInfoValue  = "INFO"
-	LevelWarnValue  = "WARN"
-	LevelErrorValue = "ERROR"
-
-	OriginKey     = "origin"
-	ThreadKey     = "thread"
-	MessageKey    = "message"
-	ParamsKey     = "params"
-	StacktraceKey = "stacktrace"
-	TagsKey       = "tags"
 )
 
-type Param = wlog.Param[logging.ServiceLogV1]
+type Param = wloginternal.Param[logging.ServiceLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logging.ServiceLogV1]
 
 func Type() Param {
-	return func(l *logging.ServiceLogV1) {
-		l.Type = "service.1"
-	}
+	return paramFunc(func(l *logging.ServiceLogV1) {
+		l.Type = TypeValue
+	})
 }
 
 func Level(level wlog.LogLevel) Param {
@@ -59,26 +49,28 @@ func Level(level wlog.LogLevel) Param {
 }
 
 func withLevel(level logging.LogLevel) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Level = level
-	}
+	})
 }
 
 func Time(time time.Time) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Time = datetime.DateTime(time)
-	}
+	})
 }
 
 func TimeNow() Param {
 	// Defer execution of time.Now() until the log is actually written
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Time = datetime.DateTime(time.Now())
-	}
+	})
 }
 
 func Origin(origin string) Param {
-	return func(l *logging.ServiceLogV1) { l.Origin = &origin }
+	return paramFunc(func(l *logging.ServiceLogV1) {
+		l.Origin = &origin
+	})
 }
 
 // OriginFromInitLine sets the "origin" field to be the filename and line of the location at which this function is
@@ -120,13 +112,13 @@ const defaultOriginFromCallLineStackSkip = 8
 // OriginFromCallLineWithSkip is like OriginFromCallLine but allows for configuring additional skipped stack frames.
 // This allows for libraries wrapping loggers to hide their implementation frames from the caller.
 func OriginFromCallLineWithSkip(skipFrames int) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		origin := ""
 		if file, line, ok := initLineCaller(defaultOriginFromCallLineStackSkip + skipFrames); ok {
 			origin = file + ":" + strconv.Itoa(line)
 		}
 		l.Origin = &origin
-	}
+	})
 }
 
 // CallerPkg returns a package path based on the location at which this function is called and the parameters given to
@@ -160,28 +152,27 @@ func initLineCaller(skip int) (string, int, bool) {
 }
 
 func Thread(thread string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Thread = &thread
-	}
+	})
 }
 
 func Message(message string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Message = message
-	}
+	})
 }
 
 func Params(params wparams.ParamStorer) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if params != nil {
-			SafeParams(params.SafeParams())(l)
-			UnsafeParams(params.UnsafeParams())(l)
+			wloginternal.ApplyParams(l, SafeParams(params.SafeParams()), UnsafeParams(params.UnsafeParams()))
 		}
-	}
+	})
 }
 
 func SafeParams(params map[string]any) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.Params == nil {
 			l.Params = maps.Clone(params)
 		} else {
@@ -189,66 +180,65 @@ func SafeParams(params map[string]any) Param {
 				l.Params[k] = v
 			}
 		}
-	}
+	})
 }
 
 func SafeParam(key string, value any) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.Params == nil {
 			l.Params = map[string]any{key: value}
 		} else {
 			l.Params[key] = value
 		}
-	}
+	})
 }
 
 func UID(uid string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Uid = (*logging.UserId)(&uid)
-	}
+	})
 }
 
 func SID(sid string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Sid = (*logging.SessionId)(&sid)
-	}
+	})
 }
 
 func TokenID(tokenId string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.TokenId = (*logging.TokenId)(&tokenId)
-	}
+	})
 }
 
 func OrgID(orgId string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		// TODO: Add OrgID to svc1log
 		// l.OrgId = (*logging.OrgId)(&orgId)
-	}
+	})
 }
 
 func TraceID(traceId string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.TraceId = (*logging.TraceId)(&traceId)
-	}
+	})
 }
 
 func Stacktrace(err error) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if err != nil {
 			stacktrace := werror.GenerateErrorString(err, false)
 			l.Stacktrace = &stacktrace
 
 			// add all safe and unsafe parameters stored in error
 			safeParams, unsafeParams := werror.ParamsFromError(err)
-			SafeParams(safeParams)(l)
-			UnsafeParams(unsafeParams)(l)
+			wloginternal.ApplyParams(l, SafeParams(safeParams), UnsafeParams(unsafeParams))
 		}
-	}
+	})
 }
 
 func UnsafeParams(unsafeParams map[string]any) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.UnsafeParams == nil {
 			l.UnsafeParams = maps.Clone(unsafeParams)
 		} else {
@@ -256,21 +246,21 @@ func UnsafeParams(unsafeParams map[string]any) Param {
 				l.UnsafeParams[k] = v
 			}
 		}
-	}
+	})
 }
 
 func UnsafeParam(key string, value any) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.UnsafeParams == nil {
 			l.UnsafeParams = map[string]any{key: value}
 		} else {
 			l.UnsafeParams[key] = value
 		}
-	}
+	})
 }
 
 func Tags(tags map[string]string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.Tags == nil {
 			l.Tags = maps.Clone(tags)
 		} else {
@@ -278,15 +268,15 @@ func Tags(tags map[string]string) Param {
 				l.Tags[k] = v
 			}
 		}
-	}
+	})
 }
 
 func Tag(key, value string) Param {
-	return func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *logging.ServiceLogV1) {
 		if l.Tags == nil {
 			l.Tags = map[string]string{key: value}
 		} else {
 			l.Tags[key] = value
 		}
-	}
+	})
 }

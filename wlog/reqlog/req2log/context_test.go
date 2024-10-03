@@ -18,23 +18,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
 	"github.com/palantir/pkg/objmatcher"
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func newTestLogger(w io.Writer) req2log.Logger {
-	return req2log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
-}
 
 func TestFromContext(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -77,6 +71,6 @@ func TestFromContext(t *testing.T) {
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := req2log.WithLogger(context.Background(), newTestLogger(buf))
+	ctx := req2log.WithLogger(context.Background(), req2log.New(buf))
 	return buf, ctx
 }

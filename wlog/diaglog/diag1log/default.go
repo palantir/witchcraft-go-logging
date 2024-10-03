@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2024 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package svc1log
+package diag1log
 
 import (
 	"bytes"
@@ -35,8 +35,7 @@ var defaultLoggerCreator = func() Logger {
 		// store the DefaultLoggerProvider at creation-time so that the output of this logger will be consistent
 		// throughout its lifetime (if the default logger provider is changed after a specific warnLogger is created,
 		// that should not change the creator used for that warnLogger).
-		creator: wlog.NewDefaultLogger[logging.ServiceLogV1],
-		level:   wlog.InfoLevel,
+		creator: wlog.NewDefaultLogger[logging.DiagnosticLogV1],
 	}
 }
 
@@ -45,56 +44,11 @@ var defaultLoggerCreator = func() Logger {
 // the created logger are written to the io.Writer.
 type warnLogger struct {
 	w       io.Writer
-	creator wlog.LoggerCreator[logging.ServiceLogV1]
-	level   wlog.LogLevel
+	creator wlog.LoggerCreator[logging.DiagnosticLogV1]
 }
 
-func (l *warnLogger) Debug(msg string, params ...Param) {
-	if l.level.Enabled(wlog.DebugLevel) {
-		l.log(func(logger Logger) {
-			logger.Debug(msg, params...)
-		})
-	}
-}
-
-func (l *warnLogger) Info(msg string, params ...Param) {
-	if l.level.Enabled(wlog.InfoLevel) {
-		l.log(func(logger Logger) {
-			logger.Info(msg, params...)
-		})
-	}
-}
-
-func (l *warnLogger) Warn(msg string, params ...Param) {
-	if l.level.Enabled(wlog.WarnLevel) {
-		l.log(func(logger Logger) {
-			logger.Warn(msg, params...)
-		})
-	}
-}
-
-func (l *warnLogger) Error(msg string, params ...Param) {
-	if l.level.Enabled(wlog.ErrorLevel) {
-		l.log(func(logger Logger) {
-			logger.Error(msg, params...)
-		})
-	}
-}
-
-func (l *warnLogger) SetLevel(level wlog.LogLevel) {
-	l.level = level
-}
-
-func (l *warnLogger) Enabled(level wlog.LogLevel) bool {
-	return l.level.Enabled(level)
-}
-
-func (l *warnLogger) LogLevel() wlog.LogLevel {
-	return l.level
-}
-
-func (l *warnLogger) log(logFn func(logger Logger)) {
+func (l *warnLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
 	buf := &bytes.Buffer{}
-	logFn(NewFromCreator(buf, l.creator, l.level))
-	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("svc1log", buf.String(), 4))
+	NewFromCreator(buf, l.creator).Diagnostic(diagnostic, params...)
+	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("evt2log", buf.String(), 2))
 }

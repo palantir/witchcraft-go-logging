@@ -17,12 +17,13 @@ package metric1log
 import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type defaultLogger struct {
 	logger wlog.Logger[logging.MetricLogV1]
 }
 
-func (l *defaultLogger) Metric(name, typ string, params ...Param) {
-	l.logger.Log(append([]Param{MetricName(name), MetricType(typ)}, params...)...)
+func (l defaultLogger) Metric(name, typ string, params ...Param) {
+	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), MetricName(name), MetricType(typ)}, params...)...)
 }

@@ -26,9 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	// Use zap as logger implementation
-	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
 )
 
 func TestSvc1ZapWrapper(t *testing.T) {

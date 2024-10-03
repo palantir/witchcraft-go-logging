@@ -19,6 +19,6 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w *wrappedLogger) Event(name string, params ...Param) {
+func (w wrappedLogger) Event(name string, params ...Param) {
 	w.logger.Event(name, append(append([]Param{}, w.params...), params...)...)
 }

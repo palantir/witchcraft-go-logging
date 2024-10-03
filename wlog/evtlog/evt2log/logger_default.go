@@ -17,12 +17,13 @@ package evt2log
 import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type defaultLogger struct {
 	logger wlog.Logger[logging.EventLogV2]
 }
 
-func (l *defaultLogger) Event(name string, params ...Param) {
-	l.logger.Log(append([]Param{EventName(name)}, params...)...)
+func (l defaultLogger) Event(name string, params ...Param) {
+	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), EventName(name)}, params...)...)
 }

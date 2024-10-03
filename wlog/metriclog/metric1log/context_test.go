@@ -17,7 +17,6 @@ package metric1log_test
 import (
 	"bytes"
 	"context"
-	"io"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -27,10 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func newTestLogger(w io.Writer) metric1log.Logger {
-	return metric1log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
-}
 
 func TestFromContext(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -87,6 +82,6 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := metric1log.WithLogger(context.Background(), newTestLogger(buf))
+	ctx := metric1log.WithLogger(context.Background(), metric1log.New(buf))
 	return buf, ctx
 }

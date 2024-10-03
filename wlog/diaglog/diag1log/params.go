@@ -20,54 +20,56 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 const (
 	TypeValue = "diagnostic.1"
 )
 
-type Param = wlog.Param[logging.DiagnosticLogV1]
+type Param = wloginternal.Param[logging.DiagnosticLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logging.DiagnosticLogV1]
 
 func Type() Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Type = TypeValue
-	}
+	})
 }
 
 func Time(time time.Time) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Time = datetime.DateTime(time)
-	}
+	})
 }
 
 func TimeNow() Param {
 	// Defer execution of time.Now() until the log is actually written
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Time = datetime.DateTime(time.Now())
-	}
+	})
 }
 
 func Diagnostic(diagnostic logging.Diagnostic) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Diagnostic = diagnostic
-	}
+	})
 }
 
 func GenericDiagnostic(genericDiagnostic logging.GenericDiagnostic) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Diagnostic = logging.NewDiagnosticFromGeneric(genericDiagnostic)
-	}
+	})
 }
 
 func ThreadDump(threadDumpV1 logging.ThreadDumpV1) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Diagnostic = logging.NewDiagnosticFromThreadDump(threadDumpV1)
-	}
+	})
 }
 
 func UnsafeParams(unsafeParams map[string]any) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		if l.UnsafeParams == nil {
 			l.UnsafeParams = maps.Clone(unsafeParams)
 		} else {
@@ -75,15 +77,15 @@ func UnsafeParams(unsafeParams map[string]any) Param {
 				l.UnsafeParams[k] = v
 			}
 		}
-	}
+	})
 }
 
 func UnsafeParam(key string, value any) Param {
-	return func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		if l.UnsafeParams == nil {
 			l.UnsafeParams = map[string]any{key: value}
 		} else {
 			l.UnsafeParams[key] = value
 		}
-	}
+	})
 }

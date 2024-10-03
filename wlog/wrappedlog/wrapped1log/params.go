@@ -16,35 +16,37 @@ package wrapped1log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 const (
 	TypeValue = "wrapped.1"
 )
 
-type Param = wlog.Param[logging.WrappedLogV1]
+type Param = wloginternal.Param[logging.WrappedLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logging.WrappedLogV1]
 
 func Type() Param {
-	return func(l *logging.WrappedLogV1) {
+	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.Type = TypeValue
-	}
+	})
 }
 
 func EntityName(name string) Param {
-	return func(l *logging.WrappedLogV1) {
+	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.EntityName = name
-	}
+	})
 }
 
 func EntityVersion(version string) Param {
-	return func(l *logging.WrappedLogV1) {
+	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.EntityVersion = version
-	}
+	})
 }
 
 func Payload(payload logging.WrappedLogV1Payload) Param {
-	return func(l *logging.WrappedLogV1) {
+	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.Payload = payload
-	}
+	})
 }

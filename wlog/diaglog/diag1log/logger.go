@@ -16,7 +16,6 @@ package diag1log
 
 import (
 	"io"
-	"slices"
 
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -27,35 +26,29 @@ type Logger interface {
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return &wrappedLogger{
-		logger: &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow())},
-		params: params,
-	}
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.DiagnosticLogV1], params...)
 }
 
-func NewWithPrinter(printer wlog.LogPrinter[logging.DiagnosticLogV1], params ...Param) Logger {
-	return &wrappedLogger{
-		logger: &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow())},
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.DiagnosticLogV1], params ...Param) Logger {
+	return wrappedLogger{
+		logger: defaultLogger{logger: creator(w)},
 		params: params,
 	}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
-	switch logger := logger.(type) {
-	case *defaultLogger:
-		return &wrappedLogger{
-			logger: logger,
-			params: slices.Clone(params),
+	if len(params) == 0 {
+		return logger
+	}
+	// Re-wrap if it is already a wrapped logger to avoid unnecessary nesting
+	if innerWrapped, ok := logger.(wrappedLogger); ok {
+		return wrappedLogger{
+			logger: innerWrapped.logger,
+			params: append(append([]Param{}, innerWrapped.params...), params...),
 		}
-	case *wrappedLogger:
-		return &wrappedLogger{
-			logger: logger.logger,
-			params: append(slices.Clone(logger.params), params...),
-		}
-	default:
-		return &wrappedLogger{
-			logger: logger,
-			params: slices.Clone(params),
-		}
+	}
+	return wrappedLogger{
+		logger: logger,
+		params: params,
 	}
 }

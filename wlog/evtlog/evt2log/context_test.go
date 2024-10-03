@@ -17,7 +17,6 @@ package evt2log_test
 import (
 	"bytes"
 	"context"
-	"io"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -29,10 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func newTestLogger(w io.Writer) evt2log.Logger {
-	return evt2log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
-}
 
 func TestFromContext(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -146,6 +141,6 @@ func TestFromContextSetsTraceID(t *testing.T) {
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := evt2log.WithLogger(context.Background(), newTestLogger(buf))
+	ctx := evt2log.WithLogger(context.Background(), evt2log.New(buf))
 	return buf, ctx
 }

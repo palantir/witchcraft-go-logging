@@ -23,27 +23,27 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w *wrappedLogger) Debug(msg string, params ...Param) {
+func (w wrappedLogger) Debug(msg string, params ...Param) {
 	w.logger.Debug(msg, append(w.params, params...)...)
 }
 
-func (w *wrappedLogger) Info(msg string, params ...Param) {
+func (w wrappedLogger) Info(msg string, params ...Param) {
 	w.logger.Info(msg, append(w.params, params...)...)
 }
 
-func (w *wrappedLogger) Warn(msg string, params ...Param) {
+func (w wrappedLogger) Warn(msg string, params ...Param) {
 	w.logger.Warn(msg, append(w.params, params...)...)
 }
 
-func (w *wrappedLogger) Error(msg string, params ...Param) {
+func (w wrappedLogger) Error(msg string, params ...Param) {
 	w.logger.Error(msg, append(w.params, params...)...)
 }
 
-func (w *wrappedLogger) SetLevel(level wlog.LogLevel) {
+func (w wrappedLogger) SetLevel(level wlog.LogLevel) {
 	w.logger.SetLevel(level)
 }
 
-func (w *wrappedLogger) Enabled(level wlog.LogLevel) bool {
+func (w wrappedLogger) Enabled(level wlog.LogLevel) bool {
 	if l, ok := w.logger.(wlog.LevelChecker); ok {
 		return l.Enabled(level)
 	}

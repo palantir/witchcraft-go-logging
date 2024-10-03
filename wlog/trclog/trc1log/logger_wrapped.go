@@ -23,14 +23,14 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w *wrappedLogger) Log(span wtracing.SpanModel, params ...Param) {
+func (w wrappedLogger) Log(span wtracing.SpanModel, params ...Param) {
 	w.logger.Log(span, append(w.params, params...)...)
 }
 
-func (w *wrappedLogger) Send(span wtracing.SpanModel) {
-	w.logger.Log(span, w.params...)
+func (w wrappedLogger) Send(span wtracing.SpanModel) {
+	w.Log(span)
 }
 
-func (w *wrappedLogger) Close() error {
+func (w wrappedLogger) Close() error {
 	return w.logger.Close()
 }

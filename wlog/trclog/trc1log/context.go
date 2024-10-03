@@ -16,6 +16,8 @@ package trc1log
 
 import (
 	"context"
+
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type trace1LogContextKeyType string
@@ -27,9 +29,28 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
 }
 
-// FromContext returns the Logger stored in the provided context. If no logger was set on the context, returns a
-// logger that logs to STDOUT at the INFO level with an empty origin field.
+// FromContext returns the Logger stored in the provided context.
 func FromContext(ctx context.Context) Logger {
+	logger := loggerFromContext(ctx)
+	var params []Param
+	if uid := wloginternal.IDFromContext(ctx, wloginternal.UIDKey); uid != nil {
+		params = append(params, UID(*uid))
+	}
+	if sid := wloginternal.IDFromContext(ctx, wloginternal.SIDKey); sid != nil {
+		params = append(params, SID(*sid))
+	}
+	if tokenID := wloginternal.IDFromContext(ctx, wloginternal.TokenIDKey); tokenID != nil {
+		params = append(params, TokenID(*tokenID))
+	}
+	if orgID := wloginternal.IDFromContext(ctx, wloginternal.OrgIDKey); orgID != nil {
+		params = append(params, OrgID(*orgID))
+	}
+	return WithParams(logger, params...)
+}
+
+// loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
+// logger created by calling DefaultLogger.
+func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
 	}

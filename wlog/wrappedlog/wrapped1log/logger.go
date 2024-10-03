@@ -38,27 +38,14 @@ type Logger interface {
 	Trace() trc1log.Logger
 }
 
-func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
-	delegate := wlog.NewDefaultLogger(w, Type(), EntityName(name), EntityVersion(version))
-	return newDefaultLogger(delegate, level)
+func New(w io.Writer, level wlog.LogLevel, name, version string, params ...Param) Logger {
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.WrappedLogV1], level, name, version, params...)
 }
 
-func NewWithPrinter(printer wlog.LogPrinter[logging.WrappedLogV1], level wlog.LogLevel, name, version string) Logger {
-	delegate := wlog.NewDefaultLoggerWithPrinter(printer, Type(), EntityName(name), EntityVersion(version))
-	return newDefaultLogger(delegate, level)
-}
-
-func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
-	delegate := creator.NewLeveledLogger(w, level)
-	// The second return value is ignored because 'level: nil' is a valid state handled in the implementation.
-	levelChecker, _ := delegate.(wlog.LevelChecker)
-	return &defaultLogger{
-		name:        name,
-		version:     version,
-		creator:     creator.NewLogger,
-		writer:      w,
-		logger:      creator.NewLogger(w),
-		levellogger: delegate,
-		level:       levelChecker,
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.WrappedLogV1], level wlog.LogLevel, name, version string, params ...Param) Logger {
+	return defaultLogger{
+		delegate: creator(w),
+		level:    level,
+		params:   append([]Param{Type(), EntityName(name), EntityVersion(version)}, params...),
 	}
 }

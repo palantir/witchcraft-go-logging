@@ -17,6 +17,7 @@ package trc1log
 import (
 	"io"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
@@ -26,13 +27,14 @@ type Logger interface {
 	Log(wtracing.SpanModel, ...Param)
 }
 
-func New(w io.Writer) Logger {
-	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
+func New(w io.Writer, params ...Param) Logger {
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.TraceLogV1], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
-	return &defaultLogger{
-		logger: creator(w),
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.TraceLogV1], params ...Param) Logger {
+	return wrappedLogger{
+		logger: defaultLogger{logger: creator(w)},
+		params: params,
 	}
 }
 
@@ -40,15 +42,14 @@ func WithParams(logger Logger, params ...Param) Logger {
 	if len(params) == 0 {
 		return logger
 	}
-
-	if innerWrapped, ok := logger.(*wrappedLogger); ok {
-		return &wrappedLogger{
+	// Re-wrap if it is already a wrapped logger to avoid unnecessary nesting
+	if innerWrapped, ok := logger.(wrappedLogger); ok {
+		return wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			params: append(append([]Param{}, innerWrapped.params...), params...),
 		}
 	}
-
-	return &wrappedLogger{
+	return wrappedLogger{
 		logger: logger,
 		params: params,
 	}

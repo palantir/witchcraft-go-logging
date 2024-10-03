@@ -30,20 +30,23 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
-	l := &defaultLogger{logger: wlog.NewDefaultLogger(w, Type(), TimeNow()), level: wlog.NewAtomicLogLevel(level)}
-	return WithParams(l, params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[logging.ServiceLogV1], level, params...)
 }
 
-func NewWithPrinter(printer wlog.LogPrinter[logging.ServiceLogV1], level wlog.LogLevel, params ...Param) Logger {
-	l := &defaultLogger{logger: wlog.NewDefaultLoggerWithPrinter(printer, Type(), TimeNow()), level: wlog.NewAtomicLogLevel(level)}
-	return WithParams(l, params...)
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.ServiceLogV1], level wlog.LogLevel, params ...Param) Logger {
+	return wrappedLogger{
+		logger: defaultLogger{logger: creator(w), level: wlog.NewAtomicLogLevel(level)},
+		// Note that wrapping is performed even if len(params) == 0. This is done intentionally to ensure that every default
+		// logger evaluates its parameters at the same level in the stack, which is required to ensure that the
+		// OriginFromCallLine parameter works generically.
+		params: params,
+	}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
-	// Note that wrapping is performed even if len(params) == 0. This is done intentionally to ensure that every default
-	// logger evaluates its parameters at the same level in the stack, which is required to ensure that the
-	// OriginFromCallLine parameter works generically.
-
+	if len(params) == 0 {
+		return logger
+	}
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,
