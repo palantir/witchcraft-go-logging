@@ -53,7 +53,7 @@ func (l defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Log
 }
 
 func (l defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	return svc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1, l.params), l.level, params...)
+	return svc1log.NewFromCreator(nil, l.level, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1, l.params), params...)
 }
 
 func (l defaultLogger) Trace() trc1log.Logger {

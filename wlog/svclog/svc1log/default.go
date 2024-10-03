@@ -95,6 +95,6 @@ func (l *warnLogger) LogLevel() wlog.LogLevel {
 
 func (l *warnLogger) log(logFn func(logger Logger)) {
 	buf := &bytes.Buffer{}
-	logFn(NewFromCreator(buf, l.creator, l.level))
+	logFn(NewFromCreator(buf, l.level, l.creator))
 	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("svc1log", buf.String(), 4))
 }

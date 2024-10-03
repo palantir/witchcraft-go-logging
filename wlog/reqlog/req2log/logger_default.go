@@ -104,6 +104,10 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 			l.TokenId = (*logging.TokenId)(&tokenID)
 		}
 
+		if orgID := idsMap[extractor.OrgIDKey]; orgID != "" {
+			l.OrgId = (*logging.OrgId)(&orgID)
+		}
+
 		if traceID := idsMap[extractor.TraceIDKey]; traceID != "" {
 			l.TraceId = (*logging.TraceId)(&traceID)
 		}

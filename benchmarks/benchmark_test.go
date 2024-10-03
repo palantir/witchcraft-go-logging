@@ -130,7 +130,7 @@ func BenchmarkSvc1Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerCreator[logging.ServiceLogV1]) {
 				b.ReportAllocs()
-				logger := svc1log.NewFromCreator(io.Discard, provider, wlog.InfoLevel)
+				logger := svc1log.NewFromCreator(io.Discard, wlog.InfoLevel, provider)
 				for n := 0; n < b.N; n++ {
 					logger.Info(tc.Message, tc.LogParams...)
 				}

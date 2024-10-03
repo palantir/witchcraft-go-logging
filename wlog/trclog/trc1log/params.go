@@ -129,9 +129,9 @@ func TokenID(tokenID string) Param {
 	})
 }
 
-func OrgID(orgID string) Param {
+func OrgID(orgId string) Param {
 	return paramFunc(func(l *logging.TraceLogV1) {
-		// TODO: Add orgId
+		l.OrgId = (*logging.OrgId)(&orgId)
 	})
 }
 

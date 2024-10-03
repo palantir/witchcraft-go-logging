@@ -1,3 +1,17 @@
+// Copyright (c) 2024 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package logging
 
 import (
@@ -32,6 +46,8 @@ type AuditLogV2 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// Token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitempty"`
 	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
@@ -158,6 +174,8 @@ type EventLogV2 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// API token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitempty"`
 	// Unsafe metadata describing the event
@@ -202,6 +220,8 @@ type MetricLogV1 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// API token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 }
@@ -301,6 +321,8 @@ type ServiceLogV1 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// API token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitempty"`
 	// Language-specific stack trace. Content is knowably safe. Renderers should substitute named placeholders ({name}, for name as a key) with keyed value from unsafeParams and leave non-matching keys as the original placeholder text.
@@ -353,6 +375,8 @@ type TraceLogV1 struct {
 	Sid *SessionId `json:"sid,omitempty"`
 	// Token id (if available)
 	TokenId *TokenId `json:"tokenId,omitempty"`
+	// Organization ID (if available)
+	OrgId *OrgId `json:"orgId,omitempty"`
 	// Unredacted parameters
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 	// Span information

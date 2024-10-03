@@ -96,10 +96,9 @@ func TokenID(tokenID string) Param {
 	})
 }
 
-func OrgID(orgID string) Param {
+func OrgID(orgId string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		// TODO: Add OrgID to svc1log
-		// l.OrgId = (*logging.OrgId)(&orgId)
+		l.OrgId = (*logging.OrgId)(&orgId)
 	})
 }
 
