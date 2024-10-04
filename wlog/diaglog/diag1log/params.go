@@ -15,7 +15,6 @@
 package diag1log
 
 import (
-	"maps"
 	"time"
 
 	"github.com/palantir/pkg/datetime"
@@ -68,24 +67,14 @@ func ThreadDump(threadDumpV1 logging.ThreadDumpV1) Param {
 	})
 }
 
-func UnsafeParams(unsafeParams map[string]any) Param {
+func UnsafeParams(unsafe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = maps.Clone(unsafeParams)
-		} else {
-			for k, v := range unsafeParams {
-				l.UnsafeParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }
 
-func UnsafeParam(key string, value any) Param {
+func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = map[string]any{key: value}
-		} else {
-			l.UnsafeParams[key] = value
-		}
+		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }

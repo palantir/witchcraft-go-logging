@@ -31,7 +31,7 @@ type Logger[T logging.LogTypes] interface {
 
 // NewDefaultLogger creates a new logger that writes JSON-marshaled lines to the provided output.
 func NewDefaultLogger[T logging.LogTypes](output io.Writer) Logger[T] {
-	return NewDefaultLoggerWithPrinter[T](GetDefaultPrinterCreator()(output))
+	return NewDefaultLoggerWithPrinter[T](DefaultLoggerProvider()(output))
 }
 
 // NewDefaultLoggerWithPrinter creates a new logger that writes log objects using the provided printer.

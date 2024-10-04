@@ -15,7 +15,6 @@
 package req2log
 
 import (
-	"maps"
 	"strings"
 	"time"
 
@@ -81,13 +80,7 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 
 		l.Path = reqPath
 
-		if l.Params == nil {
-			l.Params = maps.Clone(safeParams)
-		} else {
-			for k, v := range safeParams {
-				l.Params[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.Params, safeParams)
 
 		l.Status = r.ResponseStatus
 
@@ -117,13 +110,7 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 			l.TraceId = (*logging.TraceId)(&traceID)
 		}
 
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = maps.Clone(unsafeParams)
-		} else {
-			for k, v := range unsafeParams {
-				l.UnsafeParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafeParams)
 	})
 }
 

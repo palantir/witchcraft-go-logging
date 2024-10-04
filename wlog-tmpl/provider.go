@@ -30,15 +30,15 @@ type Config struct {
 	FormatterMap  map[logentryformatter.LogType]logentryformatter.Formatter
 	Only, Exclude map[logentryformatter.LogType]struct{}
 	// DelegateLogger is used to create the intermediate json representation that is passed to the template.
-	DelegatePrinter wlog.PrinterCreator
+	DelegatePrinter wlog.LoggerProvider
 }
 
-// PrinterCreator returns a wlog.PrinterCreator which formats log entries with wlog templates.
+// LoggerProvider returns a wlog.LoggerProvider which formats log entries with wlog templates.
 // The default templates give a human-friendly output suitable for command-line tools.
 // Services which leverage log collection infrastructure should use a JSON-based provider.
 //
 // Nil configuration is valid and will result in the default behavior.
-func PrinterCreator(cfg *Config, params ...logentryformatter.Param) wlog.PrinterCreator {
+func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerProvider {
 	if cfg == nil {
 		cfg = &Config{}
 	}

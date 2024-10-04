@@ -26,7 +26,7 @@ type tmplPrinter struct {
 	w   io.Writer
 	cfg *Config
 
-	delegate   wlog.PrinterCreator
+	delegate   wlog.LoggerProvider
 	bufferPool bytesbuffers.Pool
 }
 

@@ -36,3 +36,19 @@ func ApplyParams[T logging.LogTypes](log *T, params ...Param[T]) {
 		}
 	}
 }
+
+func SetMapParam[V any](m *map[string]V, key string, value V) {
+	if *m == nil {
+		*m = make(map[string]V)
+	}
+	(*m)[key] = value
+}
+
+func SetMapParams[V any](m *map[string]V, params map[string]V) {
+	if *m == nil {
+		*m = make(map[string]V)
+	}
+	for key, value := range params {
+		(*m)[key] = value
+	}
+}

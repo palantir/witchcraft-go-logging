@@ -15,7 +15,6 @@
 package svc1log
 
 import (
-	"maps"
 	"path"
 	"runtime"
 	"strconv"
@@ -163,33 +162,23 @@ func Message(message string) Param {
 	})
 }
 
-func Params(params wparams.ParamStorer) Param {
+func Params(object wparams.ParamStorer) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if params != nil {
-			wloginternal.ApplyParams(l, SafeParams(params.SafeParams()), UnsafeParams(params.UnsafeParams()))
+		if object != nil {
+			wloginternal.ApplyParams(l, SafeParams(object.SafeParams()), UnsafeParams(object.UnsafeParams()))
 		}
 	})
 }
 
-func SafeParams(params map[string]any) Param {
+func SafeParams(safe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.Params == nil {
-			l.Params = maps.Clone(params)
-		} else {
-			for k, v := range params {
-				l.Params[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.Params, safe)
 	})
 }
 
-func SafeParam(key string, value any) Param {
+func SafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.Params == nil {
-			l.Params = map[string]any{key: value}
-		} else {
-			l.Params[key] = value
-		}
+		wloginternal.SetMapParam(&l.Params, key, value)
 	})
 }
 
@@ -205,21 +194,21 @@ func SID(sid string) Param {
 	})
 }
 
-func TokenID(tokenId string) Param {
+func TokenID(tokenID string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.TokenId = (*logging.TokenId)(&tokenId)
+		l.TokenId = (*logging.TokenId)(&tokenID)
 	})
 }
 
-func OrgID(orgId string) Param {
+func OrgID(orgID string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.OrgId = (*logging.OrgId)(&orgId)
+		l.OrgId = (*logging.OrgId)(&orgID)
 	})
 }
 
-func TraceID(traceId string) Param {
+func TraceID(traceID string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.TraceId = (*logging.TraceId)(&traceId)
+		l.TraceId = (*logging.TraceId)(&traceID)
 	})
 }
 
@@ -236,46 +225,26 @@ func Stacktrace(err error) Param {
 	})
 }
 
-func UnsafeParams(unsafeParams map[string]any) Param {
+func UnsafeParams(unsafe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = maps.Clone(unsafeParams)
-		} else {
-			for k, v := range unsafeParams {
-				l.UnsafeParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }
 
-func UnsafeParam(key string, value any) Param {
+func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = map[string]any{key: value}
-		} else {
-			l.UnsafeParams[key] = value
-		}
+		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
 func Tags(tags map[string]string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.Tags == nil {
-			l.Tags = maps.Clone(tags)
-		} else {
-			for k, v := range tags {
-				l.Tags[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.Tags, tags)
 	})
 }
 
 func Tag(key, value string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if l.Tags == nil {
-			l.Tags = map[string]string{key: value}
-		} else {
-			l.Tags[key] = value
-		}
+		wloginternal.SetMapParam(&l.Tags, key, value)
 	})
 }

@@ -15,7 +15,6 @@
 package evt2log
 
 import (
-	"maps"
 	"time"
 
 	"github.com/palantir/pkg/datetime"
@@ -56,25 +55,15 @@ func EventName(event string) Param {
 	})
 }
 
-func Value(key string, value any) Param {
+func Value(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.Values == nil {
-			l.Values = map[string]any{key: value}
-		} else {
-			l.Values[key] = value
-		}
+		wloginternal.SetMapParam(&l.Values, key, value)
 	})
 }
 
-func Values(params map[string]any) Param {
+func Values(values map[string]interface{}) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.Values == nil {
-			l.Values = maps.Clone(params)
-		} else {
-			for k, v := range params {
-				l.Values[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.Values, values)
 	})
 }
 
@@ -96,9 +85,9 @@ func TokenID(tokenID string) Param {
 	})
 }
 
-func OrgID(orgId string) Param {
+func OrgID(orgID string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		l.OrgId = (*logging.OrgId)(&orgId)
+		l.OrgId = (*logging.OrgId)(&orgID)
 	})
 }
 
@@ -108,46 +97,26 @@ func TraceID(traceID string) Param {
 	})
 }
 
-func UnsafeParams(unsafeParams map[string]any) Param {
+func UnsafeParams(unsafe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = maps.Clone(unsafeParams)
-		} else {
-			for k, v := range unsafeParams {
-				l.UnsafeParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }
 
-func UnsafeParam(key string, value any) Param {
+func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.UnsafeParams == nil {
-			l.UnsafeParams = map[string]any{key: value}
-		} else {
-			l.UnsafeParams[key] = value
-		}
+		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
-func Tags(tags map[string]string) Param {
+func Tags(values map[string]string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.Tags == nil {
-			l.Tags = maps.Clone(tags)
-		} else {
-			for k, v := range tags {
-				l.Tags[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.Tags, values)
 	})
 }
 
 func Tag(key, value string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
-		if l.Tags == nil {
-			l.Tags = map[string]string{key: value}
-		} else {
-			l.Tags[key] = value
-		}
+		wloginternal.SetMapParam(&l.Tags, key, value)
 	})
 }

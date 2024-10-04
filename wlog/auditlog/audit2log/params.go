@@ -15,7 +15,6 @@
 package audit2log
 
 import (
-	"maps"
 	"time"
 
 	"github.com/palantir/pkg/datetime"
@@ -62,27 +61,27 @@ func SID(sid string) Param {
 	})
 }
 
-func TokenID(tokenId string) Param {
+func TokenID(tokenID string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		l.TokenId = (*logging.TokenId)(&tokenId)
+		l.TokenId = (*logging.TokenId)(&tokenID)
 	})
 }
 
-func OrgID(orgId string) Param {
+func OrgID(orgID string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		l.OrgId = (*logging.OrgId)(&orgId)
+		l.OrgId = (*logging.OrgId)(&orgID)
 	})
 }
 
-func TraceID(traceId string) Param {
+func TraceID(traceID string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		l.TraceId = (*logging.TraceId)(&traceId)
+		l.TraceId = (*logging.TraceId)(&traceID)
 	})
 }
 
-func OtherUIDs(uids ...string) Param {
+func OtherUIDs(otherUIDs ...string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		for _, uid := range uids {
+		for _, uid := range otherUIDs {
 			l.OtherUids = append(l.OtherUids, logging.UserId(uid))
 		}
 	})
@@ -106,46 +105,26 @@ func Result(result AuditResultType) Param {
 	})
 }
 
-func ResultParams(params map[string]any) Param {
+func ResultParams(resultParams map[string]interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		if l.ResultParams == nil {
-			l.ResultParams = maps.Clone(params)
-		} else {
-			for k, v := range params {
-				l.ResultParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.ResultParams, resultParams)
 	})
 }
 
-func ResultParam(key string, value any) Param {
+func ResultParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		if l.ResultParams == nil {
-			l.ResultParams = map[string]any{key: value}
-		} else {
-			l.ResultParams[key] = value
-		}
+		wloginternal.SetMapParam(&l.ResultParams, key, value)
 	})
 }
 
-func RequestParams(params map[string]any) Param {
+func RequestParams(requestParams map[string]interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		if l.RequestParams == nil {
-			l.RequestParams = maps.Clone(params)
-		} else {
-			for k, v := range params {
-				l.RequestParams[k] = v
-			}
-		}
+		wloginternal.SetMapParams(&l.RequestParams, requestParams)
 	})
 }
 
-func RequestParam(key string, value any) Param {
+func RequestParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		if l.RequestParams == nil {
-			l.RequestParams = map[string]any{key: value}
-		} else {
-			l.RequestParams[key] = value
-		}
+		wloginternal.SetMapParam(&l.RequestParams, key, value)
 	})
 }

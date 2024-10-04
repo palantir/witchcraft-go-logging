@@ -20,20 +20,20 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
-var defaultPrinterCreator PrinterCreator = JSONPrinter
+var defaultLoggerProvider LoggerProvider = JSONPrinter
 
-// GetDefaultPrinterCreator returns the default PrinterCreator.
-func GetDefaultPrinterCreator() PrinterCreator {
-	return defaultPrinterCreator
+// DefaultLoggerProvider returns the default LoggerProvider.
+func DefaultLoggerProvider() LoggerProvider {
+	return defaultLoggerProvider
 }
 
-// SetDefaultPrinterCreator sets the default PrinterCreator.
-func SetDefaultPrinterCreator(creator PrinterCreator) {
-	defaultPrinterCreator = creator
+// SetDefaultLoggerProvider sets the default LoggerProvider.
+func SetDefaultLoggerProvider(provider LoggerProvider) {
+	defaultLoggerProvider = provider
 }
 
-// PrinterCreator is a function that creates a Printer. The default is JSONPrinter.
-type PrinterCreator func(w io.Writer) Printer
+// LoggerProvider is a function that creates a Printer. The default is JSONPrinter.
+type LoggerProvider func(w io.Writer) Printer
 
 // Printer is a generic interface for printing Conjure log objects.
 type Printer interface {
