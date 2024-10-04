@@ -105,15 +105,9 @@ func Result(result AuditResultType) Param {
 	})
 }
 
-func ResultParams(resultParams map[string]interface{}) Param {
+func RequestParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		wloginternal.SetMapParams(&l.ResultParams, resultParams)
-	})
-}
-
-func ResultParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		wloginternal.SetMapParam(&l.ResultParams, key, value)
+		wloginternal.SetMapParam(&l.RequestParams, key, value)
 	})
 }
 
@@ -123,8 +117,14 @@ func RequestParams(requestParams map[string]interface{}) Param {
 	})
 }
 
-func RequestParam(key string, value interface{}) Param {
+func ResultParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
-		wloginternal.SetMapParam(&l.RequestParams, key, value)
+		wloginternal.SetMapParam(&l.ResultParams, key, value)
+	})
+}
+
+func ResultParams(resultParams map[string]interface{}) Param {
+	return paramFunc(func(l *logging.AuditLogV2) {
+		wloginternal.SetMapParams(&l.ResultParams, resultParams)
 	})
 }

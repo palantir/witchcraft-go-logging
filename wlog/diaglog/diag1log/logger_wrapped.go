@@ -24,5 +24,5 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
-	w.logger.Diagnostic(diagnostic, append(append([]Param{}, w.params...), params...)...)
+	w.logger.Diagnostic(diagnostic, append(w.params, params...)...)
 }

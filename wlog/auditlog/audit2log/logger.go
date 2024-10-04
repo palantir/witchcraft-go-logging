@@ -48,13 +48,14 @@ func WithParams(logger Logger, params ...Param) Logger {
 	if len(params) == 0 {
 		return logger
 	}
-	// Re-wrap if it is already a wrapped logger to avoid unnecessary nesting
+
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(append([]Param{}, innerWrapped.params...), params...),
+			params: append(innerWrapped.params, params...),
 		}
 	}
+
 	return &wrappedLogger{
 		logger: logger,
 		params: params,

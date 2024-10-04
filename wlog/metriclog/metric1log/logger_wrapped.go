@@ -20,5 +20,5 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Metric(name, typ string, params ...Param) {
-	w.logger.Metric(name, typ, append(append([]Param{}, w.params...), params...)...)
+	w.logger.Metric(name, typ, append(w.params, params...)...)
 }

@@ -67,14 +67,14 @@ func ThreadDump(threadDumpV1 logging.ThreadDumpV1) Param {
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
-	})
-}
-
 func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
+	})
+}
+
+func UnsafeParams(unsafe map[string]interface{}) Param {
+	return paramFunc(func(l *logging.DiagnosticLogV1) {
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }

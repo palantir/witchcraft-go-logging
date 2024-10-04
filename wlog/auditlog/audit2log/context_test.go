@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -30,10 +29,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func newTestLogger(w io.Writer) audit2log.Logger {
-	return audit2log.New(w)
-}
 
 func TestFromContext(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
@@ -188,6 +183,6 @@ func TestWithLoggerParams(t *testing.T) {
 
 func newBufAndCtxWithLogger() (*bytes.Buffer, context.Context) {
 	buf := &bytes.Buffer{}
-	ctx := audit2log.WithLogger(context.Background(), newTestLogger(buf))
+	ctx := audit2log.WithLogger(context.Background(), audit2log.New(buf))
 	return buf, ctx
 }
