@@ -24,6 +24,6 @@ type defaultLogger struct {
 	logger wlog.Logger[logging.DiagnosticLogV1]
 }
 
-func (l defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
 	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Diagnostic(diagnostic)}, params...)...)
 }

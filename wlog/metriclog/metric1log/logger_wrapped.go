@@ -19,6 +19,6 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w wrappedLogger) Metric(name, typ string, params ...Param) {
+func (w *wrappedLogger) Metric(name, typ string, params ...Param) {
 	w.logger.Metric(name, typ, append(append([]Param{}, w.params...), params...)...)
 }

@@ -24,6 +24,6 @@ type defaultLogger struct {
 	logger wlog.Logger[logging.MetricLogV1]
 }
 
-func (l defaultLogger) Metric(name, typ string, params ...Param) {
+func (l *defaultLogger) Metric(name, typ string, params ...Param) {
 	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), MetricName(name), MetricType(typ)}, params...)...)
 }

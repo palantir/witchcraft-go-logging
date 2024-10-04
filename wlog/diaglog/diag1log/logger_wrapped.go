@@ -23,6 +23,6 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w wrappedLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+func (w *wrappedLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
 	w.logger.Diagnostic(diagnostic, append(append([]Param{}, w.params...), params...)...)
 }

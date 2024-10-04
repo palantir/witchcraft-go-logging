@@ -38,8 +38,8 @@ func New(w io.Writer, params ...Param) Logger {
 }
 
 func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.AuditLogV2], params ...Param) Logger {
-	return wrappedLogger{
-		logger: defaultLogger{logger: creator(w)},
+	return &wrappedLogger{
+		logger: &defaultLogger{logger: creator(w)},
 		params: params,
 	}
 }
@@ -49,13 +49,13 @@ func WithParams(logger Logger, params ...Param) Logger {
 		return logger
 	}
 	// Re-wrap if it is already a wrapped logger to avoid unnecessary nesting
-	if innerWrapped, ok := logger.(wrappedLogger); ok {
-		return wrappedLogger{
+	if innerWrapped, ok := logger.(*wrappedLogger); ok {
+		return &wrappedLogger{
 			logger: innerWrapped.logger,
 			params: append(append([]Param{}, innerWrapped.params...), params...),
 		}
 	}
-	return wrappedLogger{
+	return &wrappedLogger{
 		logger: logger,
 		params: params,
 	}

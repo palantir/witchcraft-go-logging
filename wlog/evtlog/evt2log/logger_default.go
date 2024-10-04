@@ -24,6 +24,6 @@ type defaultLogger struct {
 	logger wlog.Logger[logging.EventLogV2]
 }
 
-func (l defaultLogger) Event(name string, params ...Param) {
+func (l *defaultLogger) Event(name string, params ...Param) {
 	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), EventName(name)}, params...)...)
 }

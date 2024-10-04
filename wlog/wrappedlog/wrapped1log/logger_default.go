@@ -32,30 +32,30 @@ type defaultLogger struct {
 	params   []Param
 }
 
-func (l defaultLogger) Audit() audit2log.Logger {
+func (l *defaultLogger) Audit() audit2log.Logger {
 	return audit2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2, l.params))
 }
 
-func (l defaultLogger) Diagnostic() diag1log.Logger {
+func (l *defaultLogger) Diagnostic() diag1log.Logger {
 	return diag1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1, l.params))
 }
 
-func (l defaultLogger) Event() evt2log.Logger {
+func (l *defaultLogger) Event() evt2log.Logger {
 	return evt2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromEventLogV2, l.params))
 }
 
-func (l defaultLogger) Metric() metric1log.Logger {
+func (l *defaultLogger) Metric() metric1log.Logger {
 	return metric1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1, l.params))
 }
 
-func (l defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
+func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
 	return req2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2, l.params), params...)
 }
 
-func (l defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
+func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 	return svc1log.NewFromCreator(nil, l.level, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1, l.params), params...)
 }
 
-func (l defaultLogger) Trace() trc1log.Logger {
+func (l *defaultLogger) Trace() trc1log.Logger {
 	return trc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1, l.params))
 }

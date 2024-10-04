@@ -25,14 +25,14 @@ type defaultLogger struct {
 	logger wlog.Logger[logging.TraceLogV1]
 }
 
-func (l defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
+func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
 	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Span(span)}, params...)...)
 }
 
-func (l defaultLogger) Send(span wtracing.SpanModel) {
+func (l *defaultLogger) Send(span wtracing.SpanModel) {
 	l.Log(span)
 }
 
-func (l defaultLogger) Close() error {
+func (l *defaultLogger) Close() error {
 	return nil
 }

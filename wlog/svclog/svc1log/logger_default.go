@@ -25,32 +25,32 @@ type defaultLogger struct {
 	level  *wlog.AtomicLogLevel
 }
 
-func (l defaultLogger) Debug(msg string, params ...Param) {
+func (l *defaultLogger) Debug(msg string, params ...Param) {
 	l.log(wlog.DebugLevel, msg, params...)
 }
 
-func (l defaultLogger) Info(msg string, params ...Param) {
+func (l *defaultLogger) Info(msg string, params ...Param) {
 	l.log(wlog.InfoLevel, msg, params...)
 }
 
-func (l defaultLogger) Warn(msg string, params ...Param) {
+func (l *defaultLogger) Warn(msg string, params ...Param) {
 	l.log(wlog.WarnLevel, msg, params...)
 }
 
-func (l defaultLogger) Error(msg string, params ...Param) {
+func (l *defaultLogger) Error(msg string, params ...Param) {
 	l.log(wlog.ErrorLevel, msg, params...)
 }
 
-func (l defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
+func (l *defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
 	if l.Enabled(level) {
 		wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Level(level), Message(msg)}, params...)...)
 	}
 }
 
-func (l defaultLogger) SetLevel(level wlog.LogLevel) {
+func (l *defaultLogger) SetLevel(level wlog.LogLevel) {
 	l.level.SetLevel(level)
 }
 
-func (l defaultLogger) Enabled(level wlog.LogLevel) bool {
+func (l *defaultLogger) Enabled(level wlog.LogLevel) bool {
 	return l.level == nil || l.level.Enabled(level)
 }

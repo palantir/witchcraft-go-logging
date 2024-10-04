@@ -15,17 +15,13 @@
 package wlogtmpl
 
 import (
+	"github.com/palantir/pkg/bytesbuffers"
 	"io"
 
-	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"
 )
-
-type tmplLoggerProvider struct {
-	cfg *Config
-}
 
 type Config struct {
 	// Strict mode emits formatting errors as log lines; by default, the raw output will be printed if it can't be formatted.
@@ -34,15 +30,15 @@ type Config struct {
 	FormatterMap  map[logentryformatter.LogType]logentryformatter.Formatter
 	Only, Exclude map[logentryformatter.LogType]struct{}
 	// DelegateLogger is used to create the intermediate json representation that is passed to the template.
-	DelegateLogger wlog.LoggerProvider
+	DelegatePrinter wlog.PrinterCreator
 }
 
-// LoggerProvider returns a wlog.LoggerProvider which formats log entries with wlog templates.
+// PrinterCreator returns a wlog.PrinterCreator which formats log entries with wlog templates.
 // The default templates give a human-friendly output suitable for command-line tools.
 // Services which leverage log collection infrastructure should use a JSON-based provider.
 //
 // Nil configuration is valid and will result in the default behavior.
-func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerProvider {
+func PrinterCreator(cfg *Config, params ...logentryformatter.Param) wlog.PrinterCreator {
 	if cfg == nil {
 		cfg = &Config{}
 	}
@@ -60,29 +56,15 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 			}
 		}
 	}
-	if cfg.DelegateLogger == nil {
-		cfg.DelegateLogger = wlog.NewJSONMarshalLoggerProvider()
+	if cfg.DelegatePrinter == nil {
+		cfg.DelegatePrinter = wlog.JSONPrinter
 	}
-	return &tmplLoggerProvider{
-		cfg: cfg,
-	}
-}
-
-func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.ZZLogger {
-	return &tmplLogger{
-		w:          w,
-		cfg:        p.cfg,
-		delegate:   p.cfg.DelegateLogger.NewLogger,
-		bufferPool: bytesbuffers.NewSyncPool(128),
-	}
-}
-
-func (p *tmplLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
-	return &tmplLogger{
-		w:              w,
-		cfg:            p.cfg,
-		AtomicLogLevel: wlog.NewAtomicLogLevel(level),
-		delegate:       p.cfg.DelegateLogger.NewLogger,
-		bufferPool:     bytesbuffers.NewSyncPool(128),
+	return func(w io.Writer) wlog.Printer {
+		return &tmplPrinter{
+			w:          w,
+			cfg:        cfg,
+			delegate:   cfg.DelegatePrinter,
+			bufferPool: bytesbuffers.NewSyncPool(128),
+		}
 	}
 }
