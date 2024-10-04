@@ -83,6 +83,7 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.RequestLogV2
 }
 
 type LoggerBuilder interface {
+	LoggerCreator(creator wlog.LoggerCreator[logging.RequestLogV2])
 	IdsExtractor(idsExtractor extractor.IDsFromRequest)
 
 	SafePathParams(safePathParams []string)
@@ -107,6 +108,10 @@ type defaultLoggerBuilder struct {
 
 	safeHeaderParams      []string
 	forbiddenHeaderParams []string
+}
+
+func (b *defaultLoggerBuilder) LoggerCreator(creator wlog.LoggerCreator[logging.RequestLogV2]) {
+	b.loggerCreator = creator
 }
 
 func (b *defaultLoggerBuilder) IdsExtractor(idsExtractor extractor.IDsFromRequest) {

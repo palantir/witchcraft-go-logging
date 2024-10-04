@@ -61,27 +61,27 @@ func MetricType(metric string) Param {
 	})
 }
 
-func Values(values map[string]interface{}) Param {
-	return paramFunc(func(l *logging.MetricLogV1) {
-		wloginternal.SetMapParams(&l.Values, values)
-	})
-}
-
 func Value(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.MetricLogV1) {
 		wloginternal.SetMapParam(&l.Values, key, value)
 	})
 }
 
-func Tags(values map[string]string) Param {
+func Values(values map[string]interface{}) Param {
 	return paramFunc(func(l *logging.MetricLogV1) {
-		wloginternal.SetMapParams(&l.Tags, values)
+		wloginternal.SetMapParams(&l.Values, values)
 	})
 }
 
 func Tag(key, value string) Param {
 	return paramFunc(func(l *logging.MetricLogV1) {
 		wloginternal.SetMapParam(&l.Tags, key, value)
+	})
+}
+
+func Tags(values map[string]string) Param {
+	return paramFunc(func(l *logging.MetricLogV1) {
+		wloginternal.SetMapParams(&l.Tags, values)
 	})
 }
 
@@ -109,14 +109,14 @@ func OrgID(orgID string) Param {
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.MetricLogV1) {
-		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
-	})
-}
-
 func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.MetricLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
+	})
+}
+
+func UnsafeParams(unsafe map[string]interface{}) Param {
+	return paramFunc(func(l *logging.MetricLogV1) {
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }

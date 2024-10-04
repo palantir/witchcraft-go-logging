@@ -15,9 +15,9 @@
 package wlogtmpl
 
 import (
-	"github.com/palantir/pkg/bytesbuffers"
 	"io"
 
+	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"

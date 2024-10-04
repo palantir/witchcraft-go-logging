@@ -15,11 +15,11 @@
 package wlog_test
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	"io"
 	"testing"
 
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"

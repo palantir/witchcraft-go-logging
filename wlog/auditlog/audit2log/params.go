@@ -49,6 +49,18 @@ func TimeNow() Param {
 	})
 }
 
+func Name(name string) Param {
+	return paramFunc(func(l *logging.AuditLogV2) {
+		l.Name = name
+	})
+}
+
+func Result(result AuditResultType) Param {
+	return paramFunc(func(l *logging.AuditLogV2) {
+		l.Result = result
+	})
+}
+
 func UID(uid string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
 		l.Uid = (*logging.UserId)(&uid)
@@ -90,18 +102,6 @@ func OtherUIDs(otherUIDs ...string) Param {
 func Origin(origin string) Param {
 	return paramFunc(func(l *logging.AuditLogV2) {
 		l.Origin = &origin
-	})
-}
-
-func Name(name string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.Name = name
-	})
-}
-
-func Result(result AuditResultType) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.Result = result
 	})
 }
 

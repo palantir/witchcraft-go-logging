@@ -67,6 +67,18 @@ func Values(values map[string]interface{}) Param {
 	})
 }
 
+func Tags(values map[string]string) Param {
+	return paramFunc(func(l *logging.EventLogV2) {
+		wloginternal.SetMapParams(&l.Tags, values)
+	})
+}
+
+func Tag(key, value string) Param {
+	return paramFunc(func(l *logging.EventLogV2) {
+		wloginternal.SetMapParam(&l.Tags, key, value)
+	})
+}
+
 func UID(uid string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
 		l.Uid = (*logging.UserId)(&uid)
@@ -106,17 +118,5 @@ func UnsafeParams(unsafe map[string]interface{}) Param {
 func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
-	})
-}
-
-func Tags(values map[string]string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		wloginternal.SetMapParams(&l.Tags, values)
-	})
-}
-
-func Tag(key, value string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		wloginternal.SetMapParam(&l.Tags, key, value)
 	})
 }

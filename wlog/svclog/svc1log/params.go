@@ -72,6 +72,27 @@ func Origin(origin string) Param {
 	})
 }
 
+// CallerPkg returns a package path based on the location at which this function is called and the parameters given to
+// the function. This can be used in conjunction with the "Origin" param to set the origin field programmatically.
+//
+// The parentCaller parameter specifies the number of "parents" to go back in the call stack, while the parentPkg
+// parameter determines the level of the parent package that should be used. For example, if this function is called in
+// a file with the package path "github.com/palantir/witchcraft-go-logging/wlog" and that function is called from a file
+// with the package path "github.com/palantir/project/helper", then with parentCaller=0 and parentPkg=0 the returned
+// value would be "github.com/palantir/witchcraft-go-logging/wlog", while with parentCaller=1 and parentPkg=1 the value
+// would be "github.com/palantir/project" (parentCaller=1 sets the package to "github.com/palantir/project/helper" and
+// parentPkg=1 causes the package to become "github.com/palantir/project").
+func CallerPkg(parentCaller, parentPkg int) string {
+	origin := ""
+	if file, _, ok := initLineCaller(1 + parentCaller); ok {
+		origin = path.Dir(file)
+		for i := 0; i < parentPkg; i++ {
+			origin = path.Dir(origin)
+		}
+	}
+	return origin
+}
+
 // OriginFromInitLine sets the "origin" field to be the filename and line of the location at which this function is
 // called.
 func OriginFromInitLine() Param {
@@ -120,27 +141,6 @@ func OriginFromCallLineWithSkip(skipFrames int) Param {
 	})
 }
 
-// CallerPkg returns a package path based on the location at which this function is called and the parameters given to
-// the function. This can be used in conjunction with the "Origin" param to set the origin field programmatically.
-//
-// The parentCaller parameter specifies the number of "parents" to go back in the call stack, while the parentPkg
-// parameter determines the level of the parent package that should be used. For example, if this function is called in
-// a file with the package path "github.com/palantir/witchcraft-go-logging/wlog" and that function is called from a file
-// with the package path "github.com/palantir/project/helper", then with parentCaller=0 and parentPkg=0 the returned
-// value would be "github.com/palantir/witchcraft-go-logging/wlog", while with parentCaller=1 and parentPkg=1 the value
-// would be "github.com/palantir/project" (parentCaller=1 sets the package to "github.com/palantir/project/helper" and
-// parentPkg=1 causes the package to become "github.com/palantir/project").
-func CallerPkg(parentCaller, parentPkg int) string {
-	origin := ""
-	if file, _, ok := initLineCaller(1 + parentCaller); ok {
-		origin = path.Dir(file)
-		for i := 0; i < parentPkg; i++ {
-			origin = path.Dir(origin)
-		}
-	}
-	return origin
-}
-
 func initLineCaller(skip int) (string, int, bool) {
 	// the 1 skips the current "initLineCaller" function
 	_, file, line, ok := runtime.Caller(1 + skip)
@@ -162,23 +162,15 @@ func Message(message string) Param {
 	})
 }
 
-func Params(object wparams.ParamStorer) Param {
+func SafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		if object != nil {
-			wloginternal.ApplyParams(l, SafeParams(object.SafeParams()), UnsafeParams(object.UnsafeParams()))
-		}
+		wloginternal.SetMapParam(&l.Params, key, value)
 	})
 }
 
 func SafeParams(safe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
 		wloginternal.SetMapParams(&l.Params, safe)
-	})
-}
-
-func SafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		wloginternal.SetMapParam(&l.Params, key, value)
 	})
 }
 
@@ -225,26 +217,35 @@ func Stacktrace(err error) Param {
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
-	})
-}
-
 func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
-func Tags(tags map[string]string) Param {
+func UnsafeParams(unsafe map[string]interface{}) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
-		wloginternal.SetMapParams(&l.Tags, tags)
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
+	})
+}
+
+func Params(object wparams.ParamStorer) Param {
+	return paramFunc(func(l *logging.ServiceLogV1) {
+		if object != nil {
+			wloginternal.SetMapParams(&l.Params, object.SafeParams())
+			wloginternal.SetMapParams(&l.UnsafeParams, object.UnsafeParams())
+		}
 	})
 }
 
 func Tag(key, value string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
 		wloginternal.SetMapParam(&l.Tags, key, value)
+	})
+}
+
+func Tags(tags map[string]string) Param {
+	return paramFunc(func(l *logging.ServiceLogV1) {
+		wloginternal.SetMapParams(&l.Tags, tags)
 	})
 }

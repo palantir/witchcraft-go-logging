@@ -15,11 +15,12 @@
 package wlogtmpl
 
 import (
+	"io"
+
 	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
-	"io"
 )
 
 type tmplPrinter struct {
