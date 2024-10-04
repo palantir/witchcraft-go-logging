@@ -39,13 +39,18 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, name, version string, params ...Param) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.WrappedLogV1], level, name, version, params...)
+	return NewFromCreator(w, level, wlog.NewDefaultLogger[logging.WrappedLogV1], name, version, params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.WrappedLogV1], level wlog.LogLevel, name, version string, params ...Param) Logger {
+func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[logging.WrappedLogV1], name, version string, params ...Param) Logger {
 	return &defaultLogger{
 		delegate: creator(w),
 		level:    level,
 		params:   append([]Param{Type(), EntityName(name), EntityVersion(version)}, params...),
 	}
 }
+
+// NewFromProvider is an alias for NewFromCreator.
+//
+// Deprecated: use NewFromCreator.
+var NewFromProvider = NewFromCreator

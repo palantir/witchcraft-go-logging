@@ -20,6 +20,8 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+var objectPool = wloginternal.NewPool((*logging.ServiceLogV1).Reset)
+
 type defaultLogger struct {
 	logger wlog.Logger[logging.ServiceLogV1]
 	level  *wlog.AtomicLogLevel
@@ -43,7 +45,11 @@ func (l *defaultLogger) Error(msg string, params ...Param) {
 
 func (l *defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
 	if l.Enabled(level) {
-		wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Level(level), Message(msg)}, params...)...)
+		log := objectPool.Get()
+		wloginternal.ApplyParams(log, Type(), TimeNow(), Level(level), Message(msg))
+		wloginternal.ApplyParams(log, params...)
+		l.logger.Log(log)
+		objectPool.Put(log)
 	}
 }
 

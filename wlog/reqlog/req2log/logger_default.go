@@ -27,6 +27,8 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+var objectPool = wloginternal.NewPool((*logging.RequestLogV2).Reset)
+
 type defaultLogger struct {
 	logger       wlog.Logger[logging.RequestLogV2]
 	idsExtractor extractor.IDsFromRequest
@@ -37,7 +39,10 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Request(r Request) {
-	wloginternal.LogParams(l.logger.Log, ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
+	log := objectPool.Get()
+	wloginternal.ApplyParams(log, ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
+	l.logger.Log(log)
+	objectPool.Put(log)
 }
 
 func (l *defaultLogger) PathParamPerms() ParamPerms {

@@ -36,10 +36,3 @@ func ApplyParams[T logging.LogTypes](log *T, params ...Param[T]) {
 		}
 	}
 }
-
-func LogParams[T logging.LogTypes](logger func(*T), params ...Param[T]) {
-	log, release := GetPooled[T]()
-	ApplyParams(log, params...)
-	logger(log)
-	release(log)
-}

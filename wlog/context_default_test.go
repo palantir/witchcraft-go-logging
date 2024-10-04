@@ -211,7 +211,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 			name: "Context with no logger set and no logger provider set returns default stderr warning logger that uses set logger provider",
 			before: func(loggerTestCaseInfo loggerTestCase) {
 				// set the default logger provider to be the JSON marshal logger provider
-				wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+				wlog.SetDefaultPrinterCreator(wlog.JSONPrinter)
 			},
 			verify: func(loggerTestCaseInfo loggerTestCase, bytes []byte) {
 				logOutput := string(bytes)
@@ -238,9 +238,9 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// store and restore global default logger provider so that tests can assume that default one is set
-			originalProvider := wlog.DefaultLoggerProvider()
+			originalProvider := wlog.GetDefaultPrinterCreator()
 			defer func() {
-				wlog.SetDefaultLoggerProvider(originalProvider)
+				wlog.SetDefaultPrinterCreator(originalProvider)
 			}()
 
 			f, err := ioutil.TempFile(tmpDir, "")

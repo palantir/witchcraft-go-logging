@@ -20,10 +20,16 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+var objectPool = wloginternal.NewPool((*logging.AuditLogV2).Reset)
+
 type defaultLogger struct {
 	logger wlog.Logger[logging.AuditLogV2]
 }
 
 func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
-	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Name(name), Result(result)}, params...)...)
+	log := objectPool.Get()
+	wloginternal.ApplyParams(log, Type(), TimeNow(), Name(name), Result(result))
+	wloginternal.ApplyParams(log, params...)
+	l.logger.Log(log)
+	objectPool.Put(log)
 }

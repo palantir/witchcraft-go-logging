@@ -21,12 +21,18 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
+var objectPool = wloginternal.NewPool((*logging.TraceLogV1).Reset)
+
 type defaultLogger struct {
 	logger wlog.Logger[logging.TraceLogV1]
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
-	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), Span(span)}, params...)...)
+	log := objectPool.Get()
+	wloginternal.ApplyParams(log, Type(), TimeNow(), Span(span))
+	wloginternal.ApplyParams(log, params...)
+	l.logger.Log(log)
+	objectPool.Put(log)
 }
 
 func (l *defaultLogger) Send(span wtracing.SpanModel) {

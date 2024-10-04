@@ -22,6 +22,8 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+var objectPool = wloginternal.NewPool((*logging.WrappedLogV1).Reset)
+
 // wrappedPrinter implements Printer for logs included in the wrapped.1 payload field.
 // When an underlying log object is constructed and passed to the Print method,
 // the delegate WrappedLogV1 logger is called with a new WrappedLogV1Payload object.
@@ -40,7 +42,11 @@ func wrapPrinter[T logging.LogTypes](
 	return func(io.Writer) wlog.Logger[T] { return wlog.NewDefaultLoggerWithPrinter[T](printer) }
 }
 
-func (p wrappedPrinter[T]) Print(log logging.LogType) error {
-	wloginternal.LogParams(p.delegate.Log, append(append([]Param{}, p.params...), Payload(p.newPayload(log.(T))))...)
+func (p wrappedPrinter[T]) Print(obj logging.LogType) error {
+	log := objectPool.Get()
+	wloginternal.ApplyParams(log, Type(), Payload(p.newPayload(obj.(T))))
+	wloginternal.ApplyParams(log, p.params...)
+	p.delegate.Log(log)
+	objectPool.Put(log)
 	return nil
 }

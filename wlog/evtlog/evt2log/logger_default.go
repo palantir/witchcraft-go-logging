@@ -20,10 +20,16 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+var objectPool = wloginternal.NewPool((*logging.EventLogV2).Reset)
+
 type defaultLogger struct {
 	logger wlog.Logger[logging.EventLogV2]
 }
 
 func (l *defaultLogger) Event(name string, params ...Param) {
-	wloginternal.LogParams(l.logger.Log, append([]Param{Type(), TimeNow(), EventName(name)}, params...)...)
+	log := objectPool.Get()
+	wloginternal.ApplyParams(log, Type(), TimeNow(), EventName(name))
+	wloginternal.ApplyParams(log, params...)
+	l.logger.Log(log)
+	objectPool.Put(log)
 }
