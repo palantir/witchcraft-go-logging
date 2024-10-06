@@ -36,17 +36,14 @@ func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[logging.ServiceLogV1], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w), level: wlog.NewAtomicLogLevel(level)},
-		// Note that wrapping is performed even if len(params) == 0. This is done intentionally to ensure that every default
-		// logger evaluates its parameters at the same level in the stack, which is required to ensure that the
-		// OriginFromCallLine parameter works generically.
 		params: params,
 	}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
-	if len(params) == 0 {
-		return logger
-	}
+	// Note that wrapping is performed even if len(params) == 0. This is done intentionally to ensure that every default
+	// logger evaluates its parameters at the same level in the stack, which is required to ensure that the
+	// OriginFromCallLine parameter works generically.
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,

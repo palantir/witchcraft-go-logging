@@ -30,34 +30,12 @@ type Param = wloginternal.Param[logging.MetricLogV1]
 
 type paramFunc = wloginternal.ParamFunc[logging.MetricLogV1]
 
-func Type() Param {
+func defaultParam(name string, typ string) Param {
 	return paramFunc(func(l *logging.MetricLogV1) {
-		l.Type = "metric.1"
-	})
-}
-
-func Time(time time.Time) Param {
-	return paramFunc(func(l *logging.MetricLogV1) {
-		l.Time = datetime.DateTime(time)
-	})
-}
-
-func TimeNow() Param {
-	// Defer execution of time.Now() until the log is actually written
-	return paramFunc(func(l *logging.MetricLogV1) {
+		l.Type = TypeValue
 		l.Time = datetime.DateTime(time.Now())
-	})
-}
-
-func MetricName(name string) Param {
-	return paramFunc(func(l *logging.MetricLogV1) {
 		l.MetricName = name
-	})
-}
-
-func MetricType(metric string) Param {
-	return paramFunc(func(l *logging.MetricLogV1) {
-		l.MetricType = metric
+		l.MetricType = typ
 	})
 }
 

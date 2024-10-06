@@ -30,28 +30,11 @@ type Param = wloginternal.Param[logging.EventLogV2]
 
 type paramFunc = wloginternal.ParamFunc[logging.EventLogV2]
 
-func Type() Param {
+func defaultParam(name string) Param {
 	return paramFunc(func(l *logging.EventLogV2) {
 		l.Type = TypeValue
-	})
-}
-
-func Time(time time.Time) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.Time = datetime.DateTime(time)
-	})
-}
-
-func TimeNow() Param {
-	// Defer execution of time.Now() until the log is actually written
-	return paramFunc(func(l *logging.EventLogV2) {
 		l.Time = datetime.DateTime(time.Now())
-	})
-}
-
-func EventName(event string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.EventName = event
+		l.EventName = name
 	})
 }
 

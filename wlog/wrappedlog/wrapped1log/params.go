@@ -27,9 +27,10 @@ type Param = wloginternal.Param[logging.WrappedLogV1]
 
 type paramFunc = wloginternal.ParamFunc[logging.WrappedLogV1]
 
-func Type() Param {
+func defaultParam(payload logging.WrappedLogV1Payload) Param {
 	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.Type = TypeValue
+		l.Payload = payload
 	})
 }
 
@@ -42,11 +43,5 @@ func EntityName(name string) Param {
 func EntityVersion(version string) Param {
 	return paramFunc(func(l *logging.WrappedLogV1) {
 		l.EntityVersion = version
-	})
-}
-
-func Payload(payload logging.WrappedLogV1Payload) Param {
-	return paramFunc(func(l *logging.WrappedLogV1) {
-		l.Payload = payload
 	})
 }

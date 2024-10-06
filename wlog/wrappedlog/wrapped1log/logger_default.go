@@ -15,16 +15,21 @@
 package wrapped1log
 
 import (
+	"io"
+
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
+
+var objectPool = wloginternal.NewPool((*logging.WrappedLogV1).Reset)
 
 type defaultLogger struct {
 	delegate wlog.Logger[logging.WrappedLogV1]
@@ -58,4 +63,27 @@ func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
 
 func (l *defaultLogger) Trace() trc1log.Logger {
 	return trc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1, l.params))
+}
+
+// wrappedPrinter implements Printer for logs included in the wrapped.1 payload field.
+// When an underlying log object is constructed and passed to the Print method,
+// the delegate WrappedLogV1 logger is called with a new WrappedLogV1Payload object.
+type wrappedPrinter[T logging.LogTypes] struct {
+	delegate   wlog.Logger[logging.WrappedLogV1]
+	newPayload func(payload T) logging.WrappedLogV1Payload
+	params     []Param
+}
+
+func wrapPrinter[T logging.LogTypes](
+	delegate wlog.Logger[logging.WrappedLogV1],
+	newPayload func(payload T) logging.WrappedLogV1Payload,
+	params []Param,
+) wlog.LoggerCreator[T] {
+	printer := wrappedPrinter[T]{delegate: delegate, newPayload: newPayload, params: params}
+	return func(io.Writer) wlog.Logger[T] { return wlog.NewDefaultLoggerWithPrinter[T](printer) }
+}
+
+func (p wrappedPrinter[T]) Print(obj logging.LogType) error {
+	wloginternal.LogObject(p.delegate, objectPool, defaultParam(p.newPayload(obj.(T))), p.params...)
+	return nil
 }

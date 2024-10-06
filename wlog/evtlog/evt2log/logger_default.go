@@ -27,9 +27,5 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Event(name string, params ...Param) {
-	log := objectPool.Get()
-	wloginternal.ApplyParams(log, Type(), TimeNow(), EventName(name))
-	wloginternal.ApplyParams(log, params...)
-	l.logger.Log(log)
-	objectPool.Put(log)
+	wloginternal.LogObject(l.logger, objectPool, defaultParam(name), params...)
 }

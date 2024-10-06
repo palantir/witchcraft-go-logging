@@ -30,40 +30,11 @@ type Param = wloginternal.Param[logging.DiagnosticLogV1]
 
 type paramFunc = wloginternal.ParamFunc[logging.DiagnosticLogV1]
 
-func Type() Param {
+func defaultParam(diagnostic logging.Diagnostic) Param {
 	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Type = TypeValue
-	})
-}
-
-func Time(time time.Time) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		l.Time = datetime.DateTime(time)
-	})
-}
-
-func TimeNow() Param {
-	// Defer execution of time.Now() until the log is actually written
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Time = datetime.DateTime(time.Now())
-	})
-}
-
-func Diagnostic(diagnostic logging.Diagnostic) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
 		l.Diagnostic = diagnostic
-	})
-}
-
-func GenericDiagnostic(genericDiagnostic logging.GenericDiagnostic) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		l.Diagnostic = logging.NewDiagnosticFromGeneric(genericDiagnostic)
-	})
-}
-
-func ThreadDump(threadDumpV1 logging.ThreadDumpV1) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
-		l.Diagnostic = logging.NewDiagnosticFromThreadDump(threadDumpV1)
 	})
 }
 

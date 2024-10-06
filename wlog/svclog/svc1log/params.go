@@ -37,32 +37,12 @@ type Param = wloginternal.Param[logging.ServiceLogV1]
 
 type paramFunc = wloginternal.ParamFunc[logging.ServiceLogV1]
 
-func Type() Param {
+func defaultParam(level wlog.LogLevel, message string) Param {
 	return paramFunc(func(l *logging.ServiceLogV1) {
 		l.Type = TypeValue
-	})
-}
-
-func Level(level wlog.LogLevel) Param {
-	return withLevel(level.ToLoggingType())
-}
-
-func withLevel(level logging.LogLevel) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.Level = level
-	})
-}
-
-func Time(time time.Time) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.Time = datetime.DateTime(time)
-	})
-}
-
-func TimeNow() Param {
-	// Defer execution of time.Now() until the log is actually written
-	return paramFunc(func(l *logging.ServiceLogV1) {
+		l.Level = level.ToLoggingType()
 		l.Time = datetime.DateTime(time.Now())
+		l.Message = message
 	})
 }
 

@@ -15,25 +15,8 @@
 package wlog
 
 import (
-	"io"
-
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
-
-var defaultLoggerProvider LoggerProvider = JSONPrinter
-
-// DefaultLoggerProvider returns the default LoggerProvider.
-func DefaultLoggerProvider() LoggerProvider {
-	return defaultLoggerProvider
-}
-
-// SetDefaultLoggerProvider sets the default LoggerProvider.
-func SetDefaultLoggerProvider(provider LoggerProvider) {
-	defaultLoggerProvider = provider
-}
-
-// LoggerProvider is a function that creates a Printer. The default is JSONPrinter.
-type LoggerProvider func(w io.Writer) Printer
 
 // Printer is a generic interface for printing Conjure log objects.
 type Printer interface {

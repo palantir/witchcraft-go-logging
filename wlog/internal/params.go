@@ -18,6 +18,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 )
 
+// Param is an interface that modifies a log object, generally used to set struct fields.
+// It is implemented by ParamFunc[T].
 type Param[T logging.LogTypes] interface {
 	apply(*T)
 }
@@ -29,6 +31,7 @@ func (f ParamFunc[T]) apply(log *T) {
 	f(log)
 }
 
+// ApplyParams executes the private apply functions on the provided log object.
 func ApplyParams[T logging.LogTypes](log *T, params ...Param[T]) {
 	for _, p := range params {
 		if p != nil {
@@ -37,6 +40,7 @@ func ApplyParams[T logging.LogTypes](log *T, params ...Param[T]) {
 	}
 }
 
+// SetMapParam initializes the map, if nil, and sets the key:value pair on the target map.
 func SetMapParam[V any](m *map[string]V, key string, value V) {
 	if *m == nil {
 		*m = make(map[string]V)
@@ -44,6 +48,7 @@ func SetMapParam[V any](m *map[string]V, key string, value V) {
 	(*m)[key] = value
 }
 
+// SetMapParams initializes the map, if nil, and sets the key:value pairs on the target map.
 func SetMapParams[V any](m *map[string]V, params map[string]V) {
 	if *m == nil {
 		*m = make(map[string]V)

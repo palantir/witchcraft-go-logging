@@ -15,6 +15,10 @@
 package trc1log
 
 import (
+	"time"
+
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
@@ -28,11 +32,7 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
-	log := objectPool.Get()
-	wloginternal.ApplyParams(log, Type(), TimeNow(), Span(span))
-	wloginternal.ApplyParams(log, params...)
-	l.logger.Log(log)
-	objectPool.Put(log)
+	wloginternal.LogObject(l.logger, objectPool, defaultParam(span), params...)
 }
 
 func (l *defaultLogger) Send(span wtracing.SpanModel) {
@@ -41,4 +41,64 @@ func (l *defaultLogger) Send(span wtracing.SpanModel) {
 
 func (l *defaultLogger) Close() error {
 	return nil
+}
+
+func defaultParam(span wtracing.SpanModel) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		l.Type = TypeValue
+		l.Time = datetime.DateTime(time.Now())
+
+		l.Span.TraceId = string(span.TraceID)
+		l.Span.Id = string(span.ID)
+		l.Span.Name = span.Name
+		l.Span.ParentId = (*string)(span.ParentID)
+		l.Span.Timestamp = safelong.SafeLong(span.Timestamp.Round(time.Microsecond).UnixNano() / 1e3)
+		l.Span.Duration = safelong.SafeLong(span.Duration / time.Microsecond)
+		l.Span.Annotations = spanAnnotationsParam(span)
+		l.Span.Tags = span.Tags
+	})
+}
+
+func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
+	var startVal, endVal string
+	switch span.Kind {
+	case wtracing.Server:
+		startVal, endVal = "sr", "ss"
+	case wtracing.Client:
+		startVal, endVal = "cs", "cr"
+	default:
+		return nil
+	}
+	return []logging.Annotation{
+		{
+			Timestamp: timestampMicros(span.Timestamp),
+			Value:     startVal,
+			Endpoint:  spanEndpoint(span.LocalEndpoint),
+		},
+		{
+			Timestamp: timestampMicros(span.Timestamp.Add(span.Duration)),
+			Value:     endVal,
+			Endpoint:  spanEndpoint(span.LocalEndpoint),
+		},
+	}
+}
+
+func spanEndpoint(endpoint *wtracing.Endpoint) logging.Endpoint {
+	e := logging.Endpoint{}
+	if endpoint != nil {
+		e.ServiceName = endpoint.ServiceName
+		if endpoint.IPv4 != nil {
+			s := endpoint.IPv4.String()
+			e.Ipv4 = &s
+		}
+		if endpoint.IPv6 != nil {
+			s := endpoint.IPv6.String()
+			e.Ipv6 = &s
+		}
+	}
+	return e
+}
+
+func timestampMicros(t time.Time) safelong.SafeLong {
+	return safelong.SafeLong(t.Round(time.Microsecond).UnixNano() / 1e3)
 }

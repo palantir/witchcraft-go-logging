@@ -18,10 +18,8 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
-	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 const (
@@ -51,65 +49,6 @@ func TimeNow() Param {
 	})
 }
 
-func Span(span wtracing.SpanModel) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		l.Span = logging.Span{
-			TraceId:     string(span.TraceID),
-			Id:          string(span.ID),
-			Name:        span.Name,
-			ParentId:    (*string)(span.ParentID),
-			Timestamp:   safelong.SafeLong(span.Timestamp.Round(time.Microsecond).UnixNano() / 1e3),
-			Duration:    safelong.SafeLong(span.Duration / time.Microsecond),
-			Annotations: spanAnnotationsParam(span),
-			Tags:        span.Tags,
-		}
-	})
-}
-
-func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
-	var startVal, endVal string
-	switch span.Kind {
-	case wtracing.Server:
-		startVal, endVal = "sr", "ss"
-	case wtracing.Client:
-		startVal, endVal = "cs", "cr"
-	default:
-		return nil
-	}
-	return []logging.Annotation{
-		{
-			Timestamp: timestampMicros(span.Timestamp),
-			Value:     startVal,
-			Endpoint:  spanEndpoint(span.LocalEndpoint),
-		},
-		{
-			Timestamp: timestampMicros(span.Timestamp.Add(span.Duration)),
-			Value:     endVal,
-			Endpoint:  spanEndpoint(span.LocalEndpoint),
-		},
-	}
-}
-
-func spanEndpoint(endpoint *wtracing.Endpoint) logging.Endpoint {
-	e := logging.Endpoint{}
-	if endpoint != nil {
-		e.ServiceName = endpoint.ServiceName
-		if endpoint.IPv4 != nil {
-			s := endpoint.IPv4.String()
-			e.Ipv4 = &s
-		}
-		if endpoint.IPv6 != nil {
-			s := endpoint.IPv6.String()
-			e.Ipv6 = &s
-		}
-	}
-	return e
-}
-
-func timestampMicros(t time.Time) safelong.SafeLong {
-	return safelong.SafeLong(t.Round(time.Microsecond).UnixNano() / 1e3)
-}
-
 func UID(uid string) Param {
 	return paramFunc(func(l *logging.TraceLogV1) {
 		l.Uid = (*logging.UserId)(&uid)
@@ -134,14 +73,14 @@ func OrgID(orgID string) Param {
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
-	})
-}
-
 func UnsafeParam(key string, value interface{}) Param {
 	return paramFunc(func(l *logging.TraceLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
+	})
+}
+
+func UnsafeParams(unsafe map[string]interface{}) Param {
+	return paramFunc(func(l *logging.TraceLogV1) {
+		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }

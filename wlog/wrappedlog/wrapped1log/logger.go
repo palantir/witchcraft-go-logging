@@ -46,7 +46,7 @@ func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator
 	return &defaultLogger{
 		delegate: creator(w),
 		level:    level,
-		params:   append([]Param{Type(), EntityName(name), EntityVersion(version)}, params...),
+		params:   append([]Param{EntityName(name), EntityVersion(version)}, params...),
 	}
 }
 

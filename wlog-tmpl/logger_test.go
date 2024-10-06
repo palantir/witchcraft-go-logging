@@ -17,13 +17,14 @@ package wlogtmpl_test
 import (
 	"bytes"
 	"context"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
@@ -131,7 +132,9 @@ func TestLogger(t *testing.T) {
 			out := &bytes.Buffer{}
 			ctx := context.Background()
 			provider := wlogtmpl.LoggerProvider(test.Config)
-			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, provider.NewLeveledLogger, svc1log.Origin("origin")))
+			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, func(w io.Writer) wlog.Logger[logging.ServiceLogV1] {
+				return wlog.NewDefaultLoggerWithPrinter[logging.ServiceLogV1](provider(w))
+			}, svc1log.Origin("origin")))
 			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, provider.NewLogger))
 			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, provider.NewLogger))
 			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, provider.NewLogger))
