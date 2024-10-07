@@ -88,23 +88,23 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 		l.Duration = safelong.SafeLong(r.Duration.Microseconds())
 
 		if uid := idsMap[extractor.UIDKey]; uid != "" {
-			l.Uid = (*wtypes.UserId)(&uid)
+			l.Uid = (*wtypes.UserID)(&uid)
 		}
 
 		if sid := idsMap[extractor.SIDKey]; sid != "" {
-			l.Sid = (*wtypes.SessionId)(&sid)
+			l.Sid = (*wtypes.SessionID)(&sid)
 		}
 
 		if tokenID := idsMap[extractor.TokenIDKey]; tokenID != "" {
-			l.TokenId = (*wtypes.TokenId)(&tokenID)
+			l.TokenId = (*wtypes.TokenID)(&tokenID)
 		}
 
 		if orgID := idsMap[extractor.OrgIDKey]; orgID != "" {
-			l.OrgId = (*wtypes.OrgId)(&orgID)
+			l.OrgId = (*wtypes.OrgID)(&orgID)
 		}
 
 		if traceID := idsMap[extractor.TraceIDKey]; traceID != "" {
-			l.TraceId = (*wtypes.TraceId)(&traceID)
+			l.TraceId = (*wtypes.TraceID)(&traceID)
 		}
 
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafeParams)

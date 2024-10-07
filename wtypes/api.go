@@ -29,8 +29,8 @@ var _, _, _, _, _, _, _, _ LogType = AuditLogV2{}, DiagnosticLogV1{}, EventLogV2
 
 // shared string aliases
 
-type OrgId string
-type SessionId string
-type TokenId string
-type TraceId string
-type UserId string
+type OrgID string
+type SessionID string
+type TokenID string
+type TraceID string
+type UserID string

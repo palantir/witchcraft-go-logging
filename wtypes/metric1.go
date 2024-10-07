@@ -34,13 +34,13 @@ type MetricLogV1 struct {
 	// Additional dimensions that describe the instance of the metric
 	Tags map[string]string `json:"tags,omitempty"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserID `json:"uid,omitempty"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionID `json:"sid,omitempty"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenID `json:"tokenId,omitempty"`
 	// Organization ID (if available)
-	OrgId *OrgId `json:"orgId,omitempty"`
+	OrgId *OrgID `json:"orgId,omitempty"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 }

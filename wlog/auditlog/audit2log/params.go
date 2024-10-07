@@ -41,38 +41,38 @@ func defaultParam(name string, result AuditResultType) Param {
 
 func UID(uid string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
-		l.Uid = (*wtypes.UserId)(&uid)
+		l.UID = (*wtypes.UserID)(&uid)
 	})
 }
 
 func SID(sid string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
-		l.Sid = (*wtypes.SessionId)(&sid)
+		l.SID = (*wtypes.SessionID)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
-		l.TokenId = (*wtypes.TokenId)(&tokenID)
+		l.TokenID = (*wtypes.TokenID)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
-		l.OrgId = (*wtypes.OrgId)(&orgID)
+		l.OrgID = (*wtypes.OrgID)(&orgID)
 	})
 }
 
 func TraceID(traceID string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
-		l.TraceId = (*wtypes.TraceId)(&traceID)
+		l.TraceID = (*wtypes.TraceID)(&traceID)
 	})
 }
 
 func OtherUIDs(otherUIDs ...string) Param {
 	return paramFunc(func(l *wtypes.AuditLogV2) {
 		for _, uid := range otherUIDs {
-			l.OtherUids = append(l.OtherUids, wtypes.UserId(uid))
+			l.OtherUIDs = append(l.OtherUIDs, wtypes.UserID(uid))
 		}
 	})
 }

@@ -54,45 +54,23 @@ type humanReadableDiagnostic struct {
 	ContentOnNewLine  bool
 }
 
-func (visitor *humanReadableDiagnostic) VisitGeneric(v wtypes.GenericDiagnostic) error {
-	visitor.SerializedContent = fmt.Sprintf("%v", v.Value)
-	visitor.ContentOnNewLine = false
-	return nil
-}
-
-func (visitor *humanReadableDiagnostic) VisitThreadDump(v wtypes.ThreadDumpV1) error {
-	visitor.SerializedContent = formatThreadDumps(v, visitor.UnsafeParams)
-	visitor.ContentOnNewLine = true
-	return nil
-}
-
-func (visitor *humanReadableDiagnostic) VisitUnknown(typeName string) error {
-	visitor.SerializedContent = fmt.Sprintf("[%s] log type is not implemented for diagnostic.1, log line will be skipped", typeName)
-	visitor.ContentOnNewLine = false
-	return nil
-}
-
 func (r *diagnostics1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
 	var res wtypes.DiagnosticLogV1
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
 	}
+
+	hrc := humanReadableDiagnostic{
+		Time:         res.Time,
+		UnsafeParams: res.UnsafeParams,
+	}
 	switch {
 	case res.Diagnostic.Generic != nil:
-		return humanReadableDiagnostic{
-			SerializedContent: fmt.Sprintf("%v", res.Diagnostic.Generic.Value),
-			Time:              res.Time,
-			UnsafeParams:      res.UnsafeParams,
-		}, nil
+		hrc.SerializedContent = fmt.Sprintf("%v", res.Diagnostic.Generic.Value)
 	case res.Diagnostic.ThreadDump != nil:
-		return humanReadableDiagnostic{
-			Time:              res.Time,
-			UnsafeParams:      res.UnsafeParams,
-			SerializedContent: formatThreadDumps(*res.Diagnostic.ThreadDump, res.UnsafeParams),
-		}, nil
-	default:
-		return humanReadableDiagnostic{UnsafeParams: res.UnsafeParams, Time: res.Time}, nil
+		hrc.SerializedContent = formatThreadDumps(*res.Diagnostic.ThreadDump, res.UnsafeParams)
 	}
+	return hrc, nil
 }
 
 func formatThreadDumps(v wtypes.ThreadDumpV1, unsafeParams map[string]interface{}) string {

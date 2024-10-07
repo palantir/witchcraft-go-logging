@@ -27,13 +27,13 @@ type TraceLogV1 struct {
 	// RFC3339Nano timestamp when the log event was emitted
 	Time datetime.DateTime `json:"time"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserID `json:"uid,omitempty"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionID `json:"sid,omitempty"`
 	// Token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenID `json:"tokenId,omitempty"`
 	// Organization ID (if available)
-	OrgId *OrgId `json:"orgId,omitempty"`
+	OrgId *OrgID `json:"orgId,omitempty"`
 	// Unredacted parameters
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
 	// Span information

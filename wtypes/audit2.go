@@ -38,17 +38,17 @@ type AuditLogV2 struct {
 	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
 	Result AuditResult `json:"result"`
 	// User id (if available). This is the most downstream caller.
-	Uid *UserId `json:"uid,omitempty"`
+	UID *UserID `json:"uid,omitempty"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	SID *SessionID `json:"sid,omitempty"`
 	// Token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenID *TokenID `json:"tokenId,omitempty"`
 	// Organization ID (if available)
-	OrgId *OrgId `json:"orgId,omitempty"`
+	OrgID *OrgID `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceID *TraceID `json:"traceId,omitempty"`
 	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
-	OtherUids []UserId `json:"otherUids,omitempty"`
+	OtherUIDs []UserID `json:"otherUids,omitempty"`
 	// Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier, or similar
 	Origin *string `json:"origin,omitempty"`
 	// The parameters known at method invocation time.
@@ -60,11 +60,11 @@ type AuditLogV2 struct {
 func (log *AuditLogV2) Reset() {
 	log.Type = ""
 	log.Time = datetime.DateTime{}
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	log.TraceId = nil
-	log.OtherUids = nil
+	log.UID = nil
+	log.SID = nil
+	log.TokenID = nil
+	log.TraceID = nil
+	log.OtherUIDs = nil
 	log.Origin = nil
 	log.Name = ""
 	log.Result = ""

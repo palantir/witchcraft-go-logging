@@ -64,31 +64,31 @@ func Tag(key, value string) Param {
 
 func UID(uid string) Param {
 	return paramFunc(func(l *wtypes.EventLogV2) {
-		l.Uid = (*wtypes.UserId)(&uid)
+		l.Uid = (*wtypes.UserID)(&uid)
 	})
 }
 
 func SID(sid string) Param {
 	return paramFunc(func(l *wtypes.EventLogV2) {
-		l.Sid = (*wtypes.SessionId)(&sid)
+		l.Sid = (*wtypes.SessionID)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
 	return paramFunc(func(l *wtypes.EventLogV2) {
-		l.TokenId = (*wtypes.TokenId)(&tokenID)
+		l.TokenId = (*wtypes.TokenID)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
 	return paramFunc(func(l *wtypes.EventLogV2) {
-		l.OrgId = (*wtypes.OrgId)(&orgID)
+		l.OrgId = (*wtypes.OrgID)(&orgID)
 	})
 }
 
 func TraceID(traceID string) Param {
 	return paramFunc(func(l *wtypes.EventLogV2) {
-		l.TraceId = (*wtypes.TraceId)(&traceID)
+		l.TraceId = (*wtypes.TraceID)(&traceID)
 	})
 }
 

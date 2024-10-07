@@ -46,15 +46,15 @@ type ServiceLogV1 struct {
 	// Known-safe parameters (redaction may be used to make params knowably safe, but is not required).
 	Params map[string]any `json:"params,omitempty"`
 	// User id (if available).
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserID `json:"uid,omitempty"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionID `json:"sid,omitempty"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenID `json:"tokenId,omitempty"`
 	// Organization ID (if available)
-	OrgId *OrgId `json:"orgId,omitempty"`
+	OrgId *OrgID `json:"orgId,omitempty"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceID `json:"traceId,omitempty"`
 	// Language-specific stack trace. Content is knowably safe. Renderers should substitute named placeholders ({name}, for name as a key) with keyed value from unsafeParams and leave non-matching keys as the original placeholder text.
 	Stacktrace *string `json:"stacktrace,omitempty"`
 	// Unredacted parameters
