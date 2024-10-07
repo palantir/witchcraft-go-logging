@@ -15,9 +15,9 @@
 package req2log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type LoggerCreatorParam interface {
@@ -30,7 +30,7 @@ func (f loggerCreatorParamFunc) Apply(builder LoggerBuilder) {
 	f(builder)
 }
 
-func Creator(creator wlog.LoggerCreator[logging.RequestLogV2]) LoggerCreatorParam {
+func Creator(creator wlog.LoggerCreator[wtypes.RequestLogV2]) LoggerCreatorParam {
 	return loggerCreatorParamFunc(func(builder LoggerBuilder) {
 		builder.LoggerCreator(creator)
 	})

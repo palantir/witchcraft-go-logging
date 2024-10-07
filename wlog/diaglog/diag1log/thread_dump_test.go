@@ -18,8 +18,8 @@ import (
 	"testing"
 
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +28,7 @@ func TestThreadDumpV1FromGoroutines(t *testing.T) {
 		Name      string
 		Input     string
 		Marshaled string
-		Expected  logging.ThreadDumpV1
+		Expected  wtypes.ThreadDumpV1
 	}{
 		{
 			Name: "single goroutine",
@@ -44,13 +44,13 @@ net/http.(*persistConn).writeLoop(...)
 created by net/http.(*Transport).dialConn(...)
 	net/http/transport.go:1339 +0x966
 `,
-			Expected: logging.ThreadDumpV1{
-				Threads: []logging.ThreadInfoV1{
+			Expected: wtypes.ThreadDumpV1{
+				Threads: []wtypes.ThreadInfoV1{
 					{
 						Name:   strPtr("goroutine 14 [select]"),
 						Id:     safelongPtr(14),
 						Params: map[string]interface{}{"status": "select"},
-						StackTrace: []logging.StackFrameV1{
+						StackTrace: []wtypes.StackFrameV1{
 							{
 								Address:   strPtr("0x113"),
 								Procedure: strPtr("net/http.(*persistConn).writeLoop"),
@@ -85,13 +85,13 @@ net/http.(*persistConn).writeLoop(...)
 	net/http/transport.go:1885
 created by net/http.(*Transport).dialConn(...)
 `,
-			Expected: logging.ThreadDumpV1{
-				Threads: []logging.ThreadInfoV1{
+			Expected: wtypes.ThreadDumpV1{
+				Threads: []wtypes.ThreadInfoV1{
 					{
 						Name:   strPtr("goroutine 14 [select]"),
 						Id:     safelongPtr(14),
 						Params: map[string]interface{}{"status": "select"},
-						StackTrace: []logging.StackFrameV1{
+						StackTrace: []wtypes.StackFrameV1{
 							{
 								Address:   nil,
 								Procedure: strPtr("net/http.(*persistConn).writeLoop"),

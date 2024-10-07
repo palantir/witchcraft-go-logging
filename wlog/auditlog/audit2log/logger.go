@@ -17,16 +17,16 @@ package audit2log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-type AuditResultType = logging.AuditResult
+type AuditResultType = wtypes.AuditResult
 
 const (
-	AuditResultSuccess      = logging.AuditResultSUCCESS
-	AuditResultUnauthorized = logging.AuditResultUNAUTHORIZED
-	AuditResultError        = logging.AuditResultERROR
+	AuditResultSuccess      = wtypes.AuditResultSUCCESS
+	AuditResultUnauthorized = wtypes.AuditResultUNAUTHORIZED
+	AuditResultError        = wtypes.AuditResultERROR
 )
 
 type Logger interface {
@@ -34,10 +34,10 @@ type Logger interface {
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.AuditLogV2], params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[wtypes.AuditLogV2], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.AuditLogV2], params ...Param) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[wtypes.AuditLogV2], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w)},
 		params: params,

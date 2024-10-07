@@ -22,23 +22,23 @@ import (
 
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // ThreadDumpV1FromGoroutines unmarshals a "goroutine dump" (as formatted by panic or the runtime package)
 // and returns a conjured logging.ThreadDumpV1 object.
-func ThreadDumpV1FromGoroutines(goroutinesContent []byte) logging.ThreadDumpV1 {
+func ThreadDumpV1FromGoroutines(goroutinesContent []byte) wtypes.ThreadDumpV1 {
 	// Goroutines are separated by an empty line
 	goroutines := bytes.Split(goroutinesContent, []byte("\n\n"))
 
-	threads := logging.ThreadDumpV1{Threads: make([]logging.ThreadInfoV1, len(goroutines))}
+	threads := wtypes.ThreadDumpV1{Threads: make([]wtypes.ThreadInfoV1, len(goroutines))}
 	for i, goroutine := range goroutines {
 		threads.Threads[i] = unmarshalThreadDump(goroutine)
 	}
 	return threads
 }
 
-func ThreadDumpV1ToGoroutines(threads logging.ThreadDumpV1) string {
+func ThreadDumpV1ToGoroutines(threads wtypes.ThreadDumpV1) string {
 	var out strings.Builder
 	for _, thread := range threads.Threads {
 		if thread.Name != nil {
@@ -74,13 +74,13 @@ func ThreadDumpV1ToGoroutines(threads logging.ThreadDumpV1) string {
 
 var titleLinePattern = regexp.MustCompile(`^(goroutine (\d+) \[([^]]+)]):$`)
 
-func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
+func unmarshalThreadDump(goroutine []byte) wtypes.ThreadInfoV1 {
 	lines := bytes.Split(bytes.TrimSpace(goroutine), []byte("\n"))
 	if len(lines) == 0 {
-		return logging.ThreadInfoV1{}
+		return wtypes.ThreadInfoV1{}
 	}
 
-	info := logging.ThreadInfoV1{Params: make(map[string]interface{})}
+	info := wtypes.ThreadInfoV1{Params: make(map[string]interface{})}
 
 	// The first line is of the form 'goroutine 14 [select]:'
 	titleLine := string(lines[0])
@@ -97,7 +97,7 @@ func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
 		funcLine := stackLines[i]
 		fileLine := stackLines[i+1]
 
-		frame := logging.StackFrameV1{Params: make(map[string]interface{})}
+		frame := wtypes.StackFrameV1{Params: make(map[string]interface{})}
 
 		unmarshalFuncLine(funcLine, &frame)
 		unmarshalFileLine(fileLine, &frame)
@@ -108,7 +108,7 @@ func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
 	return info
 }
 
-func unmarshalFuncLine(funcLine []byte, frame *logging.StackFrameV1) {
+func unmarshalFuncLine(funcLine []byte, frame *wtypes.StackFrameV1) {
 	if bytes.HasPrefix(funcLine, []byte("created by ")) {
 		// creators do not include arguments
 		procedure := strings.TrimPrefix(string(funcLine), "created by ")
@@ -124,7 +124,7 @@ func unmarshalFuncLine(funcLine []byte, frame *logging.StackFrameV1) {
 	}
 }
 
-func unmarshalFileLine(fileLine []byte, frame *logging.StackFrameV1) {
+func unmarshalFileLine(fileLine []byte, frame *wtypes.StackFrameV1) {
 	segments := strings.Split(string(bytes.TrimSpace(fileLine)), " +")
 
 	if len(segments) > 1 {

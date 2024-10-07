@@ -19,7 +19,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type LevelChecker interface {
@@ -91,18 +91,18 @@ func (l LogLevel) Enabled(other LogLevel) bool {
 	return false
 }
 
-func (l LogLevel) ToLoggingType() logging.LogLevel {
+func (l LogLevel) ToLoggingType() wtypes.LogLevel {
 	switch l {
 	case DebugLevel:
-		return logging.LogLevelDEBUG
+		return wtypes.LogLevelDEBUG
 	case InfoLevel:
-		return logging.LogLevelINFO
+		return wtypes.LogLevelINFO
 	case WarnLevel:
-		return logging.LogLevelWARN
+		return wtypes.LogLevelWARN
 	case ErrorLevel:
-		return logging.LogLevelERROR
+		return wtypes.LogLevelERROR
 	case FatalLevel:
-		return logging.LogLevelFATAL
+		return wtypes.LogLevelFATAL
 	default:
 		return ""
 	}

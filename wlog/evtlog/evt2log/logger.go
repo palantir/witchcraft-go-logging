@@ -17,8 +17,8 @@ package evt2log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Logger interface {
@@ -26,10 +26,10 @@ type Logger interface {
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.EventLogV2], params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[wtypes.EventLogV2], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.EventLogV2], params ...Param) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[wtypes.EventLogV2], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w)},
 		params: params,

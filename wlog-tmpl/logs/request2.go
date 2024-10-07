@@ -16,17 +16,18 @@ package logs
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 var req2LogType = &req2LogTyper{
 	baseLogTyper: baseLogTyper{
 		typ:         "request.2",
 		defaultTmpl: `{{with $time := .Time | printf "[%s]"}}{{if le (len $time) 26 }}{{printf "%-26s" $time}}{{else}}{{printf "%-32s" $time}}{{end}}{{end}} "{{if .Method}}{{.Method}} {{end}}{{.Path}} {{.Protocol}}" {{.Status}} {{.ResponseSize}} {{.Duration}}`,
-		defaultObj:  logging.RequestLogV2{},
+		defaultObj:  wtypes.RequestLogV2{},
 	},
 }
 
@@ -44,7 +45,7 @@ func (r *req2LogTyper) NewFormatter(tmpl string, params ...logentryformatter.Par
 }
 
 func (r *req2LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
-	var res logging.RequestLogV2
+	var res wtypes.RequestLogV2
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
 	}
@@ -54,7 +55,10 @@ func (r *req2LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interfac
 	return res, nil
 }
 
-func performRequest2PathParamSubstitution(logEntry *logging.RequestLogV2) {
+var requestParamRegexp = regexp.MustCompile(`{[^{}]+}`)
+var colonOrAsterix = regexp.MustCompile(`:|\*`)
+
+func performRequest2PathParamSubstitution(logEntry *wtypes.RequestLogV2) {
 	logEntry.Path = requestParamRegexp.ReplaceAllStringFunc(logEntry.Path, func(match string) string {
 		rv := match
 

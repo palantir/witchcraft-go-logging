@@ -15,15 +15,15 @@
 package metric1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.MetricLogV1).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.MetricLogV1).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.MetricLogV1]
+	logger wlog.Logger[wtypes.MetricLogV1]
 }
 
 func (l *defaultLogger) Metric(name, typ string, params ...Param) {

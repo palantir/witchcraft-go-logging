@@ -15,24 +15,24 @@
 package wloginternal
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // Param is an interface that modifies a log object, generally used to set struct fields.
 // It is implemented by ParamFunc[T].
-type Param[T logging.LogTypes] interface {
+type Param[T wtypes.LogTypes] interface {
 	apply(*T)
 }
 
 // ParamFunc is a function that implements Param and modifies a Conjure log object.
-type ParamFunc[T logging.LogTypes] func(log *T)
+type ParamFunc[T wtypes.LogTypes] func(log *T)
 
 func (f ParamFunc[T]) apply(log *T) {
 	f(log)
 }
 
 // ApplyParams executes the private apply functions on the provided log object.
-func ApplyParams[T logging.LogTypes](log *T, params ...Param[T]) {
+func ApplyParams[T wtypes.LogTypes](log *T, params ...Param[T]) {
 	for _, p := range params {
 		if p != nil {
 			p.apply(log)

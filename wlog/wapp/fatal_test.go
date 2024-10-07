@@ -24,10 +24,10 @@ import (
 
 	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/wapp"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,7 +37,7 @@ func TestRunWithRecoveryLogging_Panic(t *testing.T) {
 	wapp.RunWithRecoveryLogging(ctx, func(ctx context.Context) {
 		panic("foo")
 	})
-	var msg logging.ServiceLogV1
+	var msg wtypes.ServiceLogV1
 	err := safejson.Unmarshal(buf.Bytes(), &msg)
 	assert.NoError(t, err)
 	assert.Equal(t, msg.Message, "panic recovered")
@@ -132,7 +132,7 @@ func TestRunWithRecoveryLogging_NilPointer(t *testing.T) {
 		var s *string
 		_ = *s
 	})
-	var msg logging.ServiceLogV1
+	var msg wtypes.ServiceLogV1
 	err := safejson.Unmarshal(buf.Bytes(), &msg)
 	assert.NoError(t, err)
 	assert.Equal(t, msg.Message, "panic recovered")

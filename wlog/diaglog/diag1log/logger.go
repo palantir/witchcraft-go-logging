@@ -17,19 +17,19 @@ package diag1log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Logger interface {
-	Diagnostic(diagnostic logging.Diagnostic, params ...Param)
+	Diagnostic(diagnostic wtypes.Diagnostic, params ...Param)
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.DiagnosticLogV1], params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[wtypes.DiagnosticLogV1], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.DiagnosticLogV1], params ...Param) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[wtypes.DiagnosticLogV1], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w)},
 		params: params,

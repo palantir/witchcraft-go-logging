@@ -12,27 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logging
+package wtypes
 
 import (
 	"github.com/palantir/pkg/datetime"
 )
 
-// metric.1
+// event.2
 
-type MetricLogV1 struct {
-	// "metric.1"
+type EventLogV2 struct {
+	// "event.2"
 	Type string `json:"type"`
 	// RFC3339Nano timestamp when the log event was emitted
 	Time datetime.DateTime `json:"time"`
-	// Dot-delimited name of metric, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
-	MetricName string `json:"metricName"`
-	// Type of metric being represented, e.g. `gauge`, `histogram`, `counter`
-	MetricType string `json:"metricType"`
-	// Observations, measurements and context associated with the metric
+	// Dot-delimited name of event, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
+	EventName string `json:"eventName"`
+	// Observations, measurements and context associated with the event
 	Values map[string]any `json:"values,omitempty"`
-	// Additional dimensions that describe the instance of the metric
-	Tags map[string]string `json:"tags,omitempty"`
 	// User id (if available)
 	Uid *UserId `json:"uid,omitempty"`
 	// Session id (if available)
@@ -41,19 +37,23 @@ type MetricLogV1 struct {
 	TokenId *TokenId `json:"tokenId,omitempty"`
 	// Organization ID (if available)
 	OrgId *OrgId `json:"orgId,omitempty"`
+	// Zipkin trace id (if available)
+	TraceId *TraceId `json:"traceId,omitempty"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]any `json:"unsafeParams,omitempty"`
+	// Additional dimensions that describe the instance of the log event
+	Tags map[string]string `json:"tags,omitempty"`
 }
 
-func (log *MetricLogV1) Reset() {
+func (log *EventLogV2) Reset() {
 	log.Type = ""
 	log.Time = datetime.DateTime{}
-	log.MetricName = ""
-	log.MetricType = ""
+	log.EventName = ""
 	clear(log.Values)
-	clear(log.Tags)
 	log.Uid = nil
 	log.Sid = nil
 	log.TokenId = nil
+	log.TraceId = nil
 	clear(log.UnsafeParams)
+	clear(log.Tags)
 }

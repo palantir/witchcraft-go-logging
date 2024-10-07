@@ -20,16 +20,16 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.RequestLogV2).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.RequestLogV2).Reset)
 
 type defaultLogger struct {
-	logger       wlog.Logger[logging.RequestLogV2]
+	logger       wlog.Logger[wtypes.RequestLogV2]
 	idsExtractor extractor.IDsFromRequest
 
 	pathParamPerms   ParamPerms
@@ -53,7 +53,7 @@ func (l *defaultLogger) HeaderParamPerms() ParamPerms {
 	return l.headerParamPerms
 }
 
-func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) wloginternal.Param[logging.RequestLogV2] {
+func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) wloginternal.Param[wtypes.RequestLogV2] {
 	safeParams, unsafeParams := parseRequestParams(r, pathParamPerms, queryParamPerms, headerParamPerms)
 
 	reqPath := r.Request.URL.Path
@@ -64,7 +64,7 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 	// extract IDs from request
 	idsMap := idsExtractor.ExtractIDs(r.Request)
 
-	return wloginternal.ParamFunc[logging.RequestLogV2](func(l *logging.RequestLogV2) {
+	return wloginternal.ParamFunc[wtypes.RequestLogV2](func(l *wtypes.RequestLogV2) {
 		l.Type = TypeValue
 
 		l.Time = datetime.DateTime(time.Now())
@@ -88,23 +88,23 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 		l.Duration = safelong.SafeLong(r.Duration.Microseconds())
 
 		if uid := idsMap[extractor.UIDKey]; uid != "" {
-			l.Uid = (*logging.UserId)(&uid)
+			l.Uid = (*wtypes.UserId)(&uid)
 		}
 
 		if sid := idsMap[extractor.SIDKey]; sid != "" {
-			l.Sid = (*logging.SessionId)(&sid)
+			l.Sid = (*wtypes.SessionId)(&sid)
 		}
 
 		if tokenID := idsMap[extractor.TokenIDKey]; tokenID != "" {
-			l.TokenId = (*logging.TokenId)(&tokenID)
+			l.TokenId = (*wtypes.TokenId)(&tokenID)
 		}
 
 		if orgID := idsMap[extractor.OrgIDKey]; orgID != "" {
-			l.OrgId = (*logging.OrgId)(&orgID)
+			l.OrgId = (*wtypes.OrgId)(&orgID)
 		}
 
 		if traceID := idsMap[extractor.TraceIDKey]; traceID != "" {
-			l.TraceId = (*logging.TraceId)(&traceID)
+			l.TraceId = (*wtypes.TraceId)(&traceID)
 		}
 
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafeParams)

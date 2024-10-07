@@ -18,9 +18,9 @@ import (
 	"io"
 
 	"github.com/palantir/pkg/bytesbuffers"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type tmplPrinter struct {
@@ -31,7 +31,7 @@ type tmplPrinter struct {
 	bufferPool bytesbuffers.Pool
 }
 
-func (l *tmplPrinter) Print(log logging.LogType) error {
+func (l *tmplPrinter) Print(log wtypes.LogType) error {
 	buf := l.bufferPool.Get()
 	defer l.bufferPool.Put(buf)
 

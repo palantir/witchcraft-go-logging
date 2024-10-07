@@ -18,20 +18,20 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 const (
 	TypeValue = "audit.2"
 )
 
-type Param = wloginternal.Param[logging.AuditLogV2]
+type Param = wloginternal.Param[wtypes.AuditLogV2]
 
-type paramFunc = wloginternal.ParamFunc[logging.AuditLogV2]
+type paramFunc = wloginternal.ParamFunc[wtypes.AuditLogV2]
 
 func defaultParam(name string, result AuditResultType) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		l.Type = TypeValue
 		l.Time = datetime.DateTime(time.Now())
 		l.Name = name
@@ -40,69 +40,69 @@ func defaultParam(name string, result AuditResultType) Param {
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.Uid = (*logging.UserId)(&uid)
+	return paramFunc(func(l *wtypes.AuditLogV2) {
+		l.Uid = (*wtypes.UserId)(&uid)
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.Sid = (*logging.SessionId)(&sid)
+	return paramFunc(func(l *wtypes.AuditLogV2) {
+		l.Sid = (*wtypes.SessionId)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.TokenId = (*logging.TokenId)(&tokenID)
+	return paramFunc(func(l *wtypes.AuditLogV2) {
+		l.TokenId = (*wtypes.TokenId)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.OrgId = (*logging.OrgId)(&orgID)
+	return paramFunc(func(l *wtypes.AuditLogV2) {
+		l.OrgId = (*wtypes.OrgId)(&orgID)
 	})
 }
 
 func TraceID(traceID string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
-		l.TraceId = (*logging.TraceId)(&traceID)
+	return paramFunc(func(l *wtypes.AuditLogV2) {
+		l.TraceId = (*wtypes.TraceId)(&traceID)
 	})
 }
 
 func OtherUIDs(otherUIDs ...string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		for _, uid := range otherUIDs {
-			l.OtherUids = append(l.OtherUids, logging.UserId(uid))
+			l.OtherUids = append(l.OtherUids, wtypes.UserId(uid))
 		}
 	})
 }
 
 func Origin(origin string) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		l.Origin = &origin
 	})
 }
 
 func RequestParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		wloginternal.SetMapParam(&l.RequestParams, key, value)
 	})
 }
 
 func RequestParams(requestParams map[string]interface{}) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		wloginternal.SetMapParams(&l.RequestParams, requestParams)
 	})
 }
 
 func ResultParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		wloginternal.SetMapParam(&l.ResultParams, key, value)
 	})
 }
 
 func ResultParams(resultParams map[string]interface{}) Param {
-	return paramFunc(func(l *logging.AuditLogV2) {
+	return paramFunc(func(l *wtypes.AuditLogV2) {
 		wloginternal.SetMapParams(&l.ResultParams, resultParams)
 	})
 }

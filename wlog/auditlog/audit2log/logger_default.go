@@ -15,15 +15,15 @@
 package audit2log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.AuditLogV2).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.AuditLogV2).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.AuditLogV2]
+	logger wlog.Logger[wtypes.AuditLogV2]
 }
 
 func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {

@@ -15,13 +15,13 @@
 package wloginternal
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // LogObject logs a log object with the given parameters to the provided logger.
 // The heap object is retrieved and released using the objectPool.
 // The defaultParam is applied first, followed by the params.
-func LogObject[T logging.LogTypes](
+func LogObject[T wtypes.LogTypes](
 	logger func(*T),
 	objectPool *SyncPool[T],
 	defaultParam Param[T],

@@ -17,7 +17,6 @@ package wrapped1log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -27,63 +26,64 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.WrappedLogV1).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.WrappedLogV1).Reset)
 
 type defaultLogger struct {
-	delegate wlog.Logger[logging.WrappedLogV1]
+	delegate wlog.Logger[wtypes.WrappedLogV1]
 	level    wlog.LogLevel
 	params   []Param
 }
 
 func (l *defaultLogger) Audit() audit2log.Logger {
-	return audit2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromAuditLogV2, l.params))
+	return audit2log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromAuditLogV2, l.params))
 }
 
 func (l *defaultLogger) Diagnostic() diag1log.Logger {
-	return diag1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1, l.params))
+	return diag1log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromDiagnosticLogV1, l.params))
 }
 
 func (l *defaultLogger) Event() evt2log.Logger {
-	return evt2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromEventLogV2, l.params))
+	return evt2log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromEventLogV2, l.params))
 }
 
 func (l *defaultLogger) Metric() metric1log.Logger {
-	return metric1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromMetricLogV1, l.params))
+	return metric1log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromMetricLogV1, l.params))
 }
 
 func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
-	return req2log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromRequestLogV2, l.params), params...)
+	return req2log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromRequestLogV2, l.params), params...)
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	return svc1log.NewFromCreator(nil, l.level, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromServiceLogV1, l.params), params...)
+	return svc1log.NewFromCreator(nil, l.level, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromServiceLogV1, l.params), params...)
 }
 
 func (l *defaultLogger) Trace() trc1log.Logger {
-	return trc1log.NewFromCreator(nil, wrapPrinter(l.delegate, logging.NewWrappedLogV1PayloadFromTraceLogV1, l.params))
+	return trc1log.NewFromCreator(nil, wrapPrinter(l.delegate, wtypes.NewWrappedLogV1PayloadFromTraceLogV1, l.params))
 }
 
 // wrappedPrinter implements Printer for logs included in the wrapped.1 payload field.
 // When an underlying log object is constructed and passed to the Print method,
 // the delegate WrappedLogV1 logger is called with a new WrappedLogV1Payload object.
-type wrappedPrinter[T logging.LogTypes] struct {
-	logger     wlog.Logger[logging.WrappedLogV1]
-	newPayload func(payload T) logging.WrappedLogV1Payload
+type wrappedPrinter[T wtypes.LogTypes] struct {
+	logger     wlog.Logger[wtypes.WrappedLogV1]
+	newPayload func(payload T) wtypes.WrappedLogV1Payload
 	params     []Param
 }
 
-func wrapPrinter[T logging.LogTypes](
-	logger wlog.Logger[logging.WrappedLogV1],
-	newPayload func(payload T) logging.WrappedLogV1Payload,
+func wrapPrinter[T wtypes.LogTypes](
+	logger wlog.Logger[wtypes.WrappedLogV1],
+	newPayload func(payload T) wtypes.WrappedLogV1Payload,
 	params []Param,
 ) wlog.LoggerCreator[T] {
 	printer := wrappedPrinter[T]{logger: logger, newPayload: newPayload, params: params}
 	return func(io.Writer) wlog.Logger[T] { return wlog.NewDefaultLoggerWithPrinter[T](printer) }
 }
 
-func (l wrappedPrinter[T]) Print(obj logging.LogType) error {
+func (l wrappedPrinter[T]) Print(obj wtypes.LogType) error {
 	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(l.newPayload(obj.(T))), l.params...)
 	return nil
 }

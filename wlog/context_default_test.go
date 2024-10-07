@@ -24,13 +24,13 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -67,7 +67,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				logger.Audit("TEST_EVT", audit2log.AuditResultSuccess)
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.AuditLogV2
+				var logEntry wtypes.AuditLogV2
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "TEST_EVT", logEntry.Name)
 			},
@@ -84,10 +84,10 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 			loggerPkg: "diag1log",
 			performLogging: func() {
 				logger := diag1log.FromContext(context.Background())
-				logger.Diagnostic(logging.NewDiagnosticFromGeneric(logging.GenericDiagnostic{DiagnosticType: "test", Value: map[string]any{"TEST_VAL": 2}}))
+				logger.Diagnostic(wtypes.NewDiagnosticFromGeneric(wtypes.GenericDiagnostic{DiagnosticType: "test", Value: map[string]any{"TEST_VAL": 2}}))
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.DiagnosticLogV1
+				var logEntry wtypes.DiagnosticLogV1
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "test", logEntry.Diagnostic.Generic.DiagnosticType)
 			},
@@ -107,7 +107,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				logger.Event("TEST_EVT")
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.EventLogV2
+				var logEntry wtypes.EventLogV2
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "TEST_EVT", logEntry.EventName)
 			},
@@ -127,7 +127,7 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				logger.Metric("com.palantir.metric", "gauge")
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.MetricLogV1
+				var logEntry wtypes.MetricLogV1
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "com.palantir.metric", logEntry.MetricName)
 				assert.Equal(t, "gauge", logEntry.MetricType)
@@ -148,10 +148,10 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				logger.Info("Test message")
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.ServiceLogV1
+				var logEntry wtypes.ServiceLogV1
 				require.NoError(t, json.Unmarshal(bytes, &logEntry))
 				assert.Equal(t, "Test message", logEntry.Message)
-				assert.Equal(t, logging.LogLevelINFO, logEntry.Level)
+				assert.Equal(t, wtypes.LogLevelINFO, logEntry.Level)
 			},
 			setEmptyLoggerCreator: func() {
 				// set the default logger creator

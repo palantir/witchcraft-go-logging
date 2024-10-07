@@ -16,15 +16,15 @@ package logs
 
 import (
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 var evt2LogType = &evt2LogTyper{
 	baseLogTyper: baseLogTyper{
 		typ:         "event.2",
 		defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} {{.EventName}}{{if .Values}} {{niceMap .Values}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}`,
-		defaultObj:  logging.EventLogV2{},
+		defaultObj:  wtypes.EventLogV2{},
 	},
 }
 
@@ -42,7 +42,7 @@ func (r *evt2LogTyper) NewFormatter(tmpl string, params ...logentryformatter.Par
 }
 
 func (r *evt2LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
-	var res logging.EventLogV2
+	var res wtypes.EventLogV2
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
 	}

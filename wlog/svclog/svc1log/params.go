@@ -23,9 +23,9 @@ import (
 	"github.com/palantir/pkg/datetime"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
@@ -33,12 +33,12 @@ const (
 	TypeValue = "service.1"
 )
 
-type Param = wloginternal.Param[logging.ServiceLogV1]
+type Param = wloginternal.Param[wtypes.ServiceLogV1]
 
-type paramFunc = wloginternal.ParamFunc[logging.ServiceLogV1]
+type paramFunc = wloginternal.ParamFunc[wtypes.ServiceLogV1]
 
 func defaultParam(level wlog.LogLevel, message string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		l.Type = TypeValue
 		l.Level = level.ToLoggingType()
 		l.Time = datetime.DateTime(time.Now())
@@ -47,7 +47,7 @@ func defaultParam(level wlog.LogLevel, message string) Param {
 }
 
 func Origin(origin string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		l.Origin = &origin
 	})
 }
@@ -112,7 +112,7 @@ const defaultOriginFromCallLineStackSkip = 8
 // OriginFromCallLineWithSkip is like OriginFromCallLine but allows for configuring additional skipped stack frames.
 // This allows for libraries wrapping loggers to hide their implementation frames from the caller.
 func OriginFromCallLineWithSkip(skipFrames int) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		origin := ""
 		if file, line, ok := initLineCaller(defaultOriginFromCallLineStackSkip + skipFrames); ok {
 			origin = file + ":" + strconv.Itoa(line)
@@ -131,61 +131,61 @@ func initLineCaller(skip int) (string, int, bool) {
 }
 
 func Thread(thread string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		l.Thread = &thread
 	})
 }
 
 func Message(message string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		l.Message = message
 	})
 }
 
 func SafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParam(&l.Params, key, value)
 	})
 }
 
 func SafeParams(safe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParams(&l.Params, safe)
 	})
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.Uid = (*logging.UserId)(&uid)
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
+		l.Uid = (*wtypes.UserId)(&uid)
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.Sid = (*logging.SessionId)(&sid)
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
+		l.Sid = (*wtypes.SessionId)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.TokenId = (*logging.TokenId)(&tokenID)
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
+		l.TokenId = (*wtypes.TokenId)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.OrgId = (*logging.OrgId)(&orgID)
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
+		l.OrgId = (*wtypes.OrgId)(&orgID)
 	})
 }
 
 func TraceID(traceID string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
-		l.TraceId = (*logging.TraceId)(&traceID)
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
+		l.TraceId = (*wtypes.TraceId)(&traceID)
 	})
 }
 
 func Stacktrace(err error) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		if err != nil {
 			stacktrace := werror.GenerateErrorString(err, false)
 			l.Stacktrace = &stacktrace
@@ -198,19 +198,19 @@ func Stacktrace(err error) Param {
 }
 
 func UnsafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }
 
 func Params(object wparams.ParamStorer) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		if object != nil {
 			wloginternal.SetMapParams(&l.Params, object.SafeParams())
 			wloginternal.SetMapParams(&l.UnsafeParams, object.UnsafeParams())
@@ -219,13 +219,13 @@ func Params(object wparams.ParamStorer) Param {
 }
 
 func Tag(key, value string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParam(&l.Tags, key, value)
 	})
 }
 
 func Tags(tags map[string]string) Param {
-	return paramFunc(func(l *logging.ServiceLogV1) {
+	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		wloginternal.SetMapParams(&l.Tags, tags)
 	})
 }

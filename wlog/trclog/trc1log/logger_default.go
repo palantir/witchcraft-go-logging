@@ -19,16 +19,16 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
-var objectPool = wloginternal.NewPool((*logging.TraceLogV1).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.TraceLogV1).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.TraceLogV1]
+	logger wlog.Logger[wtypes.TraceLogV1]
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
@@ -44,7 +44,7 @@ func (l *defaultLogger) Close() error {
 }
 
 func defaultParam(span wtracing.SpanModel) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		l.Type = TypeValue
 		l.Time = datetime.DateTime(time.Now())
 
@@ -59,7 +59,7 @@ func defaultParam(span wtracing.SpanModel) Param {
 	})
 }
 
-func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
+func spanAnnotationsParam(span wtracing.SpanModel) []wtypes.Annotation {
 	var startVal, endVal string
 	switch span.Kind {
 	case wtracing.Server:
@@ -69,7 +69,7 @@ func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
 	default:
 		return nil
 	}
-	return []logging.Annotation{
+	return []wtypes.Annotation{
 		{
 			Timestamp: timestampMicros(span.Timestamp),
 			Value:     startVal,
@@ -83,8 +83,8 @@ func spanAnnotationsParam(span wtracing.SpanModel) []logging.Annotation {
 	}
 }
 
-func spanEndpoint(endpoint *wtracing.Endpoint) logging.Endpoint {
-	e := logging.Endpoint{}
+func spanEndpoint(endpoint *wtracing.Endpoint) wtypes.Endpoint {
+	e := wtypes.Endpoint{}
 	if endpoint != nil {
 		e.ServiceName = endpoint.ServiceName
 		if endpoint.IPv4 != nil {

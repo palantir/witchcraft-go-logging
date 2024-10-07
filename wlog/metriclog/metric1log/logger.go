@@ -17,8 +17,8 @@ package metric1log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Logger interface {
@@ -26,10 +26,10 @@ type Logger interface {
 }
 
 func New(w io.Writer, params ...Param) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.MetricLogV1], params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[wtypes.MetricLogV1], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.MetricLogV1], params ...Param) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[wtypes.MetricLogV1], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w)},
 		params: params,

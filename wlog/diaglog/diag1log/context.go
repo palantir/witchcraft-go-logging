@@ -17,7 +17,7 @@ package diag1log
 import (
 	"context"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type diag1LogContextKeyType string
@@ -25,7 +25,7 @@ type diag1LogContextKeyType string
 const contextKey = diag1LogContextKeyType(TypeValue)
 
 // Diagnostic uses the logger stored in the context to emit a diagnostic.1 log.
-func Diagnostic(ctx context.Context, diagnostic logging.Diagnostic, params ...Param) {
+func Diagnostic(ctx context.Context, diagnostic wtypes.Diagnostic, params ...Param) {
 	FromContext(ctx).Diagnostic(diagnostic, params...)
 }
 

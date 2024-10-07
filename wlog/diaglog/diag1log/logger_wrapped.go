@@ -15,7 +15,7 @@
 package diag1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type wrappedLogger struct {
@@ -23,6 +23,6 @@ type wrappedLogger struct {
 	params []Param
 }
 
-func (w *wrappedLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+func (w *wrappedLogger) Diagnostic(diagnostic wtypes.Diagnostic, params ...Param) {
 	w.logger.Diagnostic(diagnostic, append(w.params, params...)...)
 }

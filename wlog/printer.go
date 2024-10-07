@@ -15,7 +15,7 @@
 package wlog
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // Printer is a generic interface for printing Conjure log objects.
@@ -23,14 +23,14 @@ type Printer interface {
 	// Print writes the provided log object to an output.
 	// Print should return errors sparingly: they are simply logged in plaintext at stderr.
 	// Print should not retain the log object after the method returns.
-	Print(log logging.LogType) error
+	Print(log wtypes.LogType) error
 }
 
 // NoopPrinter returns a Printer that does nothing.
 func NoopPrinter() Printer {
-	return funcPrinter(func(logging.LogType) error { return nil })
+	return funcPrinter(func(wtypes.LogType) error { return nil })
 }
 
-type funcPrinter func(log logging.LogType) error
+type funcPrinter func(log wtypes.LogType) error
 
-func (p funcPrinter) Print(log logging.LogType) error { return p(log) }
+func (p funcPrinter) Print(log wtypes.LogType) error { return p(log) }

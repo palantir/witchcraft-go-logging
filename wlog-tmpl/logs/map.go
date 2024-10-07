@@ -26,11 +26,9 @@ var Unwrappers = map[logentryformatter.LogType]logentryformatter.Unwrapper{
 var formatters = []logTyper{
 	svc1LogType,
 	req2LogType,
-	evt1LogType,
 	evt2LogType,
 	metric1LogType,
 	trace1LogType,
-	req1LogType,
 	diagnostics1LogType,
 }
 

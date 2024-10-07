@@ -18,20 +18,20 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 const (
 	TypeValue = "diagnostic.1"
 )
 
-type Param = wloginternal.Param[logging.DiagnosticLogV1]
+type Param = wloginternal.Param[wtypes.DiagnosticLogV1]
 
-type paramFunc = wloginternal.ParamFunc[logging.DiagnosticLogV1]
+type paramFunc = wloginternal.ParamFunc[wtypes.DiagnosticLogV1]
 
-func defaultParam(diagnostic logging.Diagnostic) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
+func defaultParam(diagnostic wtypes.Diagnostic) Param {
+	return paramFunc(func(l *wtypes.DiagnosticLogV1) {
 		l.Type = TypeValue
 		l.Time = datetime.DateTime(time.Now())
 		l.Diagnostic = diagnostic
@@ -39,13 +39,13 @@ func defaultParam(diagnostic logging.Diagnostic) Param {
 }
 
 func UnsafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *wtypes.DiagnosticLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.DiagnosticLogV1) {
+	return paramFunc(func(l *wtypes.DiagnosticLogV1) {
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }

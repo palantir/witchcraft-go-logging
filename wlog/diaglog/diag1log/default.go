@@ -20,9 +20,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 func SetDefaultLoggerCreator(creator func() Logger) {
@@ -35,7 +35,7 @@ var defaultLoggerCreator = func() Logger {
 		// store the DefaultLoggerProvider at creation-time so that the output of this logger will be consistent
 		// throughout its lifetime (if the default logger provider is changed after a specific warnLogger is created,
 		// that should not change the creator used for that warnLogger).
-		creator: wlog.NewDefaultLogger[logging.DiagnosticLogV1],
+		creator: wlog.NewDefaultLogger[wtypes.DiagnosticLogV1],
 	}
 }
 
@@ -44,10 +44,10 @@ var defaultLoggerCreator = func() Logger {
 // the created logger are written to the io.Writer.
 type warnLogger struct {
 	w       io.Writer
-	creator wlog.LoggerCreator[logging.DiagnosticLogV1]
+	creator wlog.LoggerCreator[wtypes.DiagnosticLogV1]
 }
 
-func (l *warnLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+func (l *warnLogger) Diagnostic(diagnostic wtypes.Diagnostic, params ...Param) {
 	buf := &bytes.Buffer{}
 	NewFromCreator(buf, l.creator).Diagnostic(diagnostic, params...)
 	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("evt2log", buf.String(), 2))

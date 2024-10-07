@@ -18,20 +18,20 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 const (
 	TypeValue = "event.2"
 )
 
-type Param = wloginternal.Param[logging.EventLogV2]
+type Param = wloginternal.Param[wtypes.EventLogV2]
 
-type paramFunc = wloginternal.ParamFunc[logging.EventLogV2]
+type paramFunc = wloginternal.ParamFunc[wtypes.EventLogV2]
 
 func defaultParam(name string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		l.Type = TypeValue
 		l.Time = datetime.DateTime(time.Now())
 		l.EventName = name
@@ -39,67 +39,67 @@ func defaultParam(name string) Param {
 }
 
 func Value(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParam(&l.Values, key, value)
 	})
 }
 
 func Values(values map[string]interface{}) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParams(&l.Values, values)
 	})
 }
 
 func Tags(values map[string]string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParams(&l.Tags, values)
 	})
 }
 
 func Tag(key, value string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParam(&l.Tags, key, value)
 	})
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.Uid = (*logging.UserId)(&uid)
+	return paramFunc(func(l *wtypes.EventLogV2) {
+		l.Uid = (*wtypes.UserId)(&uid)
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.Sid = (*logging.SessionId)(&sid)
+	return paramFunc(func(l *wtypes.EventLogV2) {
+		l.Sid = (*wtypes.SessionId)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.TokenId = (*logging.TokenId)(&tokenID)
+	return paramFunc(func(l *wtypes.EventLogV2) {
+		l.TokenId = (*wtypes.TokenId)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.OrgId = (*logging.OrgId)(&orgID)
+	return paramFunc(func(l *wtypes.EventLogV2) {
+		l.OrgId = (*wtypes.OrgId)(&orgID)
 	})
 }
 
 func TraceID(traceID string) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
-		l.TraceId = (*logging.TraceId)(&traceID)
+	return paramFunc(func(l *wtypes.EventLogV2) {
+		l.TraceId = (*wtypes.TraceId)(&traceID)
 	})
 }
 
 func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }
 
 func UnsafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.EventLogV2) {
+	return paramFunc(func(l *wtypes.EventLogV2) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }

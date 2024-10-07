@@ -18,69 +18,69 @@ import (
 	"time"
 
 	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 const (
 	TypeValue = "trace.1"
 )
 
-type Param = wloginternal.Param[logging.TraceLogV1]
+type Param = wloginternal.Param[wtypes.TraceLogV1]
 
-type paramFunc = wloginternal.ParamFunc[logging.TraceLogV1]
+type paramFunc = wloginternal.ParamFunc[wtypes.TraceLogV1]
 
 func Type() Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		l.Type = TypeValue
 	})
 }
 
 func Time(time time.Time) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		l.Time = datetime.DateTime(time)
 	})
 }
 
 func TimeNow() Param {
 	// Defer execution of time.Now() until the log is actually written
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		l.Time = datetime.DateTime(time.Now())
 	})
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		l.Uid = (*logging.UserId)(&uid)
+	return paramFunc(func(l *wtypes.TraceLogV1) {
+		l.Uid = (*wtypes.UserId)(&uid)
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		l.Sid = (*logging.SessionId)(&sid)
+	return paramFunc(func(l *wtypes.TraceLogV1) {
+		l.Sid = (*wtypes.SessionId)(&sid)
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		l.TokenId = (*logging.TokenId)(&tokenID)
+	return paramFunc(func(l *wtypes.TraceLogV1) {
+		l.TokenId = (*wtypes.TokenId)(&tokenID)
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
-		l.OrgId = (*logging.OrgId)(&orgID)
+	return paramFunc(func(l *wtypes.TraceLogV1) {
+		l.OrgId = (*wtypes.OrgId)(&orgID)
 	})
 }
 
 func UnsafeParam(key string, value interface{}) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		wloginternal.SetMapParam(&l.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]interface{}) Param {
-	return paramFunc(func(l *logging.TraceLogV1) {
+	return paramFunc(func(l *wtypes.TraceLogV1) {
 		wloginternal.SetMapParams(&l.UnsafeParams, unsafe)
 	})
 }

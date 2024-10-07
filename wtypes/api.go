@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logging
+package wtypes
 
 // LogTypes is a constraint for generic types that combines all the Conjure log types.
 // Preferred to LogType when an interface type is not required.

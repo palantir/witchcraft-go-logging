@@ -17,7 +17,6 @@ package wrapped1log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
@@ -26,6 +25,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Logger interface {
@@ -39,10 +39,10 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, name, version string, params ...Param) Logger {
-	return NewFromCreator(w, level, wlog.NewDefaultLogger[logging.WrappedLogV1], name, version, params...)
+	return NewFromCreator(w, level, wlog.NewDefaultLogger[wtypes.WrappedLogV1], name, version, params...)
 }
 
-func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[logging.WrappedLogV1], name, version string, params ...Param) Logger {
+func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[wtypes.WrappedLogV1], name, version string, params ...Param) Logger {
 	return &defaultLogger{
 		delegate: creator(w),
 		level:    level,

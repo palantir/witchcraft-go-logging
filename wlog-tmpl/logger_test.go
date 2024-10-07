@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
@@ -33,6 +32,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -85,7 +85,7 @@ func TestLogger(t *testing.T) {
 		{
 			Name: "diag1log",
 			LogFn: func(ctx context.Context) {
-				diag1log.FromContext(ctx).Diagnostic(logging.NewDiagnosticFromGeneric(logging.GenericDiagnostic{
+				diag1log.FromContext(ctx).Diagnostic(wtypes.NewDiagnosticFromGeneric(wtypes.GenericDiagnostic{
 					DiagnosticType: "myDiagnostic",
 					Value:          "hello world",
 				}))
@@ -131,11 +131,11 @@ func TestLogger(t *testing.T) {
 			out := &bytes.Buffer{}
 			ctx := context.Background()
 			provider := wlogtmpl.LoggerProvider(test.Config)
-			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, wlog.NewDefaultLoggerWithLoggerProvider[logging.ServiceLogV1](provider), svc1log.Origin("origin")))
-			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.DiagnosticLogV1](provider)))
-			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.EventLogV2](provider)))
-			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.MetricLogV1](provider)))
-			ctx = req2log.WithLogger(ctx, req2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.RequestLogV2](provider)))
+			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, wlog.NewDefaultLoggerWithLoggerProvider[wtypes.ServiceLogV1](provider), svc1log.Origin("origin")))
+			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[wtypes.DiagnosticLogV1](provider)))
+			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[wtypes.EventLogV2](provider)))
+			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[wtypes.MetricLogV1](provider)))
+			ctx = req2log.WithLogger(ctx, req2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[wtypes.RequestLogV2](provider)))
 
 			test.LogFn(ctx)
 

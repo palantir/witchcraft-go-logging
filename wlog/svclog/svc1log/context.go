@@ -17,8 +17,8 @@ package svc1log
 import (
 	"context"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
@@ -123,7 +123,7 @@ func FromContext(ctx context.Context) Logger {
 }
 
 func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]interface{}, unsafe map[string]interface{}) {
-	logEntry := new(logging.ServiceLogV1)
+	logEntry := new(wtypes.ServiceLogV1)
 	wloginternal.ApplyParams(logEntry, params...)
 	return logEntry.Params, logEntry.UnsafeParams
 }

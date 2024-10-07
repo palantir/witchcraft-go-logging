@@ -21,15 +21,15 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 var svc1LogType = &svc1LogTyper{
 	baseLogTyper: baseLogTyper{
 		typ:         "service.1",
 		defaultTmpl: `{{printf "%-5s" .Level}} {{printf "%-26s" (printf "[%s]" .Time)}}{{if .Origin}} {{.Origin}}:{{end}} {{.Message}}{{if .Params}} {{niceMap .Params}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}{{if .Stacktrace}}{{println}}{{.Stacktrace}}{{end}}`,
-		defaultObj:  logging.ServiceLogV1{},
+		defaultObj:  wtypes.ServiceLogV1{},
 	},
 }
 
@@ -48,7 +48,7 @@ func (r *svc1LogTyper) NewFormatter(tmpl string, params ...logentryformatter.Par
 }
 
 func (r *svc1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
-	var res logging.ServiceLogV1
+	var res wtypes.ServiceLogV1
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ var blankPlaceholderRegex = regexp.MustCompile(`{}`)
 
 var namedPlaceholderRegex = regexp.MustCompile(`{[^{}]+}`)
 
-func performRenderSubstitution(logEntry *logging.ServiceLogV1) {
+func performRenderSubstitution(logEntry *wtypes.ServiceLogV1) {
 	blankIdx := 0
 	logEntry.Message = blankPlaceholderRegex.ReplaceAllStringFunc(logEntry.Message, func(match string) string {
 		rv := match
@@ -88,16 +88,16 @@ func performRenderSubstitution(logEntry *logging.ServiceLogV1) {
 }
 
 var (
-	logLevelColors = map[logging.LogLevel_Value]*color.Color{
-		logging.LogLevel_WARN:  color.New(color.FgYellow),
-		logging.LogLevel_ERROR: color.New(color.FgRed),
+	logLevelColors = map[wtypes.LogLevel]*color.Color{
+		wtypes.LogLevelWARN:  color.New(color.FgYellow),
+		wtypes.LogLevelERROR: color.New(color.FgRed),
 	}
 )
 
 func ServiceLogLevelColorer(in interface{}) *color.Color {
-	sle, ok := in.(logging.ServiceLogV1)
+	sle, ok := in.(wtypes.ServiceLogV1)
 	if !ok {
 		return nil
 	}
-	return logLevelColors[sle.Level.Value()]
+	return logLevelColors[sle.Level]
 }

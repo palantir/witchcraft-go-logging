@@ -18,7 +18,6 @@ import (
 	"io"
 	"testing"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
@@ -36,6 +35,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 func TestSvc1Log(t *testing.T) {
@@ -112,7 +112,7 @@ func TestWrapped1Audit2Log(t *testing.T) {
 		entityName,
 		entityVersion,
 		func(w io.Writer) audit2log.Logger {
-			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Audit()
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Audit()
 		})
 }
 
@@ -120,7 +120,7 @@ func TestWrapped1Diag1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
 	wrapped1logtests.Diag1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) diag1log.Logger {
-		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Diagnostic()
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Diagnostic()
 	})
 }
 
@@ -128,7 +128,7 @@ func TestWrapped1Evt2Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
 	wrapped1logtests.Evt2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) evt2log.Logger {
-		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Event()
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Event()
 	})
 }
 
@@ -136,7 +136,7 @@ func TestWrapped1Metric1Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
 	wrapped1logtests.Metric1LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer) metric1log.Logger {
-		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Metric()
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Metric()
 	})
 }
 
@@ -144,7 +144,7 @@ func TestWrapped1Req2Log(t *testing.T) {
 	entityName := "entity"
 	entityVersion := "version"
 	wrapped1logtests.Req2LogJSONTestSuite(t, entityName, entityVersion, func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger {
-		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Request(params...)
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Request(params...)
 	})
 }
 
@@ -156,7 +156,7 @@ func TestWrapped1Svc1Log(t *testing.T) {
 		entityName,
 		entityVersion,
 		func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {
-			return wrapped1log.NewFromProvider(w, level, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Service(svc1log.Origin(origin))
+			return wrapped1log.NewFromProvider(w, level, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Service(svc1log.Origin(origin))
 		})
 }
 
@@ -168,6 +168,6 @@ func TestWrapped1Trc1Log(t *testing.T) {
 		entityName,
 		entityVersion,
 		func(w io.Writer) trc1log.Logger {
-			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[logging.WrappedLogV1], entityName, entityVersion).Trace()
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewDefaultLogger[wtypes.WrappedLogV1], entityName, entityVersion).Trace()
 		})
 }

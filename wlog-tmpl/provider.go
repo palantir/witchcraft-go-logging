@@ -18,10 +18,10 @@ import (
 	"io"
 
 	"github.com/palantir/pkg/bytesbuffers"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Config struct {
@@ -39,7 +39,7 @@ type Config struct {
 // Services which leverage log collection infrastructure should use a JSON-based provider.
 //
 // Nil configuration is valid and will result in the default behavior.
-func LoggerCreator[T logging.LogTypes](cfg *Config, params ...logentryformatter.Param) wlog.LoggerCreator[T] {
+func LoggerCreator[T wtypes.LogTypes](cfg *Config, params ...logentryformatter.Param) wlog.LoggerCreator[T] {
 	return wlog.NewDefaultLoggerWithLoggerProvider[T](LoggerProvider(cfg, params...))
 }
 

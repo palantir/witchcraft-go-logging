@@ -15,17 +15,17 @@
 package diag1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.DiagnosticLogV1).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.DiagnosticLogV1).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.DiagnosticLogV1]
+	logger wlog.Logger[wtypes.DiagnosticLogV1]
 }
 
-func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
+func (l *defaultLogger) Diagnostic(diagnostic wtypes.Diagnostic, params ...Param) {
 	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(diagnostic), params...)
 }

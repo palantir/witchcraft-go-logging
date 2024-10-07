@@ -21,8 +21,8 @@ import (
 
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 var diagnostics1LogType = &diagnostics1LogTyper{
@@ -54,13 +54,13 @@ type humanReadableDiagnostic struct {
 	ContentOnNewLine  bool
 }
 
-func (visitor *humanReadableDiagnostic) VisitGeneric(v logging.GenericDiagnostic) error {
+func (visitor *humanReadableDiagnostic) VisitGeneric(v wtypes.GenericDiagnostic) error {
 	visitor.SerializedContent = fmt.Sprintf("%v", v.Value)
 	visitor.ContentOnNewLine = false
 	return nil
 }
 
-func (visitor *humanReadableDiagnostic) VisitThreadDump(v logging.ThreadDumpV1) error {
+func (visitor *humanReadableDiagnostic) VisitThreadDump(v wtypes.ThreadDumpV1) error {
 	visitor.SerializedContent = formatThreadDumps(v, visitor.UnsafeParams)
 	visitor.ContentOnNewLine = true
 	return nil
@@ -73,20 +73,29 @@ func (visitor *humanReadableDiagnostic) VisitUnknown(typeName string) error {
 }
 
 func (r *diagnostics1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
-	var res logging.DiagnosticLogV1
+	var res wtypes.DiagnosticLogV1
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
 	}
-	diagnostic := humanReadableDiagnostic{UnsafeParams: res.UnsafeParams, Time: res.Time}
-
-	if err := res.Diagnostic.Accept(&diagnostic); err != nil {
-		return nil, err
+	switch {
+	case res.Diagnostic.Generic != nil:
+		return humanReadableDiagnostic{
+			SerializedContent: fmt.Sprintf("%v", res.Diagnostic.Generic.Value),
+			Time:              res.Time,
+			UnsafeParams:      res.UnsafeParams,
+		}, nil
+	case res.Diagnostic.ThreadDump != nil:
+		return humanReadableDiagnostic{
+			Time:              res.Time,
+			UnsafeParams:      res.UnsafeParams,
+			SerializedContent: formatThreadDumps(*res.Diagnostic.ThreadDump, res.UnsafeParams),
+		}, nil
+	default:
+		return humanReadableDiagnostic{UnsafeParams: res.UnsafeParams, Time: res.Time}, nil
 	}
-
-	return diagnostic, nil
 }
 
-func formatThreadDumps(v logging.ThreadDumpV1, unsafeParams map[string]interface{}) string {
+func formatThreadDumps(v wtypes.ThreadDumpV1, unsafeParams map[string]interface{}) string {
 	var sb strings.Builder
 	for _, thread := range v.Threads {
 		_, _ = sb.WriteString(fmt.Sprintf("%q tid=%d %s\n", extractThreadName(thread.Name, unsafeParams), *thread.Id, logentryformatter.NiceMap(thread.Params)))

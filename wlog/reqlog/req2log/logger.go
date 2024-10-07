@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 const (
@@ -68,10 +68,10 @@ type RouteInfo struct {
 }
 
 func New(w io.Writer, params ...LoggerCreatorParam) Logger {
-	return NewFromCreator(w, wlog.NewDefaultLogger[logging.RequestLogV2], params...)
+	return NewFromCreator(w, wlog.NewDefaultLogger[wtypes.RequestLogV2], params...)
 }
 
-func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.RequestLogV2], params ...LoggerCreatorParam) Logger {
+func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[wtypes.RequestLogV2], params ...LoggerCreatorParam) Logger {
 	loggerBuilder := &defaultLoggerBuilder{
 		loggerCreator: creator,
 		idsExtractor:  extractor.NewDefaultIDsExtractor(),
@@ -83,7 +83,7 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator[logging.RequestLogV2
 }
 
 type LoggerBuilder interface {
-	LoggerCreator(creator wlog.LoggerCreator[logging.RequestLogV2])
+	LoggerCreator(creator wlog.LoggerCreator[wtypes.RequestLogV2])
 	IdsExtractor(idsExtractor extractor.IDsFromRequest)
 
 	SafePathParams(safePathParams []string)
@@ -97,7 +97,7 @@ type LoggerBuilder interface {
 }
 
 type defaultLoggerBuilder struct {
-	loggerCreator wlog.LoggerCreator[logging.RequestLogV2]
+	loggerCreator wlog.LoggerCreator[wtypes.RequestLogV2]
 	idsExtractor  extractor.IDsFromRequest
 
 	safePathParams      []string
@@ -110,7 +110,7 @@ type defaultLoggerBuilder struct {
 	forbiddenHeaderParams []string
 }
 
-func (b *defaultLoggerBuilder) LoggerCreator(creator wlog.LoggerCreator[logging.RequestLogV2]) {
+func (b *defaultLoggerBuilder) LoggerCreator(creator wlog.LoggerCreator[wtypes.RequestLogV2]) {
 	b.loggerCreator = creator
 }
 

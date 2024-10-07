@@ -15,15 +15,15 @@
 package evt2log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.EventLogV2).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.EventLogV2).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.EventLogV2]
+	logger wlog.Logger[wtypes.EventLogV2]
 }
 
 func (l *defaultLogger) Event(name string, params ...Param) {

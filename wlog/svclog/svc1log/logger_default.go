@@ -15,15 +15,15 @@
 package svc1log
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
-var objectPool = wloginternal.NewPool((*logging.ServiceLogV1).Reset)
+var objectPool = wloginternal.NewPool((*wtypes.ServiceLogV1).Reset)
 
 type defaultLogger struct {
-	logger wlog.Logger[logging.ServiceLogV1]
+	logger wlog.Logger[wtypes.ServiceLogV1]
 	level  *wlog.AtomicLogLevel
 }
 

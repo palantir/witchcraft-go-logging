@@ -17,8 +17,8 @@ package svc1log
 import (
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type Logger interface {
@@ -30,10 +30,10 @@ type Logger interface {
 }
 
 func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
-	return NewFromCreator(w, level, wlog.NewDefaultLogger[logging.ServiceLogV1], params...)
+	return NewFromCreator(w, level, wlog.NewDefaultLogger[wtypes.ServiceLogV1], params...)
 }
 
-func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[logging.ServiceLogV1], params ...Param) Logger {
+func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LoggerCreator[wtypes.ServiceLogV1], params ...Param) Logger {
 	return &wrappedLogger{
 		logger: &defaultLogger{logger: creator(w), level: wlog.NewAtomicLogLevel(level)},
 		params: params,

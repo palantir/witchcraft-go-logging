@@ -23,15 +23,15 @@ import (
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type Diag1TestCase struct {
 	Name         string
-	Diagnostic   logging.Diagnostic
+	Diagnostic   wtypes.Diagnostic
 	UnsafeParams map[string]interface{}
 	JSONMatcher  objmatcher.MapMatcher
 }
@@ -40,7 +40,7 @@ func Diag1TestCases(entityName, entityVersion string) []Diag1TestCase {
 	return []Diag1TestCase{
 		{
 			Name: "generic diagnostic log entry",
-			Diagnostic: logging.NewDiagnosticFromGeneric(logging.GenericDiagnostic{
+			Diagnostic: wtypes.NewDiagnosticFromGeneric(wtypes.GenericDiagnostic{
 				DiagnosticType: "DIAG_TYPE",
 				Value: map[string]string{
 					"testKey": "test_value",
@@ -76,12 +76,12 @@ func Diag1TestCases(entityName, entityVersion string) []Diag1TestCase {
 		},
 		{
 			Name: "thread dump diagnostic log entry",
-			Diagnostic: logging.NewDiagnosticFromThreadDump(logging.ThreadDumpV1{
-				Threads: []logging.ThreadInfoV1{
+			Diagnostic: wtypes.NewDiagnosticFromThreadDump(wtypes.ThreadDumpV1{
+				Threads: []wtypes.ThreadInfoV1{
 					{
 						Id:   safeLongVal(13),
 						Name: stringVal("testName"),
-						StackTrace: []logging.StackFrameV1{
+						StackTrace: []wtypes.StackFrameV1{
 							{
 								Address:   stringVal("address_val"),
 								Procedure: stringVal("procedure_val"),

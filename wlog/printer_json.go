@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/palantir/witchcraft-go-logging/wapi/logging"
+	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // jsonPrinter is a Printer that writes JSON-marshaled log objects to an output.
@@ -31,7 +31,7 @@ func JSONPrinter(out io.Writer) Printer {
 	return jsonPrinter{out: out}
 }
 
-func (p jsonPrinter) Print(log logging.LogType) error {
+func (p jsonPrinter) Print(log wtypes.LogType) error {
 	enc := json.NewEncoder(p.out)
 	enc.SetEscapeHTML(false)
 	// json.Encoder appends a newline after each JSON object.
