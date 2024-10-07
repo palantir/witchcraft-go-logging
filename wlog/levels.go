@@ -104,7 +104,7 @@ func (l LogLevel) ToLoggingType() logging.LogLevel {
 	case FatalLevel:
 		return logging.LogLevelFATAL
 	default:
-		panic(fmt.Sprintf("unknown log level: %s", l))
+		return ""
 	}
 }
 

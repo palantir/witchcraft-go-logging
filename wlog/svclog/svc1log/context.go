@@ -27,6 +27,50 @@ type svc1LogContextKeyType string
 
 const contextKey = svc1LogContextKeyType(TypeValue)
 
+// Debug uses the logger stored in the context to emit an service.1 log with level DEBUG.
+func Debug(ctx context.Context, msg string, params ...Param) {
+	// If the logger is a wrappedLogger, skip a stack frame to maintain the correct caller information.
+	switch logger := FromContext(ctx).(type) {
+	case *wrappedLogger:
+		logger.debug(msg, params...)
+	default:
+		logger.Debug(msg, params...)
+	}
+}
+
+// Info uses the logger stored in the context to emit an service.1 log with level INFO.
+func Info(ctx context.Context, msg string, params ...Param) {
+	// If the logger is a wrappedLogger, skip a stack frame to maintain the correct caller information.
+	switch logger := FromContext(ctx).(type) {
+	case *wrappedLogger:
+		logger.info(msg, params...)
+	default:
+		logger.Info(msg, params...)
+	}
+}
+
+// Warn uses the logger stored in the context to emit an service.1 log with level WARN.
+func Warn(ctx context.Context, msg string, params ...Param) {
+	// If the logger is a wrappedLogger, skip a stack frame to maintain the correct caller information.
+	switch logger := FromContext(ctx).(type) {
+	case *wrappedLogger:
+		logger.warn(msg, params...)
+	default:
+		logger.Warn(msg, params...)
+	}
+}
+
+// Error uses the logger stored in the context to emit an service.1 log with level ERROR.
+func Error(ctx context.Context, msg string, params ...Param) {
+	// If the logger is a wrappedLogger, skip a stack frame to maintain the correct caller information.
+	switch logger := FromContext(ctx).(type) {
+	case *wrappedLogger:
+		logger.error(msg, params...)
+	default:
+		logger.Error(msg, params...)
+	}
+}
+
 // WithLogger returns a copy of the provided context with the provided Logger included as a value. This operation will
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
 // logger).

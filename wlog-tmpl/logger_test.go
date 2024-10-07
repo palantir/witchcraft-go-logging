@@ -17,7 +17,6 @@ package wlogtmpl_test
 import (
 	"bytes"
 	"context"
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -132,13 +131,11 @@ func TestLogger(t *testing.T) {
 			out := &bytes.Buffer{}
 			ctx := context.Background()
 			provider := wlogtmpl.LoggerProvider(test.Config)
-			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, func(w io.Writer) wlog.Logger[logging.ServiceLogV1] {
-				return wlog.NewDefaultLoggerWithPrinter[logging.ServiceLogV1](provider(w))
-			}, svc1log.Origin("origin")))
-			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, provider.NewLogger))
-			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, provider.NewLogger))
-			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, provider.NewLogger))
-			ctx = context.WithValue(ctx, "req2log", req2log.NewFromCreator(out, provider.NewLogger))
+			ctx = svc1log.WithLogger(ctx, svc1log.NewFromCreator(out, wlog.InfoLevel, wlog.NewDefaultLoggerWithLoggerProvider[logging.ServiceLogV1](provider), svc1log.Origin("origin")))
+			ctx = diag1log.WithLogger(ctx, diag1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.DiagnosticLogV1](provider)))
+			ctx = evt2log.WithLogger(ctx, evt2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.EventLogV2](provider)))
+			ctx = metric1log.WithLogger(ctx, metric1log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.MetricLogV1](provider)))
+			ctx = req2log.WithLogger(ctx, req2log.NewFromCreator(out, wlog.NewDefaultLoggerWithLoggerProvider[logging.RequestLogV2](provider)))
 
 			test.LogFn(ctx)
 

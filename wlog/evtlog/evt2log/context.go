@@ -25,6 +25,11 @@ type evt2LogContextKeyType string
 
 const contextKey = evt2LogContextKeyType(TypeValue)
 
+// Event uses the logger stored in the context to emit an event.2 log.
+func Event(ctx context.Context, name string, params ...Param) {
+	FromContext(ctx).Event(name, params...)
+}
+
 // WithLogger returns a copy of the provided context with the provided Logger included as a value. This operation will
 // replace any logger that was previously set on the context (along with all parameters that may have been set on the
 // logger).

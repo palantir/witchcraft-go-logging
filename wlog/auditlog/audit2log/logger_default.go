@@ -27,5 +27,5 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
-	wloginternal.LogObject(l.logger, objectPool, defaultParam(name, result), params...)
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(name, result), params...)
 }

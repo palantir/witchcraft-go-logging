@@ -27,5 +27,5 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
-	wloginternal.LogObject(l.logger, objectPool, defaultParam(diagnostic), params...)
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(diagnostic), params...)
 }

@@ -32,7 +32,7 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
-	wloginternal.LogObject(l.logger, objectPool, defaultParam(span), params...)
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(span), params...)
 }
 
 func (l *defaultLogger) Send(span wtracing.SpanModel) {

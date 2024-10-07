@@ -27,5 +27,5 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Metric(name, typ string, params ...Param) {
-	wloginternal.LogObject(l.logger, objectPool, defaultParam(name, typ), params...)
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(name, typ), params...)
 }

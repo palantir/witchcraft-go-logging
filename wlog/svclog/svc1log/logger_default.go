@@ -45,7 +45,7 @@ func (l *defaultLogger) Error(msg string, params ...Param) {
 
 func (l *defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
 	if l.Enabled(level) {
-		wloginternal.LogObject(l.logger, objectPool, defaultParam(level, msg), params...)
+		wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(level, msg), params...)
 	}
 }
 

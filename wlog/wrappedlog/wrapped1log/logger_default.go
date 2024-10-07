@@ -69,21 +69,21 @@ func (l *defaultLogger) Trace() trc1log.Logger {
 // When an underlying log object is constructed and passed to the Print method,
 // the delegate WrappedLogV1 logger is called with a new WrappedLogV1Payload object.
 type wrappedPrinter[T logging.LogTypes] struct {
-	delegate   wlog.Logger[logging.WrappedLogV1]
+	logger     wlog.Logger[logging.WrappedLogV1]
 	newPayload func(payload T) logging.WrappedLogV1Payload
 	params     []Param
 }
 
 func wrapPrinter[T logging.LogTypes](
-	delegate wlog.Logger[logging.WrappedLogV1],
+	logger wlog.Logger[logging.WrappedLogV1],
 	newPayload func(payload T) logging.WrappedLogV1Payload,
 	params []Param,
 ) wlog.LoggerCreator[T] {
-	printer := wrappedPrinter[T]{delegate: delegate, newPayload: newPayload, params: params}
+	printer := wrappedPrinter[T]{logger: logger, newPayload: newPayload, params: params}
 	return func(io.Writer) wlog.Logger[T] { return wlog.NewDefaultLoggerWithPrinter[T](printer) }
 }
 
-func (p wrappedPrinter[T]) Print(obj logging.LogType) error {
-	wloginternal.LogObject(p.delegate, objectPool, defaultParam(p.newPayload(obj.(T))), p.params...)
+func (l wrappedPrinter[T]) Print(obj logging.LogType) error {
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(l.newPayload(obj.(T))), l.params...)
 	return nil
 }

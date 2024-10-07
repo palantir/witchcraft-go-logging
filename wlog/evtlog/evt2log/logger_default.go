@@ -27,5 +27,5 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Event(name string, params ...Param) {
-	wloginternal.LogObject(l.logger, objectPool, defaultParam(name), params...)
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(name), params...)
 }

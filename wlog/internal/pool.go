@@ -22,7 +22,7 @@ import (
 
 // SyncPool exposes a sync.Pool with a reset function for the type T.
 // The reset function is called on every object before it is returned to the pool.
-type SyncPool[T logging.LogType] struct {
+type SyncPool[T logging.LogTypes] struct {
 	pool  sync.Pool
 	reset func(*T)
 }

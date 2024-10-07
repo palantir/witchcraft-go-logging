@@ -1,15 +1,28 @@
+// Copyright (c) 2024 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package wloginternal
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wapi/logging"
-	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
 // LogObject logs a log object with the given parameters to the provided logger.
 // The heap object is retrieved and released using the objectPool.
 // The defaultParam is applied first, followed by the params.
 func LogObject[T logging.LogTypes](
-	logger wlog.Logger[T],
+	logger func(*T),
 	objectPool *SyncPool[T],
 	defaultParam Param[T],
 	params ...Param[T],
@@ -17,6 +30,6 @@ func LogObject[T logging.LogTypes](
 	log := objectPool.Get()
 	ApplyParams(log, defaultParam)
 	ApplyParams(log, params...)
-	logger.Log(log)
+	logger(log)
 	objectPool.Put(log)
 }

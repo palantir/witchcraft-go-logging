@@ -38,7 +38,7 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Request(r Request) {
-	wloginternal.LogObject(l.logger, objectPool, ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
+	wloginternal.LogObject(l.logger.Log, objectPool, ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
 }
 
 func (l *defaultLogger) PathParamPerms() ParamPerms {

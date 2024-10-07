@@ -24,18 +24,34 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Debug(msg string, params ...Param) {
+	w.debug(msg, params...)
+}
+
+func (w *wrappedLogger) debug(msg string, params ...Param) {
 	w.logger.Debug(msg, append(w.params, params...)...)
 }
 
 func (w *wrappedLogger) Info(msg string, params ...Param) {
+	w.info(msg, params...)
+}
+
+func (w *wrappedLogger) info(msg string, params ...Param) {
 	w.logger.Info(msg, append(w.params, params...)...)
 }
 
 func (w *wrappedLogger) Warn(msg string, params ...Param) {
+	w.warn(msg, params...)
+}
+
+func (w *wrappedLogger) warn(msg string, params ...Param) {
 	w.logger.Warn(msg, append(w.params, params...)...)
 }
 
 func (w *wrappedLogger) Error(msg string, params ...Param) {
+	w.error(msg, params...)
+}
+
+func (w *wrappedLogger) error(msg string, params ...Param) {
 	w.logger.Error(msg, append(w.params, params...)...)
 }
 
