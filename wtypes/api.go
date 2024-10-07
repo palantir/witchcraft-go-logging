@@ -25,15 +25,6 @@ type LogType interface {
 	logType() // marker method for the sealed interface.
 }
 
-func (AuditLogV2) logType()      {}
-func (DiagnosticLogV1) logType() {}
-func (EventLogV2) logType()      {}
-func (MetricLogV1) logType()     {}
-func (RequestLogV2) logType()    {}
-func (ServiceLogV1) logType()    {}
-func (TraceLogV1) logType()      {}
-func (WrappedLogV1) logType()    {}
-
 var _, _, _, _, _, _, _, _ LogType = AuditLogV2{}, DiagnosticLogV1{}, EventLogV2{}, MetricLogV1{}, RequestLogV2{}, ServiceLogV1{}, TraceLogV1{}, WrappedLogV1{}
 
 // shared string aliases

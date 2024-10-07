@@ -23,7 +23,6 @@ import (
 	"github.com/palantir/pkg/datetime"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-logging/wtypes"
 	wparams "github.com/palantir/witchcraft-go-params"
@@ -37,10 +36,10 @@ type Param = wloginternal.Param[wtypes.ServiceLogV1]
 
 type paramFunc = wloginternal.ParamFunc[wtypes.ServiceLogV1]
 
-func defaultParam(level wlog.LogLevel, message string) Param {
+func defaultParam(level wtypes.LogLevel, message string) Param {
 	return paramFunc(func(l *wtypes.ServiceLogV1) {
 		l.Type = TypeValue
-		l.Level = level.ToLoggingType()
+		l.Level = level
 		l.Time = datetime.DateTime(time.Now())
 		l.Message = message
 	})

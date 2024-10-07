@@ -57,3 +57,5 @@ func (log *MetricLogV1) Reset() {
 	log.TokenId = nil
 	clear(log.UnsafeParams)
 }
+
+func (MetricLogV1) logType() {}

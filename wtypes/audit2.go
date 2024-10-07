@@ -71,3 +71,5 @@ func (log *AuditLogV2) Reset() {
 	clear(log.ResultParams)
 	clear(log.RequestParams)
 }
+
+func (AuditLogV2) logType() {}

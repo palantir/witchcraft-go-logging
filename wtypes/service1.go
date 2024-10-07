@@ -79,3 +79,5 @@ func (log *ServiceLogV1) Reset() {
 	clear(log.UnsafeParams)
 	clear(log.Tags)
 }
+
+func (ServiceLogV1) logType() {}

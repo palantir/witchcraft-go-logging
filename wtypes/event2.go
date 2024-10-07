@@ -57,3 +57,5 @@ func (log *EventLogV2) Reset() {
 	clear(log.UnsafeParams)
 	clear(log.Tags)
 }
+
+func (EventLogV2) logType() {}

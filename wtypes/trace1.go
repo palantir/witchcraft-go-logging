@@ -40,6 +40,25 @@ type TraceLogV1 struct {
 	Span Span `json:"span"`
 }
 
+func (log *TraceLogV1) Reset() {
+	log.Type = ""
+	log.Time = datetime.DateTime{}
+	log.Uid = nil
+	log.Sid = nil
+	log.TokenId = nil
+	clear(log.UnsafeParams)
+	log.Span.TraceId = ""
+	log.Span.Id = ""
+	log.Span.Name = ""
+	log.Span.ParentId = nil
+	log.Span.Timestamp = 0
+	log.Span.Duration = 0
+	clear(log.Span.Annotations)
+	clear(log.Span.Tags)
+}
+
+func (TraceLogV1) logType() {}
+
 type Span struct {
 	// 16-digit hex trace identifier
 	TraceId string `json:"traceId"`
@@ -75,21 +94,4 @@ type Endpoint struct {
 	Ipv4 *string `json:"ipv4,omitempty"`
 	// IPv6 address of the machine that generated this annotation (standard hextet form)
 	Ipv6 *string `json:"ipv6,omitempty"`
-}
-
-func (log *TraceLogV1) Reset() {
-	log.Type = ""
-	log.Time = datetime.DateTime{}
-	log.Uid = nil
-	log.Sid = nil
-	log.TokenId = nil
-	clear(log.UnsafeParams)
-	log.Span.TraceId = ""
-	log.Span.Id = ""
-	log.Span.Name = ""
-	log.Span.ParentId = nil
-	log.Span.Timestamp = 0
-	log.Span.Duration = 0
-	clear(log.Span.Annotations)
-	clear(log.Span.Tags)
 }

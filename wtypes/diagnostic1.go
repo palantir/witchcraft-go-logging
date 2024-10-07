@@ -39,6 +39,8 @@ func (log *DiagnosticLogV1) Reset() {
 	clear(log.UnsafeParams)
 }
 
+func (DiagnosticLogV1) logType() {}
+
 type Diagnostic struct {
 	Type       string             `json:"type"`
 	Generic    *GenericDiagnostic `json:"generic,omitempty"`

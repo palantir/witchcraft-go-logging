@@ -16,21 +16,22 @@ package wloginternal
 
 import (
 	"sync"
-
-	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 // SyncPool exposes a sync.Pool with a reset function for the type T.
 // The reset function is called on every object before it is returned to the pool.
-type SyncPool[T wtypes.LogTypes] struct {
+type SyncPool[T any] struct {
 	pool  sync.Pool
 	reset func(*T)
 }
 
 // NewPool returns a new SyncPool whose Get() returns a new pointer to a zero-value T
 // and a closure to reset the object and return it to the pool.
-func NewPool[T wtypes.LogTypes](reset func(*T)) *SyncPool[T] {
-	return &SyncPool[T]{pool: sync.Pool{New: func() any { return new(T) }}, reset: reset}
+func NewPool[T any](reset func(*T)) *SyncPool[T] {
+	return &SyncPool[T]{
+		pool:  sync.Pool{New: func() any { return new(T) }},
+		reset: reset,
+	}
 }
 
 func (p *SyncPool[T]) Get() *T {

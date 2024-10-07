@@ -27,6 +27,15 @@ type WrappedLogV1 struct {
 	EntityVersion string `json:"entityVersion"`
 }
 
+func (log *WrappedLogV1) Reset() {
+	log.Type = ""
+	log.Payload = WrappedLogV1Payload{}
+	log.EntityName = ""
+	log.EntityVersion = ""
+}
+
+func (WrappedLogV1) logType() {}
+
 type WrappedLogV1Payload struct {
 	Type            string           `json:"type"`
 	ServiceLogV1    *ServiceLogV1    `json:"serviceLogV1,omitempty"`
@@ -64,11 +73,4 @@ func NewWrappedLogV1PayloadFromAuditLogV2(v AuditLogV2) WrappedLogV1Payload {
 
 func NewWrappedLogV1PayloadFromDiagnosticLogV1(v DiagnosticLogV1) WrappedLogV1Payload {
 	return WrappedLogV1Payload{Type: "diagnosticLogV1", DiagnosticLogV1: &v}
-}
-
-func (log *WrappedLogV1) Reset() {
-	log.Type = ""
-	log.Payload = WrappedLogV1Payload{}
-	log.EntityName = ""
-	log.EntityVersion = ""
 }

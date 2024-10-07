@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"strings"
 	"sync/atomic"
-
-	"github.com/palantir/witchcraft-go-logging/wtypes"
 )
 
 type LevelChecker interface {
@@ -39,20 +37,20 @@ const (
 )
 
 func (l *LogLevel) UnmarshalText(b []byte) error {
-	switch strings.ToLower(string(b)) {
-	case string(DebugLevel):
+	switch LogLevel(strings.ToLower(string(b))) {
+	case DebugLevel:
 		*l = DebugLevel
 		return nil
-	case "", string(InfoLevel):
+	case "", InfoLevel:
 		*l = InfoLevel
 		return nil
-	case string(WarnLevel):
+	case WarnLevel:
 		*l = WarnLevel
 		return nil
-	case string(ErrorLevel):
+	case ErrorLevel:
 		*l = ErrorLevel
 		return nil
-	case string(FatalLevel):
+	case FatalLevel:
 		*l = FatalLevel
 		return nil
 	default:
@@ -89,23 +87,6 @@ func (l LogLevel) Enabled(other LogLevel) bool {
 		}
 	}
 	return false
-}
-
-func (l LogLevel) ToLoggingType() wtypes.LogLevel {
-	switch l {
-	case DebugLevel:
-		return wtypes.LogLevelDEBUG
-	case InfoLevel:
-		return wtypes.LogLevelINFO
-	case WarnLevel:
-		return wtypes.LogLevelWARN
-	case ErrorLevel:
-		return wtypes.LogLevelERROR
-	case FatalLevel:
-		return wtypes.LogLevelFATAL
-	default:
-		return ""
-	}
 }
 
 // AtomicLogLevel wraps atomic.Value containing a LogLevel.

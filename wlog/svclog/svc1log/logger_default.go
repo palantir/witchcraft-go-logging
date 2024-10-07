@@ -28,25 +28,31 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Debug(msg string, params ...Param) {
-	l.log(wlog.DebugLevel, msg, params...)
+	if l.Enabled(wlog.DebugLevel) {
+		l.log(wtypes.LogLevelDEBUG, msg, params...)
+	}
 }
 
 func (l *defaultLogger) Info(msg string, params ...Param) {
-	l.log(wlog.InfoLevel, msg, params...)
+	if l.Enabled(wlog.InfoLevel) {
+		l.log(wtypes.LogLevelINFO, msg, params...)
+	}
 }
 
 func (l *defaultLogger) Warn(msg string, params ...Param) {
-	l.log(wlog.WarnLevel, msg, params...)
+	if l.Enabled(wlog.WarnLevel) {
+		l.log(wtypes.LogLevelWARN, msg, params...)
+	}
 }
 
 func (l *defaultLogger) Error(msg string, params ...Param) {
-	l.log(wlog.ErrorLevel, msg, params...)
+	if l.Enabled(wlog.ErrorLevel) {
+		l.log(wtypes.LogLevelERROR, msg, params...)
+	}
 }
 
-func (l *defaultLogger) log(level wlog.LogLevel, msg string, params ...Param) {
-	if l.Enabled(level) {
-		wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(level, msg), params...)
-	}
+func (l *defaultLogger) log(level wtypes.LogLevel, msg string, params ...Param) {
+	wloginternal.LogObject(l.logger.Log, objectPool, defaultParam(level, msg), params...)
 }
 
 func (l *defaultLogger) SetLevel(level wlog.LogLevel) {

@@ -34,12 +34,12 @@ type Config struct {
 	DelegatePrinter wlog.LoggerProvider
 }
 
-// LoggerCreator returns a wlog.LoggerCreator which formats log entries with wlog templates.
+// DefaultLoggerCreator returns a wlog.LoggerCreator which formats log entries with wlog templates.
 // The default templates give a human-friendly output suitable for command-line tools.
 // Services which leverage log collection infrastructure should use a JSON-based provider.
 //
 // Nil configuration is valid and will result in the default behavior.
-func LoggerCreator[T wtypes.LogTypes](cfg *Config, params ...logentryformatter.Param) wlog.LoggerCreator[T] {
+func DefaultLoggerCreator[T wtypes.LogTypes](cfg *Config, params ...logentryformatter.Param) wlog.LoggerCreator[T] {
 	return wlog.NewDefaultLoggerWithLoggerProvider[T](LoggerProvider(cfg, params...))
 }
 

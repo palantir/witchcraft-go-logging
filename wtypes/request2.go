@@ -73,3 +73,5 @@ func (log *RequestLogV2) Reset() {
 	log.TraceId = nil
 	clear(log.UnsafeParams)
 }
+
+func (RequestLogV2) logType() {}
