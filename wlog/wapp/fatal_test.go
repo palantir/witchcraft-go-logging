@@ -145,11 +145,11 @@ goroutine \d+ \[running]:
 panic\(\.\.\.\)
 	runtime/panic\.go:\d+ \+0x[0-9a-f]+
 github\.com/palantir/witchcraft-go-logging/wlog/wapp_test\.TestRunWithRecoveryLogging_NilPointer\.func1\(\.\.\.\)
-	.+/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
 github\.com/palantir/witchcraft-go-logging/wlog/wapp\.RunWithRecoveryLogging\(\.\.\.\)
-	.+/wlog/wapp/fatal\.go:\d+ \+0x[0-9a-f]+
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal\.go:\d+ \+0x[0-9a-f]+
 github\.com/palantir/witchcraft-go-logging/wlog/wapp_test\.TestRunWithRecoveryLogging_NilPointer\(\.\.\.\)
-	.+/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
+	github\.com/palantir/witchcraft-go-logging/wlog/wapp/fatal_test\.go:\d+ \+0x[0-9a-f]+
 testing\.tRunner\(\.\.\.\)
 	testing/testing\.go:\d+ \+0x[0-9a-f]+
 created by testing\.\(\*T\)\.Run( in goroutine \d+)?\(\.\.\.\)

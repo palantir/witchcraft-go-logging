@@ -72,7 +72,7 @@ func TestSvc1ZapWrapper(t *testing.T) {
 			"time":    objmatcher.NewRegExpMatcher(".+"),
 			"message": objmatcher.NewEqualsMatcher("logr 2"),
 			"type":    objmatcher.NewEqualsMatcher(svc1log.TypeValue),
-			"origin":  objmatcher.NewRegExpMatcher("^.+/adapters/svc1zap/svc1zap_test.go:\\d+"),
+			"origin":  objmatcher.NewRegExpMatcher("^github.com/palantir/witchcraft-go-logging/adapters/svc1zap/svc1zap_test.go:\\d+"),
 			"params": objmatcher.MapMatcher{
 				"safeString": objmatcher.NewEqualsMatcher("string"),
 			},

@@ -14,7 +14,7 @@ plugins:
           linux-amd64: ac50a961c95657a92105c417671b8d18dfe45da0019e72cdac0b9f5938f2ea4c
 environment:
   GO111MODULE: "on"
-  GOFLAGS: "-mod=vendor"
+  GOFLAGS: "-mod=vendor -trimpath"
 exclude:
   names:
     - \..+
