@@ -17,7 +17,7 @@ require (
 	github.com/palantir/witchcraft-go-params v1.36.0
 	github.com/palantir/witchcraft-go-tracing v1.38.0
 	github.com/rs/zerolog v1.33.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.4.0
 )
