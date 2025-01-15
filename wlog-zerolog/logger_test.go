@@ -22,6 +22,7 @@ import (
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -122,6 +123,18 @@ func TestWrapped1Audit2Log(t *testing.T) {
 		entityVersion,
 		func(w io.Writer) audit2log.Logger {
 			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).Audit()
+		})
+}
+
+func TestWrapped1Audit3Log(t *testing.T) {
+	entityName := "entity"
+	entityVersion := "version"
+	wrapped1logtests.Audit3LogJSONTestSuite(
+		t,
+		entityName,
+		entityVersion,
+		func(w io.Writer) audit3log.Logger {
+			return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlogzerolog.LoggerProvider(), entityName, entityVersion).AuditV3()
 		})
 }
 

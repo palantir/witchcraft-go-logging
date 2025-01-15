@@ -20,5 +20,5 @@ import (
 )
 
 func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
-	return auditloginternal.Audit2ToParams(name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+	return auditloginternal.Audit2ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
 }

@@ -15,7 +15,7 @@
 package auditloginternal
 
 import (
-	"time"
+	"maps"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
@@ -38,12 +38,19 @@ type Audit2Param struct {
 	Param AuditParam
 }
 
-func Audit2ToParams(name string, result AuditResultType, inParams []Audit2Param) []wlog.Param {
+func Audit2ToParams(atLogTimeValuesProvider *atLogTimeValues, name string, result AuditResultType, inParams []Audit2Param) []wlog.Param {
+	if atLogTimeValuesProvider == nil {
+		atLogTimeValuesProvider = &atLogTimeValues{}
+	}
 	outParams := make([]wlog.Param, 1+len(inParams))
 	outParams[0] = wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, Audit2TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
+		entry.StringValue(wlog.TimeKey, atLogTimeValuesProvider.getOrComputeTimeValue())
 		auditNameResultParam(name, result).Audit2ParamFn(entry)
+		// if LogEntryID value has been set, use it; otherwise, do not log/generate it
+		if logEntryIDValue := atLogTimeValuesProvider.getLogEntryIDValue(); logEntryIDValue != nil {
+			Audit3LogEntryID(*logEntryIDValue).Param.Audit2ParamFn(entry)
+		}
 	})
 	for idx := range inParams {
 		outParams[1+idx] = wlog.NewParam(inParams[idx].Param.Audit2ParamFn)
@@ -87,6 +94,9 @@ func Audit2OtherUIDs(otherUIDs ...string) Audit2Param {
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.StringListValue(Audit2OtherUIDsKey, otherUIDs)
 			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				// do nothing
+			},
 		},
 	}
 }
@@ -97,33 +107,47 @@ func Audit2Origin(origin string) Audit2Param {
 	}
 }
 
-func Audit2RequestParam(key string, value interface{}) Audit2Param {
-	return Audit2RequestParams(map[string]interface{}{
+func Audit2RequestParam(key string, value any) Audit2Param {
+	return Audit2RequestParams(map[string]any{
 		key: value,
 	})
 }
 
-func Audit2RequestParams(requestParams map[string]interface{}) Audit2Param {
+func Audit2RequestParams(requestParams map[string]any) Audit2Param {
 	return Audit2Param{
 		Param: AuditParam{
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.AnyMapValue(Audit2RequestParamsKey, requestParams)
 			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				if categoryVal, ok := requestParams["category"]; ok {
+					if categoryValString, ok := categoryVal.(string); ok {
+						requestParams = maps.Clone(requestParams)
+						delete(requestParams, "category")
+
+						entry.StringListValue(Audit3CategoriesKey, []string{categoryValString})
+					}
+				}
+				entry.AnyMapValue(Audit3RequestFieldsKey, requestParams)
+			},
 		},
 	}
 }
 
-func Audit2ResultParam(key string, value interface{}) Audit2Param {
-	return Audit2ResultParams(map[string]interface{}{
+func Audit2ResultParam(key string, value any) Audit2Param {
+	return Audit2ResultParams(map[string]any{
 		key: value,
 	})
 }
 
-func Audit2ResultParams(resultParams map[string]interface{}) Audit2Param {
+func Audit2ResultParams(resultParams map[string]any) Audit2Param {
 	return Audit2Param{
 		Param: AuditParam{
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.AnyMapValue(Audit2ResultParamsKey, resultParams)
+			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				entry.AnyMapValue(Audit3ResultFieldsKey, resultParams)
 			},
 		},
 	}
