@@ -32,10 +32,15 @@ func (a *audit2LoggerImpl) Audit(name string, result AuditResultType, params ...
 	a.logger.Audit2(name, result, params...)
 }
 
-func Audit2NewFromCreator(audit2Writer io.Writer, creator wlog.LoggerCreator) Audit2Logger {
+func Audit2NewFromCreator(audit2Writer, audit3Writer io.Writer, creator wlog.LoggerCreator) Audit2Logger {
+	var audit3Logger wlog.Logger
+	if audit3Writer != nil {
+		audit3Logger = creator(audit3Writer)
+	}
 	return &audit2LoggerImpl{
 		logger: &logger{
 			audit2Logger: creator(audit2Writer),
+			audit3Logger: audit3Logger,
 		},
 	}
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package audit2log
+package audit3log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -20,5 +20,5 @@ import (
 )
 
 func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
-	return auditloginternal.Audit2ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+	return auditloginternal.Audit3ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
 }

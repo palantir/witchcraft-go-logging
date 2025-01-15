@@ -20,6 +20,24 @@ import (
 
 type AuditParam struct {
 	Audit2ParamFn func(entry wlog.LogEntry)
+	Audit3ParamFn func(entry wlog.LogEntry)
+}
+
+// MultiAuditParam returns a new AuditParam that is the functional equivalent of applying each of the provided audit
+// params in order.
+func MultiAuditParam(in ...AuditParam) AuditParam {
+	return AuditParam{
+		Audit2ParamFn: func(entry wlog.LogEntry) {
+			for _, param := range in {
+				param.Audit2ParamFn(entry)
+			}
+		},
+		Audit3ParamFn: func(entry wlog.LogEntry) {
+			for _, param := range in {
+				param.Audit3ParamFn(entry)
+			}
+		},
+	}
 }
 
 func auditNameResultParam(name string, resultType AuditResultType) AuditParam {
@@ -27,6 +45,10 @@ func auditNameResultParam(name string, resultType AuditResultType) AuditParam {
 		Audit2ParamFn: func(entry wlog.LogEntry) {
 			entry.StringValue(Audit2NameKey, name)
 			entry.StringValue(Audit2ResultKey, string(resultType))
+		},
+		Audit3ParamFn: func(entry wlog.LogEntry) {
+			entry.StringValue(Audit3NameKey, name)
+			entry.StringValue(Audit3ResultKey, string(resultType))
 		},
 	}
 }
@@ -66,11 +88,15 @@ func originParam(origin string) AuditParam {
 		Audit2ParamFn: func(entry wlog.LogEntry) {
 			entry.OptionalStringValue(Audit2OriginKey, origin)
 		},
+		Audit3ParamFn: func(entry wlog.LogEntry) {
+			entry.OptionalStringValue(Audit3OriginKey, origin)
+		},
 	}
 }
 
 func sameImplParamFn(fn func(entry wlog.LogEntry)) AuditParam {
 	return AuditParam{
 		Audit2ParamFn: fn,
+		Audit3ParamFn: fn,
 	}
 }
