@@ -1,0 +1,296 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package audit3logtests
+
+import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"testing"
+
+	"github.com/palantir/pkg/objmatcher"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+type TestCase struct {
+	TestCaseName string
+
+	Deployment     string
+	Host           string
+	Product        string
+	ProductVersion string
+	Stack          string
+	Service        string
+	Environment    string
+	ProducerType   audit3log.AuditProducerType
+	Organizations  []audit3log.Organization
+	EventID        string
+	UserAgent      string
+	Categories     []string
+	Entities       []any
+	Users          []audit3log.ContextualizedUser
+	Origins        []string
+	SourceOrigin   string
+	RequestFields  map[string]any
+	ResultFields   map[string]any
+	UID            string
+	SID            string
+	TokenID        string
+	OrgID          string
+	TraceID        string
+	Origin         string
+	Name           string
+	Result         audit3log.AuditResultType
+	JSONMatcher    objmatcher.MapMatcher
+}
+
+func (tc TestCase) Params() []audit3log.Param {
+	return []audit3log.Param{
+		audit3log.Deployment(tc.Deployment),
+		audit3log.Host(tc.Host),
+		audit3log.Product(tc.Product),
+		audit3log.ProductVersion(tc.ProductVersion),
+		audit3log.Stack(tc.Stack),
+		audit3log.Service(tc.Service),
+		audit3log.Environment(tc.Environment),
+		audit3log.ProducerType(tc.ProducerType),
+		audit3log.Organizations(tc.Organizations),
+		audit3log.EventID(tc.EventID),
+		audit3log.UserAgent(tc.UserAgent),
+		audit3log.Categories(tc.Categories),
+		audit3log.Entities(tc.Entities),
+		audit3log.Users(tc.Users),
+		audit3log.Origins(tc.Origins),
+		audit3log.SourceOrigin(tc.SourceOrigin),
+		audit3log.RequestFields(tc.RequestFields),
+		audit3log.ResultFields(tc.ResultFields),
+		audit3log.UID(tc.UID),
+		audit3log.SID(tc.SID),
+		audit3log.TokenID(tc.TokenID),
+		audit3log.OrgID(tc.OrgID),
+		audit3log.TraceID(tc.TraceID),
+		audit3log.Origin(tc.Origin),
+	}
+}
+
+func TestCases() []TestCase {
+	return []TestCase{
+		{
+			TestCaseName: "basic audit log entry",
+
+			Deployment:     "test-deployment",
+			Host:           "test-host",
+			Product:        "test-product",
+			ProductVersion: "test-product-version",
+			Stack:          "test-stack",
+			Service:        "test-service",
+			Environment:    "test-environment",
+			ProducerType:   audit3log.AuditProducerServer,
+			Organizations: []audit3log.Organization{
+				{
+					ID:     "d460d218-5768-43cb-888c-ebd27637e9a6",
+					Reason: "test-reason-1",
+				},
+				{
+					ID:     "851aa171-b783-4c11-8cbb-ed5ef31a9ac5",
+					Reason: "test-reason-2",
+				},
+			},
+			EventID:   "c15487b9-ff6a-4bb1-8c25-2433a185c438",
+			UserAgent: "test-user-agent",
+			Categories: []string{
+				"test-category-1",
+				"test-category-2",
+			},
+			Entities: []any{
+				"test-entity-1",
+				2,
+				map[string]any{
+					"key-1": "value-1",
+					"key-2": 2,
+				},
+			},
+			Users: []audit3log.ContextualizedUser{
+				{
+					UID:       "test-user-id",
+					UserName:  toPointer("test-username"),
+					FirstName: toPointer("test-firstname"),
+					LastName:  toPointer("test-lastname"),
+					Groups: []string{
+						"test-group-1",
+						"test-group-2",
+					},
+					Realm: toPointer("test-realm"),
+				},
+			},
+			Origins: []string{
+				"test-origin-1",
+				"test-origin-2",
+			},
+			SourceOrigin: "test-source-origin",
+			RequestFields: map[string]any{
+				"key-1": "value-1",
+				"key-2": 2,
+			},
+			ResultFields: map[string]any{
+				"test-result-fields-key-1": "test-result-fields-value-1",
+				"test-result-fields-key-2": 2,
+				"test-result-fields-key-3": map[string]any{
+					"key-1": "value-1",
+					"key-2": 2,
+				},
+			},
+			UID:     "test-uid",
+			SID:     "test-sid",
+			TokenID: "test-token-id",
+			OrgID:   "91de1891-387a-405d-8a33-8543af87afbd",
+			TraceID: "test-trace-id",
+			Origin:  "0.0.0.0",
+			Name:    "TEST_AUDITED_ACTION_NAME",
+			Result:  audit3log.AuditResultSuccess,
+
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"time":           objmatcher.NewRegExpMatcher(".+"),
+				"deployment":     objmatcher.NewEqualsMatcher("test-deployment"),
+				"host":           objmatcher.NewEqualsMatcher("test-host"),
+				"product":        objmatcher.NewEqualsMatcher("test-product"),
+				"productVersion": objmatcher.NewEqualsMatcher("test-product-version"),
+				"stack":          objmatcher.NewEqualsMatcher("test-stack"),
+				"service":        objmatcher.NewEqualsMatcher("test-service"),
+				"environment":    objmatcher.NewEqualsMatcher("test-environment"),
+				"producerType":   objmatcher.NewEqualsMatcher(string(audit3log.AuditProducerServer)),
+				"organizations": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"id":     objmatcher.NewEqualsMatcher("d460d218-5768-43cb-888c-ebd27637e9a6"),
+						"reason": objmatcher.NewEqualsMatcher("test-reason-1"),
+					}),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"id":     objmatcher.NewEqualsMatcher("851aa171-b783-4c11-8cbb-ed5ef31a9ac5"),
+						"reason": objmatcher.NewEqualsMatcher("test-reason-2"),
+					}),
+				}),
+				"eventId":   objmatcher.NewEqualsMatcher("c15487b9-ff6a-4bb1-8c25-2433a185c438"),
+				"userAgent": objmatcher.NewEqualsMatcher("test-user-agent"),
+				"categories": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-category-1"),
+					objmatcher.NewEqualsMatcher("test-category-2"),
+				}),
+				"entities": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-entity-1"),
+					objmatcher.NewEqualsMatcher(json.Number("2")),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"key-1": objmatcher.NewEqualsMatcher("value-1"),
+						"key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
+					}),
+				}),
+				"users": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"uid":       objmatcher.NewEqualsMatcher("test-user-id"),
+						"userName":  objmatcher.NewEqualsMatcher("test-username"),
+						"firstName": objmatcher.NewEqualsMatcher("test-firstname"),
+						"lastName":  objmatcher.NewEqualsMatcher("test-lastname"),
+						"groups": objmatcher.SliceMatcher([]objmatcher.Matcher{
+							objmatcher.NewEqualsMatcher("test-group-1"),
+							objmatcher.NewEqualsMatcher("test-group-2"),
+						}),
+						"realm": objmatcher.NewEqualsMatcher("test-realm"),
+					}),
+				}),
+				"origins": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-origin-1"),
+					objmatcher.NewEqualsMatcher("test-origin-2"),
+				}),
+				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
+				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"key-1": objmatcher.NewEqualsMatcher("value-1"),
+					"key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
+				}),
+				"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
+					"test-result-fields-key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
+					"test-result-fields-key-3": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"key-1": objmatcher.NewEqualsMatcher("value-1"),
+						"key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
+					}),
+				}),
+				"uid":     objmatcher.NewEqualsMatcher("test-uid"),
+				"sid":     objmatcher.NewEqualsMatcher("test-sid"),
+				"tokenId": objmatcher.NewEqualsMatcher("test-token-id"),
+				"orgId":   objmatcher.NewEqualsMatcher("91de1891-387a-405d-8a33-8543af87afbd"),
+				"traceId": objmatcher.NewEqualsMatcher("test-trace-id"),
+				"origin":  objmatcher.NewEqualsMatcher("0.0.0.0"),
+				"name":    objmatcher.NewEqualsMatcher("TEST_AUDITED_ACTION_NAME"),
+				"result":  objmatcher.NewEqualsMatcher(string(audit3log.AuditResultSuccess)),
+				"type":    objmatcher.NewEqualsMatcher("audit.3"),
+			},
+		},
+	}
+}
+
+func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	jsonOutputTests(t, loggerProvider)
+}
+
+func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	for i, tc := range TestCases() {
+		t.Run(tc.Name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			logger := loggerProvider(buf)
+
+			logger.Audit(
+				tc.Name,
+				tc.Result,
+				audit3log.Deployment(tc.Deployment),
+				audit3log.Host(tc.Host),
+				audit3log.Product(tc.Product),
+				audit3log.ProductVersion(tc.ProductVersion),
+				audit3log.Stack(tc.Stack),
+				audit3log.Service(tc.Service),
+				audit3log.Environment(tc.Environment),
+				audit3log.ProducerType(tc.ProducerType),
+				audit3log.Organizations(tc.Organizations),
+				audit3log.EventID(tc.EventID),
+				audit3log.UserAgent(tc.UserAgent),
+				audit3log.Categories(tc.Categories),
+				audit3log.Entities(tc.Entities),
+				audit3log.Users(tc.Users),
+				audit3log.Origins(tc.Origins),
+				audit3log.SourceOrigin(tc.SourceOrigin),
+				audit3log.RequestFields(tc.RequestFields),
+				audit3log.ResultFields(tc.ResultFields),
+				audit3log.UID(tc.UID),
+				audit3log.SID(tc.SID),
+				audit3log.TokenID(tc.TokenID),
+				audit3log.OrgID(tc.OrgID),
+				audit3log.TraceID(tc.TraceID),
+				audit3log.Origin(tc.Origin),
+			)
+
+			gotAuditLog := map[string]interface{}{}
+			logEntry := buf.Bytes()
+			err := safejson.Unmarshal(logEntry, &gotAuditLog)
+			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.Name, string(logEntry))
+
+			assert.NoError(t, tc.JSONMatcher.Matches(gotAuditLog), "Case %d: %s", i, tc.Name)
+		})
+	}
+}
+
+func toPointer[T any](in T) *T {
+	return &in
+}

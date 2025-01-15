@@ -15,8 +15,6 @@
 package auditloginternal
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
@@ -38,11 +36,14 @@ type Audit2Param struct {
 	Param AuditParam
 }
 
-func Audit2ToParams(name string, result AuditResultType, inParams []Audit2Param) []wlog.Param {
+func Audit2ToParams(timeProvider *currentTimeProvider, name string, result AuditResultType, inParams []Audit2Param) []wlog.Param {
+	if timeProvider == nil {
+		timeProvider = &currentTimeProvider{}
+	}
 	outParams := make([]wlog.Param, 1+len(inParams))
 	outParams[0] = wlog.NewParam(func(entry wlog.LogEntry) {
 		entry.StringValue(wlog.TypeKey, Audit2TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
+		entry.StringValue(wlog.TimeKey, timeProvider.getTimeValue())
 		auditNameResultParam(name, result).Audit2ParamFn(entry)
 	})
 	for idx := range inParams {
@@ -87,6 +88,9 @@ func Audit2OtherUIDs(otherUIDs ...string) Audit2Param {
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.StringListValue(Audit2OtherUIDsKey, otherUIDs)
 			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				// do nothing
+			},
 		},
 	}
 }
@@ -109,6 +113,9 @@ func Audit2RequestParams(requestParams map[string]interface{}) Audit2Param {
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.AnyMapValue(Audit2RequestParamsKey, requestParams)
 			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				entry.AnyMapValue(Audit3RequestFieldsKey, requestParams)
+			},
 		},
 	}
 }
@@ -124,6 +131,9 @@ func Audit2ResultParams(resultParams map[string]interface{}) Audit2Param {
 		Param: AuditParam{
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.AnyMapValue(Audit2ResultParamsKey, resultParams)
+			},
+			Audit3ParamFn: func(entry wlog.LogEntry) {
+				entry.AnyMapValue(Audit3ResultFieldsKey, resultParams)
 			},
 		},
 	}
