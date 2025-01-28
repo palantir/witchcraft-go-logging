@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/fatih/color v1.9.0
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+	github.com/golang/glog v1.2.4
 	github.com/nmiyake/pkg/dirs v1.0.0
 	github.com/palantir/pkg/bytesbuffers v1.2.0
 	github.com/palantir/pkg/datetime v1.1.0
