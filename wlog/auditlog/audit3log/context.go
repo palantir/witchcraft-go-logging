@@ -53,7 +53,7 @@ func FromContext(ctx context.Context) Logger {
 	if traceID := wtracing.TraceIDFromContext(ctx); traceID != "" {
 		params = append(params, TraceID(string(traceID)))
 	}
-	return withParams(logger, params...)
+	return WithParams(logger, params...)
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the

@@ -74,7 +74,7 @@ func newDualLoggerFromCreator(audit3Writer, audit2Writer io.Writer, creator wlog
 	return convertInternalLoggerToExternalLogger(auditloginternal.Audit3NewFromCreator(audit3Writer, audit2Writer, creator))
 }
 
-func withParams(logger Logger, params ...Param) Logger {
+func WithParams(logger Logger, params ...Param) Logger {
 	if len(params) == 0 {
 		return logger
 	}

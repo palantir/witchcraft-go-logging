@@ -135,7 +135,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	buf.Reset()
 
 	// manually adding a TraceID parameter will override the TraceID (because it is applied after the context one)
-	logger = withParams(logger, TraceID("manually-set-trace-id"))
+	logger = WithParams(logger, TraceID("manually-set-trace-id"))
 	logger.Audit("EVENT_2", AuditResultSuccess)
 
 	entries, err = logreader.EntriesFromContent(buf.Bytes())
