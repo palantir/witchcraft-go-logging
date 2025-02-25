@@ -34,11 +34,11 @@ type Audit3Organization struct {
 
 type Audit3ContextualizedUser struct {
 	UID       string   `json:"uid"`
-	UserName  *string  `json:"userName"`
-	FirstName *string  `json:"firstName"`
-	LastName  *string  `json:"lastName"`
-	Groups    []string `json:"groups"`
-	Realm     *string  `json:"realm"`
+	UserName  *string  `json:"userName,omitempty"`
+	FirstName *string  `json:"firstName,omitempty"`
+	LastName  *string  `json:"lastName,omitempty"`
+	Groups    []string `json:"groups,omitempty"`
+	Realm     *string  `json:"realm,omitempty"`
 }
 
 type Audit3Logger interface {

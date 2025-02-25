@@ -31,6 +31,7 @@ const (
 	Audit3ProducerTypeKey   = "producerType"
 	Audit3OrganizationsKey  = "organizations"
 	Audit3EventIDKey        = "eventId"
+	Audit3LogEntryIDKey     = "logEntryId"
 	Audit3UserAgentKey      = "userAgent"
 	Audit3CategoriesKey     = "categories"
 	Audit3EntitiesKey       = "entities"
@@ -124,6 +125,12 @@ func Audit3Organizations(organizations []Audit3Organization) Audit3Param {
 func Audit3EventID(eventID string) Audit3Param {
 	return audit3OnlyParamFn(func(entry wlog.LogEntry) {
 		entry.StringValue(Audit3EventIDKey, eventID)
+	})
+}
+
+func Audit3LogEntryID(logEntryID string) Audit3Param {
+	return audit3OnlyParamFn(func(entry wlog.LogEntry) {
+		entry.StringValue(Audit3LogEntryIDKey, logEntryID)
 	})
 }
 

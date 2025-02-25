@@ -40,6 +40,7 @@ type TestCase struct {
 	ProducerType   audit3log.AuditProducerType
 	Organizations  []audit3log.Organization
 	EventID        string
+	LogEntryID     string
 	UserAgent      string
 	Categories     []string
 	Entities       []any
@@ -71,6 +72,7 @@ func (tc TestCase) Params() []audit3log.Param {
 		audit3log.ProducerType(tc.ProducerType),
 		audit3log.Organizations(tc.Organizations),
 		audit3log.EventID(tc.EventID),
+		audit3log.LogEntryID(tc.LogEntryID),
 		audit3log.UserAgent(tc.UserAgent),
 		audit3log.Categories(tc.Categories),
 		audit3log.Entities(tc.Entities),
@@ -111,8 +113,9 @@ func TestCases() []TestCase {
 					Reason: "test-reason-2",
 				},
 			},
-			EventID:   "c15487b9-ff6a-4bb1-8c25-2433a185c438",
-			UserAgent: "test-user-agent",
+			EventID:    "c15487b9-ff6a-4bb1-8c25-2433a185c438",
+			LogEntryID: "46ac025f-5d70-4a79-8e8e-270da9635a43",
+			UserAgent:  "test-user-agent",
 			Categories: []string{
 				"test-category-1",
 				"test-category-2",
@@ -184,8 +187,9 @@ func TestCases() []TestCase {
 						"reason": objmatcher.NewEqualsMatcher("test-reason-2"),
 					}),
 				}),
-				"eventId":   objmatcher.NewEqualsMatcher("c15487b9-ff6a-4bb1-8c25-2433a185c438"),
-				"userAgent": objmatcher.NewEqualsMatcher("test-user-agent"),
+				"eventId":    objmatcher.NewEqualsMatcher("c15487b9-ff6a-4bb1-8c25-2433a185c438"),
+				"logEntryId": objmatcher.NewEqualsMatcher("46ac025f-5d70-4a79-8e8e-270da9635a43"),
+				"userAgent":  objmatcher.NewEqualsMatcher("test-user-agent"),
 				"categories": objmatcher.SliceMatcher([]objmatcher.Matcher{
 					objmatcher.NewEqualsMatcher("test-category-1"),
 					objmatcher.NewEqualsMatcher("test-category-2"),
@@ -265,6 +269,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) audit3log.Lo
 				audit3log.ProducerType(tc.ProducerType),
 				audit3log.Organizations(tc.Organizations),
 				audit3log.EventID(tc.EventID),
+				audit3log.LogEntryID(tc.LogEntryID),
 				audit3log.UserAgent(tc.UserAgent),
 				audit3log.Categories(tc.Categories),
 				audit3log.Entities(tc.Entities),

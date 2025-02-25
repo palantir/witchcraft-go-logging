@@ -124,6 +124,10 @@ func EventID(eventID string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3EventID(eventID))
 }
 
+func LogEntryID(logEntryID string) Param {
+	return convertInternalParamToExportedParam(auditloginternal.Audit3LogEntryID(logEntryID))
+}
+
 func UserAgent(userAgent string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3UserAgent(userAgent))
 }
