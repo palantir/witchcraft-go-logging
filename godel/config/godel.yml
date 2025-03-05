@@ -6,12 +6,16 @@ plugins:
         id: com.palantir.godel-conjure-plugin:conjure-plugin:6.75.0
         checksums:
           darwin-amd64: f3b82c2a7e02184e178f08c5b3fc34f70805232d5fc2f17faa92e29fbfbb2656
+          darwin-arm64: 7876b9f1a20bcd927dcfa98bd1e0ee0e9089b470263d28c0aff0418a1aa1dcab
           linux-amd64: 20af884f5a62d5253dac46ea97fb9d01c4cdc7bbbb3ee1ef2117173ece8881e0
+          linux-arm64: 144952719bb4e168928f777f4cedbccd463dab9e250867d964f4b7e1924e16a3
     - locator:
         id: com.palantir.godel-mod-plugin:mod-plugin:1.48.0
         checksums:
           darwin-amd64: 09d0982bdde58525971c776454d89c667db17aeae9182f36d50c3d7ca0c765b4
+          darwin-arm64: 0c0933e0f089a8ee9d901053617ce4a519a544a71e14b133fdd32cea73247ad7
           linux-amd64: 0d3f159370688ba18a4744606c00740a01465b9fcc55c19e9d86fe4d75036ac9
+          linux-arm64: 5369af8f919550b1a8ffea4962e4109c695d5b3ac688e9ec8084753039dcb456
 environment:
   GO111MODULE: "on"
   GOFLAGS: "-mod=vendor"
