@@ -53,15 +53,15 @@ github.com/palantir/pkg/transform
 ## explicit; go 1.19
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
-# github.com/palantir/witchcraft-go-error v1.40.0
-## explicit; go 1.23.0
+# github.com/palantir/witchcraft-go-error v1.41.0
+## explicit; go 1.24.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.37.0
-## explicit; go 1.23.0
+# github.com/palantir/witchcraft-go-params v1.38.0
+## explicit; go 1.24.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.39.0
-## explicit; go 1.23.0
+# github.com/palantir/witchcraft-go-tracing v1.40.0
+## explicit; go 1.24.0
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
 # github.com/pmezard/go-difflib v1.0.0
