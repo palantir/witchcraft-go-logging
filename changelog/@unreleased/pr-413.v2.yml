@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Updates `witchcraft-loggin-api` Conjure version to 2.5.0.
+
+    The primary changes are that the `audit.3` log type is added and the `beacon.1` log type is removed.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/413
