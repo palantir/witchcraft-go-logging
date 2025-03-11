@@ -9,6 +9,7 @@ require (
 	github.com/palantir/pkg/bytesbuffers v1.2.0
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/pkg/objmatcher v1.1.0
+	github.com/palantir/pkg/rid v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
