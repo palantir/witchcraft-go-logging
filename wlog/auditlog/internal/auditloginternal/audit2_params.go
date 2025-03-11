@@ -16,6 +16,8 @@ package auditloginternal
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"maps"
 )
 
 const (
@@ -101,32 +103,40 @@ func Audit2Origin(origin string) Audit2Param {
 	}
 }
 
-func Audit2RequestParam(key string, value interface{}) Audit2Param {
-	return Audit2RequestParams(map[string]interface{}{
+func Audit2RequestParam(key string, value any) Audit2Param {
+	return Audit2RequestParams(map[string]any{
 		key: value,
 	})
 }
 
-func Audit2RequestParams(requestParams map[string]interface{}) Audit2Param {
+func Audit2RequestParams(requestParams map[string]any) Audit2Param {
 	return Audit2Param{
 		Param: AuditParam{
 			Audit2ParamFn: func(entry wlog.LogEntry) {
 				entry.AnyMapValue(Audit2RequestParamsKey, requestParams)
 			},
 			Audit3ParamFn: func(entry wlog.LogEntry) {
+				if categoryVal, ok := requestParams["category"]; ok {
+					if categoryValString, ok := categoryVal.(string); ok {
+						requestParams = maps.Clone(requestParams)
+						delete(requestParams, "category")
+
+						entry.StringListValue(Audit3CategoriesKey, []string{categoryValString})
+					}
+				}
 				entry.AnyMapValue(Audit3RequestFieldsKey, requestParams)
 			},
 		},
 	}
 }
 
-func Audit2ResultParam(key string, value interface{}) Audit2Param {
-	return Audit2ResultParams(map[string]interface{}{
+func Audit2ResultParam(key string, value any) Audit2Param {
+	return Audit2ResultParams(map[string]any{
 		key: value,
 	})
 }
 
-func Audit2ResultParams(resultParams map[string]interface{}) Audit2Param {
+func Audit2ResultParams(resultParams map[string]any) Audit2Param {
 	return Audit2Param{
 		Param: AuditParam{
 			Audit2ParamFn: func(entry wlog.LogEntry) {
