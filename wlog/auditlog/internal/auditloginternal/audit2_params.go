@@ -15,9 +15,9 @@
 package auditloginternal
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"maps"
+
+	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
 const (
