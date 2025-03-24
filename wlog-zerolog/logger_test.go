@@ -34,9 +34,16 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wlogtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
 )
+
+func TestWLog(t *testing.T) {
+	wlogtests.JSONTestSuite(t, func(w io.Writer) wlog.Logger {
+		return wlogzerolog.LoggerProvider().NewLogger(w)
+	})
+}
 
 func TestSvc1Log(t *testing.T) {
 	svc1logtests.JSONTestSuite(t, func(w io.Writer, level wlog.LogLevel, origin string) svc1log.Logger {

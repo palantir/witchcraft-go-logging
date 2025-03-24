@@ -21,62 +21,69 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type zeroLogEntry struct {
-	evt             *zerolog.Event
-	keys            map[string]struct{}
-	stringMapValues map[string]map[string]string
-	anyMapValues    map[string]map[string]interface{}
-}
+var _ wlog.LogEntry = (*zeroLogEntry)(nil)
 
-func (e *zeroLogEntry) keyExists(key string) bool {
-	if _, exists := e.keys[key]; exists {
-		return true
-	}
-	e.keys[key] = struct{}{}
-	return false
+// zeroLogEntryOp represents a single operation that operates on a *zeroLogEntry.
+// The function does not take a parameter because it should be captured.
+type zeroLogEntryOp func()
+
+type zeroLogEntry struct {
+	evt *zerolog.Event
+	//keys map[string]struct{}
+
+	// a map from key to the operation that should be applied to the *zerolog.Event for that key.
+	// This is needed because *zerolog.Event itself is append-only/set-once, but the wlog.LogEntry interface defines
+	// overwrite behavior.
+	entryOps map[string]zeroLogEntryOp
+
+	// stores values for StringMapValue, AnyMapValue, and
+	wlog.MutableValueEntries
 }
 
 func (e *zeroLogEntry) StringValue(key, value string) {
-	if e.keyExists(key) {
-		return
+	e.DeleteKey(key)
+	e.entryOps[key] = func() {
+		e.evt = e.evt.Str(key, value)
 	}
-	e.evt = e.evt.Str(key, value)
 }
 
 func (e *zeroLogEntry) OptionalStringValue(key, value string) {
-	if value != "" {
+	e.DeleteKey(key)
+	if value == "" {
+		delete(e.entryOps, key)
+	} else {
 		e.StringValue(key, value)
 	}
 }
 
-func (e *zeroLogEntry) StringListValue(k string, v []string) {
-	if len(v) > 0 {
-		if e.keyExists(k) {
-			return
-		}
-		e.evt.Strs(k, v)
-	}
+func (e *zeroLogEntry) StringListValue(key string, value []string) {
+	e.DeleteKey(key)
+	e.MutableValueEntries.StringListValue(key, value)
+}
+
+func (e *zeroLogEntry) StringListValueAppend(k string, v []string) {
+	e.StringListValue(k, append(e.MutableValueEntries.StringListValues()[k], v...))
 }
 
 func (e *zeroLogEntry) SafeLongValue(key string, value int64) {
-	if e.keyExists(key) {
-		return
+	e.DeleteKey(key)
+	e.entryOps[key] = func() {
+		e.evt = e.evt.Int64(key, value)
 	}
-	e.evt = e.evt.Int64(key, value)
 }
 
 func (e *zeroLogEntry) IntValue(key string, value int32) {
-	if e.keyExists(key) {
-		return
+	e.DeleteKey(key)
+	e.entryOps[key] = func() {
+		e.evt = e.evt.Int32(key, value)
 	}
-	e.evt = e.evt.Int32(key, value)
 }
 
-func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
-	if e.keyExists(k) {
-		return
+func (e *zeroLogEntry) ObjectValue(key string, value interface{}, marshalerType reflect.Type) {
+	e.DeleteKey(key)
+	e.entryOps[key] = func() {
+		e.evt.Interface(key, value)
 	}
-	e.evt.Interface(k, v)
 }
 
 // StringMapValue adds or merges the strings in values
@@ -84,22 +91,9 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 // The parameters should not replace an existing key because parameters are passed to zerolog in reverse
 // This differs from the default wlog StringMapValue since parameters are not reversed
 func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
-	if len(values) == 0 {
-		return
-	}
-	if e.stringMapValues == nil {
-		e.stringMapValues = make(map[string]map[string]string)
-	}
-	entryMapVals, ok := e.stringMapValues[key]
-	if !ok {
-		entryMapVals = make(map[string]string)
-		e.stringMapValues[key] = entryMapVals
-	}
-	for k, v := range values {
-		if _, exists := entryMapVals[k]; !exists {
-			entryMapVals[k] = v
-		}
-	}
+	//mapValueHelper(&e.stringMapValues, key, values)
+	delete(e.entryOps, key)
+	e.MutableValueEntries.StringMapValue(key, values)
 }
 
 // AnyMapValue adds or merges the values in values
@@ -107,49 +101,44 @@ func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 // The parameters should not replace an existing key because parameters are passed to zerolog in reverse
 // This differs from the default wlog AnyMapValue since parameters are not reversed
 func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
-	if len(values) == 0 {
-		return
-	}
-	if e.anyMapValues == nil {
-		e.anyMapValues = make(map[string]map[string]interface{})
-	}
-	entryMapVals, ok := e.anyMapValues[key]
-	if !ok {
-		entryMapVals = make(map[string]interface{})
-		e.anyMapValues[key] = entryMapVals
-	}
-	for k, v := range values {
-		if _, exists := entryMapVals[k]; !exists {
-			entryMapVals[k] = v
-		}
-	}
+	//mapValueHelper(&e.anyMapValues, key, values)
+	delete(e.entryOps, key)
+	e.MutableValueEntries.AnyMapValue(key, values)
 }
 
-func (e *zeroLogEntry) StringMapValues() map[string]map[string]string {
-	return e.stringMapValues
-}
-
-func (e *zeroLogEntry) AnyMapValues() map[string]map[string]interface{} {
-	return e.anyMapValues
+func (e *zeroLogEntry) DeleteKey(key string) {
+	e.MutableValueEntries.DeleteKey(key)
+	delete(e.entryOps, key)
 }
 
 func (e *zeroLogEntry) Evt() *zerolog.Event {
 	evt := e.evt
-	for key, values := range e.StringMapValues() {
-		key := key
-		values := values
-		dictEvt := zerolog.Dict()
-		for k, v := range values {
-			dictEvt = dictEvt.Str(k, v)
-		}
-		evt = evt.Dict(key, dictEvt)
+
+	// apply all operations
+	for _, opFn := range e.entryOps {
+		opFn()
 	}
-	for key, values := range e.AnyMapValues() {
-		key := key
-		values := values
+
+	for k, v := range e.MutableValueEntries.StringListValues() {
+		evt = e.evt.Strs(k, v)
+	}
+
+	evt = addMapToEvt(evt, e.StringMapValues(), func(dictEvt *zerolog.Event, k string, v string) *zerolog.Event {
+		return dictEvt.Str(k, v)
+	})
+
+	evt = addMapToEvt(evt, e.AnyMapValues(), func(dictEvt *zerolog.Event, k string, v any) *zerolog.Event {
+		return dictEvt.Interface(k, v)
+	})
+
+	return evt
+}
+
+func addMapToEvt[ValT any](evt *zerolog.Event, inputMap map[string]map[string]ValT, evtFn func(dictEvt *zerolog.Event, k string, v ValT) *zerolog.Event) *zerolog.Event {
+	for key, values := range inputMap {
 		dictEvt := zerolog.Dict()
 		for k, v := range values {
-			dictEvt = dictEvt.Interface(k, v)
+			dictEvt = evtFn(dictEvt, k, v)
 		}
 		evt = evt.Dict(key, dictEvt)
 	}
@@ -189,21 +178,14 @@ func (l *zeroLogger) Error(msg string, params ...wlog.Param) {
 	}
 }
 
-func reverseParams(params []wlog.Param) {
-	for i, j := 0, len(params)-1; i < j; i, j = i+1, j-1 {
-		params[i], params[j] = params[j], params[i]
-	}
-}
-
 func logOutput(newEvt func() *zerolog.Event, msg string, params []wlog.Param) {
 	entry := &zeroLogEntry{
-		evt:  newEvt(),
-		keys: make(map[string]struct{}),
+		evt:      newEvt(),
+		entryOps: make(map[string]zeroLogEntryOp),
 	}
 	if !entry.evt.Enabled() {
 		return
 	}
-	reverseParams(params)
 	wlog.ApplyParams(entry, params)
 	entry.Evt().Msg(msg)
 }

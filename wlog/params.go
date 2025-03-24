@@ -15,30 +15,30 @@
 package wlog
 
 type Param interface {
-	apply(logger LogEntry)
+	apply(entry LogEntry)
 }
 
 func StringParam(key, value string) Param {
-	return NewParam(func(logger LogEntry) {
-		logger.StringValue(key, value)
+	return NewParam(func(entry LogEntry) {
+		entry.StringValue(key, value)
 	})
 }
 
 func OptionalStringParam(key, value string) Param {
-	return NewParam(func(logger LogEntry) {
-		logger.OptionalStringValue(key, value)
+	return NewParam(func(entry LogEntry) {
+		entry.OptionalStringValue(key, value)
 	})
 }
 
 func IntParam(key string, value int32) Param {
-	return NewParam(func(logger LogEntry) {
-		logger.IntValue(key, value)
+	return NewParam(func(entry LogEntry) {
+		entry.IntValue(key, value)
 	})
 }
 
 func Int64Param(key string, value int64) Param {
-	return NewParam(func(logger LogEntry) {
-		logger.SafeLongValue(key, value)
+	return NewParam(func(entry LogEntry) {
+		entry.SafeLongValue(key, value)
 	})
 }
 
@@ -46,12 +46,12 @@ func NewParam(fn func(entry LogEntry)) Param {
 	return paramFunc(fn)
 }
 
-func ApplyParams(logger LogEntry, params []Param) {
+func ApplyParams(entry LogEntry, params []Param) {
 	for _, p := range params {
 		if p == nil {
 			continue
 		}
-		p.apply(logger)
+		p.apply(entry)
 	}
 }
 
@@ -65,8 +65,8 @@ func ParamsWithMessage(msg string, params []Param) []Param {
 	return params
 }
 
-type paramFunc func(logger LogEntry)
+type paramFunc func(entry LogEntry)
 
-func (f paramFunc) apply(logger LogEntry) {
-	f(logger)
+func (f paramFunc) apply(entry LogEntry) {
+	f(entry)
 }

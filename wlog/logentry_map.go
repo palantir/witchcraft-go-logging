@@ -15,6 +15,7 @@
 package wlog
 
 import (
+	"maps"
 	"reflect"
 )
 
@@ -31,6 +32,7 @@ type MapLogEntry interface {
 
 	// Apply applies the values of all of the stored entries of this MapLogEntry to the provided LogEntry.
 	Apply(logEntry LogEntry)
+
 	// AllValues returns a single map that contains all of the keys and values stored in this entry.
 	AllValues() map[string]interface{}
 }
@@ -67,13 +69,21 @@ type mapLogEntry struct {
 	objectValues     map[string]ObjectValue
 }
 
-func (le *mapLogEntry) clearKey(key string) {
+func (le *mapLogEntry) deleteKey(key string) {
 	delete(le.allKeys, key)
 	delete(le.stringValues, key)
 	delete(le.safeLongValues, key)
 	delete(le.intValues, key)
+	delete(le.stringListValues, key)
 	delete(le.stringMapValues, key)
 	delete(le.anyMapValues, key)
+	delete(le.objectValues, key)
+}
+
+// markKey deletes the specified key from all maps and then marks it as used in the "allKeys" map.
+func setKey[ValT any](le *mapLogEntry, m map[string]ValT, k string, val ValT) {
+	le.deleteKey(k)
+	m[k] = val
 }
 
 func (le *mapLogEntry) StringValues() map[string]string {
@@ -105,87 +115,56 @@ func (le *mapLogEntry) ObjectValues() map[string]ObjectValue {
 }
 
 func (le *mapLogEntry) StringValue(k, v string) {
-	le.clearKey(k)
-
-	le.allKeys[k] = struct{}{}
-	le.stringValues[k] = v
+	setKey(le, le.stringValues, k, v)
 }
 
 func (le *mapLogEntry) StringListValue(k string, v []string) {
-	le.clearKey(k)
+	setKey(le, le.stringListValues, k, v)
+}
 
-	le.allKeys[k] = struct{}{}
-	le.stringListValues[k] = v
+func (le *mapLogEntry) StringListValueAppend(k string, v []string) {
+	le.StringListValue(k, append(le.stringListValues[k], v...))
 }
 
 func (le *mapLogEntry) OptionalStringValue(k, v string) {
-	if v != "" {
+	if v == "" {
+		le.deleteKey(k)
+	} else {
 		le.StringValue(k, v)
 	}
 }
 
 func (le *mapLogEntry) SafeLongValue(k string, v int64) {
-	le.clearKey(k)
-
-	le.allKeys[k] = struct{}{}
-	le.safeLongValues[k] = v
+	setKey(le, le.safeLongValues, k, v)
 }
 
 func (le *mapLogEntry) IntValue(k string, v int32) {
-	le.clearKey(k)
-
-	le.allKeys[k] = struct{}{}
-	le.intValues[k] = v
+	setKey(le, le.intValues, k, v)
 }
 
 func (le *mapLogEntry) StringMapValue(k string, v map[string]string) {
-	prevStringMapVal := le.stringMapValues[k]
-	le.clearKey(k)
-	le.allKeys[k] = struct{}{}
-
-	var newMapVal map[string]string
-	if len(prevStringMapVal) == 0 {
-		newMapVal = v
-	} else {
-		newMapVal = make(map[string]string)
-		for prevK, prevV := range prevStringMapVal {
-			newMapVal[prevK] = prevV
-		}
-		for newK, newV := range v {
-			newMapVal[newK] = newV
-		}
-	}
-	le.stringMapValues[k] = newMapVal
+	setMapValues(le, le.stringMapValues, k, v)
 }
 
 func (le *mapLogEntry) AnyMapValue(k string, v map[string]interface{}) {
-	prevAnyMapVal := le.anyMapValues[k]
-	le.clearKey(k)
-	le.allKeys[k] = struct{}{}
+	setMapValues(le, le.anyMapValues, k, v)
+}
 
-	var newMapVal map[string]interface{}
-	if len(prevAnyMapVal) == 0 {
-		newMapVal = v
-	} else {
-		newMapVal = make(map[string]interface{})
-		for prevK, prevV := range prevAnyMapVal {
-			newMapVal[prevK] = prevV
-		}
-		for newK, newV := range v {
-			newMapVal[newK] = newV
-		}
-	}
-	le.anyMapValues[k] = newMapVal
+func setMapValues[ValT any](le *mapLogEntry, mapValues map[string]map[string]ValT, k string, v map[string]ValT) {
+	newMapVal := make(map[string]ValT)
+	prevStringMapVal := mapValues[k]
+	maps.Copy(newMapVal, prevStringMapVal)
+	maps.Copy(newMapVal, v)
+
+	le.deleteKey(k)
+	mapValues[k] = newMapVal
 }
 
 func (le *mapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
-	le.clearKey(k)
-
-	le.allKeys[k] = struct{}{}
-	le.objectValues[k] = ObjectValue{
+	setKey(le, le.objectValues, k, ObjectValue{
 		Value:         v,
 		MarshalerType: marshalerType,
-	}
+	})
 }
 
 func (le *mapLogEntry) Apply(logEntry LogEntry) {
