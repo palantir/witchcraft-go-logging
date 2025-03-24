@@ -1,0 +1,43 @@
+type: improvement
+improvement:
+  description: |-
+    Updates the LogEntry API by clarifying the semantics/behavior of
+    calls that operate on the same key as previous calls and updates
+    implementations to match the specified behavior.
+
+    The updated API clarifies that a call to any function will result
+    in the specified key being set and overwriting any previous value
+    associated with the key (with the narrow exception of "*MapValue"
+    functions, which will merge/add values if the existing value for
+    the key was set by the same function).
+
+    Also adds a test suite that verifies the wlog behavior and runs
+    the test suite for the zap and zerolog implementations.
+
+    The updated API changes existing behavior as follows:
+    * Previously, calling "OptionalStringValue" with an empty value
+      was a noop. This meant that, if the provided key already had a
+      value associated with it, it would continue to be associated with it.
+      The API contract and behavior has been updated such that the behavior is
+      to remove the value for the key instead.
+    * Previously, calling "StringListValue" with a nil or empty slice
+      was a noop. This meant that, if the provided key already had a
+      value associated with it, it would continue to be associated with it.
+      The API contract and behavior has been updated such that the behavior is
+      to set the value to an empty slice instead.
+    * Previously, implementations had inconsistent/confusing behavior if the
+      same key was set using "StringMapValue", "AnyMapValue", and another setter.
+      In a scenario where a key was set using all 3 functions, the previous implementation
+      would always log the value for "AnyMapValue", regardless of the order in which the
+      calls were made. This ambiguity has been removed by specifying sensible behavior
+      at the interface API level and ensuring that all implementations adhere to it.
+
+    Updating the API contract and implementation also allowed the zerolog
+    implementation to be simplified: previously, the zerolog logger implementation
+    tracked Param inputs and applied them in reverse, which worked, but was confusing
+    and introduced implicit behavioral assumptions between packages. With the LogEntry
+    API updates, the zerolog logger implementation has been updated to be more straightforward.
+
+    This change also uses generics to reduce code duplication.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/415
