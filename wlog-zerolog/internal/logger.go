@@ -35,8 +35,8 @@ type zeroLogEntry struct {
 	// overwrite behavior.
 	entryOps map[string]zeroLogEntryOp
 
-	// stores values for StringMapValue and AnyMapValue
-	mapValueEntries wlog.MapValueEntries
+	// stores values for StringMapValue, AnyMapValue, and StringListValue
+	mutableValueEntries wlog.MutableValueEntries
 }
 
 func zeroLogEntrySetValue[ValT any](entry *zeroLogEntry, fn func(k string, v ValT) *zerolog.Event, k string, v ValT) {
@@ -48,7 +48,7 @@ func zeroLogEntrySetValue[ValT any](entry *zeroLogEntry, fn func(k string, v Val
 
 func (e *zeroLogEntry) delete(k string) {
 	delete(e.entryOps, k)
-	e.mapValueEntries.Delete(k)
+	e.mutableValueEntries.Delete(k)
 }
 
 func (e *zeroLogEntry) StringValue(k, v string) {
@@ -64,10 +64,11 @@ func (e *zeroLogEntry) OptionalStringValue(key, value string) {
 }
 
 func (e *zeroLogEntry) StringListValue(k string, v []string) {
-	if v == nil {
-		v = make([]string, 0)
-	}
-	zeroLogEntrySetValue(e, e.evt.Strs, k, v)
+	e.mutableValueEntries.StringListValue(k, v)
+}
+
+func (e *zeroLogEntry) StringListAppendValue(k string, v []string) {
+	e.StringListValue(k, append(e.mutableValueEntries.StringListValues()[k], v...))
 }
 
 func (e *zeroLogEntry) SafeLongValue(k string, v int64) {
@@ -84,12 +85,12 @@ func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflec
 
 func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 	delete(e.entryOps, key)
-	e.mapValueEntries.StringMapValue(key, values)
+	e.mutableValueEntries.StringMapValue(key, values)
 }
 
 func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
 	delete(e.entryOps, key)
-	e.mapValueEntries.AnyMapValue(key, values)
+	e.mutableValueEntries.AnyMapValue(key, values)
 }
 
 func (e *zeroLogEntry) Evt() *zerolog.Event {
@@ -99,11 +100,15 @@ func (e *zeroLogEntry) Evt() *zerolog.Event {
 		opFn()
 	}
 
-	evt = addMapToEvt(evt, e.mapValueEntries.StringMapValues(), func(dictEvt *zerolog.Event, k string, v string) *zerolog.Event {
+	for k, v := range e.mutableValueEntries.StringListValues() {
+		evt = e.evt.Strs(k, v)
+	}
+
+	evt = addMapToEvt(evt, e.mutableValueEntries.StringMapValues(), func(dictEvt *zerolog.Event, k string, v string) *zerolog.Event {
 		return dictEvt.Str(k, v)
 	})
 
-	evt = addMapToEvt(evt, e.mapValueEntries.AnyMapValues(), func(dictEvt *zerolog.Event, k string, v any) *zerolog.Event {
+	evt = addMapToEvt(evt, e.mutableValueEntries.AnyMapValues(), func(dictEvt *zerolog.Event, k string, v any) *zerolog.Event {
 		return dictEvt.Interface(k, v)
 	})
 

@@ -55,6 +55,7 @@ type noopLogEntry struct{}
 func (*noopLogEntry) StringValue(k, v string)                                         {}
 func (*noopLogEntry) OptionalStringValue(k, v string)                                 {}
 func (*noopLogEntry) StringListValue(k string, v []string)                            {}
+func (*noopLogEntry) StringListAppendValue(k string, v []string)                      {}
 func (*noopLogEntry) SafeLongValue(k string, v int64)                                 {}
 func (*noopLogEntry) IntValue(k string, v int32)                                      {}
 func (*noopLogEntry) StringMapValue(k string, v map[string]string)                    {}

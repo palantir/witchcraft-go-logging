@@ -120,6 +120,10 @@ func (le *mapLogEntry) StringListValue(k string, v []string) {
 	mapLogEntrySetKey(le, le.stringListValues, k, v)
 }
 
+func (le *mapLogEntry) StringListAppendValue(k string, v []string) {
+	le.StringListValue(k, append(le.stringListValues[k], v...))
+}
+
 func (le *mapLogEntry) OptionalStringValue(k, v string) {
 	if v == "" {
 		le.delete(k)
