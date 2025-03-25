@@ -92,6 +92,51 @@ func basicTestCases() []EntryTestCase {
 			},
 		},
 		{
+			Name: "StringListAppendValue writes array values",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.StringListAppendValue("test-key", []string{"one", "two"})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("one"),
+					objmatcher.NewEqualsMatcher("two"),
+				}),
+			},
+		},
+		{
+			Name: "StringListAppendValue appends array values",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.StringListAppendValue("test-key", []string{"one", "two"})
+				entry.StringListAppendValue("test-key", []string{"three", "four"})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("one"),
+					objmatcher.NewEqualsMatcher("two"),
+					objmatcher.NewEqualsMatcher("three"),
+					objmatcher.NewEqualsMatcher("four"),
+				}),
+			},
+		},
+		{
+			Name: "StringListAppendValue that is empty writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.StringListAppendValue("test-key", []string{})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
+		{
+			Name: "StringListAppendValue that is nil writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.StringListAppendValue("test-key", nil)
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
+		{
 			Name: "StringMapValue writes map values",
 			EntryFn: func(entry wlog.LogEntry) {
 				entry.StringMapValue("test-key", map[string]string{
