@@ -25,6 +25,8 @@ func NewNoopLoggerProvider() LoggerProvider {
 	return &noopLoggerProvider{}
 }
 
+var _ LogEntry = (*noopLogEntry)(nil)
+
 type nooplogger struct{}
 
 func (*nooplogger) Log(params ...Param)               {}
