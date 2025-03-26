@@ -142,7 +142,7 @@ func Audit3UserAgent(userAgent string) Audit3Param {
 
 func Audit3Categories(categories []string) Audit3Param {
 	return audit3OnlyParamFn(func(entry wlog.LogEntry) {
-		entry.StringListValue(Audit3CategoriesKey, categories)
+		entry.StringListAppendValue(Audit3CategoriesKey, categories)
 	})
 }
 

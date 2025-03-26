@@ -65,6 +65,9 @@ func TestCategory(t *testing.T) {
 		"type":   objmatcher.NewEqualsMatcher("audit.3"),
 		"name":   objmatcher.NewEqualsMatcher("TEST_ENTRY"),
 		"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+		"categories": objmatcher.SliceMatcher{
+			objmatcher.NewEqualsMatcher("appConfigSearch"),
+		},
 		"requestFields": objmatcher.NewEqualsMatcher(map[string]any{
 			"appConfigSearchQuery": "testQuery",
 		}),
@@ -88,4 +91,105 @@ func TestCategory(t *testing.T) {
 	})
 	err = matcher.Matches(map[string]interface{}(entries[0]))
 	assert.NoError(t, err, "%v", err)
+}
+
+// Verifies that applying multiple "Category" params works.
+func TestMultiCategory(t *testing.T) {
+	buf, ctx := newBufAndCtxWithLogger()
+
+	logger := FromContext(ctx)
+
+	testRid, err := rid.ParseRID("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b")
+	require.NoError(t, err)
+
+	query := "testQuery"
+	appConfigSearchCategoryParams, err := Category(v2.NewAuditCategoryV2FromAppConfigSearch(v2.AppConfigSearch{
+		AppConfigSearchQuery: &query,
+		AppConfigSearchResults: []commonv2.ApplicationResource{
+			{
+				Id:      commonv2.NewIdentifierFromRid(testRid),
+				Product: "test-product",
+				Context: []commonv2.ResourceContext{
+					{
+						Value:       "test-value",
+						Description: "test-description",
+					},
+				},
+			},
+		},
+	}))
+	require.NoError(t, err)
+
+	containerSearchCategoryParams, err := Category(v2.NewAuditCategoryV2FromContainerSearch(v2.ContainerSearch{
+		ContainerSearchQuery: ptr("test-query"),
+		ContainerSearchResults: []commonv2.SystemResource{
+			commonv2.NewSystemResourceFromEntity(commonv2.EntityId{
+				Environment: "test-env",
+				Locator: commonv2.NewEntityLocatorFromService(commonv2.ServiceLocator{
+					Stack:       "test-stack",
+					ServiceName: "test-service",
+				}),
+			}),
+		},
+	}))
+	require.NoError(t, err)
+
+	logger.Audit("TEST_ENTRY", AuditResultSuccess, append(appConfigSearchCategoryParams, containerSearchCategoryParams...)...)
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, len(entries))
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"time":   objmatcher.NewRegExpMatcher(".+"),
+		"type":   objmatcher.NewEqualsMatcher("audit.3"),
+		"name":   objmatcher.NewEqualsMatcher("TEST_ENTRY"),
+		"result": objmatcher.NewEqualsMatcher("SUCCESS"),
+		"categories": objmatcher.SliceMatcher{
+			objmatcher.NewEqualsMatcher("appConfigSearch"),
+			objmatcher.NewEqualsMatcher("containerSearch"),
+		},
+		"requestFields": objmatcher.NewEqualsMatcher(map[string]any{
+			"appConfigSearchQuery": "testQuery",
+			"containerSearchQuery": "test-query",
+		}),
+		"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"appConfigSearchResults": objmatcher.SliceMatcher{
+				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"context": objmatcher.SliceMatcher{
+						objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+							"value":       objmatcher.NewEqualsMatcher("test-value"),
+							"description": objmatcher.NewEqualsMatcher("test-description"),
+						}),
+					},
+					"id": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"rid":  objmatcher.NewEqualsMatcher("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b"),
+						"type": objmatcher.NewEqualsMatcher("rid"),
+					}),
+					"product": objmatcher.NewEqualsMatcher("test-product"),
+				}),
+			},
+			"containerSearchResults": objmatcher.SliceMatcher{
+				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"entity": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"environment": objmatcher.NewEqualsMatcher("test-env"),
+						"locator": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+							"service": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+								"serviceName": objmatcher.NewEqualsMatcher("test-service"),
+								"stack":       objmatcher.NewEqualsMatcher("test-stack"),
+							}),
+							"type": objmatcher.NewEqualsMatcher("service"),
+						}),
+					}),
+					"type": objmatcher.NewEqualsMatcher("entity"),
+				}),
+			},
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

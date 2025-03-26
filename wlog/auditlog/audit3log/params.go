@@ -132,7 +132,7 @@ func UserAgent(userAgent string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3UserAgent(userAgent))
 }
 
-func Categories(categories []string) Param {
+func Categories(categories ...string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3Categories(categories))
 }
 
