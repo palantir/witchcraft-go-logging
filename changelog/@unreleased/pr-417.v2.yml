@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Adds the audit API Conjure definition and generates Conjure objects.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/417
