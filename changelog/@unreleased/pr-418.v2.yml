@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Updates implementation of audit2log package to use an internal package.
+
+    This change should be a noop in terms of functionality and API, but allows for implementing audit.3 logging and supporting dual-writing audit.2 and audit.3 logs.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/418

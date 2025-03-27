@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package audit2log
+package auditloginternal
 
 import (
+	"io"
+
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
 )
 
-func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
-	return auditloginternal.Audit2ToParams(name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+type Audit2Logger interface {
+	Audit(name string, result AuditResultType, params ...Audit2Param)
+}
+
+type audit2LoggerImpl struct {
+	logger *logger
+}
+
+func (a *audit2LoggerImpl) Audit(name string, result AuditResultType, params ...Audit2Param) {
+	a.logger.Audit2(name, result, params...)
+}
+
+func Audit2NewFromCreator(audit2Writer io.Writer, creator wlog.LoggerCreator) Audit2Logger {
+	return &audit2LoggerImpl{
+		logger: &logger{
+			audit2Logger: creator(audit2Writer),
+		},
+	}
 }
