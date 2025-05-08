@@ -198,6 +198,82 @@ func basicTestCases() []EntryTestCase {
 				"test-key": objmatcher.NewEqualsMatcher(map[string]any{}),
 			},
 		},
+		{
+			Name: "ObjectList writes array values",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListValue("test-key", []any{"one", 2, struct{ Three int }{Three: 3}})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("one"),
+					objmatcher.NewEqualsMatcher(json.Number("2")),
+					objmatcher.NewEqualsMatcher(map[string]any{"Three": json.Number("3")}),
+				}),
+			},
+		},
+		{
+			Name: "ObjectList that is empty writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListValue("test-key", []any{})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
+		{
+			Name: "ObjectList that is nil writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListValue("test-key", nil)
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
+		{
+			Name: "ObjectListAppendValue writes array values",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListAppendValue("test-key", []any{"one", 2})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("one"),
+					objmatcher.NewEqualsMatcher(json.Number("2")),
+				}),
+			},
+		},
+		{
+			Name: "ObjectListAppendValue appends array values",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListAppendValue("test-key", []any{"one", 2})
+				entry.ObjectListAppendValue("test-key", []any{struct{ Three int }{Three: 3}, "four"})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("one"),
+					objmatcher.NewEqualsMatcher(json.Number("2")),
+					objmatcher.NewEqualsMatcher(map[string]any{"Three": json.Number("3")}),
+					objmatcher.NewEqualsMatcher("four"),
+				}),
+			},
+		},
+		{
+			Name: "ObjectListAppendValue that is empty writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListAppendValue("test-key", []any{})
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
+		{
+			Name: "ObjectListAppendValue that is nil writes empty array",
+			EntryFn: func(entry wlog.LogEntry) {
+				entry.ObjectListAppendValue("test-key", nil)
+			},
+			Matcher: map[string]objmatcher.Matcher{
+				"test-key": objmatcher.NewEqualsMatcher([]any{}),
+			},
+		},
 	}
 }
 
