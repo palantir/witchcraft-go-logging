@@ -93,6 +93,14 @@ func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
 	e.mutableValueEntries.AnyMapValue(key, values)
 }
 
+func (e *zeroLogEntry) ObjectListValue(k string, v []any) {
+	e.mutableValueEntries.ObjectListValue(k, v)
+}
+
+func (e *zeroLogEntry) ObjectListAppendValue(k string, v []any) {
+	e.ObjectListValue(k, append(e.mutableValueEntries.ObjectListValues()[k], v...))
+}
+
 func (e *zeroLogEntry) Evt() *zerolog.Event {
 	evt := e.evt
 
@@ -102,6 +110,10 @@ func (e *zeroLogEntry) Evt() *zerolog.Event {
 
 	for k, v := range e.mutableValueEntries.StringListValues() {
 		evt = e.evt.Strs(k, v)
+	}
+
+	for k, v := range e.mutableValueEntries.ObjectListValues() {
+		evt = e.evt.Any(k, v)
 	}
 
 	evt = addMapToEvt(evt, e.mutableValueEntries.StringMapValues(), func(dictEvt *zerolog.Event, k string, v string) *zerolog.Event {
