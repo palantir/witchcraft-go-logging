@@ -168,7 +168,7 @@ func Audit3Categories(categories []string) Audit3Param {
 	})
 }
 
-func Audit3Entities(entities []any) Audit3Param {
+func Audit3Entities[T any](entities []T) Audit3Param {
 	return audit3OnlyParamFn(func(entry wlog.LogEntry) {
 		entry.ObjectValue(Audit3EntitiesKey, entities, nil)
 	})

@@ -1696,7 +1696,40 @@
         "docs" : "The file path requested.",
         "safety" : "UNSAFE"
       } ],
-      "docs" : "Loads a file from a static asset its full coordinate (group, artifact, and version).\n"
+      "docs" : "Deprecated, please use AssetFileLoadV2.\nLoads a file from a static asset its full coordinate (group, artifact, and version).\n"
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "AssetFileLoadV2",
+        "package" : "com.palantir.foundry.audit.api.category.v2"
+      },
+      "fields" : [ {
+        "fieldName" : "fileIdentifier",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "AssetFileLoadIdentifier",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "fileLoadResponse",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "AssetFileLoadResponse",
+                "package" : "com.palantir.foundry.audit.api.common.v2"
+              }
+            }
+          }
+        }
+      } ],
+      "docs" : "Loads a file either from the asset coordiate or through the content addressable storage.\n"
     }
   }, {
     "type" : "union",
@@ -2224,6 +2257,15 @@
           "type" : "reference",
           "reference" : {
             "name" : "AssetFileLoad",
+            "package" : "com.palantir.foundry.audit.api.category.v2"
+          }
+        }
+      }, {
+        "fieldName" : "assetFileLoadV2",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "AssetFileLoadV2",
             "package" : "com.palantir.foundry.audit.api.category.v2"
           }
         }
@@ -6302,6 +6344,97 @@
     "type" : "object",
     "object" : {
       "typeName" : {
+        "name" : "AssetCoordinate",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "fields" : [ {
+        "fieldName" : "artifactId",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "ArtifactId",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "track",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "AssetTrack",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "version",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "MavenVersion",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      } ],
+      "docs" : "Uniquely identifies a static asset through its product name, version and track."
+    }
+  }, {
+    "type" : "union",
+    "union" : {
+      "typeName" : {
+        "name" : "AssetFileLoadIdentifier",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "union" : [ {
+        "fieldName" : "mavenCoordinateAndPath",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "MavenCoordinateAndPathIdentifier",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "contentAddressableFileIdentifier",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "ContentAddressableFileIdentifier",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "union",
+    "union" : {
+      "typeName" : {
+        "name" : "AssetFileLoadResponse",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "union" : [ {
+        "fieldName" : "mavenCoordinate",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "MavenCoordinate",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "assetCoordinate",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "AssetCoordinate",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
         "name" : "AssetLocator",
         "package" : "com.palantir.foundry.audit.api.common.v2"
       },
@@ -6336,6 +6469,20 @@
       } ]
     }
   }, {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "AssetTrack",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "alias" : {
+        "type" : "primitive",
+        "primitive" : "STRING"
+      },
+      "docs" : "Represents the track used in asset server.",
+      "safety" : "SAFE"
+    }
+  }, {
     "type" : "object",
     "object" : {
       "typeName" : {
@@ -6360,6 +6507,39 @@
             "package" : "com.palantir.foundry.audit.api.common.v2"
           }
         }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "ContentAddressableFileIdentifier",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "fields" : [ {
+        "fieldName" : "namespace",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "docs" : "The namespace for the requested content-addressable-storage file.",
+        "safety" : "SAFE"
+      }, {
+        "fieldName" : "hashedFileName",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "docs" : "The CAS file being requested.",
+        "safety" : "SAFE"
+      }, {
+        "fieldName" : "forSourceMap",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        },
+        "docs" : "Represents whether the request is for source maps or not.",
+        "safety" : "SAFE"
       } ]
     }
   }, {
@@ -7098,6 +7278,31 @@
         }
       } ],
       "docs" : "Uniquely identifies a static asset through its maven coordinates."
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "MavenCoordinateAndPathIdentifier",
+        "package" : "com.palantir.foundry.audit.api.common.v2"
+      },
+      "fields" : [ {
+        "fieldName" : "mavenCoordinate",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "PartialMavenCoordinate",
+            "package" : "com.palantir.foundry.audit.api.common.v2"
+          }
+        }
+      }, {
+        "fieldName" : "path",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "safety" : "UNSAFE"
+      } ]
     }
   }, {
     "type" : "alias",

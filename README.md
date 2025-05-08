@@ -206,6 +206,40 @@ In this series of calls, each function creates a new context that decorates its 
 parameter. This has the result that, when `updateValue` performs its debug logging, the `serviceId` and `processId`
 parameters that were added in the previous calls will be included in the logger output.
 
+Updating audit logger category definitions
+------------------------------------------
+Audit logger category definitions come from 2 different places:
+* Conjure objects generated from the `audit-api` Conjure definition
+* Generated Go code that defines the request and result fields and translates an `AuditCategoryV2` object to an audit
+  parameter
+
+The Conjure objects come from the Conjure definitions, while the generated Go code is based on Java code that defines
+audit categories.
+
+In order to update audit logger category definitions, it is necessary to update the Conjure definition and to generate
+the Go code from the latest Java code.
+
+### Updating the Conjure definition
+Audit logger categories are defined by the "audit-api" Conjure definition. The Conjure definition is published
+internally. The definition can be updated in this repository by following these steps:
+  1. Obtain the latest version of the Conjure definition (the `.conjure.json` file)
+  2. Remove the existing definition from the `conjure/defs` directory
+  3. Place the new definition in the `conjure/defs` directory
+  4. Update the Conjure definition in the `godel/config/conjure-plugin.yml` file to point to the new definition
+  5. Run `./godelw conjure` to generate the code for the new definition
+
+### Updating the generated Go code
+The generated Go code is based on the Java code in the `AuditCategoryConfiguration.java` in the `foundry-audit` project.
+This is an internal project. The generated go code can be updated as follows:
+  1. Obtain the latest version of the Java code and note the path to the "AuditCategoryConfiguration.java" file
+  2. Run the `[category_transform.go](wlog/auditlog/audit3log/internal/category_transform.go)` file as a main program
+     with the path to the "AuditCategoryConfiguration.java" as the argument. The working directory should be the
+     `wlog/auditlog/audit3log/internal` directory.
+
+This will generate the "[categories.go](wlog/auditlog/audit3log/categories.go)" file. Note that the generator logic
+assumes that the definitions in the Java code are written in a particular manner -- if the format or definition of the
+definitions in the Java code changes, the generator must be updated to handle the new format.
+
 Active TODOs
 ------------
 * Improve testing loggers that produce non-JSON output (glog)

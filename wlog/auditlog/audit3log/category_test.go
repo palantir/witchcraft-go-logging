@@ -27,8 +27,8 @@ import (
 )
 
 // Verifies that the "Category" function returns the appropriate audit logging parameters. This test is a baseline that
-// verifies that the "Category" function properly populates fields for a category that includes request and response
-// fields: it is not an exhaustive test of every declared category.
+// verifies that the "Category" function properly populates fields for a categoryInfo that includes request and response
+// fields: it is not an exhaustive test of every declared categoryInfo.
 func TestCategory(t *testing.T) {
 	buf, ctx := newBufAndCtxWithLogger()
 
@@ -71,7 +71,7 @@ func TestCategory(t *testing.T) {
 		"requestFields": objmatcher.NewEqualsMatcher(map[string]any{
 			"appConfigSearchQuery": "testQuery",
 		}),
-		"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"responseFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 			"appConfigSearchResults": objmatcher.SliceMatcher{
 				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"context": objmatcher.SliceMatcher{
@@ -152,7 +152,7 @@ func TestMultiCategory(t *testing.T) {
 			"appConfigSearchQuery": "testQuery",
 			"containerSearchQuery": "test-query",
 		}),
-		"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"responseFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 			"appConfigSearchResults": objmatcher.SliceMatcher{
 				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"context": objmatcher.SliceMatcher{
