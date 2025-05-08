@@ -102,7 +102,11 @@ func (c *categoryInfo[T]) toParam(v T) Param {
 						entityExtractorFn = defaultEntityExtractor[T]
 					}
 					if entities, _ := entityExtractorFn(v, c); len(entities) > 0 {
-						Entities(entities).getParam().Audit3ParamFn(entry)
+						anyEntriesSlice := make([]any, len(entities))
+						for i, entity := range entities {
+							anyEntriesSlice[i] = entity
+						}
+						Entities(anyEntriesSlice).getParam().Audit3ParamFn(entry)
 					}
 
 					// add all extracted user IDs

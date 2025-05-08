@@ -60,6 +60,8 @@ type TestCase struct {
 	Name           string
 	Result         audit3log.AuditResultType
 	JSONMatcher    objmatcher.MapMatcher
+
+	AdditionalParams []audit3log.Param
 }
 
 func (tc TestCase) Params() []audit3log.Param {
@@ -92,6 +94,7 @@ func (tc TestCase) Params() []audit3log.Param {
 	if tc.LogEntryID != nil {
 		params = append(params, audit3log.LogEntryID(*tc.LogEntryID))
 	}
+	params = append(params, tc.AdditionalParams...)
 	return params
 }
 
@@ -380,6 +383,154 @@ func TestCases() []TestCase {
 						"key-1": objmatcher.NewEqualsMatcher("value-1"),
 						"key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
 					}),
+				}),
+				"uid":     objmatcher.NewEqualsMatcher("test-uid"),
+				"sid":     objmatcher.NewEqualsMatcher("test-sid"),
+				"tokenId": objmatcher.NewEqualsMatcher("test-token-id"),
+				"orgId":   objmatcher.NewEqualsMatcher("91de1891-387a-405d-8a33-8543af87afbd"),
+				"traceId": objmatcher.NewEqualsMatcher("test-trace-id"),
+				"origin":  objmatcher.NewEqualsMatcher("0.0.0.0"),
+				"name":    objmatcher.NewEqualsMatcher("TEST_AUDITED_ACTION_NAME"),
+				"result":  objmatcher.NewEqualsMatcher(string(audit3log.AuditResultSuccess)),
+				"type":    objmatcher.NewEqualsMatcher("audit.3"),
+			},
+		},
+		{
+			TestCaseName: "audit log entry sets all appended values for multi-value fields",
+
+			Deployment:     "test-deployment",
+			Host:           "test-host",
+			Product:        "test-product",
+			ProductVersion: "test-product-version",
+			Stack:          "test-stack",
+			Service:        "test-service",
+			Environment:    "test-environment",
+			ProducerType:   audit3log.AuditProducerServer,
+			Organizations: []audit3log.Organization{
+				{
+					ID:     "d460d218-5768-43cb-888c-ebd27637e9a6",
+					Reason: "test-reason-1",
+				},
+			},
+			EventID:   "c15487b9-ff6a-4bb1-8c25-2433a185c438",
+			UserAgent: "test-user-agent",
+			Category:  v2.NewAuditCategoryV2FromDataLoad(v2.DataLoad{}),
+			Entities: []any{
+				"test-entity-1",
+			},
+			Users: []audit3log.ContextualizedUser{
+				{
+					UID: "test-user-id-1",
+				},
+			},
+			Origins: []string{
+				"test-origin-1",
+			},
+			SourceOrigin: "test-source-origin",
+			RequestFields: map[string]any{
+				"key-1": "value-1",
+			},
+			ResultFields: map[string]any{
+				"test-result-fields-key-1": "test-result-fields-value-1",
+			},
+			UID:     "test-uid",
+			SID:     "test-sid",
+			TokenID: "test-token-id",
+			OrgID:   "91de1891-387a-405d-8a33-8543af87afbd",
+			TraceID: "test-trace-id",
+			Origin:  "0.0.0.0",
+			Name:    "TEST_AUDITED_ACTION_NAME",
+			Result:  audit3log.AuditResultSuccess,
+
+			AdditionalParams: []audit3log.Param{
+				audit3log.Organizations([]audit3log.Organization{
+					{
+						ID:     "851aa171-b783-4c11-8cbb-ed5ef31a9ac5",
+						Reason: "test-reason-2",
+					},
+				}),
+				audit3log.Category(v2.NewAuditCategoryV2FromContainerSearch(v2.ContainerSearch{})),
+				audit3log.Entities([]any{
+					2,
+					map[string]any{
+						"key-1": "value-1",
+						"key-2": 2,
+					},
+				}),
+				audit3log.Users([]audit3log.ContextualizedUser{
+					{
+						UID: "test-user-id-2",
+					},
+				}),
+				audit3log.Origins([]string{
+					"test-origin-2",
+				}),
+				audit3log.RequestFields(map[string]any{
+					"key-2": "value-2",
+				}),
+				audit3log.ResultFields(map[string]any{
+					"test-result-fields-key-2": "test-result-fields-value-2",
+				}),
+			},
+
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"time":           objmatcher.NewRegExpMatcher(".+"),
+				"deployment":     objmatcher.NewEqualsMatcher("test-deployment"),
+				"host":           objmatcher.NewEqualsMatcher("test-host"),
+				"product":        objmatcher.NewEqualsMatcher("test-product"),
+				"productVersion": objmatcher.NewEqualsMatcher("test-product-version"),
+				"stack":          objmatcher.NewEqualsMatcher("test-stack"),
+				"service":        objmatcher.NewEqualsMatcher("test-service"),
+				"environment":    objmatcher.NewEqualsMatcher("test-environment"),
+				"producerType":   objmatcher.NewEqualsMatcher(string(audit3log.AuditProducerServer)),
+				"organizations": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"id":     objmatcher.NewEqualsMatcher("d460d218-5768-43cb-888c-ebd27637e9a6"),
+						"reason": objmatcher.NewEqualsMatcher("test-reason-1"),
+					}),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"id":     objmatcher.NewEqualsMatcher("851aa171-b783-4c11-8cbb-ed5ef31a9ac5"),
+						"reason": objmatcher.NewEqualsMatcher("test-reason-2"),
+					}),
+				}),
+				"eventId":    objmatcher.NewEqualsMatcher("c15487b9-ff6a-4bb1-8c25-2433a185c438"),
+				"logEntryId": objmatcher.NewRegExpMatcher("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|a|b][a-f0-9]{3}-[a-f0-9]{12}$"),
+				"userAgent":  objmatcher.NewEqualsMatcher("test-user-agent"),
+				"categories": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("dataLoad"),
+					objmatcher.NewEqualsMatcher("containerSearch"),
+				}),
+				"entities": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-entity-1"),
+					objmatcher.NewEqualsMatcher(json.Number("2")),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"key-1": objmatcher.NewEqualsMatcher("value-1"),
+						"key-2": objmatcher.NewEqualsMatcher(json.Number("2")),
+					}),
+				}),
+				"users": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"uid": objmatcher.NewEqualsMatcher("test-user-id-1"),
+					}),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"uid": objmatcher.NewEqualsMatcher("test-user-id-2"),
+					}),
+				}),
+				"origins": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-origin-1"),
+					objmatcher.NewEqualsMatcher("test-origin-2"),
+				}),
+				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
+				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"containerSearchQuery": objmatcher.NewEqualsMatcher(nil),
+					"loadedResources":      objmatcher.NewEqualsMatcher(nil),
+					"key-1":                objmatcher.NewEqualsMatcher("value-1"),
+					"key-2":                objmatcher.NewEqualsMatcher("value-2"),
+				}),
+				"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"containerSearchResults":   objmatcher.NewEqualsMatcher(nil),
+					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
+					"test-result-fields-key-2": objmatcher.NewEqualsMatcher("test-result-fields-value-2"),
 				}),
 				"uid":     objmatcher.NewEqualsMatcher("test-uid"),
 				"sid":     objmatcher.NewEqualsMatcher("test-sid"),
