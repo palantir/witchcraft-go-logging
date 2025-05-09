@@ -1,57 +1,59 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package categories
 
 import (
 	"fmt"
-	werror "github.com/palantir/witchcraft-go-error"
-	v2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common/v2"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"reflect"
-)
 
-type Classification string
-
-const (
-	Classification_RESOURCE     = Classification("RESOURCE")
-	Classification_TOKEN        = Classification("TOKEN")
-	Classification_UID          = Classification("UID")
-	Classification_DATA         = Classification("DATA")
-	Classification_METADATA     = Classification("METADATA")
-	Classification_USER_INPUT   = Classification("USER_INPUT")
-	Classification_CONSTANT     = Classification("CONSTANT")
-	Classification_PASS_THROUGH = Classification("PASS_THROUGH")
+	werror "github.com/palantir/witchcraft-go-error"
+	commonv2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common/v2"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 )
 
 // Converts the provided data to a slice of v2.Resource. Based on the Java "promote" method.
-func toResource(data any) ([]v2.Resource, error) {
+func toResource(data any) ([]commonv2.Resource, error) {
 	switch val := data.(type) {
-	case v2.Resource:
-		return []v2.Resource{val}, nil
-	case v2.ApplicationResource:
-		return []v2.Resource{v2.NewResourceFromApplication(val)}, nil
-	case v2.DataResource:
-		return []v2.Resource{v2.NewResourceFromData(val)}, nil
-	case v2.MonitorResource:
-		return []v2.Resource{v2.NewResourceFromMonitor(val)}, nil
-	case v2.SystemResource:
-		return []v2.Resource{v2.NewResourceFromSystem(val)}, nil
-	case v2.LogicResource:
-		return []v2.Resource{v2.NewResourceFromLogic(val)}, nil
-	case v2.RequestResource:
-		return []v2.Resource{v2.NewResourceFromRequest(val)}, nil
-	case v2.OntologyLogicResource:
-		return []v2.Resource{v2.NewResourceFromOntologyLogic(val)}, nil
-	case v2.OntologyDataResource:
-		return []v2.Resource{v2.NewResourceFromOntologyData(val)}, nil
-	case v2.OntologyDataResourceList:
-		return []v2.Resource{v2.NewResourceFromOntologyDataList(val)}, nil
-	case v2.OntologyMetaDataResource:
-		return []v2.Resource{v2.NewResourceFromOntologyMetaData(val)}, nil
-	case v2.Identifier:
-		return []v2.Resource{v2.NewResourceFromExternal(val)}, nil
-	case v2.ImportDestination:
-		resources := []v2.Resource{v2.NewResourceFromData(val.Id)}
+	case commonv2.Resource:
+		return []commonv2.Resource{val}, nil
+	case commonv2.ApplicationResource:
+		return []commonv2.Resource{commonv2.NewResourceFromApplication(val)}, nil
+	case commonv2.DataResource:
+		return []commonv2.Resource{commonv2.NewResourceFromData(val)}, nil
+	case commonv2.MonitorResource:
+		return []commonv2.Resource{commonv2.NewResourceFromMonitor(val)}, nil
+	case commonv2.SystemResource:
+		return []commonv2.Resource{commonv2.NewResourceFromSystem(val)}, nil
+	case commonv2.LogicResource:
+		return []commonv2.Resource{commonv2.NewResourceFromLogic(val)}, nil
+	case commonv2.RequestResource:
+		return []commonv2.Resource{commonv2.NewResourceFromRequest(val)}, nil
+	case commonv2.OntologyLogicResource:
+		return []commonv2.Resource{commonv2.NewResourceFromOntologyLogic(val)}, nil
+	case commonv2.OntologyDataResource:
+		return []commonv2.Resource{commonv2.NewResourceFromOntologyData(val)}, nil
+	case commonv2.OntologyDataResourceList:
+		return []commonv2.Resource{commonv2.NewResourceFromOntologyDataList(val)}, nil
+	case commonv2.OntologyMetaDataResource:
+		return []commonv2.Resource{commonv2.NewResourceFromOntologyMetaData(val)}, nil
+	case commonv2.Identifier:
+		return []commonv2.Resource{commonv2.NewResourceFromExternal(val)}, nil
+	case commonv2.ImportDestination:
+		resources := []commonv2.Resource{commonv2.NewResourceFromData(val.Id)}
 		if val.Parent != nil {
-			resources = append(resources, v2.NewResourceFromData(*val.Parent))
+			resources = append(resources, commonv2.NewResourceFromData(*val.Parent))
 		}
 		return resources, nil
 	}
@@ -63,14 +65,14 @@ func toResource(data any) ([]v2.Resource, error) {
 // type (or a slice of recognized resource types).
 //
 // Based on the Java "public static Set<Resource> checkAndExtractResources(Object data)" function.
-func CheckAndExtractResources(input any) ([]v2.Resource, error) {
+func CheckAndExtractResources(input any) ([]commonv2.Resource, error) {
 	if input == nil {
 		return nil, nil
 	}
 
 	// if input is a slice, treat it as a collection of resources
 	if valViaReflection := reflect.ValueOf(input); valViaReflection.Kind() == reflect.Slice {
-		var collectedResources []v2.Resource
+		var collectedResources []commonv2.Resource
 		for i := 0; i < valViaReflection.Len(); i++ {
 			sliceVal := valViaReflection.Index(i).Interface()
 
@@ -123,7 +125,7 @@ func toUserID(in any) (logging.UserId, error) {
 	return userID, nil
 }
 
-func ExtractUserIDsFromTokens(tokens []v2.Token) []logging.UserId {
+func ExtractUserIDsFromTokens(tokens []commonv2.Token) []logging.UserId {
 	var userIDs []logging.UserId
 	for _, token := range tokens {
 		if token.UserId == nil {
@@ -133,11 +135,3 @@ func ExtractUserIDsFromTokens(tokens []v2.Token) []logging.UserId {
 	}
 	return userIDs
 }
-
-//private static Set<UserId> extractUserIdsFromTokens(List<Token> tokens) {
-//return tokens.stream()
-//.map(Token::getUserId)
-//.filter(Optional::isPresent)
-//.map(Optional::get)
-//.collect(Collectors.toSet());
-//}

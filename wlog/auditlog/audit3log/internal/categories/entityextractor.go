@@ -1,11 +1,25 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package categories
 
 import (
 	"github.com/palantir/pkg/rid"
-	v2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common/v2"
+	commonv2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common/v2"
 )
 
-func EntitiesFromResources(resource ...v2.Resource) ([]rid.ResourceIdentifier, error) {
+func EntitiesFromResources(resource ...commonv2.Resource) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 	for _, r := range resource {
 		rids, err := entitiesFromResource(r)
@@ -17,10 +31,10 @@ func EntitiesFromResources(resource ...v2.Resource) ([]rid.ResourceIdentifier, e
 	return ids, nil
 }
 
-func entitiesFromResource(resource v2.Resource) ([]rid.ResourceIdentifier, error) {
+func entitiesFromResource(resource commonv2.Resource) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 
-	ridsFromIDFn := func(id v2.Identifier) error {
+	ridsFromIDFn := func(id commonv2.Identifier) error {
 		rids, err := ridsFromIdentifier(id)
 		if err != nil {
 			return err
@@ -37,35 +51,35 @@ func entitiesFromResource(resource v2.Resource) ([]rid.ResourceIdentifier, error
 	}
 
 	if err := resource.AcceptFuncs(
-		func(v v2.ApplicationResource) error {
+		func(v commonv2.ApplicationResource) error {
 			return ridsFromIDFn(v.Id)
 		},
-		func(v v2.DataResource) error {
+		func(v commonv2.DataResource) error {
 			return ridsFromIDFn(v.Id)
 		},
-		func(v v2.MonitorResource) error {
+		func(v commonv2.MonitorResource) error {
 			return ridsFromIDFn(v.Id)
 		},
 		resource.SystemNoopSuccess,
-		func(v v2.LogicResource) error {
+		func(v commonv2.LogicResource) error {
 			return ridsFromIDFn(v.Id)
 		},
-		func(v v2.RequestResource) error {
+		func(v commonv2.RequestResource) error {
 			return ridsFromIDFn(v.Id)
 		},
-		func(v v2.OntologyDataResource) error {
+		func(v commonv2.OntologyDataResource) error {
 			return ridsFn(ridsFromOntologyDataResource(v))
 		},
-		func(v v2.OntologyDataResourceList) error {
+		func(v commonv2.OntologyDataResourceList) error {
 			return ridsFn(ridsFromOntologyDataResourceList(v))
 		},
-		func(v v2.OntologyLogicResource) error {
+		func(v commonv2.OntologyLogicResource) error {
 			return ridsFn(ridsFromOntologyLogicResource(v))
 		},
-		func(v v2.OntologyMetaDataResource) error {
+		func(v commonv2.OntologyMetaDataResource) error {
 			return ridsFromIDFn(v.Id)
 		},
-		func(v v2.Identifier) error {
+		func(v commonv2.Identifier) error {
 			return ridsFromIDFn(v)
 		},
 		resource.ErrorOnUnknown,
@@ -75,7 +89,7 @@ func entitiesFromResource(resource v2.Resource) ([]rid.ResourceIdentifier, error
 	return ids, nil
 }
 
-func ridsFromIdentifier(identifier v2.Identifier) ([]rid.ResourceIdentifier, error) {
+func ridsFromIdentifier(identifier commonv2.Identifier) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 	if err := identifier.AcceptFuncs(
 		func(v rid.ResourceIdentifier) error {
@@ -95,7 +109,7 @@ func ridsFromIdentifier(identifier v2.Identifier) ([]rid.ResourceIdentifier, err
 	return ids, nil
 }
 
-func ridsFromOntologyDataResource(resource v2.OntologyDataResource) ([]rid.ResourceIdentifier, error) {
+func ridsFromOntologyDataResource(resource commonv2.OntologyDataResource) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 	for _, k := range resource.ObjectPrimaryKey {
 		rids, err := ridsFromObjectPropertyIdentifier(k.PropertyIdentifier)
@@ -123,7 +137,7 @@ func ridsFromOntologyDataResource(resource v2.OntologyDataResource) ([]rid.Resou
 	return ids, nil
 }
 
-func ridsFromObjectPropertyIdentifier(identifier v2.ObjectPropertyIdentifier) ([]rid.ResourceIdentifier, error) {
+func ridsFromObjectPropertyIdentifier(identifier commonv2.ObjectPropertyIdentifier) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 	if err := identifier.AcceptFuncs(
 		func(v rid.ResourceIdentifier) error {
@@ -138,7 +152,7 @@ func ridsFromObjectPropertyIdentifier(identifier v2.ObjectPropertyIdentifier) ([
 	return ids, nil
 }
 
-func ridsFromOntologyContext(ontologyContext v2.OntologyContext) ([]rid.ResourceIdentifier, error) {
+func ridsFromOntologyContext(ontologyContext commonv2.OntologyContext) ([]rid.ResourceIdentifier, error) {
 	if ontologyContext.EntityType == nil {
 		return nil, nil
 	}
@@ -156,7 +170,7 @@ func ridsFromOntologyContext(ontologyContext v2.OntologyContext) ([]rid.Resource
 	return ids, nil
 }
 
-func ridsFromOntologyDataResourceList(resource v2.OntologyDataResourceList) ([]rid.ResourceIdentifier, error) {
+func ridsFromOntologyDataResourceList(resource commonv2.OntologyDataResourceList) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 
 	rids, err := ridsFromOntologyContext(resource.SharedOntologyResourceContext.OntologyContext)
@@ -175,7 +189,7 @@ func ridsFromOntologyDataResourceList(resource v2.OntologyDataResourceList) ([]r
 	return ids, nil
 }
 
-func ridsFromOntologyLogicResource(resource v2.OntologyLogicResource) ([]rid.ResourceIdentifier, error) {
+func ridsFromOntologyLogicResource(resource commonv2.OntologyLogicResource) ([]rid.ResourceIdentifier, error) {
 	var ids []rid.ResourceIdentifier
 	for _, ontologyContext := range resource.OntologyContext {
 		rids, err := ridsFromOntologyContext(ontologyContext)

@@ -21,8 +21,10 @@ import (
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
+	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	v2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/category/v2"
+	commonv2 "github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common/v2"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
 	"github.com/stretchr/testify/assert"
@@ -77,7 +79,6 @@ func (tc TestCase) Params() []audit3log.Param {
 		audit3log.Organizations(tc.Organizations),
 		audit3log.EventID(tc.EventID),
 		audit3log.UserAgent(tc.UserAgent),
-		audit3log.Category(v2.NewAuditCategoryV2FromDataLoad(v2.DataLoad{})),
 		audit3log.Entities(tc.Entities),
 		audit3log.Users(tc.Users),
 		audit3log.Origins(tc.Origins),
@@ -90,6 +91,7 @@ func (tc TestCase) Params() []audit3log.Param {
 		audit3log.OrgID(tc.OrgID),
 		audit3log.TraceID(tc.TraceID),
 		audit3log.Origin(tc.Origin),
+		audit3log.Category(tc.Category),
 	}
 	if tc.LogEntryID != nil {
 		params = append(params, audit3log.LogEntryID(*tc.LogEntryID))
@@ -531,6 +533,147 @@ func TestCases() []TestCase {
 					"containerSearchResults":   objmatcher.NewEqualsMatcher(nil),
 					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
 					"test-result-fields-key-2": objmatcher.NewEqualsMatcher("test-result-fields-value-2"),
+				}),
+				"uid":     objmatcher.NewEqualsMatcher("test-uid"),
+				"sid":     objmatcher.NewEqualsMatcher("test-sid"),
+				"tokenId": objmatcher.NewEqualsMatcher("test-token-id"),
+				"orgId":   objmatcher.NewEqualsMatcher("91de1891-387a-405d-8a33-8543af87afbd"),
+				"traceId": objmatcher.NewEqualsMatcher("test-trace-id"),
+				"origin":  objmatcher.NewEqualsMatcher("0.0.0.0"),
+				"name":    objmatcher.NewEqualsMatcher("TEST_AUDITED_ACTION_NAME"),
+				"result":  objmatcher.NewEqualsMatcher(string(audit3log.AuditResultSuccess)),
+				"type":    objmatcher.NewEqualsMatcher("audit.3"),
+			},
+		},
+		{
+			TestCaseName: "audit log entry sets values extracted from categories",
+
+			Deployment:     "test-deployment",
+			Host:           "test-host",
+			Product:        "test-product",
+			ProductVersion: "test-product-version",
+			Stack:          "test-stack",
+			Service:        "test-service",
+			Environment:    "test-environment",
+			ProducerType:   audit3log.AuditProducerServer,
+			Organizations: []audit3log.Organization{
+				{
+					ID:     "d460d218-5768-43cb-888c-ebd27637e9a6",
+					Reason: "test-reason-1",
+				},
+			},
+			EventID:   "c15487b9-ff6a-4bb1-8c25-2433a185c438",
+			UserAgent: "test-user-agent",
+			Category: v2.NewAuditCategoryV2FromTokenRevoke(v2.TokenRevoke{
+				// UID should be extracted as a user
+				RevokedTokens: []commonv2.Token{
+					{
+						UserId: toPointer("test-revoked-user"),
+					},
+				},
+			}),
+			Entities: []any{
+				"test-entity-1",
+			},
+			Users: []audit3log.ContextualizedUser{
+				{
+					UID: "test-user-id-1",
+				},
+			},
+			Origins: []string{
+				"test-origin-1",
+			},
+			SourceOrigin: "test-source-origin",
+			RequestFields: map[string]any{
+				"key-1": "value-1",
+			},
+			ResultFields: map[string]any{
+				"test-result-fields-key-1": "test-result-fields-value-1",
+			},
+			UID:     "test-uid",
+			SID:     "test-sid",
+			TokenID: "test-token-id",
+			OrgID:   "91de1891-387a-405d-8a33-8543af87afbd",
+			TraceID: "test-trace-id",
+			Origin:  "0.0.0.0",
+			Name:    "TEST_AUDITED_ACTION_NAME",
+			Result:  audit3log.AuditResultSuccess,
+
+			AdditionalParams: []audit3log.Param{
+				// RID should be extracted as an entity
+				audit3log.Category(v2.NewAuditCategoryV2FromDataTransform(v2.DataTransform{
+					TransformTargets: []commonv2.DataResource{
+						{
+							Id: commonv2.NewIdentifierFromRid(rid.MustNew("service", "instance", "resource-type", "00d5fa8a-87d3-4416-ad86-b96cba130b19")),
+						},
+					},
+				})),
+			},
+
+			JSONMatcher: map[string]objmatcher.Matcher{
+				"time":           objmatcher.NewRegExpMatcher(".+"),
+				"deployment":     objmatcher.NewEqualsMatcher("test-deployment"),
+				"host":           objmatcher.NewEqualsMatcher("test-host"),
+				"product":        objmatcher.NewEqualsMatcher("test-product"),
+				"productVersion": objmatcher.NewEqualsMatcher("test-product-version"),
+				"stack":          objmatcher.NewEqualsMatcher("test-stack"),
+				"service":        objmatcher.NewEqualsMatcher("test-service"),
+				"environment":    objmatcher.NewEqualsMatcher("test-environment"),
+				"producerType":   objmatcher.NewEqualsMatcher(string(audit3log.AuditProducerServer)),
+				"organizations": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"id":     objmatcher.NewEqualsMatcher("d460d218-5768-43cb-888c-ebd27637e9a6"),
+						"reason": objmatcher.NewEqualsMatcher("test-reason-1"),
+					}),
+				}),
+				"eventId":    objmatcher.NewEqualsMatcher("c15487b9-ff6a-4bb1-8c25-2433a185c438"),
+				"logEntryId": objmatcher.NewRegExpMatcher("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|a|b][a-f0-9]{3}-[a-f0-9]{12}$"),
+				"userAgent":  objmatcher.NewEqualsMatcher("test-user-agent"),
+				"categories": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("tokenRevoke"),
+					objmatcher.NewEqualsMatcher("dataTransform"),
+				}),
+				"entities": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-entity-1"),
+					// extracted from category
+					objmatcher.NewEqualsMatcher("ri.service.instance.resource-type.00d5fa8a-87d3-4416-ad86-b96cba130b19"),
+				}),
+				"users": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"uid": objmatcher.NewEqualsMatcher("test-user-id-1"),
+					}),
+					objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+						"uid": objmatcher.NewEqualsMatcher("test-revoked-user"),
+					}),
+				}),
+				"origins": objmatcher.SliceMatcher([]objmatcher.Matcher{
+					objmatcher.NewEqualsMatcher("test-origin-1"),
+				}),
+				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
+				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"revokeTokensDescription": objmatcher.NewEqualsMatcher(nil),
+					"transformDescription":    objmatcher.NewEqualsMatcher(nil),
+					"transformTargets": objmatcher.SliceMatcher([]objmatcher.Matcher{
+						objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+							"context": objmatcher.NewEqualsMatcher([]any{}),
+							"id": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+								"rid":  objmatcher.NewEqualsMatcher("ri.service.instance.resource-type.00d5fa8a-87d3-4416-ad86-b96cba130b19"),
+								"type": objmatcher.NewEqualsMatcher("rid"),
+							}),
+						}),
+					}),
+					"key-1": objmatcher.NewEqualsMatcher("value-1"),
+				}),
+				"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
+					"revokedTokens": objmatcher.SliceMatcher([]objmatcher.Matcher{
+						objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+							"userId":         objmatcher.NewEqualsMatcher("test-revoked-user"),
+							"expirationTime": objmatcher.NewEqualsMatcher(nil),
+							"id":             objmatcher.NewEqualsMatcher(nil),
+							"type":           objmatcher.NewEqualsMatcher(""),
+						}),
+					}),
 				}),
 				"uid":     objmatcher.NewEqualsMatcher("test-uid"),
 				"sid":     objmatcher.NewEqualsMatcher("test-sid"),

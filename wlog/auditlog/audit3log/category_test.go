@@ -68,10 +68,13 @@ func TestCategory(t *testing.T) {
 		"categories": objmatcher.SliceMatcher{
 			objmatcher.NewEqualsMatcher("appConfigSearch"),
 		},
+		"entities": objmatcher.SliceMatcher([]objmatcher.Matcher{
+			objmatcher.NewEqualsMatcher("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b"),
+		}),
 		"requestFields": objmatcher.NewEqualsMatcher(map[string]any{
 			"appConfigSearchQuery": "testQuery",
 		}),
-		"responseFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 			"appConfigSearchResults": objmatcher.SliceMatcher{
 				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"context": objmatcher.SliceMatcher{
@@ -148,11 +151,14 @@ func TestMultiCategory(t *testing.T) {
 			objmatcher.NewEqualsMatcher("appConfigSearch"),
 			objmatcher.NewEqualsMatcher("containerSearch"),
 		},
+		"entities": objmatcher.SliceMatcher([]objmatcher.Matcher{
+			objmatcher.NewEqualsMatcher("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b"),
+		}),
 		"requestFields": objmatcher.NewEqualsMatcher(map[string]any{
 			"appConfigSearchQuery": "testQuery",
 			"containerSearchQuery": "test-query",
 		}),
-		"responseFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 			"appConfigSearchResults": objmatcher.SliceMatcher{
 				objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"context": objmatcher.SliceMatcher{
