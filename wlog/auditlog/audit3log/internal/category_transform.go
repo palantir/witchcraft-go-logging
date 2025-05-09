@@ -17,6 +17,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"go/format"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -98,33 +99,37 @@ func convertJavaCategoryDefinitionToGo(javaFileBytes []byte) ([]byte, error) {
 		categoryVisitors = append(categoryVisitors, categoryVisitor)
 	}
 
-	outBytes := &bytes.Buffer{}
-	outBytes.WriteString(header)
+	outBytesBuf := &bytes.Buffer{}
+	outBytesBuf.WriteString(header)
 
-	outBytes.WriteString(`var (`)
-	outBytes.WriteString("\n")
+	outBytesBuf.WriteString(`var (`)
+	outBytesBuf.WriteString("\n")
 
 	for idx, def := range categoryDefs {
-		outBytes.WriteString("\t")
-		outBytes.WriteString(def)
+		outBytesBuf.WriteString("\t")
+		outBytesBuf.WriteString(def)
 		if idx != len(categoryDefs)-1 {
-			outBytes.WriteString("\n\n")
+			outBytesBuf.WriteString("\n\n")
 		}
 	}
 
-	outBytes.WriteString("\n")
-	outBytes.WriteString(`)`)
-	outBytes.WriteString("\n\n")
+	outBytesBuf.WriteString("\n")
+	outBytesBuf.WriteString(`)`)
+	outBytesBuf.WriteString("\n\n")
 
 	for idx, visitor := range categoryVisitors {
-		outBytes.WriteString(visitor)
+		outBytesBuf.WriteString(visitor)
 		if idx != len(categoryDefs)-1 {
-			outBytes.WriteString("\n\n")
+			outBytesBuf.WriteString("\n\n")
 		}
 	}
-	outBytes.WriteString("\n")
+	outBytesBuf.WriteString("\n")
 
-	return outBytes.Bytes(), nil
+	outBytes, err := format.Source(outBytesBuf.Bytes())
+	if err != nil {
+		return nil, werror.Wrap(err, "failed to format Go source code")
+	}
+	return outBytes, nil
 }
 
 func convertSingleJavaDefinitionToGo(in string) (string, string, error) {
