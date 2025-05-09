@@ -68,15 +68,15 @@ var (
 				requiredRequest("transformDescription", categoriespkg.Classification_CONSTANT, func(v v2.DataTransform) any { return v.TransformDescription })
 
 	categoryApiGatewayRequest = newCategoryInfo("apiGatewayRequest", v2.NewAuditCategoryV2FromApiGatewayRequest).
-					optionalRequest("operationNames", categoriespkg.Classification_METADATA, func(v v2.ApiGatewayRequest) any { return v.OperationNames })
+				optionalRequest("operationNames", categoriespkg.Classification_METADATA, func(v v2.ApiGatewayRequest) any { return v.OperationNames })
 
 	categoryCodeExecution = newCategoryInfo("codeExecution", v2.NewAuditCategoryV2FromCodeExecution).
 				requiredResponse("executedResources", categoriespkg.Classification_RESOURCE, func(v v2.CodeExecution) any { return v.ExecutedResources }).
 				requiredRequest("executedResourceEnvironment", categoriespkg.Classification_RESOURCE, func(v v2.CodeExecution) any { return v.ExecutedResourceEnvironment })
 
 	categoryCancelCodeExecution = newCategoryInfo("cancelCodeExecution", v2.NewAuditCategoryV2FromCancelCodeExecution).
-					requiredRequest("cancelledExecutedResources", categoriespkg.Classification_RESOURCE, func(v v2.CancelCodeExecution) any { return v.CancelledExecutedResources }).
-					requiredRequest("cancelledExecutedResourceEnvironment", categoriespkg.Classification_RESOURCE, func(v v2.CancelCodeExecution) any { return v.CancelledExecutedResourceEnvironment })
+				requiredRequest("cancelledExecutedResources", categoriespkg.Classification_RESOURCE, func(v v2.CancelCodeExecution) any { return v.CancelledExecutedResources }).
+				requiredRequest("cancelledExecutedResourceEnvironment", categoriespkg.Classification_RESOURCE, func(v v2.CancelCodeExecution) any { return v.CancelledExecutedResourceEnvironment })
 
 	categoryDataShare = newCategoryInfo("dataShare", v2.NewAuditCategoryV2FromDataShare).
 				optionalRequest("dataShareId", categoriespkg.Classification_RESOURCE, func(v v2.DataShare) any { return v.DataShareId }).
@@ -88,8 +88,8 @@ var (
 				requiredRequest("dataShareCreateTargets", categoriespkg.Classification_RESOURCE, func(v v2.DataShareCreate) any { return v.DataShareCreateTargets })
 
 	categoryDataShareDisable = newCategoryInfo("dataShareDisable", v2.NewAuditCategoryV2FromDataShareDisable).
-					optionalRequest("dataShareDisableId", categoriespkg.Classification_RESOURCE, func(v v2.DataShareDisable) any { return v.DataShareDisableId }).
-					requiredRequest("dataShareDisableTargets", categoriespkg.Classification_RESOURCE, func(v v2.DataShareDisable) any { return v.DataShareDisableTargets })
+				optionalRequest("dataShareDisableId", categoriespkg.Classification_RESOURCE, func(v v2.DataShareDisable) any { return v.DataShareDisableId }).
+				requiredRequest("dataShareDisableTargets", categoriespkg.Classification_RESOURCE, func(v v2.DataShareDisable) any { return v.DataShareDisableTargets })
 
 	categoryMetaDataAccess = newCategoryInfo("metaDataAccess", v2.NewAuditCategoryV2FromMetaDataAccess).
 				requiredRequest("accessedMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.MetaDataAccess) any { return v.AccessedMetaDataResources }).
@@ -149,8 +149,8 @@ var (
 				optionalRequest("approveRequestUserId", categoriespkg.Classification_UID, func(v v2.RequestApprove) any { return v.ApproveRequestUserId })
 
 	categoryRequestDisapprove = newCategoryInfo("requestDisapprove", v2.NewAuditCategoryV2FromRequestDisapprove).
-					requiredRequest("disapprovedRequestIds", categoriespkg.Classification_RESOURCE, func(v v2.RequestDisapprove) any { return v.DisapprovedRequestIds }).
-					optionalRequest("disapproveRequestUserId", categoriespkg.Classification_UID, func(v v2.RequestDisapprove) any { return v.DisapproveRequestUserId })
+				requiredRequest("disapprovedRequestIds", categoriespkg.Classification_RESOURCE, func(v v2.RequestDisapprove) any { return v.DisapprovedRequestIds }).
+				optionalRequest("disapproveRequestUserId", categoriespkg.Classification_UID, func(v v2.RequestDisapprove) any { return v.DisapproveRequestUserId })
 
 	categoryRequestExecute = newCategoryInfo("requestExecute", v2.NewAuditCategoryV2FromRequestExecute).
 				requiredRequest("executedRequestIds", categoriespkg.Classification_RESOURCE, func(v v2.RequestExecute) any { return v.ExecutedRequestIds }).
@@ -194,12 +194,12 @@ var (
 				requiredResponse("fileLoadResponse", categoriespkg.Classification_METADATA, func(v v2.AssetFileLoadV2) any { return v.FileLoadResponse })
 
 	categoryAuditDataShareCreate = newCategoryInfo("auditDataShareCreate", v2.NewAuditCategoryV2FromAuditDataShareCreate).
-					requiredRequest("shareTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataShareCreate) any { return v.ShareTargets })
+				requiredRequest("shareTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataShareCreate) any { return v.ShareTargets })
 
 	categoryAuditDataTransform = newCategoryInfo("auditDataTransform", v2.NewAuditCategoryV2FromAuditDataTransform).
-					requiredRequest("transformTarget", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataTransform) any { return v.TransformTarget }).
-					requiredRequest("transformDescriptions", categoriespkg.Classification_METADATA, func(v v2.AuditDataTransform) any { return v.TransformDescriptions }).
-					optionalResponse("transformDestination", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataTransform) any { return v.TransformDestination })
+				requiredRequest("transformTarget", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataTransform) any { return v.TransformTarget }).
+				requiredRequest("transformDescriptions", categoriespkg.Classification_METADATA, func(v v2.AuditDataTransform) any { return v.TransformDescriptions }).
+				optionalResponse("transformDestination", categoriespkg.Classification_RESOURCE, func(v v2.AuditDataTransform) any { return v.TransformDestination })
 
 	categoryContainerLaunch = newCategoryInfo("containerLaunch", v2.NewAuditCategoryV2FromContainerLaunch).
 				optionalRequest("requestedContainerIdsToLaunch", categoriespkg.Classification_RESOURCE, func(v v2.ContainerLaunch) any { return v.RequestedContainerIdsToLaunch }).
@@ -230,9 +230,9 @@ var (
 				requiredResponse("configureInfraRequestId", categoriespkg.Classification_METADATA, func(v v2.ConfigureInfra) any { return v.ConfigureInfraRequestId })
 
 	categoryReviewInfraAction = newCategoryInfo("reviewInfraAction", v2.NewAuditCategoryV2FromReviewInfraAction).
-					requiredRequest("reviewInfraActionRequestId", categoriespkg.Classification_METADATA, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionRequestId }).
-					requiredRequest("reviewInfraActionUser", categoriespkg.Classification_UID, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionUser }).
-					requiredResponse("reviewInfraActionWasApproved", categoriespkg.Classification_CONSTANT, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionWasApproved })
+				requiredRequest("reviewInfraActionRequestId", categoriespkg.Classification_METADATA, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionRequestId }).
+				requiredRequest("reviewInfraActionUser", categoriespkg.Classification_UID, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionUser }).
+				requiredResponse("reviewInfraActionWasApproved", categoriespkg.Classification_CONSTANT, func(v v2.ReviewInfraAction) any { return v.ReviewInfraActionWasApproved })
 
 	categoryRestartInfra = newCategoryInfo("restartInfra", v2.NewAuditCategoryV2FromRestartInfra).
 				requiredRequest("restartedResources", categoriespkg.Classification_RESOURCE, func(v v2.RestartInfra) any { return v.RestartedResources })
@@ -287,8 +287,8 @@ var (
 				requiredResponse("accessedTokens", categoriespkg.Classification_TOKEN, func(v v2.TokenAccess) any { return v.AccessedTokens })
 
 	categoryOauth2InitiateAuthFlow = newCategoryInfo("oauth2InitiateAuthFlow", v2.NewAuditCategoryV2FromOauth2InitiateAuthFlow).
-					requiredRequest("oauth2InitiateAuthFlowUser", categoriespkg.Classification_UID, func(v v2.Oauth2InitiateAuthFlow) any { return v.Oauth2InitiateAuthFlowUser }).
-					requiredRequest("oauth2InitiateAuthClientId", categoriespkg.Classification_RESOURCE, func(v v2.Oauth2InitiateAuthFlow) any { return v.Oauth2InitiateAuthClientId })
+				requiredRequest("oauth2InitiateAuthFlowUser", categoriespkg.Classification_UID, func(v v2.Oauth2InitiateAuthFlow) any { return v.Oauth2InitiateAuthFlowUser }).
+				requiredRequest("oauth2InitiateAuthClientId", categoriespkg.Classification_RESOURCE, func(v v2.Oauth2InitiateAuthFlow) any { return v.Oauth2InitiateAuthClientId })
 
 	categoryPassThrough = newCategoryInfo("passThrough", v2.NewAuditCategoryV2FromPassThrough)
 
@@ -296,29 +296,29 @@ var (
 				requiredRequest("managedUserIds", categoriespkg.Classification_METADATA, func(v v2.ManagementUsers) any { return v.ManagedUserIds })
 
 	categoryManagementGroups = newCategoryInfo("managementGroups", v2.NewAuditCategoryV2FromManagementGroups).
-					requiredRequest("groupPatches", categoriespkg.Classification_METADATA, func(v v2.ManagementGroups) any { return v.GroupPatches })
+				requiredRequest("groupPatches", categoriespkg.Classification_METADATA, func(v v2.ManagementGroups) any { return v.GroupPatches })
 
 	categoryManagementMarkings = newCategoryInfo("managementMarkings", v2.NewAuditCategoryV2FromManagementMarkings).
-					requiredRequest("markingPatches", categoriespkg.Classification_METADATA, func(v v2.ManagementMarkings) any { return v.MarkingPatches })
+				requiredRequest("markingPatches", categoriespkg.Classification_METADATA, func(v v2.ManagementMarkings) any { return v.MarkingPatches })
 
 	categoryManagementPermissions = newCategoryInfo("managementPermissions", v2.NewAuditCategoryV2FromManagementPermissions).
-					requiredRequest("resourcesWithPermissionsChanges", categoriespkg.Classification_RESOURCE, func(v v2.ManagementPermissions) any { return v.ResourcesWithPermissionsChanges }).
-					optionalRequest("permissionChangeContext", categoriespkg.Classification_METADATA, func(v v2.ManagementPermissions) any { return v.PermissionChangeContext })
+				requiredRequest("resourcesWithPermissionsChanges", categoriespkg.Classification_RESOURCE, func(v v2.ManagementPermissions) any { return v.ResourcesWithPermissionsChanges }).
+				optionalRequest("permissionChangeContext", categoriespkg.Classification_METADATA, func(v v2.ManagementPermissions) any { return v.PermissionChangeContext })
 
 	categoryManagementTokens = newCategoryInfo("managementTokens", v2.NewAuditCategoryV2FromManagementTokens).
-					requiredRequest("managedTokens", categoriespkg.Classification_METADATA, func(v v2.ManagementTokens) any { return v.ManagedTokens })
+				requiredRequest("managedTokens", categoriespkg.Classification_METADATA, func(v v2.ManagementTokens) any { return v.ManagedTokens })
 
 	categoryAuthenticationCheck = newCategoryInfo("authenticationCheck", v2.NewAuditCategoryV2FromAuthenticationCheck).
-					optionalRequest("authenticationCheckTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckTargets }).
-					requiredResponse("authenticationCheckResult", categoriespkg.Classification_METADATA, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckResult }).
-					optionalResponse("authenticationCheckResultMessage", categoriespkg.Classification_CONSTANT, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckResultMessage })
+				optionalRequest("authenticationCheckTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckTargets }).
+				requiredResponse("authenticationCheckResult", categoriespkg.Classification_METADATA, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckResult }).
+				optionalResponse("authenticationCheckResultMessage", categoriespkg.Classification_CONSTANT, func(v v2.AuthenticationCheck) any { return v.AuthenticationCheckResultMessage })
 
 	categoryAuthorizationCheck = newCategoryInfo("authorizationCheck", v2.NewAuditCategoryV2FromAuthorizationCheck).
-					optionalRequest("authorizationCheckTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckTargets }).
-					requiredRequest("authorizationCheckOperations", categoriespkg.Classification_METADATA, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckOperations }).
-					requiredResponse("authorizationCheckSucceededTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckSucceededTargets }).
-					requiredResponse("authorizationCheckFailedTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckFailedTargets }).
-					optionalResponse("authorizationCheckResultMessage", categoriespkg.Classification_CONSTANT, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckResultMessage })
+				optionalRequest("authorizationCheckTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckTargets }).
+				requiredRequest("authorizationCheckOperations", categoriespkg.Classification_METADATA, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckOperations }).
+				requiredResponse("authorizationCheckSucceededTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckSucceededTargets }).
+				requiredResponse("authorizationCheckFailedTargets", categoriespkg.Classification_RESOURCE, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckFailedTargets }).
+				optionalResponse("authorizationCheckResultMessage", categoriespkg.Classification_CONSTANT, func(v v2.AuthorizationCheck) any { return v.AuthorizationCheckResultMessage })
 
 	categoryUserLogin = newCategoryInfo("userLogin", v2.NewAuditCategoryV2FromUserLogin).
 				optionalResponse("loginUserId", categoriespkg.Classification_UID, func(v v2.UserLogin) any { return v.LoginUserId })
@@ -334,54 +334,54 @@ var (
 				requiredRequest("onBehalfOfUserIds", categoriespkg.Classification_UID, func(v v2.OnBehalfOf) any { return v.OnBehalfOfUserIds })
 
 	categoryOntologyDataLoad = newCategoryInfo("ontologyDataLoad", v2.NewAuditCategoryV2FromOntologyDataLoad).
-					optionalRequest("ontologyDataLoadContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataLoad) any { return v.OntologyDataLoadContext }).
-					requiredRequest("requestedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataLoad) any { return v.RequestedOntologyDataResources }).
-					requiredResponse("loadedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataLoad) any { return v.LoadedOntologyDataResources })
+				optionalRequest("ontologyDataLoadContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataLoad) any { return v.OntologyDataLoadContext }).
+				requiredRequest("requestedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataLoad) any { return v.RequestedOntologyDataResources }).
+				requiredResponse("loadedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataLoad) any { return v.LoadedOntologyDataResources })
 
 	categoryOntologyDataTransform = newCategoryInfo("ontologyDataTransform", v2.NewAuditCategoryV2FromOntologyDataTransform).
-					optionalRequest("ontologyDataTransformTargets", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformTargets }).
-					optionalRequest("ontologyDataTransformContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformContext }).
-					optionalRequest("ontologyDataTransformDescription", categoriespkg.Classification_CONSTANT, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformDescription }).
-					optionalResponse("transformedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataTransform) any { return v.TransformedOntologyDataResources })
+				optionalRequest("ontologyDataTransformTargets", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformTargets }).
+				optionalRequest("ontologyDataTransformContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformContext }).
+				optionalRequest("ontologyDataTransformDescription", categoriespkg.Classification_CONSTANT, func(v v2.OntologyDataTransform) any { return v.OntologyDataTransformDescription }).
+				optionalResponse("transformedOntologyDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataTransform) any { return v.TransformedOntologyDataResources })
 
 	categoryOntologyDataSearch = newCategoryInfo("ontologyDataSearch", v2.NewAuditCategoryV2FromOntologyDataSearch).
-					optionalRequest("ontologyDataSearchContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataSearch) any { return v.OntologyDataSearchContext }).
-					requiredRequest("searchedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataSearch) any { return v.SearchedOntologyLogicResources }).
-					requiredResponse("ontologyDataSearchResults", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataSearch) any { return v.OntologyDataSearchResults })
+				optionalRequest("ontologyDataSearchContext", categoriespkg.Classification_METADATA, func(v v2.OntologyDataSearch) any { return v.OntologyDataSearchContext }).
+				requiredRequest("searchedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataSearch) any { return v.SearchedOntologyLogicResources }).
+				requiredResponse("ontologyDataSearchResults", categoriespkg.Classification_RESOURCE, func(v v2.OntologyDataSearch) any { return v.OntologyDataSearchResults })
 
 	categoryOntologyLogicAccess = newCategoryInfo("ontologyLogicAccess", v2.NewAuditCategoryV2FromOntologyLogicAccess).
-					requiredRequest("requestedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicAccess) any { return v.RequestedOntologyLogicResources }).
-					requiredResponse("loadedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicAccess) any { return v.LoadedOntologyLogicResources })
+				requiredRequest("requestedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicAccess) any { return v.RequestedOntologyLogicResources }).
+				requiredResponse("loadedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicAccess) any { return v.LoadedOntologyLogicResources })
 
 	categoryOntologyLogicCreate = newCategoryInfo("ontologyLogicCreate", v2.NewAuditCategoryV2FromOntologyLogicCreate).
-					requiredResponse("createdOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicCreate) any { return v.CreatedOntologyLogicResources }).
-					optionalRequest("createOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicCreate) any { return v.CreateOntologyLogicContext })
+				requiredResponse("createdOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicCreate) any { return v.CreatedOntologyLogicResources }).
+				optionalRequest("createOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicCreate) any { return v.CreateOntologyLogicContext })
 
 	categoryOntologyLogicDelete = newCategoryInfo("ontologyLogicDelete", v2.NewAuditCategoryV2FromOntologyLogicDelete).
-					requiredResponse("deletedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicDelete) any { return v.DeletedOntologyLogicResources }).
-					optionalRequest("deleteOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicDelete) any { return v.DeleteOntologyLogicContext })
+				requiredResponse("deletedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicDelete) any { return v.DeletedOntologyLogicResources }).
+				optionalRequest("deleteOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicDelete) any { return v.DeleteOntologyLogicContext })
 
 	categoryOntologyLogicUpdate = newCategoryInfo("ontologyLogicUpdate", v2.NewAuditCategoryV2FromOntologyLogicUpdate).
-					requiredResponse("updatedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicUpdate) any { return v.UpdatedOntologyLogicResources }).
-					optionalRequest("updateOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicUpdate) any { return v.UpdateOntologyLogicContext })
+				requiredResponse("updatedOntologyLogicResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyLogicUpdate) any { return v.UpdatedOntologyLogicResources }).
+				optionalRequest("updateOntologyLogicContext", categoriespkg.Classification_METADATA, func(v v2.OntologyLogicUpdate) any { return v.UpdateOntologyLogicContext })
 
 	categoryOntologyMetaDataLoad = newCategoryInfo("ontologyMetaDataLoad", v2.NewAuditCategoryV2FromOntologyMetaDataLoad).
-					requiredRequest("requestedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataLoad) any { return v.RequestedOntologyMetaDataResources }).
-					requiredResponse("loadedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataLoad) any { return v.LoadedOntologyMetaDataResources })
+				requiredRequest("requestedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataLoad) any { return v.RequestedOntologyMetaDataResources }).
+				requiredResponse("loadedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataLoad) any { return v.LoadedOntologyMetaDataResources })
 
 	categoryOntologyMetaDataCreate = newCategoryInfo("ontologyMetaDataCreate", v2.NewAuditCategoryV2FromOntologyMetaDataCreate).
-					requiredResponse("createdOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataCreate) any { return v.CreatedOntologyMetaDataResources })
+				requiredResponse("createdOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataCreate) any { return v.CreatedOntologyMetaDataResources })
 
 	categoryOntologyMetaDataDelete = newCategoryInfo("ontologyMetaDataDelete", v2.NewAuditCategoryV2FromOntologyMetaDataDelete).
-					requiredRequest("deletedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataDelete) any { return v.DeletedOntologyMetaDataResources })
+				requiredRequest("deletedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataDelete) any { return v.DeletedOntologyMetaDataResources })
 
 	categoryOntologyMetaDataUpdate = newCategoryInfo("ontologyMetaDataUpdate", v2.NewAuditCategoryV2FromOntologyMetaDataUpdate).
-					requiredRequest("updatedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataUpdate) any { return v.UpdatedOntologyMetaDataResources })
+				requiredRequest("updatedOntologyMetaDataResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataUpdate) any { return v.UpdatedOntologyMetaDataResources })
 
 	categoryOntologyMetaDataSearch = newCategoryInfo("ontologyMetaDataSearch", v2.NewAuditCategoryV2FromOntologyMetaDataSearch).
-					requiredRequest("ontologyMetaDataSearchedResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchedResources }).
-					optionalRequest("ontologyMetaDataSearchContext", categoriespkg.Classification_METADATA, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchContext }).
-					requiredResponse("ontologyMetaDataSearchResults", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchResults })
+				requiredRequest("ontologyMetaDataSearchedResources", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchedResources }).
+				optionalRequest("ontologyMetaDataSearchContext", categoriespkg.Classification_METADATA, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchContext }).
+				requiredResponse("ontologyMetaDataSearchResults", categoriespkg.Classification_RESOURCE, func(v v2.OntologyMetaDataSearch) any { return v.OntologyMetaDataSearchResults })
 
 	categoryLlmInference = newCategoryInfo("llmInference", v2.NewAuditCategoryV2FromLlmInference).
 				requiredRequest("llmInferenceContext", categoriespkg.Classification_METADATA, func(v v2.LlmInference) any { return v.LlmInferenceContext }).
@@ -394,10 +394,10 @@ var (
 				requiredResponse("llmRouteResponse", categoriespkg.Classification_DATA, func(v v2.LlmRoute) any { return v.LlmRouteResponse })
 
 	categoryInApplicationContext = newCategoryInfo("inApplicationContext", v2.NewAuditCategoryV2FromInApplicationContext).
-					requiredRequest("applicationRid", categoriespkg.Classification_METADATA, func(v v2.InApplicationContext) any { return v.ApplicationRid })
+				requiredRequest("applicationRid", categoriespkg.Classification_METADATA, func(v v2.InApplicationContext) any { return v.ApplicationRid })
 
 	categoryInEnrollmentContext = newCategoryInfo("inEnrollmentContext", v2.NewAuditCategoryV2FromInEnrollmentContext).
-					requiredRequest("enrollmentRids", categoriespkg.Classification_METADATA, func(v v2.InEnrollmentContext) any { return v.EnrollmentRids })
+				requiredRequest("enrollmentRids", categoriespkg.Classification_METADATA, func(v v2.InEnrollmentContext) any { return v.EnrollmentRids })
 )
 
 func (a *auditCategoryV2Visitor) VisitDataCreate(ctx context.Context, v v2.DataCreate) (Param, error) {
