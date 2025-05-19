@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Adds support for audit.3 logging.
+    
+    Adds the audit3log package and functions for creating and writing audit.3 logs.
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/400
