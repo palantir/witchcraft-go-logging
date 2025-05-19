@@ -7,11 +7,11 @@ require (
 	github.com/golang/glog v1.2.4
 	github.com/nmiyake/pkg/dirs v1.0.0
 	github.com/palantir/pkg/bytesbuffers v1.2.0
-	github.com/palantir/pkg/datetime v1.1.0
+	github.com/palantir/pkg/datetime v1.2.0
 	github.com/palantir/pkg/objmatcher v1.1.0
 	github.com/palantir/pkg/rid v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
-	github.com/palantir/pkg/safelong v1.1.0
+	github.com/palantir/pkg/safelong v1.2.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.41.0
