@@ -11,10 +11,10 @@ import (
 
 // Programmatic or manual authentication event, e.g. token validation.
 type AuthenticationCheck struct {
-	UserId    *string `json:"userId"`
-	Username  *string `json:"username"`
-	Realm     *string `json:"realm"`
-	SessionId *string `json:"sessionId"`
+	UserId    *string `json:"userId,omitempty"`
+	Username  *string `json:"username,omitempty"`
+	Realm     *string `json:"realm,omitempty"`
+	SessionId *string `json:"sessionId,omitempty"`
 }
 
 func (o AuthenticationCheck) MarshalYAML() (interface{}, error) {
@@ -38,8 +38,8 @@ type CodeExecution struct {
 	BuildIds    []string          `json:"buildIds"`
 	Inputs      []common.Resource `json:"inputs"`
 	Outputs     []common.Resource `json:"outputs"`
-	SourceId    *common.Resource  `json:"sourceId"`
-	ContainerId *string           `json:"containerId"`
+	SourceId    *common.Resource  `json:"sourceId,omitempty"`
+	ContainerId *string           `json:"containerId,omitempty"`
 }
 
 func (o CodeExecution) MarshalJSON() ([]byte, error) {
@@ -98,7 +98,7 @@ environment.
 */
 type ContainerLaunch struct {
 	ContainerId string    `json:"containerId"`
-	Location    *[]string `json:"location"`
+	Location    *[]string `json:"location,omitempty"`
 }
 
 func (o ContainerLaunch) MarshalYAML() (interface{}, error) {
@@ -123,7 +123,7 @@ shutdown (e.g. "failure" or "user request").
 */
 type ContainerStop struct {
 	ContainerId string  `json:"containerId"`
-	Reason      *string `json:"reason"`
+	Reason      *string `json:"reason,omitempty"`
 }
 
 func (o ContainerStop) MarshalYAML() (interface{}, error) {
@@ -208,8 +208,8 @@ func (o *DataDelete) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Exports from the platform.
 type DataExport struct {
-	DownloadedResource *common.Resource   `json:"downloadedResource"`
-	Size               *safelong.SafeLong `json:"size"`
+	DownloadedResource *common.Resource   `json:"downloadedResource,omitempty"`
+	Size               *safelong.SafeLong `json:"size,omitempty"`
 }
 
 func (o DataExport) MarshalYAML() (interface{}, error) {
@@ -234,11 +234,11 @@ ingested from outside the platform. It is therefore possible that a DataImport i
 DataPromote in a separate service.
 */
 type DataImport struct {
-	Filename         *string            `json:"filename"`
-	FileType         *common.FileType   `json:"fileType"`
-	ResourceId       *common.Resource   `json:"resourceId"`
-	ParentResourceId *common.Resource   `json:"parentResourceId"`
-	Size             *safelong.SafeLong `json:"size"`
+	Filename         *string            `json:"filename,omitempty"`
+	FileType         *common.FileType   `json:"fileType,omitempty"`
+	ResourceId       *common.Resource   `json:"resourceId,omitempty"`
+	ParentResourceId *common.Resource   `json:"parentResourceId,omitempty"`
+	Size             *safelong.SafeLong `json:"size,omitempty"`
 }
 
 func (o DataImport) MarshalYAML() (interface{}, error) {
@@ -319,7 +319,7 @@ func (o *DataPromote) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Searches of datasets, object, or other searches.
 type DataSearch struct {
-	Query *string `json:"query"`
+	Query *string `json:"query,omitempty"`
 }
 
 func (o DataSearch) MarshalYAML() (interface{}, error) {
@@ -340,9 +340,9 @@ func (o *DataSearch) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Discretionary share of data.
 type DataShare struct {
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 	// A human-readable reason this data was shared (e.g. "visited a share link").
-	Reason *string           `conjure-docs:"A human-readable reason this data was shared (e.g. \"visited a share link\")." json:"reason"`
+	Reason *string           `conjure-docs:"A human-readable reason this data was shared (e.g. \"visited a share link\")." json:"reason,omitempty"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -385,7 +385,7 @@ func (o *DataShare) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Creation of a share of data. For example, when creating a link that grants access to resources on visit.
 type DataShareCreate struct {
-	Id     *string           `json:"id"`
+	Id     *string           `json:"id,omitempty"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -428,7 +428,7 @@ func (o *DataShareCreate) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 // Deactivation of a mechanism to share data. For example, the disabling of a link that grants access to resources on visit.
 type DataShareDisable struct {
-	Id     *string           `json:"id"`
+	Id     *string           `json:"id,omitempty"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -553,8 +553,8 @@ func (o *LogicUpdate) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Changes to group membership or otherwise, should always go through here.
 type ManagementGroups struct {
-	GroupId           *string  `json:"groupId"`
-	GroupName         *string  `json:"groupName"`
+	GroupId           *string  `json:"groupId,omitempty"`
+	GroupName         *string  `json:"groupName,omitempty"`
 	AddedPrincipals   []string `json:"addedPrincipals"`
 	RemovedPrincipals []string `json:"removedPrincipals"`
 }
@@ -626,9 +626,9 @@ func (o *ManagementPermissions) UnmarshalYAML(unmarshal func(interface{}) error)
 
 // Specific action related to token management, e.g. revocation/deletion of tokens.
 type ManagementTokens struct {
-	TokenId   *string           `json:"tokenId"`
+	TokenId   *string           `json:"tokenId,omitempty"`
 	TokenTtl  safelong.SafeLong `json:"tokenTtl"`
-	TokenType *TokenType        `json:"tokenType"`
+	TokenType *TokenType        `json:"tokenType,omitempty"`
 }
 
 func (o ManagementTokens) MarshalYAML() (interface{}, error) {
@@ -653,8 +653,8 @@ events related to user permissions, please use ManagementPermissions.  For event
 the user is added or removed from a group, use ManagementGroups.
 */
 type ManagementUsers struct {
-	UserId   *string              `json:"userId"`
-	Username *string              `json:"username"`
+	UserId   *string              `json:"userId,omitempty"`
+	Username *string              `json:"username,omitempty"`
 	Action   UserManagementAction `json:"action"`
 }
 
@@ -821,9 +821,9 @@ func (o *SystemManagement) UnmarshalYAML(unmarshal func(interface{}) error) erro
 
 // Action that leads to generation of a new token.
 type TokenGeneration struct {
-	TokenId   *string           `json:"tokenId"`
+	TokenId   *string           `json:"tokenId,omitempty"`
 	TokenTtl  safelong.SafeLong `json:"tokenTtl"`
-	TokenType *TokenType        `json:"tokenType"`
+	TokenType *TokenType        `json:"tokenType,omitempty"`
 }
 
 func (o TokenGeneration) MarshalYAML() (interface{}, error) {
@@ -917,11 +917,11 @@ func (o *UserJustify) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Login events of users.
 type UserLogin struct {
-	UserId         *string `json:"userId"`
-	Username       *string `json:"username"`
-	Realm          *string `json:"realm"`
-	OrganizationId *string `json:"organizationId"`
-	SessionId      *string `json:"sessionId"`
+	UserId         *string `json:"userId,omitempty"`
+	Username       *string `json:"username,omitempty"`
+	Realm          *string `json:"realm,omitempty"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+	SessionId      *string `json:"sessionId,omitempty"`
 }
 
 func (o UserLogin) MarshalYAML() (interface{}, error) {

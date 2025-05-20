@@ -87,7 +87,7 @@ func (o *AssetCoordinate) UnmarshalYAML(unmarshal func(interface{}) error) error
 type AssetLocator struct {
 	AssetServerLocator ServiceLocator `json:"assetServerLocator"`
 	Product            string         `json:"product"`
-	Track              *string        `json:"track"`
+	Track              *string        `json:"track,omitempty"`
 }
 
 func (o AssetLocator) MarshalYAML() (interface{}, error) {
@@ -154,8 +154,8 @@ func (o *ContentAddressableFileIdentifier) UnmarshalYAML(unmarshal func(interfac
 
 type ContextualizedResource struct {
 	Id          Resource `json:"id"`
-	Name        *string  `json:"name"`
-	Description *string  `json:"description"`
+	Name        *string  `json:"name,omitempty"`
+	Description *string  `json:"description,omitempty"`
 }
 
 func (o ContextualizedResource) MarshalYAML() (interface{}, error) {
@@ -313,9 +313,9 @@ type ImportDestination struct {
 	// The destination resource for the imported data.
 	Id DataResource `conjure-docs:"The destination resource for the imported data." json:"id"`
 	// The parent of the destination resource.
-	Parent *DataResource `conjure-docs:"The parent of the destination resource." json:"parent"`
+	Parent *DataResource `conjure-docs:"The parent of the destination resource." json:"parent,omitempty"`
 	// The total size, in bytes, of the imported data.
-	ImportedSize *safelong.SafeLong `conjure-docs:"The total size, in bytes, of the imported data." json:"importedSize"`
+	ImportedSize *safelong.SafeLong `conjure-docs:"The total size, in bytes, of the imported data." json:"importedSize,omitempty"`
 }
 
 func (o ImportDestination) MarshalYAML() (interface{}, error) {
@@ -338,7 +338,7 @@ type ImportedFile struct {
 	// The filename of the imported data, or descriptor of the imported data.
 	Filename string `conjure-docs:"The filename of the imported data, or descriptor of the imported data." json:"filename"`
 	// The filetype of the imported data.
-	Type *common.FileType `conjure-docs:"The filetype of the imported data." json:"type"`
+	Type *common.FileType `conjure-docs:"The filetype of the imported data." json:"type,omitempty"`
 }
 
 func (o ImportedFile) MarshalYAML() (interface{}, error) {
@@ -432,11 +432,11 @@ type LlmInferenceContext struct {
 	   This field is optional to support providing the model id either at request or response time.
 	   Services producing logs with this type are expected to provide the model id at request or response time.
 	*/
-	ModelId *Identifier `conjure-docs:"The model id to which the request was sent.\nThis field is optional to support providing the model id either at request or response time.\nServices producing logs with this type are expected to provide the model id at request or response time." json:"modelId"`
+	ModelId *Identifier `conjure-docs:"The model id to which the request was sent.\nThis field is optional to support providing the model id either at request or response time.\nServices producing logs with this type are expected to provide the model id at request or response time." json:"modelId,omitempty"`
 	// The temperature used for the llm inference request.
-	ModelTemperature *float64 `conjure-docs:"The temperature used for the llm inference request." json:"modelTemperature"`
+	ModelTemperature *float64 `conjure-docs:"The temperature used for the llm inference request." json:"modelTemperature,omitempty"`
 	// Whether or not processing of the enrollment's data for the purposes of content moderation is enabled.
-	ContentModerationEnabled *bool `conjure-docs:"Whether or not processing of the enrollment's data for the purposes of content moderation is enabled." json:"contentModerationEnabled"`
+	ContentModerationEnabled *bool `conjure-docs:"Whether or not processing of the enrollment's data for the purposes of content moderation is enabled." json:"contentModerationEnabled,omitempty"`
 }
 
 func (o LlmInferenceContext) MarshalYAML() (interface{}, error) {
@@ -461,7 +461,7 @@ type LlmRoutingRequest struct {
 	// The HTTP body forwarded to the LLM endpoint.
 	RequestBody string `conjure-docs:"The HTTP body forwarded to the LLM endpoint." json:"requestBody"`
 	// The requested model for the query if available.
-	Model *string `conjure-docs:"The requested model for the query if available." json:"model"`
+	Model *string `conjure-docs:"The requested model for the query if available." json:"model,omitempty"`
 }
 
 func (o LlmRoutingRequest) MarshalYAML() (interface{}, error) {
@@ -710,7 +710,7 @@ type OntologyContext struct {
 	   The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,
 	   this could the ObjectTypeId in an ObjectLocator specified in a request.
 	*/
-	EntityType *EntityTypeIdentifier `conjure-docs:"The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,\nthis could the ObjectTypeId in an ObjectLocator specified in a request." json:"entityType"`
+	EntityType *EntityTypeIdentifier `conjure-docs:"The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,\nthis could the ObjectTypeId in an ObjectLocator specified in a request." json:"entityType,omitempty"`
 	// Properties loaded/access for this entity. This may be empty to represent all properties.
 	PropertyTypeRids []rid.ResourceIdentifier `conjure-docs:"Properties loaded/access for this entity. This may be empty to represent all properties." json:"propertyTypeRids"`
 }
@@ -758,7 +758,7 @@ type OntologyDataResource struct {
 	   By convention, the objectRid if this resource is an object
 	   And both object type rids if a link
 	*/
-	Id *Identifier `conjure-docs:"By convention, the objectRid if this resource is an object\nAnd both object type rids if a link" json:"id"`
+	Id *Identifier `conjure-docs:"By convention, the objectRid if this resource is an object\nAnd both object type rids if a link" json:"id,omitempty"`
 	/*
 	   If a suitable ID is not present, a Primary Key may be present instead (or in addition to the ID) - this is
 	   expected to be SENSITIVE, and will be tagged as such.
@@ -772,9 +772,9 @@ type OntologyDataResource struct {
 	   Concretely, if non-empty, the whole OntologyDataResource will be sensitivity
 	   marked as Data, rather than MetaData.
 	*/
-	AdditionalObjectProperties *[]ObjectProperty `conjure-docs:"Additional properties of the OntologyDataResource to further identify loaded/accessed data. This is\nexpected to be SENSITIVE, and will be tagged as such.\nConcretely, if non-empty, the whole OntologyDataResource will be sensitivity\nmarked as Data, rather than MetaData." json:"additionalObjectProperties"`
+	AdditionalObjectProperties *[]ObjectProperty `conjure-docs:"Additional properties of the OntologyDataResource to further identify loaded/accessed data. This is\nexpected to be SENSITIVE, and will be tagged as such.\nConcretely, if non-empty, the whole OntologyDataResource will be sensitivity\nmarked as Data, rather than MetaData." json:"additionalObjectProperties,omitempty"`
 	// Further ontology context to identify this resource.
-	OntologyContext *OntologyContext `conjure-docs:"Further ontology context to identify this resource." json:"ontologyContext"`
+	OntologyContext *OntologyContext `conjure-docs:"Further ontology context to identify this resource." json:"ontologyContext,omitempty"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
 	   This includes a "type" context identifying the type represented by this resource (link, object type, etc...)
@@ -876,7 +876,7 @@ func (o *OntologyDataResourceList) UnmarshalYAML(unmarshal func(interface{}) err
 // A resource that refers to a selection or query over ontology data.
 type OntologyLogicResource struct {
 	// By convention, the objecSetRid if this resource is an object set
-	Id              *Identifier       `conjure-docs:"By convention, the objecSetRid if this resource is an object set" json:"id"`
+	Id              *Identifier       `conjure-docs:"By convention, the objecSetRid if this resource is an object set" json:"id,omitempty"`
 	OntologyContext []OntologyContext `json:"ontologyContext"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
@@ -984,7 +984,7 @@ language.
 */
 type OtherIdentifier struct {
 	Value       string  `json:"value"`
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 }
 
 func (o OtherIdentifier) MarshalYAML() (interface{}, error) {
@@ -1006,8 +1006,8 @@ func (o *OtherIdentifier) UnmarshalYAML(unmarshal func(interface{}) error) error
 // Represents a partial MavenCoordinate, frequently used for queries.
 type PartialMavenCoordinate struct {
 	ArtifactId ArtifactId    `json:"artifactId"`
-	GroupId    *GroupId      `json:"groupId"`
-	Version    *MavenVersion `json:"version"`
+	GroupId    *GroupId      `json:"groupId,omitempty"`
+	Version    *MavenVersion `json:"version,omitempty"`
 }
 
 func (o PartialMavenCoordinate) MarshalYAML() (interface{}, error) {
@@ -1030,7 +1030,7 @@ type Patch struct {
 	Id          Identifier   `json:"id"`
 	AddedIds    []Identifier `json:"addedIds"`
 	RemovedIds  []Identifier `json:"removedIds"`
-	Description *string      `json:"description"`
+	Description *string      `json:"description,omitempty"`
 }
 
 func (o Patch) MarshalJSON() ([]byte, error) {
@@ -1218,11 +1218,11 @@ degree of access to a system, after validation.
 */
 type Token struct {
 	// A unique identifier for this token, if one exists.
-	Id *Identifier `conjure-docs:"A unique identifier for this token, if one exists." json:"id"`
+	Id *Identifier `conjure-docs:"A unique identifier for this token, if one exists." json:"id,omitempty"`
 	// The time at which this token expires, if known.
-	ExpirationTime *datetime.DateTime `conjure-docs:"The time at which this token expires, if known." json:"expirationTime"`
+	ExpirationTime *datetime.DateTime `conjure-docs:"The time at which this token expires, if known." json:"expirationTime,omitempty"`
 	// The user associated with this token, if known.
-	UserId *string `conjure-docs:"The user associated with this token, if known." json:"userId"`
+	UserId *string `conjure-docs:"The user associated with this token, if known." json:"userId,omitempty"`
 	/*
 	   There are many different variants of token types, depending on the use-case and system. This type will
 	   often determine the risk-profile of the token, so try to describe the token type that most accurately matches
