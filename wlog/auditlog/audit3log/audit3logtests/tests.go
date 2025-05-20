@@ -668,10 +668,8 @@ func TestCases() []TestCase {
 					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
 					"revokedTokens": objmatcher.SliceMatcher([]objmatcher.Matcher{
 						objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"userId":         objmatcher.NewEqualsMatcher("test-revoked-user"),
-							"expirationTime": objmatcher.NewEqualsMatcher(nil),
-							"id":             objmatcher.NewEqualsMatcher(nil),
-							"type":           objmatcher.NewEqualsMatcher(""),
+							"userId": objmatcher.NewEqualsMatcher("test-revoked-user"),
+							"type":   objmatcher.NewEqualsMatcher(""),
 						}),
 					}),
 				}),

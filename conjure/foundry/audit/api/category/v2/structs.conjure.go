@@ -65,7 +65,7 @@ type AppConfigAccess struct {
 	// The ApplicationResources that were accessed in this event.
 	AccessedAppConfigIds []v2.ApplicationResource `conjure-docs:"The ApplicationResources that were accessed in this event." json:"accessedAppConfigIds"`
 	// A description of the configuration access.
-	AccessAppConfigDescription *string `conjure-docs:"A description of the configuration access." json:"accessAppConfigDescription"`
+	AccessAppConfigDescription *string `conjure-docs:"A description of the configuration access." json:"accessAppConfigDescription,omitempty"`
 }
 
 func (o AppConfigAccess) MarshalJSON() ([]byte, error) {
@@ -110,7 +110,7 @@ type AppConfigCreate struct {
 	// The ApplicationResources that were created in this event.
 	CreatedAppConfigIds []v2.ApplicationResource `conjure-docs:"The ApplicationResources that were created in this event." json:"createdAppConfigIds"`
 	// A description of the configuration creation.
-	CreateAppConfigDescription *string `conjure-docs:"A description of the configuration creation." json:"createAppConfigDescription"`
+	CreateAppConfigDescription *string `conjure-docs:"A description of the configuration creation." json:"createAppConfigDescription,omitempty"`
 }
 
 func (o AppConfigCreate) MarshalJSON() ([]byte, error) {
@@ -155,7 +155,7 @@ type AppConfigDelete struct {
 	// The ApplicationResouces that were deleted in this event.
 	DeletedAppConfigIds []v2.ApplicationResource `conjure-docs:"The ApplicationResouces that were deleted in this event." json:"deletedAppConfigIds"`
 	// A description of the configuration deletion.
-	DeleteAppConfigDescription *string `conjure-docs:"A description of the configuration deletion." json:"deleteAppConfigDescription"`
+	DeleteAppConfigDescription *string `conjure-docs:"A description of the configuration deletion." json:"deleteAppConfigDescription,omitempty"`
 }
 
 func (o AppConfigDelete) MarshalJSON() ([]byte, error) {
@@ -202,7 +202,7 @@ be variable.
 */
 type AppConfigSearch struct {
 	// The search-query that this event is running.
-	AppConfigSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"appConfigSearchQuery"`
+	AppConfigSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"appConfigSearchQuery,omitempty"`
 	// The search-results that are returned to the user in this event.
 	AppConfigSearchResults []v2.ApplicationResource `conjure-docs:"The search-results that are returned to the user in this event." json:"appConfigSearchResults"`
 }
@@ -249,7 +249,7 @@ type AppConfigUpdate struct {
 	// The ApplicationResources that were updated in this event.
 	UpdatedAppConfigIds []v2.ApplicationResource `conjure-docs:"The ApplicationResources that were updated in this event." json:"updatedAppConfigIds"`
 	// A description of the configuration update.
-	UpdateAppConfigDescription *string `conjure-docs:"A description of the configuration update." json:"updateAppConfigDescription"`
+	UpdateAppConfigDescription *string `conjure-docs:"A description of the configuration update." json:"updateAppConfigDescription,omitempty"`
 }
 
 func (o AppConfigUpdate) MarshalJSON() ([]byte, error) {
@@ -297,7 +297,7 @@ type AssetFileLoad struct {
 	// Maven coordinate for the asset requested. Might not include groupId or version.
 	RequestMavenCoordinate v2.PartialMavenCoordinate `conjure-docs:"Maven coordinate for the asset requested. Might not include groupId or version." json:"requestMavenCoordinate"`
 	// The full maven coordinate for the returned asset.
-	ResponseMavenCoordinate *v2.MavenCoordinate `conjure-docs:"The full maven coordinate for the returned asset." json:"responseMavenCoordinate"`
+	ResponseMavenCoordinate *v2.MavenCoordinate `conjure-docs:"The full maven coordinate for the returned asset." json:"responseMavenCoordinate,omitempty"`
 	// The file path requested.
 	FilePath string `conjure-docs:"The file path requested." json:"filePath"`
 }
@@ -321,7 +321,7 @@ func (o *AssetFileLoad) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Loads a file either from the asset coordiate or through the content addressable storage.
 type AssetFileLoadV2 struct {
 	FileIdentifier   v2.AssetFileLoadIdentifier `json:"fileIdentifier"`
-	FileLoadResponse *v2.AssetFileLoadResponse  `json:"fileLoadResponse"`
+	FileLoadResponse *v2.AssetFileLoadResponse  `json:"fileLoadResponse,omitempty"`
 }
 
 func (o AssetFileLoadV2) MarshalYAML() (interface{}, error) {
@@ -408,7 +408,7 @@ type AuditDataTransform struct {
 	   may not have been shown to the user, but it wasn't persisted). In order to indicate an in-place
 	   transformation, the transformTarget and transformDestination fields should contain the same DataResource.
 	*/
-	TransformDestination *v2.DataResource `conjure-docs:"The destination to which the output of the transformations on the input were written.\n\nIf absent, then the transformations are assumed to have been performed in-memory only (the output may or\nmay not have been shown to the user, but it wasn't persisted). In order to indicate an in-place\ntransformation, the transformTarget and transformDestination fields should contain the same DataResource." json:"transformDestination"`
+	TransformDestination *v2.DataResource `conjure-docs:"The destination to which the output of the transformations on the input were written.\n\nIf absent, then the transformations are assumed to have been performed in-memory only (the output may or\nmay not have been shown to the user, but it wasn't persisted). In order to indicate an in-place\ntransformation, the transformTarget and transformDestination fields should contain the same DataResource." json:"transformDestination,omitempty"`
 }
 
 func (o AuditDataTransform) MarshalJSON() ([]byte, error) {
@@ -453,9 +453,9 @@ type AuthenticationCheck struct {
 	// The identifiers that auth is being checked against.
 	AuthenticationCheckTargets []v2.Identifier `conjure-docs:"The identifiers that auth is being checked against." json:"authenticationCheckTargets"`
 	// Whether this authentication check succeeded or not.
-	AuthenticationCheckResult *bool `conjure-docs:"Whether this authentication check succeeded or not." json:"authenticationCheckResult"`
+	AuthenticationCheckResult *bool `conjure-docs:"Whether this authentication check succeeded or not." json:"authenticationCheckResult,omitempty"`
 	// Further details on this authentication check result.
-	AuthenticationCheckResultMessage *string `conjure-docs:"Further details on this authentication check result." json:"authenticationCheckResultMessage"`
+	AuthenticationCheckResultMessage *string `conjure-docs:"Further details on this authentication check result." json:"authenticationCheckResultMessage,omitempty"`
 }
 
 func (o AuthenticationCheck) MarshalJSON() ([]byte, error) {
@@ -506,7 +506,7 @@ type AuthorizationCheck struct {
 	// Targets that failed authorization.
 	AuthorizationCheckFailedTargets []v2.Identifier `conjure-docs:"Targets that failed authorization." json:"authorizationCheckFailedTargets"`
 	// Further details on this authorization check result.
-	AuthorizationCheckResultMessage *string `conjure-docs:"Further details on this authorization check result." json:"authorizationCheckResultMessage"`
+	AuthorizationCheckResultMessage *string `conjure-docs:"Further details on this authorization check result." json:"authorizationCheckResultMessage,omitempty"`
 }
 
 func (o AuthorizationCheck) MarshalJSON() ([]byte, error) {
@@ -623,7 +623,7 @@ type CancelCodeExecution struct {
 	// The specific resources that were being executed before cancellation. For example, could be a modelUUID or a buildRID.
 	CancelledExecutedResources []v2.LogicResource `conjure-docs:"The specific resources that were being executed before cancellation. For example, could be a modelUUID or a buildRID." json:"cancelledExecutedResources"`
 	// The encompasssing environment for the resources that were being executed before cancellation. For example, could be a liveRID or a workbookRID.
-	CancelledExecutedResourceEnvironment *v2.LogicResource `conjure-docs:"The encompasssing environment for the resources that were being executed before cancellation. For example, could be a liveRID or a workbookRID." json:"cancelledExecutedResourceEnvironment"`
+	CancelledExecutedResourceEnvironment *v2.LogicResource `conjure-docs:"The encompasssing environment for the resources that were being executed before cancellation. For example, could be a liveRID or a workbookRID." json:"cancelledExecutedResourceEnvironment,omitempty"`
 }
 
 func (o CancelCodeExecution) MarshalJSON() ([]byte, error) {
@@ -668,7 +668,7 @@ type CodeExecution struct {
 	// The specific resources that were executed. For example, could be a modelUUID or a buildRID.
 	ExecutedResources []v2.LogicResource `conjure-docs:"The specific resources that were executed. For example, could be a modelUUID or a buildRID." json:"executedResources"`
 	// The encompasssing environment for the resources that were executed. For example, could be a liveRID or a workbookRID.
-	ExecutedResourceEnvironment *v2.LogicResource `conjure-docs:"The encompasssing environment for the resources that were executed. For example, could be a liveRID or a workbookRID." json:"executedResourceEnvironment"`
+	ExecutedResourceEnvironment *v2.LogicResource `conjure-docs:"The encompasssing environment for the resources that were executed. For example, could be a liveRID or a workbookRID." json:"executedResourceEnvironment,omitempty"`
 }
 
 func (o CodeExecution) MarshalJSON() ([]byte, error) {
@@ -713,7 +713,7 @@ type ConfigureInfra struct {
 	// The SystemResources that are being configured.
 	ConfigureInfraTargets []v2.SystemResource `conjure-docs:"The SystemResources that are being configured." json:"configureInfraTargets"`
 	// The request-id of this configuration event.
-	ConfigureInfraRequestId *string `conjure-docs:"The request-id of this configuration event." json:"configureInfraRequestId"`
+	ConfigureInfraRequestId *string `conjure-docs:"The request-id of this configuration event." json:"configureInfraRequestId,omitempty"`
 }
 
 func (o ConfigureInfra) MarshalJSON() ([]byte, error) {
@@ -869,7 +869,7 @@ module list is read.
 */
 type ContainerSearch struct {
 	// The search-query that this event is running.
-	ContainerSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"containerSearchQuery"`
+	ContainerSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"containerSearchQuery,omitempty"`
 	// The search-results that are returned to the user in this event.
 	ContainerSearchResults []v2.SystemResource `conjure-docs:"The search-results that are returned to the user in this event." json:"containerSearchResults"`
 }
@@ -919,7 +919,7 @@ type ContainerStop struct {
 	// The IDs of the resources that were stopped.
 	StoppedContainerIds []v2.SystemResource `conjure-docs:"The IDs of the resources that were stopped." json:"stoppedContainerIds"`
 	// The reason why the resource was stopped.
-	ContainerStopReason *string `conjure-docs:"The reason why the resource was stopped." json:"containerStopReason"`
+	ContainerStopReason *string `conjure-docs:"The reason why the resource was stopped." json:"containerStopReason,omitempty"`
 }
 
 func (o ContainerStop) MarshalJSON() ([]byte, error) {
@@ -1108,7 +1108,7 @@ type DataExport struct {
 	// All resources that were downloaded in this event.
 	DownloadedResources []v2.DataResource `conjure-docs:"All resources that were downloaded in this event." json:"downloadedResources"`
 	// The size, in bytes, of the downloaded data.
-	DownloadedSize *safelong.SafeLong `conjure-docs:"The size, in bytes, of the downloaded data." json:"downloadedSize"`
+	DownloadedSize *safelong.SafeLong `conjure-docs:"The size, in bytes, of the downloaded data." json:"downloadedSize,omitempty"`
 }
 
 func (o DataExport) MarshalJSON() ([]byte, error) {
@@ -1155,15 +1155,15 @@ DataPromote in a separate service.
 */
 type DataImport struct {
 	// The filename of the imported data, if it exists.
-	ImportedFilename *string `conjure-docs:"The filename of the imported data, if it exists." json:"importedFilename"`
+	ImportedFilename *string `conjure-docs:"The filename of the imported data, if it exists." json:"importedFilename,omitempty"`
 	// The filetype of the imported data.
-	ImportedFileType *common.FileType `conjure-docs:"The filetype of the imported data." json:"importedFileType"`
+	ImportedFileType *common.FileType `conjure-docs:"The filetype of the imported data." json:"importedFileType,omitempty"`
 	// The destination resource for the imported data.
-	ImportResourceId *v2.DataResource `conjure-docs:"The destination resource for the imported data." json:"importResourceId"`
+	ImportResourceId *v2.DataResource `conjure-docs:"The destination resource for the imported data." json:"importResourceId,omitempty"`
 	// The parent of the destination resource.
-	ImportParentResourceId *v2.DataResource `conjure-docs:"The parent of the destination resource." json:"importParentResourceId"`
+	ImportParentResourceId *v2.DataResource `conjure-docs:"The parent of the destination resource." json:"importParentResourceId,omitempty"`
 	// The total size, in bytes, of the imported data.
-	ImportedSize *safelong.SafeLong `conjure-docs:"The total size, in bytes, of the imported data." json:"importedSize"`
+	ImportedSize *safelong.SafeLong `conjure-docs:"The total size, in bytes, of the imported data." json:"importedSize,omitempty"`
 }
 
 func (o DataImport) MarshalYAML() (interface{}, error) {
@@ -1233,7 +1233,7 @@ type DataMerge struct {
 	// The resources that were merged in this event.
 	ResourcesToMerge []v2.DataResource `conjure-docs:"The resources that were merged in this event." json:"resourcesToMerge"`
 	// The resultant DataResource from the merging of the resources.
-	MergedResult *v2.DataResource `conjure-docs:"The resultant DataResource from the merging of the resources." json:"mergedResult"`
+	MergedResult *v2.DataResource `conjure-docs:"The resultant DataResource from the merging of the resources." json:"mergedResult,omitempty"`
 }
 
 func (o DataMerge) MarshalJSON() ([]byte, error) {
@@ -1280,7 +1280,7 @@ type DataPromote struct {
 	// The resources that were promoted to another system.
 	PromotedResources []v2.DataResource `conjure-docs:"The resources that were promoted to another system." json:"promotedResources"`
 	// A description of this promotion event.
-	PromotionDescription *string `conjure-docs:"A description of this promotion event." json:"promotionDescription"`
+	PromotionDescription *string `conjure-docs:"A description of this promotion event." json:"promotionDescription,omitempty"`
 }
 
 func (o DataPromote) MarshalJSON() ([]byte, error) {
@@ -1329,7 +1329,7 @@ func (o *DataPromote) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Search of dataset, objects, or other searches for data within the system.
 type DataSearch struct {
 	// The query that this search is executing.
-	DataSearchQuery *string `conjure-docs:"The query that this search is executing." json:"dataSearchQuery"`
+	DataSearchQuery *string `conjure-docs:"The query that this search is executing." json:"dataSearchQuery,omitempty"`
 	/*
 	   Further information to contextualise the current query. This information is unstructured
 	   and should not be relied upon beyond informing auditors.
@@ -1385,10 +1385,10 @@ func (o *DataSearch) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Discretionary share of data.
 type DataShare struct {
 	// An optional identifier for this share, if available.
-	DataShareId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareId"`
+	DataShareId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareId,omitempty"`
 	DataShareTargets []v2.DataResource `json:"dataShareTargets"`
 	// A human-readable reason this data was shared (e.g. "visited a share link").
-	DataShareReason *string `conjure-docs:"A human-readable reason this data was shared (e.g. \"visited a share link\")." json:"dataShareReason"`
+	DataShareReason *string `conjure-docs:"A human-readable reason this data was shared (e.g. \"visited a share link\")." json:"dataShareReason,omitempty"`
 }
 
 func (o DataShare) MarshalJSON() ([]byte, error) {
@@ -1431,7 +1431,7 @@ func (o *DataShare) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Creation of a share of data. For example, when creating a link that grants access to resources on visit.
 type DataShareCreate struct {
 	// An optional identifier for this share, if available.
-	DataShareCreateId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareCreateId"`
+	DataShareCreateId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareCreateId,omitempty"`
 	DataShareCreateTargets []v2.DataResource `json:"dataShareCreateTargets"`
 }
 
@@ -1475,7 +1475,7 @@ func (o *DataShareCreate) UnmarshalYAML(unmarshal func(interface{}) error) error
 // Deactivation of a mechanism to share data. For example, the disabling of a link that grants access to resources on visit.
 type DataShareDisable struct {
 	// An optional identifier for this share, if available.
-	DataShareDisableId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareDisableId"`
+	DataShareDisableId      *v2.Identifier    `conjure-docs:"An optional identifier for this share, if available." json:"dataShareDisableId,omitempty"`
 	DataShareDisableTargets []v2.DataResource `json:"dataShareDisableTargets"`
 }
 
@@ -1521,7 +1521,7 @@ type DataTransform struct {
 	// The resources that were transformed.
 	TransformTargets []v2.DataResource `conjure-docs:"The resources that were transformed." json:"transformTargets"`
 	// A description of the transformation that was performed.
-	TransformDescription *string `conjure-docs:"A description of the transformation that was performed." json:"transformDescription"`
+	TransformDescription *string `conjure-docs:"A description of the transformation that was performed." json:"transformDescription,omitempty"`
 }
 
 func (o DataTransform) MarshalJSON() ([]byte, error) {
@@ -1673,7 +1673,7 @@ func (o *InEnrollmentContext) UnmarshalYAML(unmarshal func(interface{}) error) e
 // User requests logs from an infrastructure resource (eg. node, service).
 type InfraLogsAccess struct {
 	// The request-id of this access request event.
-	InfraLogsAccessRequestId *string `conjure-docs:"The request-id of this access request event." json:"infraLogsAccessRequestId"`
+	InfraLogsAccessRequestId *string `conjure-docs:"The request-id of this access request event." json:"infraLogsAccessRequestId,omitempty"`
 	// The SystemResource from which logs are being requested.
 	InfraLogsAccessTarget v2.SystemResource `conjure-docs:"The SystemResource from which logs are being requested." json:"infraLogsAccessTarget"`
 }
@@ -1706,7 +1706,7 @@ type LlmInference struct {
 	   Further context to identify this inference request, such as the model id.
 	   This must include any LLM inference context that is only available at response-time.
 	*/
-	LlmInferenceResponseContext *v2.LlmInferenceContext `conjure-docs:"Further context to identify this inference request, such as the model id.\nThis must include any LLM inference context that is only available at response-time." json:"llmInferenceResponseContext"`
+	LlmInferenceResponseContext *v2.LlmInferenceContext `conjure-docs:"Further context to identify this inference request, such as the model id.\nThis must include any LLM inference context that is only available at response-time." json:"llmInferenceResponseContext,omitempty"`
 }
 
 func (o LlmInference) MarshalJSON() ([]byte, error) {
@@ -1758,7 +1758,7 @@ This audit category is intended for LLM proxies or load-balancers (i.e. llm-port
 */
 type LlmRoute struct {
 	LlmRouteRequest  v2.LlmRoutingRequest   `json:"llmRouteRequest"`
-	LlmRouteResponse *v2.LlmRoutingResponse `json:"llmRouteResponse"`
+	LlmRouteResponse *v2.LlmRoutingResponse `json:"llmRouteResponse,omitempty"`
 }
 
 func (o LlmRoute) MarshalYAML() (interface{}, error) {
@@ -1909,7 +1909,7 @@ func (o *LogicDelete) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Search of some logic. For example, searching for a contour analysis.
 type LogicSearch struct {
 	// The query that this search is executing.
-	LogicSearchQuery *string `conjure-docs:"The query that this search is executing." json:"logicSearchQuery"`
+	LogicSearchQuery *string `conjure-docs:"The query that this search is executing." json:"logicSearchQuery,omitempty"`
 	// All underlying LogicResources returned by this search request.
 	LogicSearchResults []v2.LogicResource `conjure-docs:"All underlying LogicResources returned by this search request." json:"logicSearchResults"`
 }
@@ -2224,7 +2224,7 @@ type MetaDataAccess struct {
 	// The underlying DataResources that the accessed metadata describes.
 	AccessedMetaDataResources []v2.DataResource `conjure-docs:"The underlying DataResources that the accessed metadata describes." json:"accessedMetaDataResources"`
 	// A description of the metadata access.
-	AccessedMetaDataDescription *string `conjure-docs:"A description of the metadata access." json:"accessedMetaDataDescription"`
+	AccessedMetaDataDescription *string `conjure-docs:"A description of the metadata access." json:"accessedMetaDataDescription,omitempty"`
 }
 
 func (o MetaDataAccess) MarshalJSON() ([]byte, error) {
@@ -2273,7 +2273,7 @@ type MetaDataCreate struct {
 	// The underlying DataResources that the created metadata describes.
 	CreatedMetaDataResources []v2.DataResource `conjure-docs:"The underlying DataResources that the created metadata describes." json:"createdMetaDataResources"`
 	// A description of the metadata creation.
-	CreatedMetaDataDescription *string `conjure-docs:"A description of the metadata creation." json:"createdMetaDataDescription"`
+	CreatedMetaDataDescription *string `conjure-docs:"A description of the metadata creation." json:"createdMetaDataDescription,omitempty"`
 }
 
 func (o MetaDataCreate) MarshalJSON() ([]byte, error) {
@@ -2322,7 +2322,7 @@ type MetaDataDelete struct {
 	// The underlying DataResources that the deleted metadata describes.
 	DeletedMetaDataResources []v2.DataResource `conjure-docs:"The underlying DataResources that the deleted metadata describes." json:"deletedMetaDataResources"`
 	// A description of the metadata deletion.
-	DeletedMetaDataDescription *string `conjure-docs:"A description of the metadata deletion." json:"deletedMetaDataDescription"`
+	DeletedMetaDataDescription *string `conjure-docs:"A description of the metadata deletion." json:"deletedMetaDataDescription,omitempty"`
 }
 
 func (o MetaDataDelete) MarshalJSON() ([]byte, error) {
@@ -2365,7 +2365,7 @@ func (o *MetaDataDelete) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // Search of metadata associated with a dataset, objects, or other searches for metadata within the system.
 type MetaDataSearch struct {
 	// The query that this search is executing.
-	MetaDataSearchQuery *string `conjure-docs:"The query that this search is executing." json:"metaDataSearchQuery"`
+	MetaDataSearchQuery *string `conjure-docs:"The query that this search is executing." json:"metaDataSearchQuery,omitempty"`
 	// All underlying resources that had metadata presented to the user by this search result.
 	MetaDataSearchResults []v2.DataResource `conjure-docs:"All underlying resources that had metadata presented to the user by this search result." json:"metaDataSearchResults"`
 }
@@ -2416,7 +2416,7 @@ type MetaDataUpdate struct {
 	// The underlying DataResources that the updated metadata describes.
 	UpdatedMetaDataResources []v2.DataResource `conjure-docs:"The underlying DataResources that the updated metadata describes." json:"updatedMetaDataResources"`
 	// A description of the metadata update.
-	UpdatedMetaDataDescription *string `conjure-docs:"A description of the metadata update." json:"updatedMetaDataDescription"`
+	UpdatedMetaDataDescription *string `conjure-docs:"A description of the metadata update." json:"updatedMetaDataDescription,omitempty"`
 }
 
 func (o MetaDataUpdate) MarshalJSON() ([]byte, error) {
@@ -2461,7 +2461,7 @@ type MonitorAccess struct {
 	// The MonitorResources that were accessed in this event.
 	AccessedMonitorResources []v2.MonitorResource `conjure-docs:"The MonitorResources that were accessed in this event." json:"accessedMonitorResources"`
 	// A description of the monitor access.
-	AccessedMonitorDescription *string `conjure-docs:"A description of the monitor access." json:"accessedMonitorDescription"`
+	AccessedMonitorDescription *string `conjure-docs:"A description of the monitor access." json:"accessedMonitorDescription,omitempty"`
 }
 
 func (o MonitorAccess) MarshalJSON() ([]byte, error) {
@@ -2506,7 +2506,7 @@ type MonitorCreate struct {
 	// The MonitorResources that were created in this event.
 	CreatedMonitorResources []v2.MonitorResource `conjure-docs:"The MonitorResources that were created in this event." json:"createdMonitorResources"`
 	// A description of the monitor creation.
-	CreatedMonitorDescription *string `conjure-docs:"A description of the monitor creation." json:"createdMonitorDescription"`
+	CreatedMonitorDescription *string `conjure-docs:"A description of the monitor creation." json:"createdMonitorDescription,omitempty"`
 }
 
 func (o MonitorCreate) MarshalJSON() ([]byte, error) {
@@ -2551,7 +2551,7 @@ type MonitorDelete struct {
 	// The MonitorResources that were deleted in this event.
 	DeletedMonitorResources []v2.MonitorResource `conjure-docs:"The MonitorResources that were deleted in this event." json:"deletedMonitorResources"`
 	// A description of the monitor deletion.
-	DeletedMonitorDescription *string `conjure-docs:"A description of the monitor deletion." json:"deletedMonitorDescription"`
+	DeletedMonitorDescription *string `conjure-docs:"A description of the monitor deletion." json:"deletedMonitorDescription,omitempty"`
 }
 
 func (o MonitorDelete) MarshalJSON() ([]byte, error) {
@@ -2637,7 +2637,7 @@ func (o *MonitorRun) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Searching for a monitor.
 type MonitorSearch struct {
 	// The search-query that this event is running.
-	MonitorSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"monitorSearchQuery"`
+	MonitorSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"monitorSearchQuery,omitempty"`
 	// The search-results that are returned to the user in this event.
 	MonitorSearchResults []v2.MonitorResource `conjure-docs:"The search-results that are returned to the user in this event." json:"monitorSearchResults"`
 }
@@ -2684,7 +2684,7 @@ type MonitorUpdate struct {
 	// The MonitorResources that were updated in this event.
 	UpdatedMonitorResources []v2.MonitorResource `conjure-docs:"The MonitorResources that were updated in this event." json:"updatedMonitorResources"`
 	// A description of the monitor update.
-	UpdatedMonitorDescription *string `conjure-docs:"A description of the monitor update." json:"updatedMonitorDescription"`
+	UpdatedMonitorDescription *string `conjure-docs:"A description of the monitor update." json:"updatedMonitorDescription,omitempty"`
 }
 
 func (o MonitorUpdate) MarshalJSON() ([]byte, error) {
@@ -2916,7 +2916,7 @@ type OntologyDataTransform struct {
 	// The OntologyDataResources that the user intends to transform.
 	OntologyDataTransformTargets []v2.OntologyDataResource `conjure-docs:"The OntologyDataResources that the user intends to transform." json:"ontologyDataTransformTargets"`
 	// A description of the transformation that was performed.
-	OntologyDataTransformDescription *string `conjure-docs:"A description of the transformation that was performed." json:"ontologyDataTransformDescription"`
+	OntologyDataTransformDescription *string `conjure-docs:"A description of the transformation that was performed." json:"ontologyDataTransformDescription,omitempty"`
 	// The OntologyDataResources that were transformed by the request.
 	TransformedOntologyDataResources []v2.OntologyDataResource `conjure-docs:"The OntologyDataResources that were transformed by the request." json:"transformedOntologyDataResources"`
 }
@@ -3328,7 +3328,7 @@ type OntologyMetaDataSearch struct {
 	// The OntologyMetaDataResources included in the search query.
 	OntologyMetaDataSearchedResources []v2.OntologyMetaDataResource `conjure-docs:"The OntologyMetaDataResources included in the search query." json:"ontologyMetaDataSearchedResources"`
 	// Further context to the search query - such as DatasourceType
-	OntologyMetaDataSearchContext *string `conjure-docs:"Further context to the search query - such as DatasourceType" json:"ontologyMetaDataSearchContext"`
+	OntologyMetaDataSearchContext *string `conjure-docs:"Further context to the search query - such as DatasourceType" json:"ontologyMetaDataSearchContext,omitempty"`
 	// All OntologyMetaDataResources that were returned to the user.
 	OntologyMetaDataSearchResults []v2.OntologyMetaDataResource `conjure-docs:"All OntologyMetaDataResources that were returned to the user." json:"ontologyMetaDataSearchResults"`
 }
@@ -3516,7 +3516,7 @@ type RequestAccess struct {
 	// The requests that were accessed in this request.
 	AccessedRequestIds []v2.RequestResource `conjure-docs:"The requests that were accessed in this request." json:"accessedRequestIds"`
 	// A description of the request access.
-	AccessedRequestDescription *string `conjure-docs:"A description of the request access." json:"accessedRequestDescription"`
+	AccessedRequestDescription *string `conjure-docs:"A description of the request access." json:"accessedRequestDescription,omitempty"`
 }
 
 func (o RequestAccess) MarshalJSON() ([]byte, error) {
@@ -3564,7 +3564,7 @@ type RequestApprove struct {
 	// The requests that are being approved
 	ApprovedRequestIds []v2.RequestResource `conjure-docs:"The requests that are being approved" json:"approvedRequestIds"`
 	// The user that approved the request
-	ApproveRequestUserId *string `conjure-docs:"The user that approved the request" json:"approveRequestUserId"`
+	ApproveRequestUserId *string `conjure-docs:"The user that approved the request" json:"approveRequestUserId,omitempty"`
 }
 
 func (o RequestApprove) MarshalJSON() ([]byte, error) {
@@ -3662,7 +3662,7 @@ type RequestCreate struct {
 	*/
 	CreatedRequestAffectedResources []v2.Resource `conjure-docs:"The resources that are directly affected by the request. For example, for an update request this would be\nthe updated resource, and for a create request this could be the parent resource." json:"createdRequestAffectedResources"`
 	// A description of the request creation.
-	CreatedRequestDescription *string `conjure-docs:"A description of the request creation." json:"createdRequestDescription"`
+	CreatedRequestDescription *string `conjure-docs:"A description of the request creation." json:"createdRequestDescription,omitempty"`
 }
 
 func (o RequestCreate) MarshalJSON() ([]byte, error) {
@@ -3713,7 +3713,7 @@ type RequestDisapprove struct {
 	// The requests that are being disapproved
 	DisapprovedRequestIds []v2.RequestResource `conjure-docs:"The requests that are being disapproved" json:"disapprovedRequestIds"`
 	// The user that disapproved the request
-	DisapproveRequestUserId *string `conjure-docs:"The user that disapproved the request" json:"disapproveRequestUserId"`
+	DisapproveRequestUserId *string `conjure-docs:"The user that disapproved the request" json:"disapproveRequestUserId,omitempty"`
 }
 
 func (o RequestDisapprove) MarshalJSON() ([]byte, error) {
@@ -3810,7 +3810,7 @@ func (o *RequestExecute) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // Searching for requests.
 type RequestSearch struct {
 	// The search-query that this event is running.
-	RequestSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"requestSearchQuery"`
+	RequestSearchQuery *string `conjure-docs:"The search-query that this event is running." json:"requestSearchQuery,omitempty"`
 	// The search-results that are returned to the user in this event.
 	RequestSearchResults []v2.RequestResource `conjure-docs:"The search-results that are returned to the user in this event." json:"requestSearchResults"`
 }
@@ -3857,7 +3857,7 @@ type RequestUpdate struct {
 	// The requests that were updated in this request
 	UpdatedRequestIds []v2.RequestResource `conjure-docs:"The requests that were updated in this request" json:"updatedRequestIds"`
 	// A description of the request update.
-	UpdatedRequestDescription *string `conjure-docs:"A description of the request update." json:"updatedRequestDescription"`
+	UpdatedRequestDescription *string `conjure-docs:"A description of the request update." json:"updatedRequestDescription,omitempty"`
 }
 
 func (o RequestUpdate) MarshalJSON() ([]byte, error) {
@@ -3947,7 +3947,7 @@ type ReviewInfraAction struct {
 	// The user who reviewed this action.
 	ReviewInfraActionUser string `conjure-docs:"The user who reviewed this action." json:"reviewInfraActionUser"`
 	// Whether the review was approved.
-	ReviewInfraActionWasApproved *bool `conjure-docs:"Whether the review was approved." json:"reviewInfraActionWasApproved"`
+	ReviewInfraActionWasApproved *bool `conjure-docs:"Whether the review was approved." json:"reviewInfraActionWasApproved,omitempty"`
 }
 
 func (o ReviewInfraAction) MarshalYAML() (interface{}, error) {
@@ -4180,7 +4180,7 @@ type TokenGeneration struct {
 	// All tokens that were generated
 	GeneratedTokens []v2.Token `conjure-docs:"All tokens that were generated" json:"generatedTokens"`
 	// A description of how these tokens were generated, for auditor-context.
-	GenerateTokensDescription *string `conjure-docs:"A description of how these tokens were generated, for auditor-context." json:"generateTokensDescription"`
+	GenerateTokensDescription *string `conjure-docs:"A description of how these tokens were generated, for auditor-context." json:"generateTokensDescription,omitempty"`
 }
 
 func (o TokenGeneration) MarshalJSON() ([]byte, error) {
@@ -4225,7 +4225,7 @@ type TokenRevoke struct {
 	// All tokens that were revoked.
 	RevokedTokens []v2.Token `conjure-docs:"All tokens that were revoked." json:"revokedTokens"`
 	// A description of how these tokens were generated, for auditor-context.
-	RevokeTokensDescription *string `conjure-docs:"A description of how these tokens were generated, for auditor-context." json:"revokeTokensDescription"`
+	RevokeTokensDescription *string `conjure-docs:"A description of how these tokens were generated, for auditor-context." json:"revokeTokensDescription,omitempty"`
 }
 
 func (o TokenRevoke) MarshalJSON() ([]byte, error) {
@@ -4355,7 +4355,7 @@ func (o *UserJustify) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Login of a user.
 type UserLogin struct {
-	LoginUserId *string `json:"loginUserId"`
+	LoginUserId *string `json:"loginUserId,omitempty"`
 }
 
 func (o UserLogin) MarshalYAML() (interface{}, error) {
@@ -4376,7 +4376,7 @@ func (o *UserLogin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Logout of a user.
 type UserLogout struct {
-	LogoutUserId *string `json:"logoutUserId"`
+	LogoutUserId *string `json:"logoutUserId,omitempty"`
 }
 
 func (o UserLogout) MarshalYAML() (interface{}, error) {
