@@ -5,6 +5,7 @@ plugins:
     - locator:
         id: com.palantir.godel-conjure-plugin:conjure-plugin:6.77.0
         checksums:
+          darwin-amd64: 04982108ab91366ec2a4ccd81c1c2a684ff88372b1b17d9aab12b0fadfbff89f
           darwin-arm64: 21c0ef75e647e819496561f72c0ee4325d59e7cce175116e54f2bffd814f22db
           linux-amd64: 55e2c8e682fc7b47f27b9f33c60b4e86426d412bc177a5d94010d93435cd17e7
           linux-arm64: c83a9af66d0c8d7b62596ee713294d2bb51cf01f73c50f721f78a06e80a32966
