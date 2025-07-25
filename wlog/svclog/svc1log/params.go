@@ -145,14 +145,20 @@ func initLineCaller(skip int) (string, int, bool) {
 }
 
 func SafeParam(key string, value interface{}) Param {
+	safeValue, _ := validateLogSafety(value)
 	return SafeParams(map[string]interface{}{
-		key: value,
+		key: safeValue,
 	})
 }
 
 func SafeParams(safe map[string]interface{}) Param {
+	safeCopy := make(map[string]interface{})
+	for key, value := range safe {
+		safeValue, _ := validateLogSafety(value)
+		safeCopy[key] = safeValue
+	}
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ParamsKey, safe)
+		entry.AnyMapValue(ParamsKey, safeCopy)
 	})
 }
 
