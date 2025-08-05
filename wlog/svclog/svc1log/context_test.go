@@ -442,3 +442,272 @@ func (w wrappedSvcLogger) Error(msg string, params ...svc1log.Param) {
 func (w wrappedSvcLogger) SetLevel(level wlog.LogLevel) {
 	w.delegate.SetLevel(level)
 }
+
+// Test types implementing ConjureSafety interface
+type safeConjureType struct {
+	Value string
+}
+
+func (s safeConjureType) GetConjureSafety() string {
+	return "safe"
+}
+
+type unknownConjureType struct {
+	Value string
+}
+
+func (u unknownConjureType) GetConjureSafety() string {
+	return "unknown"
+}
+
+type unsafeConjureType struct {
+	Value string
+}
+
+func (u unsafeConjureType) GetConjureSafety() string {
+	return "unsafe"
+}
+
+type doNotLogConjureType struct {
+	Value string
+}
+
+func (d doNotLogConjureType) GetConjureSafety() string {
+	return "do-not-log"
+}
+
+type nonConjureType struct {
+	Value string
+}
+
+func TestConjureSafetySafeParam(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testConjureSafetySafeParam(t, test.provider)
+		})
+	}
+}
+
+func testConjureSafetySafeParam(t *testing.T, provider wlog.LoggerProvider) {
+	buf, ctx := newBufAndCtxWithLogger(provider)
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test",
+		svc1log.SafeParam("safe", safeConjureType{Value: "should-appear"}),
+		svc1log.SafeParam("unknown", unknownConjureType{Value: "should-appear"}),
+		svc1log.SafeParam("unsafe", unsafeConjureType{Value: "should-be-redacted"}),
+		svc1log.SafeParam("do-not-log", doNotLogConjureType{Value: "should-be-redacted"}),
+		svc1log.SafeParam("non-conjure", nonConjureType{Value: "should-appear"}),
+	)
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"safe":        objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unknown":     objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unsafe":      objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"do-not-log":  objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"non-conjure": objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestConjureSafetyUnsafeParam(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testConjureSafetyUnsafeParam(t, test.provider)
+		})
+	}
+}
+
+func testConjureSafetyUnsafeParam(t *testing.T, provider wlog.LoggerProvider) {
+	buf, ctx := newBufAndCtxWithLogger(provider)
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test",
+		svc1log.UnsafeParam("safe", safeConjureType{Value: "should-appear"}),
+		svc1log.UnsafeParam("unknown", unknownConjureType{Value: "should-appear"}),
+		svc1log.UnsafeParam("unsafe", unsafeConjureType{Value: "should-appear"}),
+		svc1log.UnsafeParam("do-not-log", doNotLogConjureType{Value: "should-be-redacted"}),
+		svc1log.UnsafeParam("non-conjure", nonConjureType{Value: "should-appear"}),
+	)
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"safe":        objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unknown":     objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unsafe":      objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"do-not-log":  objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"non-conjure": objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestConjureSafetySafeParams(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testConjureSafetySafeParams(t, test.provider)
+		})
+	}
+}
+
+func testConjureSafetySafeParams(t *testing.T, provider wlog.LoggerProvider) {
+	buf, ctx := newBufAndCtxWithLogger(provider)
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test", svc1log.SafeParams(map[string]interface{}{
+		"safe":        safeConjureType{Value: "should-appear"},
+		"unknown":     unknownConjureType{Value: "should-appear"},
+		"unsafe":      unsafeConjureType{Value: "should-be-redacted"},
+		"do-not-log":  doNotLogConjureType{Value: "should-be-redacted"},
+		"non-conjure": nonConjureType{Value: "should-appear"},
+	}))
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"safe":        objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unknown":     objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unsafe":      objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"do-not-log":  objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"non-conjure": objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}
+
+func TestConjureSafetyUnsafeParams(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		provider wlog.LoggerProvider
+	}{
+		{
+			name:     "jsonMarshalLogger",
+			provider: wlog.NewJSONMarshalLoggerProvider(),
+		},
+		{
+			name:     "zap",
+			provider: wlogzap.LoggerProvider(),
+		},
+		{
+			name:     "zerolog",
+			provider: wlogzerolog.LoggerProvider(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testConjureSafetyUnsafeParams(t, test.provider)
+		})
+	}
+}
+
+func testConjureSafetyUnsafeParams(t *testing.T, provider wlog.LoggerProvider) {
+	buf, ctx := newBufAndCtxWithLogger(provider)
+
+	logger := svc1log.FromContext(ctx)
+	logger.Info("Test", svc1log.UnsafeParams(map[string]interface{}{
+		"safe":        safeConjureType{Value: "should-appear"},
+		"unknown":     unknownConjureType{Value: "should-appear"},
+		"unsafe":      unsafeConjureType{Value: "should-appear"},
+		"do-not-log":  doNotLogConjureType{Value: "should-be-redacted"},
+		"non-conjure": nonConjureType{Value: "should-appear"},
+	}))
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(entries))
+
+	matcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+		"level":   objmatcher.NewEqualsMatcher("INFO"),
+		"time":    objmatcher.NewRegExpMatcher(".+"),
+		"origin":  objmatcher.NewEqualsMatcher("com.palantir.test"),
+		"type":    objmatcher.NewEqualsMatcher("service.1"),
+		"message": objmatcher.NewEqualsMatcher("Test"),
+		"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
+			"safe":        objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unknown":     objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"unsafe":      objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+			"do-not-log":  objmatcher.NewEqualsMatcher("[REDACTED]"),
+			"non-conjure": objmatcher.MapMatcher(map[string]objmatcher.Matcher{"Value": objmatcher.NewEqualsMatcher("should-appear")}),
+		}),
+	})
+	err = matcher.Matches(map[string]interface{}(entries[0]))
+	assert.NoError(t, err, "%v", err)
+}

@@ -25,6 +25,26 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
+type ConjureSafety interface {
+	GetConjureSafety() string
+}
+
+func shouldRedactForSafe(value interface{}) bool {
+	if cs, ok := value.(ConjureSafety); ok {
+		safety := cs.GetConjureSafety()
+		return safety != "safe" && safety != "unknown"
+	}
+	return false
+}
+
+func shouldRedactForUnsafe(value interface{}) bool {
+	if cs, ok := value.(ConjureSafety); ok {
+		safety := cs.GetConjureSafety()
+		return safety == "do-not-log"
+	}
+	return false
+}
+
 const (
 	TypeValue = "service.1"
 
@@ -145,14 +165,25 @@ func initLineCaller(skip int) (string, int, bool) {
 }
 
 func SafeParam(key string, value interface{}) Param {
+	if shouldRedactForSafe(value) {
+		value = "[REDACTED]"
+	}
 	return SafeParams(map[string]interface{}{
 		key: value,
 	})
 }
 
 func SafeParams(safe map[string]interface{}) Param {
+	filtered := make(map[string]interface{})
+	for key, value := range safe {
+		if shouldRedactForSafe(value) {
+			filtered[key] = "[REDACTED]"
+		} else {
+			filtered[key] = value
+		}
+	}
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ParamsKey, safe)
+		entry.AnyMapValue(ParamsKey, filtered)
 	})
 }
 
@@ -201,14 +232,25 @@ func Stacktrace(err error) Param {
 }
 
 func UnsafeParam(key string, value interface{}) Param {
+	if shouldRedactForUnsafe(value) {
+		value = "[REDACTED]"
+	}
 	return UnsafeParams(map[string]interface{}{
 		key: value,
 	})
 }
 
 func UnsafeParams(unsafe map[string]interface{}) Param {
+	filtered := make(map[string]interface{})
+	for key, value := range unsafe {
+		if shouldRedactForUnsafe(value) {
+			filtered[key] = "[REDACTED]"
+		} else {
+			filtered[key] = value
+		}
+	}
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
+		entry.AnyMapValue(wlog.UnsafeParamsKey, filtered)
 	})
 }
 
