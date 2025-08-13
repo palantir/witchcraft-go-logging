@@ -25,7 +25,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gorilla/mux v1.7.3 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
