@@ -3,7 +3,7 @@ module github.com/palantir/witchcraft-go-logging
 go 1.24.0
 
 require (
-	github.com/fatih/color v1.9.0
+	github.com/fatih/color v1.18.0
 	github.com/golang/glog v1.2.5
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/pkg/bytesbuffers v1.2.0
