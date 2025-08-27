@@ -15,7 +15,7 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.42.0
-	github.com/palantir/witchcraft-go-params v1.38.0
+	github.com/palantir/witchcraft-go-params v1.39.0
 	github.com/palantir/witchcraft-go-tracing v1.40.0
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.0
