@@ -37,8 +37,8 @@ github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/objmatcher v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/objmatcher
-# github.com/palantir/pkg/rid v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/rid v1.2.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/rid
 # github.com/palantir/pkg/safejson v1.1.0
 ## explicit; go 1.19
