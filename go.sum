@@ -33,8 +33,8 @@ github.com/palantir/pkg/safejson v1.1.0 h1:myVdz3dGPjac1o3aYDuODk7BaYdsxHcYLfVNX
 github.com/palantir/pkg/safejson v1.1.0/go.mod h1:CxrDB47zqztxqu4ufDnh6MCrFhPCxXLF5pe1xj8yKlA=
 github.com/palantir/pkg/safelong v1.2.0 h1:7P1ZvHrjd0uNoLL4vDhuIfFPN50aakVTF/JjdDfGJJo=
 github.com/palantir/pkg/safelong v1.2.0/go.mod h1:vRTjkl9UhNbkTtz9QxWwFVa2dvGAppcCXB7OufOpn10=
-github.com/palantir/pkg/safeyaml v1.1.0 h1:5Pt3cGNw5QyOPYwfLsPImh+SiNIilSw3Cn4t3m7tZuo=
-github.com/palantir/pkg/safeyaml v1.1.0/go.mod h1:RG0a/ze5V6uppZJvwV2e3RmyjKMxdPpwIyS5OHp3DPU=
+github.com/palantir/pkg/safeyaml v1.2.0 h1:5IbhlQstu0JC4STfWvLiWex47sFtBHzxjEYbckpjEcY=
+github.com/palantir/pkg/safeyaml v1.2.0/go.mod h1:lcCo9iTDCRwrWJS79kF/zY3H8BGbrD+Sdb6TADK4nHI=
 github.com/palantir/pkg/transform v1.1.0 h1:43tnYETShELXCRro6+uc0GlgB4GZvsQ/YNH5301IxW8=
 github.com/palantir/pkg/transform v1.1.0/go.mod h1:SHqpFkx1vKQ8Bb81VsmySYTsSHSBtgj06cZm9HihuGk=
 github.com/palantir/pkg/uuid v1.2.0 h1:eb7A1clc0DzchT9G0DRXi9QEkz/IYGDzLVFqZoIfrl0=
