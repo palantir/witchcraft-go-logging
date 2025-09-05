@@ -29,8 +29,8 @@ github.com/palantir/pkg/objmatcher v1.2.0 h1:cR0IX2NXAhR1hRFBFUwA7y/+m4CtpXUCm5t
 github.com/palantir/pkg/objmatcher v1.2.0/go.mod h1:ekDpUDezSoBcD47CUWo9xbYTGycIkiM2ODvxHCUR+lQ=
 github.com/palantir/pkg/rid v1.2.0 h1:sEdklNKk4hrDm0JsUyICYakbc+16GrC6pYxMFjfqXkE=
 github.com/palantir/pkg/rid v1.2.0/go.mod h1:W+w31R+a/6RzShEybZfbu86sOMcg+hR2h/KmoSDu2kQ=
-github.com/palantir/pkg/safejson v1.1.0 h1:myVdz3dGPjac1o3aYDuODk7BaYdsxHcYLfVNXMRP+MU=
-github.com/palantir/pkg/safejson v1.1.0/go.mod h1:CxrDB47zqztxqu4ufDnh6MCrFhPCxXLF5pe1xj8yKlA=
+github.com/palantir/pkg/safejson v1.2.0 h1:mNARH/UdpeDjHSUujUYXSqe4Rclul53xle2CLm6UG34=
+github.com/palantir/pkg/safejson v1.2.0/go.mod h1:Pmxy4EUrfp5sSji5IhNySUKhEyaZw85SoOzag/lzsYg=
 github.com/palantir/pkg/safelong v1.2.0 h1:7P1ZvHrjd0uNoLL4vDhuIfFPN50aakVTF/JjdDfGJJo=
 github.com/palantir/pkg/safelong v1.2.0/go.mod h1:vRTjkl9UhNbkTtz9QxWwFVa2dvGAppcCXB7OufOpn10=
 github.com/palantir/pkg/safeyaml v1.2.0 h1:5IbhlQstu0JC4STfWvLiWex47sFtBHzxjEYbckpjEcY=
