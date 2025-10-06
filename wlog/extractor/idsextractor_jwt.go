@@ -33,7 +33,7 @@ const (
 
 // newIDsFromJWTExtractor creates an extractor that sets the UIDKey, SIDKey, TokenIDKey and OrgIDKey keys to have the values
 // parsed from the JWT used as the bearer token in the "Authorization" header of the request. The JWT's "sub" field is
-// used as the UID, the "sid" field is used as the SID and the "jti" field is used as the tokenID.
+// used as the UID, the "sid" field is used as the SID, the "jti" field is used as the tokenID and the "org" field is used as the orgID.
 func newIDsFromJWTExtractor() IDsFromRequest {
 	return &jwtRequestIDsExtractor{}
 }
