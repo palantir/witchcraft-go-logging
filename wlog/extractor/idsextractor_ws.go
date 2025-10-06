@@ -19,8 +19,8 @@ import (
 	"strings"
 )
 
-// newIDsFromWSExtractor creates an extractor that sets the UIDKey, SIDKey and TokenIDKey keys to have the values
-// parsed from the WebSocket request containing the bearer token in the "Sec-WebSocket-Protocol" header.
+// newIDsFromWSExtractor creates an extractor that sets the UIDKey, SIDKey, TokenIDKey and OrgIDKey keys to have the values
+// parsed from the WebSocket request containing the bearer token in the "Sec-WebSocket-Protocol" header with the `Bearer-<token>` format.
 // The JWT's "sub" field is used as the UID, the "sid" field is used as the SID and the "jti" field is used as the tokenID.
 func newIDsFromWSExtractor() IDsFromRequest {
 	return &wsRequestIDsExtractor{}
