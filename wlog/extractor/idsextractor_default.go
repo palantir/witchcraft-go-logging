@@ -16,7 +16,6 @@ package extractor
 
 func NewDefaultIDsExtractor() IDsFromRequest {
 	return newCompoundExtractor(
-		newIDsFromWSExtractor(),
 		newIDsFromJWTExtractor(),
 		newTraceIDFromHeaderExtractor(),
 		newAudit3IDsFromHeaderExtractor(),
