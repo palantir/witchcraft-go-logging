@@ -96,7 +96,7 @@ func (u *Diagnostic) AcceptFuncs(genericFunc func(GenericDiagnostic) error, thre
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Diagnostic type")
 		}
 		return unknownFunc(u.typ)
 	case "generic":
@@ -112,11 +112,11 @@ func (u *Diagnostic) AcceptFuncs(genericFunc func(GenericDiagnostic) error, thre
 	}
 }
 
-func (u *Diagnostic) GenericNoopSuccess(GenericDiagnostic) error {
+func (u *Diagnostic) GenericNoopSuccess(_ GenericDiagnostic) error {
 	return nil
 }
 
-func (u *Diagnostic) ThreadDumpNoopSuccess(ThreadDumpV1) error {
+func (u *Diagnostic) ThreadDumpNoopSuccess(_ ThreadDumpV1) error {
 	return nil
 }
 
@@ -270,7 +270,7 @@ func (u *RequestLog) AcceptFuncs(v1Func func(RequestLogV1) error, v2Func func(Re
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in RequestLog type")
 		}
 		return unknownFunc(u.typ)
 	case "v1":
@@ -286,11 +286,11 @@ func (u *RequestLog) AcceptFuncs(v1Func func(RequestLogV1) error, v2Func func(Re
 	}
 }
 
-func (u *RequestLog) V1NoopSuccess(RequestLogV1) error {
+func (u *RequestLog) V1NoopSuccess(_ RequestLogV1) error {
 	return nil
 }
 
-func (u *RequestLog) V2NoopSuccess(RequestLogV2) error {
+func (u *RequestLog) V2NoopSuccess(_ RequestLogV2) error {
 	return nil
 }
 
@@ -445,7 +445,7 @@ func (u *UnionEventLog) AcceptFuncs(eventLogFunc func(EventLogV1) error, eventLo
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in UnionEventLog type")
 		}
 		return unknownFunc(u.typ)
 	case "eventLog":
@@ -461,11 +461,11 @@ func (u *UnionEventLog) AcceptFuncs(eventLogFunc func(EventLogV1) error, eventLo
 	}
 }
 
-func (u *UnionEventLog) EventLogNoopSuccess(EventLogV1) error {
+func (u *UnionEventLog) EventLogNoopSuccess(_ EventLogV1) error {
 	return nil
 }
 
-func (u *UnionEventLog) EventLogV2NoopSuccess(EventLogV2) error {
+func (u *UnionEventLog) EventLogV2NoopSuccess(_ EventLogV2) error {
 	return nil
 }
 
@@ -703,7 +703,7 @@ func (u *WrappedLogV1Payload) AcceptFuncs(serviceLogV1Func func(ServiceLogV1) er
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in WrappedLogV1Payload type")
 		}
 		return unknownFunc(u.typ)
 	case "serviceLogV1":
@@ -749,35 +749,35 @@ func (u *WrappedLogV1Payload) AcceptFuncs(serviceLogV1Func func(ServiceLogV1) er
 	}
 }
 
-func (u *WrappedLogV1Payload) ServiceLogV1NoopSuccess(ServiceLogV1) error {
+func (u *WrappedLogV1Payload) ServiceLogV1NoopSuccess(_ ServiceLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) RequestLogV2NoopSuccess(RequestLogV2) error {
+func (u *WrappedLogV1Payload) RequestLogV2NoopSuccess(_ RequestLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) TraceLogV1NoopSuccess(TraceLogV1) error {
+func (u *WrappedLogV1Payload) TraceLogV1NoopSuccess(_ TraceLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) EventLogV2NoopSuccess(EventLogV2) error {
+func (u *WrappedLogV1Payload) EventLogV2NoopSuccess(_ EventLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) MetricLogV1NoopSuccess(MetricLogV1) error {
+func (u *WrappedLogV1Payload) MetricLogV1NoopSuccess(_ MetricLogV1) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) AuditLogV2NoopSuccess(AuditLogV2) error {
+func (u *WrappedLogV1Payload) AuditLogV2NoopSuccess(_ AuditLogV2) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) AuditLogV3NoopSuccess(AuditLogV3) error {
+func (u *WrappedLogV1Payload) AuditLogV3NoopSuccess(_ AuditLogV3) error {
 	return nil
 }
 
-func (u *WrappedLogV1Payload) DiagnosticLogV1NoopSuccess(DiagnosticLogV1) error {
+func (u *WrappedLogV1Payload) DiagnosticLogV1NoopSuccess(_ DiagnosticLogV1) error {
 	return nil
 }
 
