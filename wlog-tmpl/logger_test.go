@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
