@@ -21,7 +21,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 )
 
