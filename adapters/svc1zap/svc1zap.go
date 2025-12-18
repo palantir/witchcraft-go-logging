@@ -58,13 +58,6 @@ func WithOriginFromZapCaller() Option {
 	return func(core *svc1zapCore) { core.originFromCallLine = true }
 }
 
-// WithNewParamFunc provides a function for constructing svc1log.Param values from zap fields.
-// Use this option to control parameter safety. By default, all fields are converted to unsafe params.
-// If newParam returns nil, the field is skipped.
-func WithNewParamFunc(newParam func(key string, value interface{}) svc1log.Param) Option {
-	return func(core *svc1zapCore) { core.newParamFunc = newParam }
-}
-
 // WithEntryMutatorFunc provides a function for modifying or skipping entries dynamically.
 // If mutator is set, ok must return true for the message to be logged.
 func WithEntryMutatorFunc(mutator func(entry zapcore.Entry) (out zapcore.Entry, ok bool)) Option {
