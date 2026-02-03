@@ -15,7 +15,6 @@
 package audit2log
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -39,15 +38,14 @@ var defaultLoggerCreator = func() Logger {
 }
 
 // warnLogger is a logger that writes a warning to the provided io.Writer whenever its logging function is invoked. When
-// the logging function is invoked, a new logger is created using the wlog.LoggerCreator and a warning and the output of
-// the created logger are written to the io.Writer.
+// the logging function is invoked, a new logger is created using the wlog.LoggerCreator and a warning is written to the io.Writer.
 type warnLogger struct {
 	w       io.Writer
 	creator wlog.LoggerCreator
 }
 
 func (l *warnLogger) Audit(name string, result AuditResultType, params ...Param) {
-	buf := &bytes.Buffer{}
-	NewFromCreator(buf, l.creator).Audit(name, result, params...)
-	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("audit2log", buf.String(), 2))
+	NewFromCreator(io.Discard, l.creator).Audit(name, result, params...)
+	// Ignore the audit log output to prevent leaking sensitive data
+	_, _ = fmt.Fprintln(l.w, wloginternal.WarnLoggerOutput("audit2log", "", 2))
 }
