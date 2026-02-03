@@ -27,6 +27,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -66,9 +67,8 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 				logger.Audit("TEST_EVT", audit2log.AuditResultSuccess)
 			},
 			validateJSON: func(bytes []byte) {
-				var logEntry logging.AuditLogV2
-				require.NoError(t, json.Unmarshal(bytes, &logEntry))
-				assert.Equal(t, "TEST_EVT", logEntry.Name)
+				// audit2log no longer emits log output when warning about missing logger context
+				// to prevent leaking sensitive data. This validation function is no longer called.
 			},
 			setEmptyLoggerCreator: func() {
 				// set the default logger creator
@@ -78,6 +78,27 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 					return audit2log.New(ioutil.Discard)
 				})
 			},
+			skipLogOutputVerification: true,
+		},
+		{
+			loggerPkg: "audit3log",
+			performLogging: func() {
+				logger := audit3log.FromContext(context.Background())
+				logger.Audit("TEST_EVT", audit3log.AuditResultSuccess)
+			},
+			validateJSON: func(bytes []byte) {
+				// audit3log no longer emits log output when warning about missing logger context
+				// to prevent leaking sensitive data. This validation function is no longer called.
+			},
+			setEmptyLoggerCreator: func() {
+				// set the default logger creator
+				audit3log.SetDefaultLoggerCreator(func() audit3log.Logger {
+					// technically, a truly no-op writer would implement the logger interface and do nothing, but it is
+					// easier to just return a new logger that writes to a no-op writer.
+					return audit3log.New(ioutil.Discard)
+				})
+			},
+			skipLogOutputVerification: true,
 		},
 		{
 			loggerPkg: "evt2log",
@@ -149,10 +170,11 @@ func TestOutputFromContextEmptyContext(t *testing.T) {
 }
 
 type loggerTestCase struct {
-	loggerPkg             string
-	performLogging        func()
-	validateJSON          func([]byte)
-	setEmptyLoggerCreator func()
+	loggerPkg                 string
+	performLogging            func()
+	validateJSON              func([]byte)
+	setEmptyLoggerCreator     func()
+	skipLogOutputVerification bool
 }
 
 func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string, loggerTestCaseInfo loggerTestCase) {
@@ -167,6 +189,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 		// the logger created by that function outputs a warning stating that the global logger should be set. As a
 		// result, the over-all logger output to os.Stderr is:
 		// "[WARNING] <logger not set in context>: [WARNING] <global logger provider not set>"
+		// NOTE: audit2log and audit3log no longer emit log output after the warning to prevent leaking sensitive data.
 		{
 			name: "Context with no logger set and no logger provider set returns default stderr warning logger that uses warn-once logger",
 			verify: func(loggerTestCaseInfo loggerTestCase, bytes []byte) {
@@ -177,8 +200,13 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
-				got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
-				assert.Equal(t, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`, got)
+				if loggerTestCaseInfo.skipLogOutputVerification {
+					got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
+					assert.Equal(t, "", got)
+				} else {
+					got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
+					assert.Equal(t, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`, got)
+				}
 			},
 		},
 		// Because the context has no logger set on it, the defaultLoggerCreator is used. The defaultLoggerCreator has
@@ -200,7 +228,12 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				loc := firstPortionRegexp.FindStringIndex(logOutput)
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
-				loggerTestCaseInfo.validateJSON([]byte(logOutput[loc[1]:]))
+				if loggerTestCaseInfo.skipLogOutputVerification {
+					got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
+					assert.Equal(t, "", got)
+				} else {
+					loggerTestCaseInfo.validateJSON([]byte(logOutput[loc[1]:]))
+				}
 			},
 		},
 		// Because the context has no logger set on it, the defaultLoggerCreator is used. The defaultLoggerCreator has
