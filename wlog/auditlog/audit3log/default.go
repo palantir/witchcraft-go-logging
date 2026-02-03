@@ -22,6 +22,10 @@ import (
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
+func SetDefaultLoggerCreator(creator func() Logger) {
+	defaultLoggerCreator = creator
+}
+
 var defaultLoggerCreator = func() Logger {
 	return &warnLogger{
 		w: os.Stderr,
