@@ -421,7 +421,9 @@ func jsonParamsOnlyMarshaledIfLoggedTest(t *testing.T, loggerProvider func(w io.
 		logger := loggerProvider(&bytes.Buffer{}, wlog.InfoLevel, "")
 		// demonstrates that writing to a log at a level that is lower than the logger's level will not marshal the
 		// parameters (if marshal occurred, this would panic).
-		logger.Debug("Test Message", svc1log.SafeParam("testType", jsonMarshalPanicType{}))
+		logger.Debug("Test Message", svc1log.SafeParams(map[string]interface{}{
+			"testType": jsonMarshalPanicType{},
+		}))
 	})
 }
 

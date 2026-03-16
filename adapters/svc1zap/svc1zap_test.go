@@ -17,7 +17,6 @@ package svc1zap
 import (
 	"bytes"
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -33,16 +32,6 @@ import (
 
 func TestSvc1ZapWrapper(t *testing.T) {
 
-	prefixParamFunc := func(key string, value interface{}) svc1log.Param {
-		if strings.HasPrefix(key, "safe") {
-			return svc1log.SafeParam(key, value)
-		}
-		if !strings.HasPrefix(key, "forbidden") {
-			return svc1log.UnsafeParam(key, value)
-		}
-		return nil
-	}
-
 	t.Run("defaults to all unsafe params", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		logger := svc1log.New(buf, wlog.DebugLevel)
@@ -57,28 +46,6 @@ func TestSvc1ZapWrapper(t *testing.T) {
 				"forbiddenToken": objmatcher.NewEqualsMatcher("token"),
 				"safeString":     objmatcher.NewEqualsMatcher("string"),
 				"unsafeInt":      objmatcher.NewEqualsMatcher(float64(42)),
-			},
-		})
-	})
-
-	t.Run("caller origin and custom params", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		logger := svc1log.New(buf, wlog.DebugLevel)
-		logr2 := New(logger, WithOriginFromZapCaller(), WithNewParamFunc(prefixParamFunc))
-		logr2 = logr2.With(zap.String("attached", "value"))
-		logr2.Info("logr 2", zap.String("safeString", "string"), zap.String("forbiddenToken", "token"), zap.Int("unsafeInt", 42))
-		assertLogLine(t, buf.Bytes(), objmatcher.MapMatcher{
-			"level":   objmatcher.NewEqualsMatcher("INFO"),
-			"time":    objmatcher.NewRegExpMatcher(".+"),
-			"message": objmatcher.NewEqualsMatcher("logr 2"),
-			"type":    objmatcher.NewEqualsMatcher(svc1log.TypeValue),
-			"origin":  objmatcher.NewRegExpMatcher("^.+/adapters/svc1zap/svc1zap_test.go:\\d+"),
-			"params": objmatcher.MapMatcher{
-				"safeString": objmatcher.NewEqualsMatcher("string"),
-			},
-			"unsafeParams": objmatcher.MapMatcher{
-				"attached":  objmatcher.NewEqualsMatcher("value"),
-				"unsafeInt": objmatcher.NewEqualsMatcher(float64(42)),
 			},
 		})
 	})

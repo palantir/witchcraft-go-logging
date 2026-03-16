@@ -18,7 +18,10 @@ import (
 	"path"
 	"runtime"
 	"strconv"
+	"time"
 
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -144,7 +147,22 @@ func initLineCaller(skip int) (string, int, bool) {
 	return file, line, ok
 }
 
-func SafeParam(key string, value interface{}) Param {
+type SafeLoggableTypes interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+		~float32 | ~float64 |
+		~string | []string | ~bool |
+		uuid.UUID | time.Time | rid.ResourceIdentifier |
+		map[string]interface{}
+}
+
+func SafeParam[T SafeLoggableTypes](key string, value T) Param {
+	return SafeParams(map[string]interface{}{
+		key: value,
+	})
+}
+
+func SafeParamSlice[T SafeLoggableTypes](key string, value []T) Param {
 	return SafeParams(map[string]interface{}{
 		key: value,
 	})

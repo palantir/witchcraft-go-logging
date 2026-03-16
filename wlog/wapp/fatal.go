@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -83,7 +84,7 @@ func handleRecovered(ctx context.Context, r interface{}, stack []byte) (retErr e
 	if err, ok := r.(error); ok {
 		safeParams, unsafeParams := werror.ParamsFromError(err)
 		svc1log.FromContext(ctx).Error("panic recovered",
-			svc1log.SafeParam("stacktrace", stacktrace),
+			svc1log.SafeParam("stacktrace", threadDumpV1SafeParams(stacktrace)),
 			svc1log.SafeParams(safeParams),
 			svc1log.UnsafeParams(unsafeParams),
 			svc1log.UnsafeParam("recovered", r),
@@ -92,7 +93,7 @@ func handleRecovered(ctx context.Context, r interface{}, stack []byte) (retErr e
 			werror.SafeParam("stacktrace", stacktrace))
 	} else {
 		svc1log.FromContext(ctx).Error("panic recovered",
-			svc1log.SafeParam("stacktrace", stacktrace),
+			svc1log.SafeParam("stacktrace", threadDumpV1SafeParams(stacktrace)),
 			svc1log.UnsafeParam("recovered", r),
 			svc1log.Stacktrace(fmt.Errorf("panic recovered\n\n%s", goroutines)))
 		retErr = werror.ErrorWithContextParams(ctx, "panic recovered",
@@ -103,4 +104,10 @@ func handleRecovered(ctx context.Context, r interface{}, stack []byte) (retErr e
 		evt2log.Value("stacktrace", stacktrace),
 		evt2log.UnsafeParam("recovered", r))
 	return retErr
+}
+
+func threadDumpV1SafeParams(threadDump logging.ThreadDumpV1) map[string]interface{} {
+	return map[string]interface{}{
+		"threads": threadDump.Threads,
+	}
 }
