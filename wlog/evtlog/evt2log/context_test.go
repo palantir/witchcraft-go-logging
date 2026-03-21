@@ -50,7 +50,7 @@ func TestFromContext(t *testing.T) {
 		"type":      objmatcher.NewEqualsMatcher("event.2"),
 		"eventName": objmatcher.NewEqualsMatcher("testop"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -81,7 +81,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 		"tokenId":   objmatcher.NewEqualsMatcher("test-TokenID"),
 		"orgId":     objmatcher.NewEqualsMatcher("test-OrgID"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -113,7 +113,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher := createMatcher("testop_0", "")
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 
@@ -127,7 +127,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("testop_1", string(spanOne.Context().TraceID))
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 
@@ -139,7 +139,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("testop_2", "manually-set-trace-id")
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 }

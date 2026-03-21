@@ -15,6 +15,7 @@
 package extractor
 
 import (
+	"maps"
 	"net/http"
 )
 
@@ -31,9 +32,7 @@ type compoundExtractor []IDsFromRequest
 func (e compoundExtractor) ExtractIDs(req *http.Request) map[string]string {
 	out := make(map[string]string)
 	for _, currExtractor := range e {
-		for k, v := range currExtractor.ExtractIDs(req) {
-			out[k] = v
-		}
+		maps.Copy(out, currExtractor.ExtractIDs(req))
 	}
 	return out
 }

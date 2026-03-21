@@ -22,13 +22,13 @@ type logTyper interface {
 	LogType() logentryformatter.LogType
 	DefaultFormatter(params ...logentryformatter.Param) logentryformatter.Formatter
 	NewFormatter(tmpl string, params ...logentryformatter.Param) (logentryformatter.Formatter, error)
-	parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error)
+	parseLogEntry(lineJSON []byte, substitute bool) (any, error)
 }
 
 type baseLogTyper struct {
 	typ         logentryformatter.LogType
 	defaultTmpl string
-	defaultObj  interface{}
+	defaultObj  any
 }
 
 func (b *baseLogTyper) LogType() logentryformatter.LogType {

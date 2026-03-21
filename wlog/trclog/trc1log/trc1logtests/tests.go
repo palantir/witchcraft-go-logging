@@ -309,7 +309,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 			entries, err := logreader.EntriesFromContent(buf.Bytes())
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
-			assert.NoError(t, tc.JSONMatcher.Matches(map[string]interface{}(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
+			assert.NoError(t, tc.JSONMatcher.Matches(map[string]any(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}
 }
@@ -317,7 +317,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) trc1log.Logg
 func getDurationValue(t *testing.T, entry logreader.Entry) time.Duration {
 	v, ok := entry["span"]
 	require.True(t, ok)
-	valueAsMap, ok := v.(map[string]interface{})
+	valueAsMap, ok := v.(map[string]any)
 	require.True(t, ok)
 	durationValue, ok := valueAsMap["duration"]
 	require.True(t, ok)

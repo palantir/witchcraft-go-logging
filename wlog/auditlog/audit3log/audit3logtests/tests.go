@@ -124,7 +124,7 @@ func TestCases() []TestCase {
 				},
 			},
 			EventID:    "c15487b9-ff6a-4bb1-8c25-2433a185c438",
-			LogEntryID: toPointer("46ac025f-5d70-4a79-8e8e-270da9635a43"),
+			LogEntryID: new("46ac025f-5d70-4a79-8e8e-270da9635a43"),
 			UserAgent:  "test-user-agent",
 			Category:   v2.NewAuditCategoryV2FromDataLoad(v2.DataLoad{}),
 			Entities: []any{
@@ -138,14 +138,14 @@ func TestCases() []TestCase {
 			Users: []audit3log.ContextualizedUser{
 				{
 					UID:       "test-user-id",
-					UserName:  toPointer("test-username"),
-					FirstName: toPointer("test-firstname"),
-					LastName:  toPointer("test-lastname"),
+					UserName:  new("test-username"),
+					FirstName: new("test-firstname"),
+					LastName:  new("test-lastname"),
 					Groups: []string{
 						"test-group-1",
 						"test-group-2",
 					},
-					Realm: toPointer("test-realm"),
+					Realm: new("test-realm"),
 				},
 			},
 			Origins: []string{
@@ -285,14 +285,14 @@ func TestCases() []TestCase {
 			Users: []audit3log.ContextualizedUser{
 				{
 					UID:       "test-user-id",
-					UserName:  toPointer("test-username"),
-					FirstName: toPointer("test-firstname"),
-					LastName:  toPointer("test-lastname"),
+					UserName:  new("test-username"),
+					FirstName: new("test-firstname"),
+					LastName:  new("test-lastname"),
 					Groups: []string{
 						"test-group-1",
 						"test-group-2",
 					},
-					Realm: toPointer("test-realm"),
+					Realm: new("test-realm"),
 				},
 			},
 			Origins: []string{
@@ -568,7 +568,7 @@ func TestCases() []TestCase {
 				// UID should be extracted as a user
 				RevokedTokens: []commonv2.Token{
 					{
-						UserId: toPointer("test-revoked-user"),
+						UserId: new("test-revoked-user"),
 					},
 				},
 			}),
@@ -699,7 +699,7 @@ func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logg
 				tc.Params()...,
 			)
 
-			gotAuditLog := map[string]interface{}{}
+			gotAuditLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotAuditLog)
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.TestCaseName, string(logEntry))
@@ -750,6 +750,7 @@ func assertEqualNillableStringPointer[T ~string](t *testing.T, want *T, gotMap m
 	}
 }
 
+//go:fix inline
 func toPointer[T any](in T) *T {
-	return &in
+	return new(in)
 }

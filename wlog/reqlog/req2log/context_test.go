@@ -71,7 +71,7 @@ func TestFromContext(t *testing.T) {
 		"status":       objmatcher.NewEqualsMatcher(json.Number("200")),
 		"unsafeParams": objmatcher.NewEqualsMatcher(map[string]any{"foo": "FOO", "bar": "BAR"}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 

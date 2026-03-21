@@ -24,8 +24,8 @@ func OriginsFromXForwardedForHeaderValue(forwardedFor string) []string {
 	// https://tools.ietf.org/html/rfc7239#section-6.2
 	const unknownIP = "unknown"
 	var origins []string
-	for _, forwardedForValue := range strings.Split(forwardedFor, ",") {
-		for _, ip := range strings.Split(forwardedForValue, ",") {
+	for forwardedForValue := range strings.SplitSeq(forwardedFor, ",") {
+		for ip := range strings.SplitSeq(forwardedForValue, ",") {
 			ip = strings.TrimSpace(ip)
 			if ip == "" || strings.ToLower(ip) == unknownIP {
 				continue

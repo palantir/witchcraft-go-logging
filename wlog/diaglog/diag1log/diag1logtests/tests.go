@@ -32,7 +32,7 @@ import (
 type TestCase struct {
 	Name         string
 	Diagnostic   logging.Diagnostic
-	UnsafeParams map[string]interface{}
+	UnsafeParams map[string]any
 	JSONMatcher  objmatcher.MapMatcher
 }
 
@@ -46,7 +46,7 @@ func TestCases() []TestCase {
 					"testKey": "test_value",
 				},
 			}),
-			UnsafeParams: map[string]interface{}{
+			UnsafeParams: map[string]any{
 				"Password": "HelloWorld!",
 			},
 			JSONMatcher: map[string]objmatcher.Matcher{
@@ -72,25 +72,25 @@ func TestCases() []TestCase {
 				Threads: []logging.ThreadInfoV1{
 					{
 						Id:   safeLongVal(13),
-						Name: stringVal("testName"),
+						Name: new("testName"),
 						StackTrace: []logging.StackFrameV1{
 							{
-								Address:   stringVal("address_val"),
-								Procedure: stringVal("procedure_val"),
-								File:      stringVal("file_val"),
-								Line:      intVal(99),
-								Params: map[string]interface{}{
+								Address:   new("address_val"),
+								Procedure: new("procedure_val"),
+								File:      new("file_val"),
+								Line:      new(99),
+								Params: map[string]any{
 									"stackFrameParam": 33,
 								},
 							},
 						},
-						Params: map[string]interface{}{
+						Params: map[string]any{
 							"threadParam": 77,
 						},
 					},
 				},
 			}),
-			UnsafeParams: map[string]interface{}{
+			UnsafeParams: map[string]any{
 				"Password": "HelloWorld!",
 			},
 			JSONMatcher: map[string]objmatcher.Matcher{
@@ -137,12 +137,14 @@ func safeLongVal(in int64) *safelong.SafeLong {
 	return &val
 }
 
+//go:fix inline
 func intVal(in int) *int {
-	return &in
+	return new(in)
 }
 
+//go:fix inline
 func stringVal(in string) *string {
-	return &in
+	return new(in)
 }
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) diag1log.Logger) {
@@ -160,7 +162,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) diag1log.Log
 				diag1log.UnsafeParams(tc.UnsafeParams),
 			)
 
-			gotEventLog := map[string]interface{}{}
+			gotEventLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotEventLog)
 

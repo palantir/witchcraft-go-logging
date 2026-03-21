@@ -51,13 +51,13 @@ func metricNameTypeParam(name, typ string) Param {
 	})
 }
 
-func Value(key string, value interface{}) Param {
-	return Values(map[string]interface{}{
+func Value(key string, value any) Param {
+	return Values(map[string]any{
 		key: value,
 	})
 }
 
-func Values(values map[string]interface{}) Param {
+func Values(values map[string]any) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		entry.AnyMapValue(ValuesKey, values)
 	})
@@ -99,13 +99,13 @@ func OrgID(orgID string) Param {
 	})
 }
 
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
+func UnsafeParam(key string, value any) Param {
+	return UnsafeParams(map[string]any{
 		key: value,
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
+func UnsafeParams(unsafe map[string]any) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
 	})

@@ -41,13 +41,13 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 	f(entry)
 }
 
-func UnsafeParam(key string, value interface{}) Param {
-	return UnsafeParams(map[string]interface{}{
+func UnsafeParam(key string, value any) Param {
+	return UnsafeParams(map[string]any{
 		key: value,
 	})
 }
 
-func UnsafeParams(unsafe map[string]interface{}) Param {
+func UnsafeParams(unsafe map[string]any) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
 	})

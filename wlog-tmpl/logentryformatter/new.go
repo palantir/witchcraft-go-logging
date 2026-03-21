@@ -51,9 +51,9 @@ func NoSubstitution() Param {
 	})
 }
 
-func New(entryParser func([]byte, bool) (interface{}, error), tmplString string, params ...Param) (Formatter, error) {
+func New(entryParser func([]byte, bool) (any, error), tmplString string, params ...Param) (Formatter, error) {
 	tmpl := template.New("logFunc")
-	tmpl.Funcs(map[string]interface{}{
+	tmpl.Funcs(map[string]any{
 		"niceMap":    NiceMap,
 		"niceMapStr": niceMapStr,
 	})
@@ -75,7 +75,7 @@ func New(entryParser func([]byte, bool) (interface{}, error), tmplString string,
 	return f, nil
 }
 
-func NiceMap(params map[string]interface{}) string {
+func NiceMap(params map[string]any) string {
 	if len(params) == 0 {
 		return ""
 	}
@@ -99,14 +99,14 @@ func NiceMap(params map[string]interface{}) string {
 }
 
 func niceMapStr(params map[string]string) string {
-	mapIface := make(map[string]interface{}, len(params))
+	mapIface := make(map[string]any, len(params))
 	for k, v := range params {
 		mapIface[k] = v
 	}
 	return NiceMap(mapIface)
 }
 
-func FormatValue(val interface{}) string {
+func FormatValue(val any) string {
 	switch v := val.(type) {
 	case float32:
 		return strconv.FormatFloat(float64(v), 'f', -1, 32)

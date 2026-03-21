@@ -92,10 +92,10 @@ type Formatter interface {
 	TemplateObjectDescription() string
 }
 
-type ColorizerFunc func(interface{}) *color.Color
+type ColorizerFunc func(any) *color.Color
 
 type entryFormatter struct {
-	entryParser    func(lineJSON []byte, substitute bool) (interface{}, error)
+	entryParser    func(lineJSON []byte, substitute bool) (any, error)
 	colorizer      ColorizerFunc
 	tmpl           *template.Template
 	objDesc        string

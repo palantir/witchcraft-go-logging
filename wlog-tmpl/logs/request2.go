@@ -43,7 +43,7 @@ func (r *req2LogTyper) NewFormatter(tmpl string, params ...logentryformatter.Par
 	return logentryformatter.New(r.parseLogEntry, tmpl, newParams...)
 }
 
-func (r *req2LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
+func (r *req2LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (any, error) {
 	var res logging.RequestLogV2
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err

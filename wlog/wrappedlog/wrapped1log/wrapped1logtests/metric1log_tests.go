@@ -32,12 +32,12 @@ type Metric1TestCase struct {
 	MetricName   string
 	MetricType   string
 	Tags         map[string]string
-	Values       map[string]interface{}
+	Values       map[string]any
 	UID          string
 	SID          string
 	TokenID      string
 	OrgID        string
-	UnsafeParams map[string]interface{}
+	UnsafeParams map[string]any
 	JSONMatcher  objmatcher.MapMatcher
 }
 
@@ -61,7 +61,7 @@ func Metric1TestCases(entityName, entityVersion string) []Metric1TestCase {
 			MetricType: "histogram",
 			UID:        "user-1",
 			SID:        "session-1",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"max":    1400,
 				"mean":   70,
 				"stddev": 20,
@@ -75,7 +75,7 @@ func Metric1TestCases(entityName, entityVersion string) []Metric1TestCase {
 			},
 			TokenID: "X-Y-Z",
 			OrgID:   "org-1",
-			UnsafeParams: map[string]interface{}{
+			UnsafeParams: map[string]any{
 				"Password": "HelloWorld!",
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -131,7 +131,7 @@ func metric1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, l
 
 			logger.Metric(tc.MetricName, tc.MetricType, tc.Params()...)
 
-			gotMetricLog := map[string]interface{}{}
+			gotMetricLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotMetricLog)
 			require.NoError(t, err, "Case %d: %s\nMetric log line is not a valid map: %v", i, tc.Name, string(logEntry))
@@ -148,9 +148,9 @@ func metric1LogValueIsntOverwrittenByValues(t *testing.T, entityName, entityVers
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
-		logger.Metric("metric", "metric-type", metric1log.Value("key", "value"), metric1log.Values(map[string]interface{}{"keys": "values"}))
+		logger.Metric("metric", "metric-type", metric1log.Value("key", "value"), metric1log.Values(map[string]any{"keys": "values"}))
 
-		gotMetricLog := map[string]interface{}{}
+		gotMetricLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))
@@ -182,10 +182,10 @@ func extraValuesDoNotAppear(t *testing.T, entityName, entityVersion string, logg
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
-		reusedParams := metric1log.Values(map[string]interface{}{"keys": "values"})
+		reusedParams := metric1log.Values(map[string]any{"keys": "values"})
 		logger.Metric("metric", "metric-type", reusedParams, metric1log.Value("key", "value"))
 
-		gotMetricLog := map[string]interface{}{}
+		gotMetricLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))
@@ -211,7 +211,7 @@ func extraValuesDoNotAppear(t *testing.T, entityName, entityVersion string, logg
 		buf.Reset()
 		logger.Metric("metric", "metric-type", reusedParams)
 
-		gotMetricLog = map[string]interface{}{}
+		gotMetricLog = map[string]any{}
 		logEntry = buf.Bytes()
 		err = safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))
@@ -244,7 +244,7 @@ func tagIsntOverwrittenByTags(t *testing.T, entityName, entityVersion string, lo
 
 		logger.Metric("metric", "metric-type", metric1log.Tag("key", "value"), metric1log.Tags(map[string]string{"keys": "values"}))
 
-		gotMetricLog := map[string]interface{}{}
+		gotMetricLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))
@@ -279,7 +279,7 @@ func extraTagsDoNotAppear(t *testing.T, entityName, entityVersion string, logger
 		reusedParams := metric1log.Tags(map[string]string{"keys": "values"})
 		logger.Metric("metric", "metric-type", reusedParams, metric1log.Tag("key", "value"))
 
-		gotMetricLog := map[string]interface{}{}
+		gotMetricLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))
@@ -305,7 +305,7 @@ func extraTagsDoNotAppear(t *testing.T, entityName, entityVersion string, logger
 		buf.Reset()
 		logger.Metric("metric", "metric-type", reusedParams)
 
-		gotMetricLog = map[string]interface{}{}
+		gotMetricLog = map[string]any{}
 		logEntry = buf.Bytes()
 		err = safejson.Unmarshal(logEntry, &gotMetricLog)
 		require.NoError(t, err, "Metric log line is not a valid map: %v", string(logEntry))

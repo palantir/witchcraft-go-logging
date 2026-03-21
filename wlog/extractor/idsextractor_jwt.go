@@ -74,7 +74,7 @@ func idsFromJWT(jwtContent string) (uid string, sid string, tokenID string, orgI
 		return "", "", "", "", fmt.Errorf("failed to decode JWT content %q as Base64 URL-encoded string: %v", parts[1], err)
 	}
 
-	var jsonMap map[string]interface{}
+	var jsonMap map[string]any
 	if err := json.Unmarshal(bytes, &jsonMap); err != nil {
 		return "", "", "", "", fmt.Errorf("failed to decode JWT content %s as JSON: %v", string(bytes), err)
 	}
@@ -91,7 +91,7 @@ func idsFromJWT(jwtContent string) (uid string, sid string, tokenID string, orgI
 	return uid, sid, tokenID, orgID, nil
 }
 
-func getMapUUIDStringVal(m map[string]interface{}, key string) string {
+func getMapUUIDStringVal(m map[string]any, key string) string {
 	val, ok := m[key]
 	if !ok {
 		return ""

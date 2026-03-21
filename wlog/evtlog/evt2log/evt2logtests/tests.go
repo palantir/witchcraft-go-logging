@@ -29,12 +29,12 @@ import (
 type TestCase struct {
 	Name         string
 	EventName    string
-	Values       map[string]interface{}
+	Values       map[string]any
 	UID          string
 	SID          string
 	TokenID      string
 	OrgID        string
-	UnsafeParams map[string]interface{}
+	UnsafeParams map[string]any
 	JSONMatcher  objmatcher.MapMatcher
 }
 
@@ -57,12 +57,12 @@ func TestCases() []TestCase {
 			EventName: "com.palantir.foundry.build.buildstarted",
 			UID:       "user-1",
 			SID:       "session-1",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"dataset": "my-cool-dataset",
 			},
 			TokenID: "X-Y-Z",
 			OrgID:   "org-1",
-			UnsafeParams: map[string]interface{}{
+			UnsafeParams: map[string]any{
 				"Password": "HelloWorld!",
 			},
 			JSONMatcher: map[string]objmatcher.Matcher{
@@ -101,7 +101,7 @@ func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer) evt2log.Logg
 
 			logger.Event(tc.EventName, tc.Params()...)
 
-			gotEventLog := map[string]interface{}{}
+			gotEventLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotEventLog)
 			require.NoError(t, err, "Case %d: %s\nEvent log line is not a valid map: %v", i, tc.Name, string(logEntry))
@@ -118,9 +118,9 @@ func valueIsntOverwrittenByValues(t *testing.T, loggerProvider func(w io.Writer)
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
-		logger.Event("event", evt2log.Value("key", "value"), evt2log.Values(map[string]interface{}{"keys": "values"}))
+		logger.Event("event", evt2log.Value("key", "value"), evt2log.Values(map[string]any{"keys": "values"}))
 
-		gotEventLog := map[string]interface{}{}
+		gotEventLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotEventLog)
 		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))
@@ -144,9 +144,9 @@ func extraValuesIndependentAcrossCalls(t *testing.T, loggerProvider func(w io.Wr
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf)
 
-		reusedParams := evt2log.Values(map[string]interface{}{"keys": "values"})
+		reusedParams := evt2log.Values(map[string]any{"keys": "values"})
 		logger.Event("event", reusedParams, evt2log.Value("key", "value"))
-		gotEventLog := map[string]interface{}{}
+		gotEventLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotEventLog)
 		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))
@@ -164,7 +164,7 @@ func extraValuesIndependentAcrossCalls(t *testing.T, loggerProvider func(w io.Wr
 		buf.Reset()
 		logger.Event("event", reusedParams)
 
-		gotEventLog = map[string]interface{}{}
+		gotEventLog = map[string]any{}
 		logEntry = buf.Bytes()
 		err = safejson.Unmarshal(logEntry, &gotEventLog)
 		require.NoError(t, err, "Event log line is not a valid map: %v", string(logEntry))

@@ -23,7 +23,7 @@ import (
 )
 
 // Entry is a single JSON entry in the log.
-type Entry map[string]interface{}
+type Entry map[string]any
 
 // EntriesFromFile returns a slice of all of the log entries in the given file. Assumes that each line in the file
 // is a JSON object that represents a log entry.

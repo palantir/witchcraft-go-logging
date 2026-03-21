@@ -28,7 +28,7 @@ type svc1zapCore struct {
 	log                svc1log.Logger
 	mutator            func(entry zapcore.Entry) (zapcore.Entry, bool)
 	originFromCallLine bool
-	newParamFunc       func(key string, value interface{}) svc1log.Param
+	newParamFunc       func(key string, value any) svc1log.Param
 }
 
 // New returns a zap logger that delegates to the provided svc1log logger.
@@ -61,7 +61,7 @@ func WithOriginFromZapCaller() Option {
 // WithNewParamFunc provides a function for constructing svc1log.Param values from zap fields.
 // Use this option to control parameter safety. By default, all fields are converted to unsafe params.
 // If newParam returns nil, the field is skipped.
-func WithNewParamFunc(newParam func(key string, value interface{}) svc1log.Param) Option {
+func WithNewParamFunc(newParam func(key string, value any) svc1log.Param) Option {
 	return func(core *svc1zapCore) { core.newParamFunc = newParam }
 }
 
@@ -155,7 +155,7 @@ func formatMessage(entry zapcore.Entry) string {
 	return sb.String()
 }
 
-func fieldsToMap(fields []zapcore.Field) map[string]interface{} {
+func fieldsToMap(fields []zapcore.Field) map[string]any {
 	params := zapcore.NewMapObjectEncoder()
 	for _, field := range fields {
 		if field.Key == "token" {

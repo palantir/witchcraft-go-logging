@@ -83,8 +83,8 @@ func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, 
 // is added to unsafeParams otherwise. If a single key has multiple values, the value for that key in the returned field
 // will be a slice that contains all of the values for the key.
 func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams wlog.Param, unsafeParams wlog.Param) {
-	safeMap := make(map[string]interface{})
-	unsafeMap := make(map[string]interface{})
+	safeMap := make(map[string]any)
+	unsafeMap := make(map[string]any)
 
 	for pathParamKey, pathParamVal := range r.RouteInfo.PathParams {
 		processKeyValPair(pathParamKey, pathParamVal, safeMap, unsafeMap, pathParamPerms, r.PathParamPerms)
@@ -108,7 +108,7 @@ func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamP
 		})
 }
 
-func processKeyValPair(k, v string, safeDst, unsafeDst map[string]interface{}, basePerms, reqPerms ParamPerms) {
+func processKeyValPair(k, v string, safeDst, unsafeDst map[string]any, basePerms, reqPerms ParamPerms) {
 	// lowercase keys are used for lookups. Convert once here to avoid multiple unnecessary allocations.
 	// Note that, if a key is added to an output map, the original unconverted key should be added.
 	lowerK := strings.ToLower(k)
@@ -141,20 +141,20 @@ func processKeyValPair(k, v string, safeDst, unsafeDst map[string]interface{}, b
 	addAsMultiMap(k, v, unsafeDst)
 }
 
-func addAsMultiMap(k, v string, m map[string]interface{}) {
+func addAsMultiMap(k, v string, m map[string]any) {
 	currVal, exists := m[k]
 	if !exists {
 		m[k] = v
 		return
 	}
 
-	var newVal interface{}
+	var newVal any
 	// value for key already exists in destination. If destination is a slice, append to it.
 	// Otherwise, create a new slice, add existing value to it and append new value.
 	switch t := currVal.(type) {
 	default:
-		newVal = append([]interface{}{t}, v)
-	case []interface{}:
+		newVal = append([]any{t}, v)
+	case []any:
 		newVal = append(t, v)
 	}
 	m[k] = newVal
