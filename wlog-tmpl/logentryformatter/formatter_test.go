@@ -106,14 +106,14 @@ func TestFormatLogLine(t *testing.T) {
 }
 
 var testMyTypeFormatter = map[logentryformatter.LogType]logentryformatter.Formatter{
-	logentryformatter.LogType("myType"): mustNew(func(lineJSON []byte, substitute bool) (interface{}, error) {
-		var m map[string]interface{}
+	logentryformatter.LogType("myType"): mustNew(func(lineJSON []byte, substitute bool) (any, error) {
+		var m map[string]any
 		err := json.Unmarshal(lineJSON, &m)
 		return m, err
 	}, `Output of key: {{.key}}`),
 }
 
-func mustNew(entryParser func([]byte, bool) (interface{}, error), tmplString string) logentryformatter.Formatter {
+func mustNew(entryParser func([]byte, bool) (any, error), tmplString string) logentryformatter.Formatter {
 	f, err := logentryformatter.New(entryParser, tmplString)
 	if err != nil {
 		panic(err)

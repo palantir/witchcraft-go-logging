@@ -49,7 +49,7 @@ func TestFromContext(t *testing.T) {
 		"metricName": objmatcher.NewEqualsMatcher("com.palantir.metric"),
 		"metricType": objmatcher.NewEqualsMatcher("gauge"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -81,7 +81,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 		"tokenId":    objmatcher.NewEqualsMatcher("test-TokenID"),
 		"orgId":      objmatcher.NewEqualsMatcher("test-OrgID"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 

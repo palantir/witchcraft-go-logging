@@ -92,7 +92,7 @@ func TestCategory(t *testing.T) {
 			},
 		}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -123,7 +123,7 @@ func TestMultiCategory(t *testing.T) {
 	}))
 
 	containerSearchCategoryParams := Category(v2.NewAuditCategoryV2FromContainerSearch(v2.ContainerSearch{
-		ContainerSearchQuery: ptr("test-query"),
+		ContainerSearchQuery: new("test-query"),
 		ContainerSearchResults: []commonv2.SystemResource{
 			commonv2.NewSystemResourceFromEntity(commonv2.EntityId{
 				Environment: "test-env",
@@ -191,10 +191,6 @@ func TestMultiCategory(t *testing.T) {
 			},
 		}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
-}
-
-func ptr[T any](v T) *T {
-	return &v
 }

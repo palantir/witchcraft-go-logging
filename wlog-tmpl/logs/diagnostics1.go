@@ -49,8 +49,8 @@ func (r *diagnostics1LogTyper) NewFormatter(tmpl string, params ...logentryforma
 type humanReadableDiagnostic struct {
 	SerializedContent string
 	Time              datetime.DateTime
-	UnsafeParams      map[string]interface{}
-	Params            map[string]interface{}
+	UnsafeParams      map[string]any
+	Params            map[string]any
 	ContentOnNewLine  bool
 }
 
@@ -72,7 +72,7 @@ func (visitor *humanReadableDiagnostic) VisitUnknown(typeName string) error {
 	return nil
 }
 
-func (r *diagnostics1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
+func (r *diagnostics1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (any, error) {
 	var res logging.DiagnosticLogV1
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (r *diagnostics1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (
 	return diagnostic, nil
 }
 
-func formatThreadDumps(v logging.ThreadDumpV1, unsafeParams map[string]interface{}) string {
+func formatThreadDumps(v logging.ThreadDumpV1, unsafeParams map[string]any) string {
 	var sb strings.Builder
 	for _, thread := range v.Threads {
 		_, _ = sb.WriteString(fmt.Sprintf("%q tid=%d %s\n", extractThreadName(thread.Name, unsafeParams), *thread.Id, logentryformatter.NiceMap(thread.Params)))
@@ -108,7 +108,7 @@ func formatThreadDumps(v logging.ThreadDumpV1, unsafeParams map[string]interface
 	return sb.String()
 }
 
-func formatStackFrameParameters(sb *strings.Builder, params map[string]interface{}) {
+func formatStackFrameParameters(sb *strings.Builder, params map[string]any) {
 	if len(params) == 0 {
 		return
 	}
@@ -122,7 +122,7 @@ func formatStackFrameParameters(sb *strings.Builder, params map[string]interface
 	}
 }
 
-func extractThreadName(threadID *string, unsafeParams map[string]interface{}) string {
+func extractThreadName(threadID *string, unsafeParams map[string]any) string {
 	if threadID == nil {
 		return ""
 	}

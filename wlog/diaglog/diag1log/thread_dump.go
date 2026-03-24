@@ -80,12 +80,12 @@ func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
 		return logging.ThreadInfoV1{}
 	}
 
-	info := logging.ThreadInfoV1{Params: make(map[string]interface{})}
+	info := logging.ThreadInfoV1{Params: make(map[string]any)}
 
 	// The first line is of the form 'goroutine 14 [select]:'
 	titleLine := string(lines[0])
 	if matches := titleLinePattern.FindStringSubmatch(titleLine); len(matches) >= 4 {
-		info.Name = stringPtr(matches[1])
+		info.Name = new(matches[1])
 		info.Id = stringToOptionalSafeLong(matches[2])
 		info.Params["status"] = matches[3]
 	}
@@ -97,7 +97,7 @@ func unmarshalThreadDump(goroutine []byte) logging.ThreadInfoV1 {
 		funcLine := stackLines[i]
 		fileLine := stackLines[i+1]
 
-		frame := logging.StackFrameV1{Params: make(map[string]interface{})}
+		frame := logging.StackFrameV1{Params: make(map[string]any)}
 
 		unmarshalFuncLine(funcLine, &frame)
 		unmarshalFileLine(fileLine, &frame)
@@ -146,10 +146,6 @@ func unmarshalFileLine(fileLine []byte, frame *logging.StackFrameV1) {
 			frame.Line = &lineNum
 		}
 	}
-}
-
-func stringPtr(s string) *string {
-	return &s
 }
 
 // stringToOptionalSafeLong returns nil on errors

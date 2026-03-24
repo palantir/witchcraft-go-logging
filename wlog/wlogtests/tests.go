@@ -544,7 +544,7 @@ func runEntryTestCases(t *testing.T, suiteName string, testCases []EntryTestCase
 
 				logger.Log(param)
 
-				gotLog := map[string]interface{}{}
+				gotLog := map[string]any{}
 				logEntry := buf.Bytes()
 				err := safejson.Unmarshal(logEntry, &gotLog)
 				require.NoError(t, err, "Log line is not a valid map: %v", string(logEntry))

@@ -98,18 +98,18 @@ func Origin(origin string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit2Origin(origin))
 }
 
-func RequestParam(key string, value interface{}) Param {
+func RequestParam(key string, value any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit2RequestParam(key, value))
 }
 
-func RequestParams(requestParams map[string]interface{}) Param {
+func RequestParams(requestParams map[string]any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit2RequestParams(requestParams))
 }
 
-func ResultParam(key string, value interface{}) Param {
+func ResultParam(key string, value any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit2ResultParam(key, value))
 }
 
-func ResultParams(resultParams map[string]interface{}) Param {
+func ResultParams(resultParams map[string]any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit2ResultParams(resultParams))
 }

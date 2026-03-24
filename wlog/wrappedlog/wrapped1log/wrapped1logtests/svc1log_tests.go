@@ -45,23 +45,23 @@ type testStruct struct {
 }
 
 type testParamStorerObject struct {
-	safeParams   map[string]interface{}
-	unsafeParams map[string]interface{}
+	safeParams   map[string]any
+	unsafeParams map[string]any
 }
 
-func (t testParamStorerObject) SafeParams() map[string]interface{} {
+func (t testParamStorerObject) SafeParams() map[string]any {
 	return t.safeParams
 }
 
-func (t testParamStorerObject) UnsafeParams() map[string]interface{} {
+func (t testParamStorerObject) UnsafeParams() map[string]any {
 	return t.unsafeParams
 }
 
 type testError struct {
 	message      string
 	stacktrace   string
-	safeParams   map[string]interface{}
-	unsafeParams map[string]interface{}
+	safeParams   map[string]any
+	unsafeParams map[string]any
 }
 
 func (t testError) Error() string {
@@ -74,11 +74,11 @@ func (t testError) Format(state fmt.State, c rune) {
 	}
 }
 
-func (t testError) SafeParams() map[string]interface{} {
+func (t testError) SafeParams() map[string]any {
 	return t.safeParams
 }
 
-func (t testError) UnsafeParams() map[string]interface{} {
+func (t testError) UnsafeParams() map[string]any {
 	return t.unsafeParams
 }
 
@@ -99,11 +99,11 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 				svc1log.UID("user-1"),
 				svc1log.SID("session-1"),
 				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+				svc1log.SafeParams(map[string]any{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log.UnsafeParams(map[string]any{
 					"Password": "HelloWorld!",
 				}),
 				svc1log.Tags(map[string]string{
@@ -147,25 +147,25 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 				svc1log.UID("user-1"),
 				svc1log.SID("session-1"),
 				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+				svc1log.SafeParams(map[string]any{
 					"structKey": testStruct{
 						NumVal:            13,
 						ExportedStringVal: "exportedFoo",
 						privateStrVal:     "privateFoo",
 					},
-					"mapKey": map[string]interface{}{
+					"mapKey": map[string]any{
 						"mapKey1": "map-val-1",
 					},
 					"sliceKey":  []string{"one", "two", "three"},
 					"stringKey": "stringVal",
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log.UnsafeParams(map[string]any{
 					"structKey": testStruct{
 						NumVal:            13,
 						ExportedStringVal: "exportedFoo",
 						privateStrVal:     "privateFoo",
 					},
-					"mapKey": map[string]interface{}{
+					"mapKey": map[string]any{
 						"mapKey1": "map-val-1",
 					},
 					"sliceKey":  []string{"one", "two", "three"},
@@ -184,7 +184,7 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 						"type":    objmatcher.NewEqualsMatcher("service.1"),
 						"message": objmatcher.NewEqualsMatcher("this is a test"),
 						"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"structKey": objmatcher.NewEqualsMatcher(map[string]interface{}{
+							"structKey": objmatcher.NewEqualsMatcher(map[string]any{
 								"num-val":           json.Number("13"),
 								"ExportedStringVal": "exportedFoo",
 								// note: "privateStrVal" not expected to be included because it is not an exported field
@@ -192,14 +192,14 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 							"mapKey": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 								"mapKey1": objmatcher.NewEqualsMatcher("map-val-1"),
 							}),
-							"sliceKey":  objmatcher.NewEqualsMatcher([]interface{}{"one", "two", "three"}),
+							"sliceKey":  objmatcher.NewEqualsMatcher([]any{"one", "two", "three"}),
 							"stringKey": objmatcher.NewEqualsMatcher("stringVal"),
 						}),
 						"uid":     objmatcher.NewEqualsMatcher("user-1"),
 						"sid":     objmatcher.NewEqualsMatcher("session-1"),
 						"traceId": objmatcher.NewEqualsMatcher("X-Y-Z"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"structKey": objmatcher.NewEqualsMatcher(map[string]interface{}{
+							"structKey": objmatcher.NewEqualsMatcher(map[string]any{
 								"num-val":           json.Number("13"),
 								"ExportedStringVal": "exportedFoo",
 								// note: "privateStrVal" not expected to be included because it is not an exported field
@@ -207,7 +207,7 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 							"mapKey": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 								"mapKey1": objmatcher.NewEqualsMatcher("map-val-1"),
 							}),
-							"sliceKey":  objmatcher.NewEqualsMatcher([]interface{}{"one", "two", "three"}),
+							"sliceKey":  objmatcher.NewEqualsMatcher([]any{"one", "two", "three"}),
 							"stringKey": objmatcher.NewEqualsMatcher("stringVal"),
 						}),
 					}),
@@ -219,11 +219,11 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 			Message: "this is a test",
 			Origin:  "github.com/palantir/witchcraft-go-logging",
 			LogParams: []svc1log.Param{
-				svc1log.SafeParams(map[string]interface{}{
+				svc1log.SafeParams(map[string]any{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log.UnsafeParams(map[string]any{
 					"Password": "HelloWorld!",
 				}),
 			},
@@ -281,10 +281,10 @@ func Svc1TestCases(entityName, entityVersion string) []Svc1TestCase {
 						message: "some error message",
 						stacktrace: `Failed to open file
 something/something:123`,
-						safeParams: map[string]interface{}{
+						safeParams: map[string]any{
 							"safeKey": "safeVal",
 						},
-						unsafeParams: map[string]interface{}{
+						unsafeParams: map[string]any{
 							"unsafeKey": "unsafeVal",
 						},
 					},
@@ -319,10 +319,10 @@ something/something:123`,
 			Origin:  "github.com/palantir/witchcraft-go-logging",
 			LogParams: []svc1log.Param{
 				svc1log.Params(testParamStorerObject{
-					safeParams: map[string]interface{}{
+					safeParams: map[string]any{
 						"safeObjectParamKey": "safeObjectParamValue",
 					},
-					unsafeParams: map[string]interface{}{
+					unsafeParams: map[string]any{
 						"unsafeObjectParamKey": "unsafeObjectParamValue",
 					},
 				}),
@@ -354,7 +354,7 @@ something/something:123`,
 			Message: "msg",
 			LogParams: []svc1log.Param{
 				svc1log.SafeParam("param", "value"),
-				svc1log.SafeParams(map[string]interface{}{"params": "values"}),
+				svc1log.SafeParams(map[string]any{"params": "values"}),
 			},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
@@ -384,11 +384,11 @@ something/something:123`,
 				svc1log.UID("user-1"),
 				svc1log.SID("session-1"),
 				svc1log.TraceID("X-Y-Z"),
-				svc1log.SafeParams(map[string]interface{}{
+				svc1log.SafeParams(map[string]any{
 					"key": "value",
 					"int": 10,
 				}),
-				svc1log.UnsafeParams(map[string]interface{}{
+				svc1log.UnsafeParams(map[string]any{
 					"Password": "HelloWorld!",
 				}),
 				svc1log.Tags(map[string]string{
@@ -437,7 +437,7 @@ func svc1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 
 			logger.Info(tc.Message, tc.LogParams...)
 
-			gotServiceLog := map[string]interface{}{}
+			gotServiceLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotServiceLog)
 			require.NoError(t, err, "Case %d: %s\nService log line is not a valid map: %v", i, tc.Name, string(logEntry))
@@ -467,9 +467,9 @@ func paramIsntOverwrittenByParams(t *testing.T, entityName, entityVersion string
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.InfoLevel, "")
 
-		logger.Info("msg", svc1log.SafeParam("param", "value"), svc1log.SafeParams(map[string]interface{}{"params": "values"}))
+		logger.Info("msg", svc1log.SafeParam("param", "value"), svc1log.SafeParams(map[string]any{"params": "values"}))
 
-		gotServiceLog := map[string]interface{}{}
+		gotServiceLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
@@ -502,9 +502,9 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName, entityVersion string, 
 		var buf bytes.Buffer
 		logger := loggerProvider(&buf, wlog.DebugLevel, "")
 
-		reusedParams := svc1log.SafeParams(map[string]interface{}{"params": "values"})
+		reusedParams := svc1log.SafeParams(map[string]any{"params": "values"})
 		logger.Info("msg", reusedParams, svc1log.SafeParam("param", "value"))
-		gotServiceLog := map[string]interface{}{}
+		gotServiceLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
@@ -530,7 +530,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName, entityVersion string, 
 		buf.Reset()
 		logger.Info("msg", reusedParams)
 
-		gotServiceLog = map[string]interface{}{}
+		gotServiceLog = map[string]any{}
 		logEntry = buf.Bytes()
 		err = safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
@@ -574,7 +574,7 @@ func jsonLoggerUpdateTest(t *testing.T, entityName, entityVersion string, logger
 		logger.Info(currCase.Message, currCase.LogParams...)
 
 		// output should exist and match
-		gotServiceLog := map[string]interface{}{}
+		gotServiceLog := map[string]any{}
 		logEntry := buf.Bytes()
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))

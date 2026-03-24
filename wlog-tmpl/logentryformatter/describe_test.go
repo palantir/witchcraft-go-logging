@@ -25,7 +25,7 @@ import (
 func TestDescribeObject(t *testing.T) {
 	for i, currCase := range []struct {
 		name string
-		obj  interface{}
+		obj  any
 		want string
 	}{
 		{

@@ -193,7 +193,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"protocol": objmatcher.NewEqualsMatcher("HTTP/1.1"),
 						"path":     objmatcher.NewEqualsMatcher("/some/path/here"),
 						"params": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"fooQueryVarName": objmatcher.NewEqualsMatcher([]interface{}{"fooQueryVarVal", "extra-val-foo"}),
+							"fooQueryVarName": objmatcher.NewEqualsMatcher([]any{"fooQueryVarVal", "extra-val-foo"}),
 							"fooqueryvarname": objmatcher.NewEqualsMatcher("case-sensitive-so-val-alone"),
 						}),
 						"status":       objmatcher.NewEqualsMatcher(json.Number("200")),
@@ -206,7 +206,7 @@ func Req2TestCases(entityName, entityVersion string) []Req2TestCase {
 						"orgId":        objmatcher.NewEqualsMatcher("0998e573-31d7-4999-8bf9-0bc5f4592db9"),
 						"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 							"Fooheaderparamname": objmatcher.NewEqualsMatcher("fooHeaderParamVal"),
-							"barQueryVarName":    objmatcher.NewEqualsMatcher([]interface{}{"barQueryVarVal", "extra-val-bar"}),
+							"barQueryVarName":    objmatcher.NewEqualsMatcher([]any{"barQueryVarVal", "extra-val-bar"}),
 						}),
 					}),
 				}),
@@ -282,7 +282,7 @@ func req2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "request log should have exactly 1 entry")
 
-			err = tc.JSONMatcher.Matches(map[string]interface{}(entries[0]))
+			err = tc.JSONMatcher.Matches(map[string]any(entries[0]))
 			assert.NoError(t, err, "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}

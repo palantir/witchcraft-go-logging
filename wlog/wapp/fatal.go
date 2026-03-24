@@ -66,7 +66,7 @@ func RunWithRecoveryLoggingWithError(ctx context.Context, runFn func(ctx context
 	return runFn(ctx)
 }
 
-func handleRecovered(ctx context.Context, r interface{}, stack []byte) (retErr error) {
+func handleRecovered(ctx context.Context, r any, stack []byte) (retErr error) {
 	// Process stack through diag1log to remove unsafe arguments from function calls
 	stacktrace := diag1log.ThreadDumpV1FromGoroutines(stack)
 	if len(stacktrace.Threads) > 0 && len(stacktrace.Threads[0].StackTrace) > 2 {

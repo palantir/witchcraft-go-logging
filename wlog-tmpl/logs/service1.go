@@ -47,7 +47,7 @@ func (r *svc1LogTyper) NewFormatter(tmpl string, params ...logentryformatter.Par
 	return logentryformatter.New(r.parseLogEntry, tmpl, newParams...)
 }
 
-func (r *svc1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (interface{}, error) {
+func (r *svc1LogTyper) parseLogEntry(lineJSON []byte, substitute bool) (any, error) {
 	var res logging.ServiceLogV1
 	if err := safejson.Unmarshal(lineJSON, &res); err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ var (
 	}
 )
 
-func ServiceLogLevelColorer(in interface{}) *color.Color {
+func ServiceLogLevelColorer(in any) *color.Color {
 	sle, ok := in.(logging.ServiceLogV1)
 	if !ok {
 		return nil

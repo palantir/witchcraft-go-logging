@@ -142,7 +142,7 @@ func SourceOrigin(sourceOrigin string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3SourceOrigin(sourceOrigin))
 }
 
-func RequestField(key string, value interface{}) Param {
+func RequestField(key string, value any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3RequestField(key, value))
 }
 
@@ -150,7 +150,7 @@ func RequestFields(requestFields map[string]any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3RequestFields(requestFields))
 }
 
-func ResultField(key string, value interface{}) Param {
+func ResultField(key string, value any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3ResultField(key, value))
 }
 

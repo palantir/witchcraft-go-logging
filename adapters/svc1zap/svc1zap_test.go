@@ -33,7 +33,7 @@ import (
 
 func TestSvc1ZapWrapper(t *testing.T) {
 
-	prefixParamFunc := func(key string, value interface{}) svc1log.Param {
+	prefixParamFunc := func(key string, value any) svc1log.Param {
 		if strings.HasPrefix(key, "safe") {
 			return svc1log.SafeParam(key, value)
 		}
@@ -145,7 +145,7 @@ func TestSvc1ZapWrapper(t *testing.T) {
 }
 
 func assertLogLine(t *testing.T, logLine []byte, matcher objmatcher.MapMatcher) {
-	logEntry := map[string]interface{}{}
+	logEntry := map[string]any{}
 	err := json.Unmarshal(logLine, &logEntry)
 	assert.NoError(t, err)
 	assert.NoError(t, matcher.Matches(logEntry))

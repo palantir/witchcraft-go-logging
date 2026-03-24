@@ -255,7 +255,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				wlog.SetDefaultLoggerProvider(originalProvider)
 			}()
 
-			f, err := ioutil.TempFile(tmpDir, "")
+			f, err := os.CreateTemp(tmpDir, "")
 			require.NoError(t, err)
 			defer func() {
 				_ = f.Close()
@@ -272,7 +272,7 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 			err = f.Close()
 			require.NoError(t, err)
 
-			bytes, err := ioutil.ReadFile(f.Name())
+			bytes, err := os.ReadFile(f.Name())
 			require.NoError(t, err)
 
 			// verify logger output

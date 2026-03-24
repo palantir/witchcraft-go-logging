@@ -79,7 +79,7 @@ func (e *zeroLogEntry) IntValue(k string, v int32) {
 	zeroLogEntrySetValue(e, e.evt.Int32, k, v)
 }
 
-func (e *zeroLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (e *zeroLogEntry) ObjectValue(k string, v any, marshalerType reflect.Type) {
 	zeroLogEntrySetValue(e, e.evt.Interface, k, v)
 }
 
@@ -88,7 +88,7 @@ func (e *zeroLogEntry) StringMapValue(key string, values map[string]string) {
 	e.mutableValueEntries.StringMapValue(key, values)
 }
 
-func (e *zeroLogEntry) AnyMapValue(key string, values map[string]interface{}) {
+func (e *zeroLogEntry) AnyMapValue(key string, values map[string]any) {
 	delete(e.entryOps, key)
 	e.mutableValueEntries.AnyMapValue(key, values)
 }

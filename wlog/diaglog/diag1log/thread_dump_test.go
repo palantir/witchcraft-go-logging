@@ -47,23 +47,23 @@ created by net/http.(*Transport).dialConn(...)
 			Expected: logging.ThreadDumpV1{
 				Threads: []logging.ThreadInfoV1{
 					{
-						Name:   strPtr("goroutine 14 [select]"),
+						Name:   new("goroutine 14 [select]"),
 						Id:     safelongPtr(14),
-						Params: map[string]interface{}{"status": "select"},
+						Params: map[string]any{"status": "select"},
 						StackTrace: []logging.StackFrameV1{
 							{
-								Address:   strPtr("0x113"),
-								Procedure: strPtr("net/http.(*persistConn).writeLoop"),
-								File:      strPtr("net/http/transport.go"),
-								Line:      intPtr(1885),
-								Params:    map[string]interface{}{},
+								Address:   new("0x113"),
+								Procedure: new("net/http.(*persistConn).writeLoop"),
+								File:      new("net/http/transport.go"),
+								Line:      new(1885),
+								Params:    map[string]any{},
 							},
 							{
-								Address:   strPtr("0x966"),
-								Procedure: strPtr("net/http.(*Transport).dialConn"),
-								File:      strPtr("net/http/transport.go"),
-								Line:      intPtr(1339),
-								Params: map[string]interface{}{
+								Address:   new("0x966"),
+								Procedure: new("net/http.(*Transport).dialConn"),
+								File:      new("net/http/transport.go"),
+								Line:      new(1339),
+								Params: map[string]any{
 									"goroutineCreator": true,
 								},
 							},
@@ -88,23 +88,23 @@ created by net/http.(*Transport).dialConn(...)
 			Expected: logging.ThreadDumpV1{
 				Threads: []logging.ThreadInfoV1{
 					{
-						Name:   strPtr("goroutine 14 [select]"),
+						Name:   new("goroutine 14 [select]"),
 						Id:     safelongPtr(14),
-						Params: map[string]interface{}{"status": "select"},
+						Params: map[string]any{"status": "select"},
 						StackTrace: []logging.StackFrameV1{
 							{
 								Address:   nil,
-								Procedure: strPtr("net/http.(*persistConn).writeLoop"),
-								File:      strPtr("net/http/transport.go"),
-								Line:      intPtr(1885),
-								Params:    map[string]interface{}{},
+								Procedure: new("net/http.(*persistConn).writeLoop"),
+								File:      new("net/http/transport.go"),
+								Line:      new(1885),
+								Params:    map[string]any{},
 							},
 							{
-								Address:   strPtr("0x966"),
-								Procedure: strPtr("net/http.(*Transport).dialConn"),
+								Address:   new("0x966"),
+								Procedure: new("net/http.(*Transport).dialConn"),
 								File:      nil,
 								Line:      nil,
-								Params: map[string]interface{}{
+								Params: map[string]any{
 									"goroutineCreator": true,
 								},
 							},
@@ -122,10 +122,6 @@ created by net/http.(*Transport).dialConn(...)
 		})
 	}
 }
-
-func strPtr(s string) *string { return &s }
-
-func intPtr(i int) *int { return &i }
 
 func safelongPtr(i int64) *safelong.SafeLong {
 	s, _ := safelong.NewSafeLong(i)

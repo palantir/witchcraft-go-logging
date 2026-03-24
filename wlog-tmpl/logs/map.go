@@ -56,9 +56,9 @@ func Formatter(typ logentryformatter.LogType, tmpl string, params ...logentryfor
 			return fmtr.NewFormatter(tmpl, params...)
 		}
 	}
-	return logentryformatter.New(func(lineJSON []byte, substitute bool) (interface{}, error) {
+	return logentryformatter.New(func(lineJSON []byte, substitute bool) (any, error) {
 		// unmarshal as generic JSON map
-		var m map[string]interface{}
+		var m map[string]any
 		err := safejson.Unmarshal(lineJSON, &m)
 		return m, err
 	}, tmpl)

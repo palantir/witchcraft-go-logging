@@ -55,9 +55,9 @@ type diagnosticVisitor struct {
 
 func (d *diagnosticVisitor) VisitGeneric(v logging.GenericDiagnostic) error {
 	d.diagnosticParam = wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.AnyMapValue("diagnostic", map[string]interface{}{
+		entry.AnyMapValue("diagnostic", map[string]any{
 			"type": "generic",
-			"generic": map[string]interface{}{
+			"generic": map[string]any{
 				"diagnosticType": v.DiagnosticType,
 				"value":          v.Value,
 			},
@@ -68,9 +68,9 @@ func (d *diagnosticVisitor) VisitGeneric(v logging.GenericDiagnostic) error {
 
 func (d *diagnosticVisitor) VisitThreadDump(v logging.ThreadDumpV1) error {
 	d.diagnosticParam = wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.AnyMapValue("diagnostic", map[string]interface{}{
+		entry.AnyMapValue("diagnostic", map[string]any{
 			"type": "threadDump",
-			"threadDump": map[string]interface{}{
+			"threadDump": map[string]any{
 				"threads": threadsField(v.Threads),
 			},
 		})
@@ -82,16 +82,16 @@ func (d *diagnosticVisitor) VisitUnknown(typeName string) error {
 	return fmt.Errorf("unknown diagnostic type: %s", typeName)
 }
 
-func threadsField(threads []logging.ThreadInfoV1) []map[string]interface{} {
-	encodedThreads := make([]map[string]interface{}, len(threads))
+func threadsField(threads []logging.ThreadInfoV1) []map[string]any {
+	encodedThreads := make([]map[string]any, len(threads))
 	for idx, threadInfo := range threads {
 		encodedThreads[idx] = encodeThreadInfo(threadInfo)
 	}
 	return encodedThreads
 }
 
-func encodeThreadInfo(threadInfo logging.ThreadInfoV1) map[string]interface{} {
-	fields := make(map[string]interface{})
+func encodeThreadInfo(threadInfo logging.ThreadInfoV1) map[string]any {
+	fields := make(map[string]any)
 	if threadInfo.Id != nil {
 		fields["id"] = threadInfo.Id
 	}
@@ -105,16 +105,16 @@ func encodeThreadInfo(threadInfo logging.ThreadInfoV1) map[string]interface{} {
 	return fields
 }
 
-func stackTraceField(stackFrames []logging.StackFrameV1) []map[string]interface{} {
-	encodedStackTrace := make([]map[string]interface{}, len(stackFrames))
+func stackTraceField(stackFrames []logging.StackFrameV1) []map[string]any {
+	encodedStackTrace := make([]map[string]any, len(stackFrames))
 	for idx, stackFrame := range stackFrames {
 		encodedStackTrace[idx] = encodeStackFrame(stackFrame)
 	}
 	return encodedStackTrace
 }
 
-func encodeStackFrame(stackFrame logging.StackFrameV1) map[string]interface{} {
-	fields := make(map[string]interface{})
+func encodeStackFrame(stackFrame logging.StackFrameV1) map[string]any {
+	fields := make(map[string]any)
 	encodeNonEmptyString(fields, "address", stackFrame.Address)
 	encodeNonEmptyString(fields, "procedure", stackFrame.Procedure)
 	encodeNonEmptyString(fields, "file", stackFrame.File)
@@ -127,7 +127,7 @@ func encodeStackFrame(stackFrame logging.StackFrameV1) map[string]interface{} {
 	return fields
 }
 
-func encodeNonEmptyString(fields map[string]interface{}, key string, val *string) {
+func encodeNonEmptyString(fields map[string]any, key string, val *string) {
 	if val == nil || len(*val) == 0 {
 		return
 	}

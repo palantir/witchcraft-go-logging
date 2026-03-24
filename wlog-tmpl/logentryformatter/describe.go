@@ -22,15 +22,14 @@ import (
 	"text/tabwriter"
 )
 
-func DescribeObject(obj interface{}) string {
+func DescribeObject(obj any) string {
 	const jsonCol = "JSON Field"
 	const descCol = "Description"
 
 	nonEmptyFields := make(map[string]struct{})
 	var rows []*reflect.StructField
 	st := reflect.TypeOf(obj)
-	for i := 0; i < st.NumField(); i++ {
-		stField := st.Field(i)
+	for stField := range st.Fields() {
 		rows = append(rows, &stField)
 		if jsonName := structFieldJSONName(&stField); jsonName != "" {
 			nonEmptyFields[jsonCol] = struct{}{}

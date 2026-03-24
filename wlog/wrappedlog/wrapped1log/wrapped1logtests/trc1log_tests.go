@@ -229,7 +229,7 @@ func trc1LogJSONOutputTests(t *testing.T, entityName string, entityVersion strin
 			entries, err := logreader.EntriesFromContent(buf.Bytes())
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
-			assert.NoError(t, tc.JSONMatcher.Matches(map[string]interface{}(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
+			assert.NoError(t, tc.JSONMatcher.Matches(map[string]any(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}
 }
@@ -237,15 +237,15 @@ func trc1LogJSONOutputTests(t *testing.T, entityName string, entityVersion strin
 func getDurationValue(t *testing.T, entry logreader.Entry) time.Duration {
 	payload, ok := entry["payload"]
 	require.True(t, ok)
-	payloadAsMap, ok := payload.(map[string]interface{})
+	payloadAsMap, ok := payload.(map[string]any)
 	require.True(t, ok)
 	traceLog, ok := payloadAsMap["traceLogV1"]
 	require.True(t, ok)
-	traceLogAsMap, ok := traceLog.(map[string]interface{})
+	traceLogAsMap, ok := traceLog.(map[string]any)
 	require.True(t, ok)
 	value, ok := traceLogAsMap["span"]
 	require.True(t, ok)
-	valueAsMap, ok := value.(map[string]interface{})
+	valueAsMap, ok := value.(map[string]any)
 	require.True(t, ok)
 	durationValue, ok := valueAsMap["duration"]
 	require.True(t, ok)

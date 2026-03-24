@@ -188,18 +188,19 @@ func convertSingleJavaDefinitionToGo(in string) (string, string, error) {
 	categoryClass := matched[2]
 
 	//"createInfraTargets", Classification.RESOURCE, wrapList(CreateInfra::getCreateInfraTargets))
-	categoryDefOut := fmt.Sprintf(`category%s = newCategoryInfo("%s", v2.NewAuditCategoryV2From%s)`, categoryClass, categoryName, categoryClass)
+	var categoryDefOut strings.Builder
+	categoryDefOut.WriteString(fmt.Sprintf(`category%s = newCategoryInfo("%s", v2.NewAuditCategoryV2From%s)`, categoryClass, categoryName, categoryClass))
 	if matches := regexp.MustCompile(`(?s)(optional|required)(Request|Response)\([^"]*"([^"]+)",\s*Classification\.([^,]+),.+?::get([^)]+)`).FindAllStringSubmatch(in, -1); matches != nil {
-		categoryDefOut += ".\n"
+		categoryDefOut.WriteString(".\n")
 		for idx, currMatch := range matches {
 			optionalOrRequired := currMatch[1]
 			requestOrResponse := currMatch[2]
 			fieldName := currMatch[3]
 			classification := currMatch[4]
 
-			categoryDefOut += fmt.Sprintf(`				%s%s("%s", categoriespkg.Classification_%s, func(v v2.%s) any { return v.%s })`, optionalOrRequired, requestOrResponse, fieldName, classification, categoryClass, capitalize(fieldName))
+			categoryDefOut.WriteString(fmt.Sprintf(`				%s%s("%s", categoriespkg.Classification_%s, func(v v2.%s) any { return v.%s })`, optionalOrRequired, requestOrResponse, fieldName, classification, categoryClass, capitalize(fieldName)))
 			if idx != len(matches)-1 {
-				categoryDefOut += ".\n"
+				categoryDefOut.WriteString(".\n")
 			}
 		}
 	}
@@ -213,7 +214,7 @@ func convertSingleJavaDefinitionToGo(in string) (string, string, error) {
 	categoryVisitorOut += fmt.Sprintf("\treturn category%s.toParam(v), nil\n", categoryClass)
 	categoryVisitorOut += "}"
 
-	return categoryDefOut, categoryVisitorOut, nil
+	return categoryDefOut.String(), categoryVisitorOut, nil
 }
 
 func capitalize(in string) string {

@@ -206,8 +206,8 @@ func Audit3SourceOrigin(sourceOrigin string) Audit3Param {
 	}
 }
 
-func Audit3RequestField(key string, value interface{}) Audit3Param {
-	return Audit3RequestFields(map[string]interface{}{
+func Audit3RequestField(key string, value any) Audit3Param {
+	return Audit3RequestFields(map[string]any{
 		key: value,
 	})
 }
@@ -225,8 +225,8 @@ func Audit3RequestFields(requestFields map[string]any) Audit3Param {
 	}
 }
 
-func Audit3ResultField(key string, value interface{}) Audit3Param {
-	return Audit3ResultFields(map[string]interface{}{
+func Audit3ResultField(key string, value any) Audit3Param {
+	return Audit3ResultFields(map[string]any{
 		key: value,
 	})
 }

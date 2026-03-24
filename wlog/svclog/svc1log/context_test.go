@@ -59,7 +59,7 @@ func TestFromContext(t *testing.T) {
 		"type":    objmatcher.NewEqualsMatcher("service.1"),
 		"message": objmatcher.NewEqualsMatcher("Test"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -92,7 +92,7 @@ func TestFromContextUsesCommonIDs(t *testing.T) {
 		"tokenId": objmatcher.NewEqualsMatcher("test-TokenID"),
 		"orgId":   objmatcher.NewEqualsMatcher("test-OrgID"),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -126,7 +126,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher := createMatcher("Message0", "")
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 
@@ -140,7 +140,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("Message1", string(spanOne.Context().TraceID))
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 
@@ -152,7 +152,7 @@ func TestFromContextSetsTraceID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(entries))
 	matcher = createMatcher("Message2", "manually-set-trace-id")
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 	buf.Reset()
 }
@@ -183,7 +183,7 @@ func TestWithLoggerParams(t *testing.T) {
 		}),
 		"unsafeParams": objmatcher.MapMatcher(map[string]objmatcher.Matcher{}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -241,7 +241,7 @@ func testWParamsSafeAndUnsafeParamsUsed(t *testing.T, provider wlog.LoggerProvid
 			"unsafe": objmatcher.NewEqualsMatcher("secret"),
 		}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -299,7 +299,7 @@ func testWParamsSafeAndUnsafeParamsUsedAndOverwritten(t *testing.T, provider wlo
 			"unsafe": objmatcher.NewEqualsMatcher("secret"),
 		}),
 	})
-	err = matcher.Matches(map[string]interface{}(entries[0]))
+	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
 
@@ -310,10 +310,10 @@ func TestWithLoggerParamsSetsWParamsSafeAndUnsafeParams(t *testing.T) {
 	ctx = svc1log.WithLoggerParams(ctx, svc1log.UnsafeParam("ten", 10))
 
 	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"foo": "bar",
 	}, safe)
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"ten": 10,
 	}, unsafe)
 }
@@ -356,7 +356,7 @@ func TestWithLoggerOriginFromCallLine(t *testing.T) {
 				"type":    objmatcher.NewEqualsMatcher("service.1"),
 				"message": objmatcher.NewEqualsMatcher("Test"),
 			})
-			err = matcher.Matches(map[string]interface{}(entries[0]))
+			err = matcher.Matches(map[string]any(entries[0]))
 			assert.NoError(t, err, "%v", err)
 		})
 	}
@@ -402,7 +402,7 @@ func TestWithLoggerOriginFromCallLineWithSkip(t *testing.T) {
 				"message": objmatcher.NewEqualsMatcher("Test"),
 			})
 			fmt.Println(entries[0])
-			err = matcher.Matches(map[string]interface{}(entries[0]))
+			err = matcher.Matches(map[string]any(entries[0]))
 			assert.NoError(t, err, "%v", err)
 		})
 	}

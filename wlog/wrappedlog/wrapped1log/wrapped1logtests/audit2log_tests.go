@@ -38,8 +38,8 @@ type Audit2TestCase struct {
 	Origin        string
 	AuditName     string
 	AuditResult   audit2log.AuditResultType
-	RequestParams map[string]interface{}
-	ResultParams  map[string]interface{}
+	RequestParams map[string]any
+	ResultParams  map[string]any
 	JSONMatcher   objmatcher.MapMatcher
 }
 
@@ -70,8 +70,8 @@ func Audit2TestCases(entityName, entityVersion string) []Audit2TestCase {
 			Origin:        "0.0.0.0",
 			AuditName:     "AUDITED_ACTION_NAME",
 			AuditResult:   audit2log.AuditResultSuccess,
-			RequestParams: map[string]interface{}{"requestKey": "requestValue"},
-			ResultParams:  map[string]interface{}{"resultKey": "resultValue"},
+			RequestParams: map[string]any{"requestKey": "requestValue"},
+			ResultParams:  map[string]any{"resultKey": "resultValue"},
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
 				"entityName":    objmatcher.NewEqualsMatcher(entityName),
@@ -85,7 +85,7 @@ func Audit2TestCases(entityName, entityVersion string) []Audit2TestCase {
 						"tokenId":   objmatcher.NewEqualsMatcher("X-Y-Z"),
 						"orgId":     objmatcher.NewEqualsMatcher("org-1"),
 						"traceId":   objmatcher.NewEqualsMatcher("trace-id-1"),
-						"otherUids": objmatcher.NewEqualsMatcher([]interface{}{"user-2", "user-3"}),
+						"otherUids": objmatcher.NewEqualsMatcher([]any{"user-2", "user-3"}),
 						"origin":    objmatcher.NewEqualsMatcher("0.0.0.0"),
 						"name":      objmatcher.NewEqualsMatcher("AUDITED_ACTION_NAME"),
 						"result":    objmatcher.NewEqualsMatcher("SUCCESS"),
@@ -128,7 +128,7 @@ func audit2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, lo
 				audit2log.RequestParams(tc.RequestParams),
 				audit2log.ResultParams(tc.ResultParams))
 
-			gotAuditLog := map[string]interface{}{}
+			gotAuditLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotAuditLog)
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.Name, string(logEntry))
@@ -154,7 +154,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, entityName, entityVersion 
 			name: "ResultParam params are additive",
 			params: []audit2log.Param{
 				audit2log.ResultParam("key1", "val1"),
-				audit2log.ResultParams(map[string]interface{}{"key2": "val2"}),
+				audit2log.ResultParams(map[string]any{"key2": "val2"}),
 			},
 			want: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"type":          objmatcher.NewEqualsMatcher("wrapped.1"),
@@ -176,7 +176,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, entityName, entityVersion 
 			name: "RequestParam params are additive",
 			params: []audit2log.Param{
 				audit2log.RequestParam("key1", "val1"),
-				audit2log.RequestParams(map[string]interface{}{
+				audit2log.RequestParams(map[string]any{
 					"key2": "val2",
 				}),
 			},
@@ -203,7 +203,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, entityName, entityVersion 
 
 			logger.Audit("audited action name", audit2log.AuditResultSuccess, tc.params...)
 
-			auditLog := map[string]interface{}{}
+			auditLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &auditLog)
 			require.NoError(
@@ -229,8 +229,8 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 	for i, tc := range []struct {
 		name       string
 		paramKey   string
-		paramFunc  func(key string, val interface{}) audit2log.Param
-		paramsFunc func(map[string]interface{}) audit2log.Param
+		paramFunc  func(key string, val any) audit2log.Param
+		paramsFunc func(map[string]any) audit2log.Param
 	}{
 		{
 			name:       "Params stay separate across calls for ResultParam",
@@ -249,7 +249,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 			var buf bytes.Buffer
 			logger := loggerProvider(&buf)
 
-			reusedParams := tc.paramsFunc(map[string]interface{}{"key1": "val1"})
+			reusedParams := tc.paramsFunc(map[string]any{"key1": "val1"})
 
 			logger.Audit(
 				"audited action name",
@@ -274,7 +274,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 					}),
 				}),
 			})
-			auditLog := map[string]interface{}{}
+			auditLog := map[string]any{}
 			logEntry := buf.Bytes()
 			err := json.Unmarshal(logEntry, &auditLog)
 			require.NoError(
@@ -307,7 +307,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				}),
 			})
 
-			auditLog = map[string]interface{}{}
+			auditLog = map[string]any{}
 			logEntry = buf.Bytes()
 			err = json.Unmarshal(logEntry, &auditLog)
 			require.NoError(
