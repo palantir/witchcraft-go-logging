@@ -30,7 +30,6 @@ func DescribeObject(obj any) string {
 	var rows []*reflect.StructField
 	st := reflect.TypeOf(obj)
 	for stField := range st.Fields() {
-		stField := stField
 		rows = append(rows, &stField)
 		if jsonName := structFieldJSONName(&stField); jsonName != "" {
 			nonEmptyFields[jsonCol] = struct{}{}

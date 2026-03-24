@@ -194,8 +194,3 @@ func TestMultiCategory(t *testing.T) {
 	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
 }
-
-//go:fix inline
-func ptr[T any](v T) *T {
-	return new(v)
-}

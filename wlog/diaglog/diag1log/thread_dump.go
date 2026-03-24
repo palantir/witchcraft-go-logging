@@ -148,11 +148,6 @@ func unmarshalFileLine(fileLine []byte, frame *logging.StackFrameV1) {
 	}
 }
 
-//go:fix inline
-func stringPtr(s string) *string {
-	return new(s)
-}
-
 // stringToOptionalSafeLong returns nil on errors
 func stringToOptionalSafeLong(s string) *safelong.SafeLong {
 	i, err := strconv.ParseInt(s, 0, 64)

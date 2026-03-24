@@ -137,16 +137,6 @@ func safeLongVal(in int64) *safelong.SafeLong {
 	return &val
 }
 
-//go:fix inline
-func intVal(in int) *int {
-	return new(in)
-}
-
-//go:fix inline
-func stringVal(in string) *string {
-	return new(in)
-}
-
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) diag1log.Logger) {
 	jsonOutputTests(t, loggerProvider)
 }

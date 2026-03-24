@@ -749,8 +749,3 @@ func assertEqualNillableStringPointer[T ~string](t *testing.T, want *T, gotMap m
 		assert.Equal(t, string(*want), gotValue)
 	}
 }
-
-//go:fix inline
-func toPointer[T any](in T) *T {
-	return new(in)
-}

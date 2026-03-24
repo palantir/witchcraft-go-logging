@@ -123,12 +123,6 @@ created by net/http.(*Transport).dialConn(...)
 	}
 }
 
-//go:fix inline
-func strPtr(s string) *string { return new(s) }
-
-//go:fix inline
-func intPtr(i int) *int { return new(i) }
-
 func safelongPtr(i int64) *safelong.SafeLong {
 	s, _ := safelong.NewSafeLong(i)
 	return &s
