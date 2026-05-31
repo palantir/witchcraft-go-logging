@@ -60,7 +60,7 @@ github.com/palantir/pkg/uuid/internal/uuid
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.40.0
+# github.com/palantir/witchcraft-go-params v1.41.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
 # github.com/palantir/witchcraft-go-tracing v1.42.0
