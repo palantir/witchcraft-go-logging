@@ -38,8 +38,8 @@ github.com/palantir/witchcraft-go-error v1.44.0 h1:8+Y+/SJ4Fat0oH9RWWHWap6RRR1FW
 github.com/palantir/witchcraft-go-error v1.44.0/go.mod h1:lJK6g4YUEvDDX93SBC7m44XdS1bDxq2BCdfFJSh4Pr0=
 github.com/palantir/witchcraft-go-params v1.41.0 h1:kN+8McJpAxO94YFeOXPn4gEfTDi6mtEwCAoxMv13MQQ=
 github.com/palantir/witchcraft-go-params v1.41.0/go.mod h1:/Jel4PARd1KSOGsDKtLUemEhtshRTyJYrHxYj2fMQQo=
-github.com/palantir/witchcraft-go-tracing v1.42.0 h1:cTID5dlhJt8koAc/iroTKLFy6fBz8Rl0i6tnF/rZ2Y4=
-github.com/palantir/witchcraft-go-tracing v1.42.0/go.mod h1:PM8wvCoEVhZjo2uopgh/iisgBgw0bgdVSoXuXCaJNnM=
+github.com/palantir/witchcraft-go-tracing v1.43.0 h1:P3cLxg1MZOSnRhjwvaiD4aJ8CDHxcwHq2TJh+nz97pU=
+github.com/palantir/witchcraft-go-tracing v1.43.0/go.mod h1:AHDhCve6fRydjwprY3p9PF3R0TP2VcDrCpRQu8FnOBA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rs/zerolog v1.35.1 h1:m7xQeoiLIiV0BCEY4Hs+j2NG4Gp2o2KPKmhnnLiazKI=
