@@ -12,8 +12,8 @@ github.com/golang/glog/internal/stackdump
 # github.com/mattn/go-colorable v0.1.15
 ## explicit; go 1.18
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.22
-## explicit; go 1.21
+# github.com/mattn/go-isatty v0.0.23
+## explicit; go 1.20
 github.com/mattn/go-isatty
 # github.com/nmiyake/pkg/dirs v1.1.0
 ## explicit; go 1.16
