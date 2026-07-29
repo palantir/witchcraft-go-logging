@@ -63,7 +63,7 @@ github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.43.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.45.0
+# github.com/palantir/witchcraft-go-tracing v1.46.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
