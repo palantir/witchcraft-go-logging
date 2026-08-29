@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: 'Wapp: Format thread dumps and panics in the ''stacktrace'' service
-    log field'
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/352

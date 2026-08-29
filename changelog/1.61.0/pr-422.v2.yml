@@ -1,8 +1,0 @@
-type: improvement
-improvement:
-  description: Update the LogEntry interface to add the "ObjectListValue" and "ObjectListAppendValue"
-    functions. These functions are analogous to the existing "StringListValue" and
-    "StringListAppendValue" functions and makes it possible to support log entry types
-    for append-only lists for non-string types.
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/422
