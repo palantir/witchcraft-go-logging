@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Expose RunWithRecoveryLoggingWithError under the wapp package
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/108

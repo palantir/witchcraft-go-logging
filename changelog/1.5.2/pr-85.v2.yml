@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: Exports reqe2log.TypeValue for consistency with all of the other logger
-    types.
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/85

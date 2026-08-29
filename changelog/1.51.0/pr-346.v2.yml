@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Remove opinionated implementation of async tcp logger
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/346

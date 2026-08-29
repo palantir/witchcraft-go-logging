@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Add diag1log wrapped logger
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/134

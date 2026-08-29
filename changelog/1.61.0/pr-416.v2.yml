@@ -1,8 +1,0 @@
-type: improvement
-improvement:
-  description: |-
-    Adds the `StringListAppendValue` function to the `LogEntry` interface.
-
-    This allows logger implementations to support appending to string lists.
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/416

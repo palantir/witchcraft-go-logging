@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Add audit2log wrapped logger
-  links:
-  - https://github.com/palantir/witchcraft-go-logging/pull/133
