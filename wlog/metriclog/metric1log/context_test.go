@@ -19,6 +19,7 @@ import (
 	"context"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/wlog"
@@ -51,6 +52,18 @@ func TestFromContext(t *testing.T) {
 	})
 	err = matcher.Matches(map[string]any(entries[0]))
 	assert.NoError(t, err, "%v", err)
+}
+
+func TestExplicitTime(t *testing.T) {
+	buf := &bytes.Buffer{}
+	timestamp := time.Date(2026, time.September, 2, 12, 34, 56, 789123456, time.UTC)
+
+	newTestLogger(buf).Metric("com.palantir.metric", "gauge", metric1log.Time(timestamp))
+
+	entries, err := logreader.EntriesFromContent(buf.Bytes())
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	assert.Equal(t, timestamp.Format(time.RFC3339Nano), entries[0]["time"])
 }
 
 // Tests that the logger returned by metric1log.FromContext has UID, SID, TokenID, and OrgID parameters set on it if the context

@@ -102,9 +102,14 @@ func TestLogger(t *testing.T) {
 		{
 			Name: "metric1log",
 			LogFn: func(ctx context.Context) {
-				metric1log.FromContext(ctx).Metric("com.palantir.foo", "gauge", metric1log.Value("value", 1))
+				metric1log.FromContext(ctx).Metric(
+					"com.palantir.foo",
+					"gauge",
+					metric1log.Value("value", 1),
+					metric1log.Time(time.Date(2026, time.September, 2, 12, 34, 56, 789123456, time.UTC)),
+				)
 			},
-			Expected: regexp.MustCompile(`^\[[0-9TZ:.-]+] ? METRIC com.palantir.foo gauge \(value: 1\)$`),
+			Expected: regexp.MustCompile(`^\[2026-09-02T12:34:56.789123456Z] ? METRIC com.palantir.foo gauge \(value: 1\)$`),
 		},
 		{
 			Name: "req2log",

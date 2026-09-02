@@ -15,6 +15,8 @@
 package metric1log
 
 import (
+	"time"
+
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
@@ -48,6 +50,13 @@ func metricNameTypeParam(name, typ string) Param {
 	return paramFunc(func(logger wlog.LogEntry) {
 		logger.StringValue(MetricNameKey, name)
 		logger.StringValue(MetricTypeKey, typ)
+	})
+}
+
+// Time overrides the time at which the metric was recorded. By default, metrics use the time at which they are logged.
+func Time(value time.Time) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		entry.StringValue(wlog.TimeKey, value.Format(time.RFC3339Nano))
 	})
 }
 

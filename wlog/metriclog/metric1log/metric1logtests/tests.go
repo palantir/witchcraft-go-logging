@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
@@ -38,6 +39,7 @@ type TestCase struct {
 	TokenID      string
 	OrgID        string
 	UnsafeParams map[string]any
+	Time         time.Time
 	JSONMatcher  objmatcher.MapMatcher
 }
 
@@ -50,6 +52,7 @@ func (tc TestCase) Params() []metric1log.Param {
 		metric1log.OrgID(tc.OrgID),
 		metric1log.Tags(tc.Tags),
 		metric1log.UnsafeParams(tc.UnsafeParams),
+		metric1log.Time(tc.Time),
 	}
 }
 
@@ -78,9 +81,10 @@ func TestCases() []TestCase {
 			UnsafeParams: map[string]any{
 				"Password": "HelloWorld!",
 			},
+			Time: time.Date(2026, time.September, 2, 12, 34, 56, 789123456, time.UTC),
 			JSONMatcher: objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 				"metricName": objmatcher.NewEqualsMatcher("com.palantir.deployability.logtrough.iteratorage.millis"),
-				"time":       objmatcher.NewRegExpMatcher(".+"),
+				"time":       objmatcher.NewEqualsMatcher("2026-09-02T12:34:56.789123456Z"),
 				"type":       objmatcher.NewEqualsMatcher("metric.1"),
 				"metricType": objmatcher.NewEqualsMatcher("histogram"),
 				"uid":        objmatcher.NewEqualsMatcher("user-1"),

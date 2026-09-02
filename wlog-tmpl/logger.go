@@ -66,11 +66,13 @@ func (l *tmplLogger) logOutput(params []wlog.Param) {
 }
 
 func (l *tmplLogger) formatOutput(params []wlog.Param) string {
-	params = append(params, wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)))
+	paramsWithTime := make([]wlog.Param, len(params)+1)
+	paramsWithTime[0] = wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
+	copy(paramsWithTime[1:], params)
 
 	buf := l.bufferPool.Get()
 	defer l.bufferPool.Put(buf)
-	l.delegate(buf).Log(params...)
+	l.delegate(buf).Log(paramsWithTime...)
 
 	out, err := logentryformatter.FormatLogLine(buf.String(), l.cfg.UnwrapperMap, l.cfg.FormatterMap, l.cfg.Only, l.cfg.Exclude)
 	if err != nil {
