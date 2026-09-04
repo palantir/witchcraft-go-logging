@@ -2,7 +2,7 @@ module github.com/palantir/witchcraft-go-logging
 
 go 1.26.0
 
-toolchain go1.26.7
+toolchain go1.26.8
 
 require (
 	github.com/fatih/color v1.19.0
