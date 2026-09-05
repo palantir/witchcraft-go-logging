@@ -3,12 +3,12 @@ plugins:
     - https://github.com/{{index GroupParts 1}}/{{index GroupParts 2}}/releases/download/v{{Version}}/{{Product}}-{{Version}}-{{OS}}-{{Arch}}.tgz
   plugins:
     - locator:
-        id: com.palantir.godel-conjure-plugin:conjure-plugin:7.13.0
+        id: com.palantir.godel-conjure-plugin:conjure-plugin:7.14.0
         checksums:
-          darwin-amd64: c32bd3fcb8717f7fa535b3c109145bd5e7b1ca177820feeb519df42b912c0244
-          darwin-arm64: 8fbe746331310135703ef10f29c1db995cdbff2869a43b4bd8f7d2545fce495b
-          linux-amd64: a50e9c1e014be2bbc1f3cb663e30510dc62c6901bf43247bc584ee8e2421671c
-          linux-arm64: e58693a2e10b2f8a00f9f5f54eb1bce9cfa709a05eb102cf001dd9ce01a3fb15
+          darwin-amd64: cd78f6cbed4e6dc1f9c824ee2b4e01ab317d9a0002de0f4595272afe1c0d82d1
+          darwin-arm64: 807a16656e6f5773c81aa1f0d426061058766b2dc20f357ddd6957fc9e308788
+          linux-amd64: 7f61a4edfead821d25e34d79ce69466b4911b1c78c2567e72cadab6935fdf26f
+          linux-arm64: e51a1e05fe0cd21bffc5e4e0309f8331994cd744708ecce5d1ba17297e23cb21
     - locator:
         id: com.palantir.godel-mod-plugin:mod-plugin:1.61.0
         checksums:
