@@ -21,11 +21,9 @@ import (
 )
 
 var trace1LogType = &trace1LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "trace.1",
-		defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} traceId: {{.Span.TraceId}} id: {{.Span.Id}} name: {{.Span.Name}} duration: {{printf "%d microseconds" .Span.Duration}}`,
-		defaultObj:  logging.TraceLogV1{},
-	},
+	typ:         "trace.1",
+	defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} traceId: {{.Span.TraceId}} id: {{.Span.Id}} name: {{.Span.Name}} duration: {{printf "%d microseconds" .Span.Duration}}`,
+	defaultObj:  logging.TraceLogV1{},
 }
 
 type trace1LogTyper struct {

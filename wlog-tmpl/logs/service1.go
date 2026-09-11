@@ -26,11 +26,9 @@ import (
 )
 
 var svc1LogType = &svc1LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "service.1",
-		defaultTmpl: `{{printf "%-5s" .Level}} {{printf "%-26s" (printf "[%s]" .Time)}}{{if .Origin}} {{.Origin}}:{{end}} {{.Message}}{{if .Params}} {{niceMap .Params}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}{{if .Stacktrace}}{{println}}{{.Stacktrace}}{{end}}`,
-		defaultObj:  logging.ServiceLogV1{},
-	},
+	typ:         "service.1",
+	defaultTmpl: `{{printf "%-5s" .Level}} {{printf "%-26s" (printf "[%s]" .Time)}}{{if .Origin}} {{.Origin}}:{{end}} {{.Message}}{{if .Params}} {{niceMap .Params}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}{{if .Stacktrace}}{{println}}{{.Stacktrace}}{{end}}`,
+	defaultObj:  logging.ServiceLogV1{},
 }
 
 type svc1LogTyper struct {

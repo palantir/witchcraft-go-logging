@@ -26,11 +26,9 @@ import (
 )
 
 var diagnostics1LogType = &diagnostics1LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "diagnostic.1",
-		defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}}{{if .ContentOnNewLine}}{{printf "\n"}}{{else}} {{end}}{{if .UnsafeParams}}{{printf "%s\n" (niceMap .UnsafeParams)}}{{end}}{{.SerializedContent}}`,
-		defaultObj:  humanReadableDiagnostic{},
-	},
+	typ:         "diagnostic.1",
+	defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}}{{if .ContentOnNewLine}}{{printf "\n"}}{{else}} {{end}}{{if .UnsafeParams}}{{printf "%s\n" (niceMap .UnsafeParams)}}{{end}}{{.SerializedContent}}`,
+	defaultObj:  humanReadableDiagnostic{},
 }
 
 type diagnostics1LogTyper struct {

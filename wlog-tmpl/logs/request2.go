@@ -23,11 +23,9 @@ import (
 )
 
 var req2LogType = &req2LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "request.2",
-		defaultTmpl: `{{with $time := .Time | printf "[%s]"}}{{if le (len $time) 26 }}{{printf "%-26s" $time}}{{else}}{{printf "%-32s" $time}}{{end}}{{end}} "{{if .Method}}{{.Method}} {{end}}{{.Path}} {{.Protocol}}" {{.Status}} {{.ResponseSize}} {{.Duration}}`,
-		defaultObj:  logging.RequestLogV2{},
-	},
+	typ:         "request.2",
+	defaultTmpl: `{{with $time := .Time | printf "[%s]"}}{{if le (len $time) 26 }}{{printf "%-26s" $time}}{{else}}{{printf "%-32s" $time}}{{end}}{{end}} "{{if .Method}}{{.Method}} {{end}}{{.Path}} {{.Protocol}}" {{.Status}} {{.ResponseSize}} {{.Duration}}`,
+	defaultObj:  logging.RequestLogV2{},
 }
 
 type req2LogTyper struct {
