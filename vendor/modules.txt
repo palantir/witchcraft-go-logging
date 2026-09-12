@@ -22,8 +22,8 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/pkg v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg v1.2.0
+## explicit; go 1.26.0
 github.com/palantir/pkg
 # github.com/palantir/pkg/bytesbuffers v1.3.0
 ## explicit; go 1.25.0
