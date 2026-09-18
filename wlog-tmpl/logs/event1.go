@@ -21,11 +21,9 @@ import (
 )
 
 var evt1LogType = &evt1LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "event.1",
-		defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} {{.EventName}} {{.EventType}}{{if .Values}} {{niceMap .Values}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}`,
-		defaultObj:  logging.EventLogV1{},
-	},
+	typ:         "event.1",
+	defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} {{.EventName}} {{.EventType}}{{if .Values}} {{niceMap .Values}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}`,
+	defaultObj:  logging.EventLogV1{},
 }
 
 type evt1LogTyper struct {

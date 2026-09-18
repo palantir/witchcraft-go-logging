@@ -21,11 +21,9 @@ import (
 )
 
 var metric1LogType = &metric1LogTyper{
-	baseLogTyper: baseLogTyper{
-		typ:         "metric.1",
-		defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} METRIC {{.MetricName}} {{.MetricType}}{{if .Values}} {{niceMap .Values}}{{end}}{{if .Tags}} {{niceMapStr .Tags}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}`,
-		defaultObj:  logging.MetricLogV1{},
-	},
+	typ:         "metric.1",
+	defaultTmpl: `{{printf "%-26s" (printf "[%s]" .Time)}} METRIC {{.MetricName}} {{.MetricType}}{{if .Values}} {{niceMap .Values}}{{end}}{{if .Tags}} {{niceMapStr .Tags}}{{end}}{{if .UnsafeParams}} {{niceMap .UnsafeParams}}{{end}}`,
+	defaultObj:  logging.MetricLogV1{},
 }
 
 type metric1LogTyper struct {
