@@ -26,7 +26,7 @@ require (
 )
 
 require (
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/palantir/pkg v1.2.0 // indirect
