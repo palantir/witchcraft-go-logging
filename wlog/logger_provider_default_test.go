@@ -16,31 +16,31 @@ package wlog_test
 
 import (
 	"bytes"
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Verifies that a logger created using the default logger provider uses the newWarnOnceLoggerProvider.
-//
-// Note that this test depends on the global state of defaultLoggerProvider: if the default logger is set before this
-// test is run in the same process or if the default logger provider is changed in the future, the test will fail.
-func TestDefaultProviderIsWarnOnceProvider(t *testing.T) {
-	// create logger that writes to buffer using the default logger provider
+func TestDefaultProviderWritesObjectJSONToSuppliedWriter(t *testing.T) {
 	buf := &bytes.Buffer{}
-	logger := svc1log.New(buf, wlog.DebugLevel) // uses default provider
-
-	// verify that output provides warning that no logger provider was specified
+	logger := svc1log.New(buf, wlog.DebugLevel)
 	logger.Info("Test output 1")
-	const wantOutput = `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).` + "\n"
-	got := buf.String()
-	assert.Equal(t, wantOutput, got)
-
-	// verify that warning is only written on first call to logger
 	logger.Info("Test output 2")
-	buf.Reset()
-	got = buf.String()
-	assert.Equal(t, "", got)
+
+	lines := strings.Split(strings.TrimSpace(buf.String()), "\n")
+	require.Len(t, lines, 2)
+	for i, line := range lines {
+		require.True(t, strings.HasPrefix(line, `{"type":"service.1","level":`), line)
+		var got struct {
+			Level   string `json:"level"`
+			Message string `json:"message"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(line), &got))
+		require.Equal(t, "INFO", got.Level)
+		require.Equal(t, []string{"Test output 1", "Test output 2"}[i], got.Message)
+	}
 }
