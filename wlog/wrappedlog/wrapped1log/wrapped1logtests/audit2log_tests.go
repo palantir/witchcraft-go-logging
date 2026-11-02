@@ -133,7 +133,7 @@ func audit2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, lo
 			err := safejson.Unmarshal(logEntry, &gotAuditLog)
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.Name, string(logEntry))
 
-			assert.NoError(t, tc.JSONMatcher.Matches(gotAuditLog), "Case %d: %s", i, tc.Name)
+			assert.NoError(t, tc.JSONMatcher.Matches(withoutProviderTime(gotAuditLog)), "Case %d: %s", i, tc.Name)
 		})
 	}
 }
@@ -213,7 +213,7 @@ func rParamIsntOverwrittenByRParamsTest(t *testing.T, entityName, entityVersion 
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, tc.want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, tc.want.Matches(withoutProviderTime(auditLog)), "Case %d: %s", i, tc.name)
 		})
 	}
 }
@@ -284,7 +284,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, want.Matches(withoutProviderTime(auditLog)), "Case %d: %s", i, tc.name)
 
 			buf.Reset()
 			logger.Audit("audited action name", audit2log.AuditResultSuccess, reusedParams)
@@ -317,7 +317,7 @@ func extraRParamsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, want.Matches(withoutProviderTime(auditLog)), "Case %d: %s", i, tc.name)
 		})
 	}
 }

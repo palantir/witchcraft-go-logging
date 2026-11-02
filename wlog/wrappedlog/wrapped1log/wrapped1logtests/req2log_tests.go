@@ -282,7 +282,7 @@ func req2LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "request log should have exactly 1 entry")
 
-			err = tc.JSONMatcher.Matches(map[string]any(entries[0]))
+			err = tc.JSONMatcher.Matches(withoutProviderTime(map[string]any(entries[0])))
 			assert.NoError(t, err, "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}

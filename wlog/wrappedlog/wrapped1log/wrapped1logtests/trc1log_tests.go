@@ -229,7 +229,7 @@ func trc1LogJSONOutputTests(t *testing.T, entityName string, entityVersion strin
 			entries, err := logreader.EntriesFromContent(buf.Bytes())
 			require.NoError(t, err)
 			require.Equal(t, 1, len(entries), "trace log should have exactly 1 entry")
-			assert.NoError(t, tc.JSONMatcher.Matches(map[string]any(entries[0])), "Case %d: %s\n%v", i, tc.Name, err)
+			assert.NoError(t, tc.JSONMatcher.Matches(withoutProviderTime(map[string]any(entries[0]))), "Case %d: %s\n%v", i, tc.Name, err)
 		})
 	}
 }

@@ -174,7 +174,7 @@ func diag1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, log
 
 			require.NoError(t, err, "Case %d: %s\nEvent log line is not a valid map: %v", i, tc.Name, string(logEntry))
 
-			assert.NoError(t, tc.JSONMatcher.Matches(gotEventLog), "Case %d: %s", i, tc.Name)
+			assert.NoError(t, tc.JSONMatcher.Matches(withoutProviderTime(gotEventLog)), "Case %d: %s", i, tc.Name)
 		})
 	}
 }

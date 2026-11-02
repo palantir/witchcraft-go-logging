@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/safejson"
@@ -549,6 +550,13 @@ func runEntryTestCases(t *testing.T, suiteName string, testCases []EntryTestCase
 				err := safejson.Unmarshal(logEntry, &gotLog)
 				require.NoError(t, err, "Log line is not a valid map: %v", string(logEntry))
 
+				// Providers may add their own timestamp independently of entry operations.
+				if timestamp, ok := gotLog[wlog.TimeKey]; ok {
+					require.IsType(t, "", timestamp)
+					_, err := time.Parse(time.RFC3339Nano, timestamp.(string))
+					require.NoError(t, err)
+				}
+				delete(gotLog, wlog.TimeKey)
 				assert.NoError(t, tc.Matcher.Matches(gotLog))
 			})
 		}

@@ -445,7 +445,7 @@ func svc1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, logg
 			require.NoError(t, err, "Not able to marshal log line")
 			assert.Equal(t, len(strings.TrimRight(string(logEntry), "\n")), len(string(logEntryRewrite)), "Differing length on remarshal, possibly due to duplicate keys in the original payload.")
 
-			assert.NoError(t, tc.JSONMatcher.Matches(gotServiceLog), "Case %d: %s", i, tc.Name)
+			assert.NoError(t, tc.JSONMatcher.Matches(withoutProviderTime(gotServiceLog)), "Case %d: %s", i, tc.Name)
 		})
 	}
 }
@@ -491,7 +491,7 @@ func paramIsntOverwrittenByParams(t *testing.T, entityName, entityVersion string
 					}),
 				}),
 			}),
-		}).Matches(gotServiceLog))
+		}).Matches(withoutProviderTime(gotServiceLog)))
 	})
 }
 
@@ -525,7 +525,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName, entityVersion string, 
 					}),
 				}),
 			}),
-		}).Matches(gotServiceLog))
+		}).Matches(withoutProviderTime(gotServiceLog)))
 
 		buf.Reset()
 		logger.Info("msg", reusedParams)
@@ -550,7 +550,7 @@ func extraParamsDoNotAppearTest(t *testing.T, entityName, entityVersion string, 
 					}),
 				}),
 			}),
-		}).Matches(gotServiceLog))
+		}).Matches(withoutProviderTime(gotServiceLog)))
 	})
 }
 
@@ -579,7 +579,7 @@ func jsonLoggerUpdateTest(t *testing.T, entityName, entityVersion string, logger
 		err := safejson.Unmarshal(logEntry, &gotServiceLog)
 		require.NoError(t, err, "Service log line is not a valid map: %v", string(logEntry))
 
-		assert.NoError(t, currCase.JSONMatcher.Matches(gotServiceLog), "No match")
+		assert.NoError(t, currCase.JSONMatcher.Matches(withoutProviderTime(gotServiceLog)), "No match")
 	})
 }
 

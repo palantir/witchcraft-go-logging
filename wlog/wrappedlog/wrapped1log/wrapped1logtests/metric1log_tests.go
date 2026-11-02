@@ -140,7 +140,7 @@ func metric1LogJSONOutputTests(t *testing.T, entityName, entityVersion string, l
 			err := safejson.Unmarshal(logEntry, &gotMetricLog)
 			require.NoError(t, err, "Case %d: %s\nMetric log line is not a valid map: %v", i, tc.Name, string(logEntry))
 
-			assert.NoError(t, tc.JSONMatcher.Matches(gotMetricLog), "Case %d: %s", i, tc.Name)
+			assert.NoError(t, tc.JSONMatcher.Matches(withoutProviderTime(gotMetricLog)), "Case %d: %s", i, tc.Name)
 		})
 	}
 }
@@ -175,7 +175,7 @@ func metric1LogValueIsntOverwrittenByValues(t *testing.T, entityName, entityVers
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 	})
 }
 
@@ -210,7 +210,7 @@ func extraValuesDoNotAppear(t *testing.T, entityName, entityVersion string, logg
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 
 		buf.Reset()
 		logger.Metric("metric", "metric-type", reusedParams)
@@ -235,7 +235,7 @@ func extraValuesDoNotAppear(t *testing.T, entityName, entityVersion string, logg
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 	})
 }
 
@@ -269,7 +269,7 @@ func tagIsntOverwrittenByTags(t *testing.T, entityName, entityVersion string, lo
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 	})
 }
 
@@ -304,7 +304,7 @@ func extraTagsDoNotAppear(t *testing.T, entityName, entityVersion string, logger
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 
 		buf.Reset()
 		logger.Metric("metric", "metric-type", reusedParams)
@@ -329,6 +329,6 @@ func extraTagsDoNotAppear(t *testing.T, entityName, entityVersion string, logger
 					}),
 				}),
 			}),
-		}).Matches(gotMetricLog))
+		}).Matches(withoutProviderTime(gotMetricLog)))
 	})
 }
