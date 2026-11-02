@@ -15,6 +15,7 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 )
@@ -27,9 +28,9 @@ type wrappedEvt2Logger struct {
 }
 
 func (l *wrappedEvt2Logger) Event(name string, params ...evt2log.Param) {
-	l.logger.Log(l.toEventParams(name, params)...)
-}
-
-func (l *wrappedEvt2Logger) toEventParams(name string, params []evt2log.Param) []wlog.Param {
-	return wrappedParams(l.name, l.version, evt2PayloadParams(name, params))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromEventLogV2(evt2log.ToObject(name, params)))
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, evt2PayloadParams(name, params))...)
 }

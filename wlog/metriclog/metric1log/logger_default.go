@@ -15,32 +15,44 @@
 package metric1log
 
 import (
-	"time"
-
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
+// conjureLogger consumes borrowed log objects synchronously. Implementations must copy
+// any object or nested data they retain after the method returns.
+type conjureLogger interface {
+	LogMetricLogV1(*logging.MetricLogV1)
+}
+
 type defaultLogger struct {
-	logger wlog.Logger
+	logger conjureLogger
 }
 
 func (l *defaultLogger) Metric(name, typ string, params ...Param) {
-	l.logger.Log(ToParams(name, typ, params)...)
+	log := poolMetricLogV1.Get()
+	populateLogObject(log, name, typ, params)
+	l.logger.LogMetricLogV1(log)
+	poolMetricLogV1.Put(log)
 }
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(metricName, metricType string, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(metricNameTypeParam(metricName, metricType).apply)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
-	return outParams
+	log := new(logging.MetricLogV1)
+	populateLogObject(log, metricName, metricType, inParams)
+	return []wlog.Param{objectToParam(log)}
 }
 
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
+func ToObject(metricName, metricType string, inParams []Param) logging.MetricLogV1 {
+	var log logging.MetricLogV1
+	populateLogObject(&log, metricName, metricType, inParams)
+	return log
+}
+
+type entryLogger struct {
+	logger wlog.Logger
+}
+
+func (l entryLogger) LogMetricLogV1(log *logging.MetricLogV1) {
+	l.logger.Log(objectToParam(log))
 }

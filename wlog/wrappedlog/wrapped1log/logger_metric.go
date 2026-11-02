@@ -15,6 +15,7 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/metriclog/metric1log"
 )
@@ -27,9 +28,9 @@ type wrappedMetric1Logger struct {
 }
 
 func (l *wrappedMetric1Logger) Metric(name, typ string, params ...metric1log.Param) {
-	l.logger.Log(l.toMetricParams(name, typ, params)...)
-}
-
-func (l *wrappedMetric1Logger) toMetricParams(metricName, metricType string, inParams []metric1log.Param) []wlog.Param {
-	return wrappedParams(l.name, l.version, metric1PayloadParams(metricName, metricType, inParams))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromMetricLogV1(metric1log.ToObject(name, typ, params)))
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, metric1PayloadParams(name, typ, params))...)
 }

@@ -15,6 +15,7 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
@@ -28,17 +29,18 @@ type wrappedTrc1Logger struct {
 }
 
 func (l *wrappedTrc1Logger) Log(span wtracing.SpanModel, params ...trc1log.Param) {
-	l.logger.Log(l.toTraceParams(span, params)...)
-}
-
-func (l *wrappedTrc1Logger) toTraceParams(span wtracing.SpanModel, inParams []trc1log.Param) []wlog.Param {
-	return wrappedParams(l.name, l.version, trc1PayloadParams(span, inParams...))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromTraceLogV1(trc1log.ToObject(span, params)))
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, trc1PayloadParams(span, params))...)
 }
 
 func (l *wrappedTrc1Logger) Send(span wtracing.SpanModel) {
 	l.Log(span)
 }
 
+// Close is a no-op that satisfies the wtracing.Reporter interface.
 func (l *wrappedTrc1Logger) Close() error {
 	return nil
 }

@@ -112,7 +112,7 @@ func svc1PayloadParams(obj logging.ServiceLogV1) Param {
 	})
 }
 
-func trc1PayloadParams(span wtracing.SpanModel, params ...trc1log.Param) Param {
+func trc1PayloadParams(span wtracing.SpanModel, params []trc1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
 		applyPayload(entry, PayloadTraceLogV1, trc1log.ToParams(span, params))
 	})

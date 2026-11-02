@@ -32,8 +32,11 @@ func New(w io.Writer) Logger {
 }
 
 func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
+	logger := creator(w)
+	direct, _ := logger.(conjureLogger)
 	return &defaultLogger{
-		logger: creator(w),
+		logger: direct,
+		entry:  logger,
 	}
 }
 
