@@ -27,9 +27,9 @@ type wrappedDiag1Logger struct {
 }
 
 func (l *wrappedDiag1Logger) Diagnostic(diagnostic logging.Diagnostic, params ...diag1log.Param) {
-	l.logger.Log(l.toDiagParams(diagnostic, params)...)
-}
-
-func (l *wrappedDiag1Logger) toDiagParams(diagnostic logging.Diagnostic, inParams []diag1log.Param) []wlog.Param {
-	return wrappedParams(l.name, l.version, diag1PayloadParams(diagnostic, inParams))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromDiagnosticLogV1(diag1log.ToObject(diagnostic, params)))
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, diag1PayloadParams(diagnostic, params))...)
 }

@@ -17,6 +17,7 @@ package wrapped1log
 import (
 	"io"
 
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
@@ -34,7 +35,11 @@ type wrappedReq2Logger struct {
 }
 
 func (l *wrappedReq2Logger) Request(r req2log.Request) {
-	l.logger.Log(l.toRequestParams(r)...)
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromRequestLogV2(req2log.ToObject(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms)))
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, req2PayloadParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))...)
 }
 
 func (l *wrappedReq2Logger) PathParamPerms() req2log.ParamPerms {
@@ -47,10 +52,6 @@ func (l *wrappedReq2Logger) QueryParamPerms() req2log.ParamPerms {
 
 func (l *wrappedReq2Logger) HeaderParamPerms() req2log.ParamPerms {
 	return l.headerParamPerms
-}
-
-func (l *wrappedReq2Logger) toRequestParams(r req2log.Request) []wlog.Param {
-	return wrappedParams(l.name, l.version, req2PayloadParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
 }
 
 type req2LoggerBuilder struct {

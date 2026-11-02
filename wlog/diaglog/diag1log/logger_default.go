@@ -16,37 +16,53 @@ package diag1log
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
 
+// conjureLogger consumes borrowed log objects synchronously. Implementations must copy
+// any object or nested data they retain after the method returns.
+type conjureLogger interface {
+	LogDiagnosticLogV1(*logging.DiagnosticLogV1)
+}
+
 type defaultLogger struct {
-	logger wlog.Logger
+	logger conjureLogger
 }
 
 func (l *defaultLogger) Diagnostic(diagnostic logging.Diagnostic, params ...Param) {
-	l.logger.Log(ToParams(diagnostic, params)...)
+	log := poolDiagnosticLogV1.Get()
+	populateLogObject(log, diagnostic, params)
+	l.logger.LogDiagnosticLogV1(log)
+	poolDiagnosticLogV1.Put(log)
 }
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(diagnostic logging.Diagnostic, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+1+len(inParams))
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = diagnosticParam(diagnostic)
-	for idx := range inParams {
-		outParams[len(defaultTypeParam)+1+idx] = wlog.NewParam(inParams[idx].apply)
-	}
-	return outParams
+	log := new(logging.DiagnosticLogV1)
+	populateLogObject(log, diagnostic, inParams)
+	return []wlog.Param{objectToParam(log)}
 }
 
-func diagnosticParam(diagnostic logging.Diagnostic) wlog.Param {
+func ToObject(diagnostic logging.Diagnostic, inParams []Param) logging.DiagnosticLogV1 {
+	var log logging.DiagnosticLogV1
+	populateLogObject(&log, diagnostic, inParams)
+	return log
+}
+
+type entryLogger struct {
+	logger wlog.Logger
+}
+
+func (l entryLogger) LogDiagnosticLogV1(log *logging.DiagnosticLogV1) {
+	l.logger.Log(objectToParam(log))
+}
+
+func diagnosticFromObject(diagnostic logging.Diagnostic) wlog.Param {
 	visitor := &diagnosticVisitor{}
 	_ = diagnostic.Accept(visitor)
-	if visitor.diagnosticParam != nil {
-		return visitor.diagnosticParam
-	}
-	return wlog.NewParam(func(entry wlog.LogEntry) {})
+	return visitor.diagnosticParam
 }
 
 type diagnosticVisitor struct {
@@ -132,11 +148,4 @@ func encodeNonEmptyString(fields map[string]any, key string, val *string) {
 		return
 	}
 	fields[key] = val
-}
-
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-		entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	}),
 }
