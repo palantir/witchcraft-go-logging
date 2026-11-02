@@ -3,3 +3,8 @@
 *.iws
 .idea/
 /out/
+
+# Benchmark artifacts: compiled test binaries, pprof captures, raw benchstat input.
+/benchmarks/*.test
+/benchmarks/*.pprof
+/benchmarks/results/

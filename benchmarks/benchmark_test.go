@@ -15,19 +15,19 @@
 package benchmarks
 
 import (
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wlogglog "github.com/palantir/witchcraft-go-logging/wlog-glog"
-	wlogtmpl "github.com/palantir/witchcraft-go-logging/wlog-tmpl"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/audit3logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -40,6 +40,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log/svc1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log/trc1logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/stretchr/testify/require"
@@ -51,10 +53,25 @@ func BenchmarkAudit2Log(b *testing.B) {
 			params := tc.Params()
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := audit2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
-				for n := 0; n < b.N; n++ {
+				logger := audit2log.NewFromCreator(io.Discard, provider.NewLogger)
+				benchmarkLogCalls(b, func() {
 					logger.Audit(tc.AuditName, tc.AuditResult, params...)
-				}
+				})
+			})
+		})
+	}
+}
+
+func BenchmarkAudit3Log(b *testing.B) {
+	for _, tc := range audit3logtests.TestCases() {
+		b.Run(tc.TestCaseName, func(b *testing.B) {
+			params := tc.Params()
+			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+				b.ReportAllocs()
+				logger := audit3log.NewFromCreator(io.Discard, provider.NewLogger)
+				benchmarkLogCalls(b, func() {
+					logger.Audit(tc.Name, tc.Result, params...)
+				})
 			})
 		})
 	}
@@ -65,10 +82,10 @@ func BenchmarkDiag1Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := diag1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
-				for n := 0; n < b.N; n++ {
+				logger := diag1log.NewFromCreator(io.Discard, provider.NewLogger)
+				benchmarkLogCalls(b, func() {
 					logger.Diagnostic(tc.Diagnostic, diag1log.UnsafeParams(tc.UnsafeParams))
-				}
+				})
 			})
 		})
 	}
@@ -80,10 +97,10 @@ func BenchmarkEvt2Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := evt2log.NewFromCreator(ioutil.Discard, provider.NewLogger)
-				for n := 0; n < b.N; n++ {
-					logger.Event(tc.Name, params...)
-				}
+				logger := evt2log.NewFromCreator(io.Discard, provider.NewLogger)
+				benchmarkLogCalls(b, func() {
+					logger.Event(tc.EventName, params...)
+				})
 			})
 		})
 	}
@@ -95,10 +112,10 @@ func BenchmarkMetric1Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := metric1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
-				for n := 0; n < b.N; n++ {
+				logger := metric1log.NewFromCreator(io.Discard, provider.NewLogger)
+				benchmarkLogCalls(b, func() {
 					logger.Metric(tc.MetricName, tc.MetricType, params...)
-				}
+				})
 			})
 		})
 	}
@@ -119,10 +136,15 @@ func BenchmarkReq2Log(b *testing.B) {
 			}
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := req2log.New(ioutil.Discard, req2log.Creator(provider.NewLogger))
-				for n := 0; n < b.N; n++ {
+				logger := req2log.New(io.Discard,
+					req2log.Creator(provider.NewLogger),
+					req2log.SafeQueryParams(tc.SafeQueryParams...),
+					req2log.SafeHeaderParams(tc.SafeHeaderParams...),
+					req2log.ForbiddenHeaderParams(tc.ForbiddenHeaderParams...),
+				)
+				benchmarkLogCalls(b, func() {
 					logger.Request(req)
-				}
+				})
 			})
 		})
 	}
@@ -133,10 +155,13 @@ func BenchmarkSvc1Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := svc1log.NewFromCreator(ioutil.Discard, wlog.InfoLevel, provider.NewLeveledLogger)
-				for n := 0; n < b.N; n++ {
-					logger.Info(tc.Message, tc.LogParams...)
+				logger := svc1log.NewFromCreator(io.Discard, wlog.InfoLevel, provider.NewLeveledLogger)
+				if tc.Origin != "" {
+					logger = svc1log.WithParams(logger, svc1log.Origin(tc.Origin))
 				}
+				benchmarkLogCalls(b, func() {
+					logger.Info(tc.Message, tc.LogParams...)
+				})
 			})
 		})
 	}
@@ -154,7 +179,7 @@ func BenchmarkTrc1Log(b *testing.B) {
 		b.Run(tc.Name, func(b *testing.B) {
 			RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
 				b.ReportAllocs()
-				logger := trc1log.NewFromCreator(ioutil.Discard, provider.NewLogger)
+				logger := trc1log.NewFromCreator(io.Discard, provider.NewLogger)
 				tracer, err := wzipkin.NewTracer(
 					logger,
 					wtracing.WithLocalEndpoint(&wtracing.Endpoint{
@@ -164,20 +189,66 @@ func BenchmarkTrc1Log(b *testing.B) {
 					}),
 				)
 				require.NoError(b, err)
-				for n := 0; n < b.N; n++ {
+				spanOptions := append([]wtracing.SpanOption{wtracing.WithParent(clientSpan)}, tc.SpanOptions...)
+				benchmarkLogCalls(b, func() {
+					span := tracer.StartSpan("testOp", spanOptions...)
+					for key, value := range tc.Tags {
+						span.Tag(key, value)
+					}
 					// Finish() triggers logging
-					tracer.StartSpan("testOp", wtracing.WithParent(clientSpan)).Finish()
-				}
+					span.Finish()
+				})
 			})
 		})
 	}
 }
 
+func BenchmarkWrapped1Log(b *testing.B) {
+	// Providers with wrapped object support emit directly; others use the map path.
+	tc := wrapped1logtests.Svc1TestCases("bench-entity", "1")[0]
+	b.Run(tc.Name, func(b *testing.B) {
+		RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			b.ReportAllocs()
+			logger := wrapped1log.NewFromProvider(io.Discard, wlog.InfoLevel, provider, "bench-entity", "1").Service()
+			benchmarkLogCalls(b, func() {
+				logger.Info(tc.Message, tc.LogParams...)
+			})
+		})
+	})
+	b.Run("audit.3", func(b *testing.B) {
+		fixture := wrapped1logtests.Audit3TestCases("bench-entity", "1")[0]
+		// Typed emission requires a valid event ID.
+		params := append(fixture.Params(), audit3log.EventID("c15487b9-ff6a-4bb1-8c25-2433a185c438"))
+		RunBenchmarks(b, func(b *testing.B, provider wlog.LoggerProvider) {
+			logger := wrapped1log.NewFromProvider(io.Discard, wlog.InfoLevel, provider, "bench-entity", "1").AuditV3()
+			benchmarkLogCalls(b, func() {
+				logger.Audit(fixture.AuditName, fixture.AuditResult, params...)
+			})
+		})
+	})
+}
+
 func RunBenchmarks(b *testing.B, benchmark func(*testing.B, wlog.LoggerProvider)) {
 	b.Run("noop", func(b *testing.B) { benchmark(b, wlog.NewNoopLoggerProvider()) })
-	b.Run("json.Marshal", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
-	b.Run("glog", func(b *testing.B) { benchmark(b, wlogglog.LoggerProvider()) })
+	b.Run("json", func(b *testing.B) { benchmark(b, wlog.NewJSONMarshalLoggerProvider()) })
 	b.Run("zap", func(b *testing.B) { benchmark(b, wlogzap.LoggerProvider()) })
 	b.Run("zerolog", func(b *testing.B) { benchmark(b, wlogzerolog.LoggerProvider()) })
-	b.Run("tmpl", func(b *testing.B) { benchmark(b, wlogtmpl.LoggerProvider(nil)) })
+}
+
+// Parallel calls share one logger and writer to include provider contention.
+func benchmarkLogCalls(b *testing.B, emit func()) {
+	b.Run("serial", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			emit()
+		}
+	})
+	b.Run("parallel", func(b *testing.B) {
+		b.ReportAllocs()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				emit()
+			}
+		})
+	})
 }

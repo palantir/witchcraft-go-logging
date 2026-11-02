@@ -40,8 +40,7 @@ func newZapLogEntry() *zapLogEntry {
 
 func zapLogEntrySetValue[ValT any](entry *zapLogEntry, fn func(k string, v ValT) zap.Field, k string, v ValT) {
 	entry.delete(k)
-	field := fn(k, v)
-	entry.fields[k] = &field
+	entry.fields[k] = new(fn(k, v))
 }
 
 func (e *zapLogEntry) delete(k string) {
