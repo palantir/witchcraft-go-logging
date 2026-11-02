@@ -14,11 +14,15 @@
 
 package audit3log
 
+import (
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+)
+
 type wrappedLogger struct {
 	logger Logger
 	params []Param
 }
 
 func (w *wrappedLogger) Audit(name string, result AuditResultType, params ...Param) {
-	w.logger.Audit(name, result, append(w.params, params...)...)
+	w.logger.Audit(name, result, wloginternal.AppendParams(w.params, params)...)
 }
