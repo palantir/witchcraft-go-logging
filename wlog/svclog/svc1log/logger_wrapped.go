@@ -16,6 +16,7 @@ package svc1log
 
 import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type wrappedLogger struct {
@@ -24,19 +25,19 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Debug(msg string, params ...Param) {
-	w.logger.Debug(msg, append(w.params, params...)...)
+	w.logger.Debug(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Info(msg string, params ...Param) {
-	w.logger.Info(msg, append(w.params, params...)...)
+	w.logger.Info(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Warn(msg string, params ...Param) {
-	w.logger.Warn(msg, append(w.params, params...)...)
+	w.logger.Warn(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Error(msg string, params ...Param) {
-	w.logger.Error(msg, append(w.params, params...)...)
+	w.logger.Error(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) SetLevel(level wlog.LogLevel) {
