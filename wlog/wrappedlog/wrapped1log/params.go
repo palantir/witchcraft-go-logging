@@ -66,98 +66,75 @@ func (f paramFunc) apply(entry wlog.LogEntry) {
 
 func audit2PayloadParams(name string, result audit2log.AuditResultType, params []audit2log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		audit2Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(audit2Log, audit2log.ToParams(name, result, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadAuditLogV2)
-		payload.AnyMapValue(PayloadAuditLogV2, audit2Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadAuditLogV2, audit2log.ToParams(name, result, params))
 	})
 }
 
 func audit3PayloadParams(name string, result audit3log.AuditResultType, params []audit3log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		audit3Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(audit3Log, audit3log.ToParams(name, result, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadAuditLogV3)
-		payload.AnyMapValue(PayloadAuditLogV3, audit3Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadAuditLogV3, audit3log.ToParams(name, result, params))
 	})
 }
 
 func diag1PayloadParams(diagnostic logging.Diagnostic, params []diag1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		diag1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(diag1Log, diag1log.ToParams(diagnostic, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadDiagnosticLogV1)
-		payload.AnyMapValue(PayloadDiagnosticLogV1, diag1Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadDiagnosticLogV1, diag1log.ToParams(diagnostic, params))
 	})
 }
 
 func evt2PayloadParams(name string, params []evt2log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		evt2Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(evt2Log, evt2log.ToParams(name, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadEventLogV2)
-		payload.AnyMapValue(PayloadEventLogV2, evt2Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadEventLogV2, evt2log.ToParams(name, params))
 	})
 }
 
 func metric1PayloadParams(metricName, metricType string, params []metric1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		metric1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(metric1Log, metric1log.ToParams(metricName, metricType, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadMetricLogV1)
-		payload.AnyMapValue(PayloadMetricLogV1, metric1Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadMetricLogV1, metric1log.ToParams(metricName, metricType, params))
 	})
 }
 
 func req2PayloadParams(r req2log.Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms req2log.ParamPerms) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		req2Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(req2Log, req2log.ToParams(r, idsExtractor, pathParamPerms, queryParamPerms, headerParamPerms))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadRequestLogV2)
-		payload.AnyMapValue(PayloadRequestLogV2, req2Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadRequestLogV2, req2log.ToParams(r, idsExtractor, pathParamPerms, queryParamPerms, headerParamPerms))
 	})
 }
 
-func svc1PayloadParams(message string, level wlog.Param, params []svc1log.Param) Param {
+func svc1PayloadParams(obj logging.ServiceLogV1) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		svc1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(svc1Log, wlog.ParamsWithMessage(message, svc1log.ToParams(level, params)))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadServiceLogV1)
-		payload.AnyMapValue(PayloadServiceLogV1, svc1Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		payloadParams := []wlog.Param{svc1log.ObjectToParam(&obj)}
+		// svc1log.ObjectToParam doesn't emit "message" (the direct provider path gets it via the msg arg); emit it
+		// here so the embedded service.1 payload includes the message.
+		if obj.Message != "" {
+			payloadParams = append(payloadParams, wlog.StringParam(svc1log.MessageKey, obj.Message))
+		}
+		applyPayload(entry, PayloadServiceLogV1, payloadParams)
 	})
 }
 
 func trc1PayloadParams(span wtracing.SpanModel, params ...trc1log.Param) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		trc1Log := wlog.NewMapLogEntry()
-		wlog.ApplyParams(trc1Log, trc1log.ToParams(span, params))
-		payload := wlog.NewMapLogEntry()
-		payload.StringValue(PayloadTypeKey, PayloadTraceLogV1)
-		payload.AnyMapValue(PayloadTraceLogV1, trc1Log.AllValues())
-
-		entry.AnyMapValue(PayloadKey, payload.AllValues())
+		applyPayload(entry, PayloadTraceLogV1, trc1log.ToParams(span, params))
 	})
+}
+
+func applyPayload(entry wlog.LogEntry, payloadType string, params []wlog.Param) {
+	inner := wlog.NewMapLogEntry()
+	wlog.ApplyParams(inner, params)
+	entry.AnyMapValue(PayloadKey, map[string]any{
+		PayloadTypeKey: payloadType,
+		payloadType:    inner.AllValues(),
+	})
+}
+
+var wrappedLogTypeParam = wlog.StringParam(wlog.TypeKey, TypeValue)
+
+func wrappedParams(name, version string, payload Param) []wlog.Param {
+	return []wlog.Param{
+		wrappedLogTypeParam,
+		wlog.NewParam(wrappedTypeParams(name, version).apply),
+		wlog.NewParam(payload.apply),
+	}
 }
 
 func wrappedTypeParams(name, version string) Param {

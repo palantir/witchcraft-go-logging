@@ -15,7 +15,9 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
@@ -30,25 +32,25 @@ type wrappedSvc1Logger struct {
 
 func (l *wrappedSvc1Logger) Debug(msg string, params ...svc1log.Param) {
 	if l.Enabled(wlog.DebugLevel) {
-		l.logger.Debug("", l.toServiceParams(msg, svc1log.DebugLevelParam(), params)...)
+		l.log(svc1log.LevelDebug, msg, params)
 	}
 }
 
 func (l *wrappedSvc1Logger) Info(msg string, params ...svc1log.Param) {
 	if l.Enabled(wlog.InfoLevel) {
-		l.logger.Info("", l.toServiceParams(msg, svc1log.InfoLevelParam(), params)...)
+		l.log(svc1log.LevelInfo, msg, params)
 	}
 }
 
 func (l *wrappedSvc1Logger) Warn(msg string, params ...svc1log.Param) {
 	if l.Enabled(wlog.WarnLevel) {
-		l.logger.Warn("", l.toServiceParams(msg, svc1log.WarnLevelParam(), params)...)
+		l.log(svc1log.LevelWarn, msg, params)
 	}
 }
 
 func (l *wrappedSvc1Logger) Error(msg string, params ...svc1log.Param) {
 	if l.Enabled(wlog.ErrorLevel) {
-		l.logger.Error("", l.toServiceParams(msg, svc1log.ErrorLevelParam(), params)...)
+		l.log(svc1log.LevelError, msg, params)
 	}
 }
 
@@ -60,10 +62,23 @@ func (l *wrappedSvc1Logger) Enabled(level wlog.LogLevel) bool {
 	return l.level == nil || l.level.Enabled(level)
 }
 
-func (l *wrappedSvc1Logger) toServiceParams(message string, levelParam wlog.Param, inParams []svc1log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(svc1PayloadParams(message, levelParam, append(l.params, inParams...)).apply)
-	return outParams
+func (l *wrappedSvc1Logger) log(level logging.LogLevel, message string, params []svc1log.Param) {
+	// Evaluate params before provider dispatch so caller attribution is independent of the backend.
+	obj := svc1log.ToObject(level, message, wloginternal.AppendParams(l.params, params))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromServiceLogV1(obj))
+		return
+	}
+
+	entryParams := wrappedParams(l.name, l.version, svc1PayloadParams(obj))
+	switch level.Value() {
+	case logging.LogLevel_DEBUG:
+		l.logger.Debug("", entryParams...)
+	case logging.LogLevel_INFO:
+		l.logger.Info("", entryParams...)
+	case logging.LogLevel_WARN:
+		l.logger.Warn("", entryParams...)
+	case logging.LogLevel_ERROR:
+		l.logger.Error("", entryParams...)
+	}
 }

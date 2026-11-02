@@ -17,6 +17,7 @@ package wrapped1log
 import (
 	"io"
 
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
@@ -28,6 +29,21 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
 )
+
+// conjureLogger consumes borrowed log objects synchronously. Implementations must copy
+// any object or nested data they retain after the method returns.
+type conjureLogger interface {
+	LogWrappedLogV1(*logging.WrappedLogV1)
+}
+
+func emitObject(logger conjureLogger, name, version string, payload logging.WrappedLogV1Payload) {
+	logger.LogWrappedLogV1(&logging.WrappedLogV1{
+		Type:          TypeValue,
+		Payload:       payload,
+		EntityName:    name,
+		EntityVersion: version,
+	})
+}
 
 var _ Logger = (*defaultLogger)(nil)
 
@@ -114,10 +130,4 @@ func (l *defaultLogger) Trace() trc1log.Logger {
 		version: l.version,
 		logger:  l.logger,
 	}
-}
-
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-	}),
 }

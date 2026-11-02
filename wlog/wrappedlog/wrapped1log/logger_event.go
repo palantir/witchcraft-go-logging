@@ -31,9 +31,5 @@ func (l *wrappedEvt2Logger) Event(name string, params ...evt2log.Param) {
 }
 
 func (l *wrappedEvt2Logger) toEventParams(name string, params []evt2log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(evt2PayloadParams(name, params).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, evt2PayloadParams(name, params))
 }

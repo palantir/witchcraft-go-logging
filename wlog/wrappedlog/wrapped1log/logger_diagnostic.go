@@ -31,9 +31,5 @@ func (l *wrappedDiag1Logger) Diagnostic(diagnostic logging.Diagnostic, params ..
 }
 
 func (l *wrappedDiag1Logger) toDiagParams(diagnostic logging.Diagnostic, inParams []diag1log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(diag1PayloadParams(diagnostic, inParams).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, diag1PayloadParams(diagnostic, inParams))
 }

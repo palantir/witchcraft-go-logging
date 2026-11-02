@@ -31,9 +31,5 @@ func (l *wrappedMetric1Logger) Metric(name, typ string, params ...metric1log.Par
 }
 
 func (l *wrappedMetric1Logger) toMetricParams(metricName, metricType string, inParams []metric1log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(metric1PayloadParams(metricName, metricType, inParams).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, metric1PayloadParams(metricName, metricType, inParams))
 }

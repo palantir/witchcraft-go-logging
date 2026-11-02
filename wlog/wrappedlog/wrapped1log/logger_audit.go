@@ -31,9 +31,5 @@ func (l *wrappedAudit2Logger) Audit(name string, result audit2log.AuditResultTyp
 }
 
 func (l *wrappedAudit2Logger) toAuditParams(name string, result audit2log.AuditResultType, params []audit2log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(audit2PayloadParams(name, result, params).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, audit2PayloadParams(name, result, params))
 }

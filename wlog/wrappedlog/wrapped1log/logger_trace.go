@@ -32,11 +32,7 @@ func (l *wrappedTrc1Logger) Log(span wtracing.SpanModel, params ...trc1log.Param
 }
 
 func (l *wrappedTrc1Logger) toTraceParams(span wtracing.SpanModel, inParams []trc1log.Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(trc1PayloadParams(span, inParams...).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, trc1PayloadParams(span, inParams...))
 }
 
 func (l *wrappedTrc1Logger) Send(span wtracing.SpanModel) {

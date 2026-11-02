@@ -50,11 +50,7 @@ func (l *wrappedReq2Logger) HeaderParamPerms() req2log.ParamPerms {
 }
 
 func (l *wrappedReq2Logger) toRequestParams(r req2log.Request) []wlog.Param {
-	outParams := make([]wlog.Param, len(defaultTypeParam)+2)
-	copy(outParams, defaultTypeParam)
-	outParams[len(defaultTypeParam)] = wlog.NewParam(wrappedTypeParams(l.name, l.version).apply)
-	outParams[len(defaultTypeParam)+1] = wlog.NewParam(req2PayloadParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms).apply)
-	return outParams
+	return wrappedParams(l.name, l.version, req2PayloadParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms))
 }
 
 type req2LoggerBuilder struct {
