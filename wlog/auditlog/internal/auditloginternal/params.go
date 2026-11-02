@@ -15,71 +15,59 @@
 package auditloginternal
 
 import (
-	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 )
 
+// AuditParam holds the per-format mutators for an audit parameter. A single Param can mutate either or both of the
+// audit.v2 and audit.v3 log structs depending on which fields it represents.
 type AuditParam struct {
-	Audit2ParamFn func(entry wlog.LogEntry)
-	Audit3ParamFn func(entry wlog.LogEntry)
-}
-
-func auditNameResultParam(name string, resultType AuditResultType) AuditParam {
-	return AuditParam{
-		Audit2ParamFn: func(entry wlog.LogEntry) {
-			entry.StringValue(Audit2NameKey, name)
-			entry.StringValue(Audit2ResultKey, string(resultType))
-		},
-		Audit3ParamFn: func(entry wlog.LogEntry) {
-			entry.StringValue(Audit3NameKey, name)
-			entry.StringValue(Audit3ResultKey, string(resultType))
-		},
-	}
+	Audit2ParamFn func(*logging.AuditLogV2)
+	Audit3ParamFn func(*logging.AuditLogV3)
+	LogEntryID    *string
 }
 
 func uidParam(uid string) AuditParam {
-	return sameImplParamFn(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
-	})
+	return optStringParam(uid,
+		func(log *logging.AuditLogV2, v *logging.UserId) { log.Uid = v },
+		func(log *logging.AuditLogV3, v *logging.UserId) { log.Uid = v })
 }
 
 func sidParam(sid string) AuditParam {
-	return sameImplParamFn(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
-	})
+	return optStringParam(sid,
+		func(log *logging.AuditLogV2, v *logging.SessionId) { log.Sid = v },
+		func(log *logging.AuditLogV3, v *logging.SessionId) { log.Sid = v })
 }
 
 func tokenIDParam(tokenID string) AuditParam {
-	return sameImplParamFn(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
-	})
+	return optStringParam(tokenID,
+		func(log *logging.AuditLogV2, v *logging.TokenId) { log.TokenId = v },
+		func(log *logging.AuditLogV3, v *logging.TokenId) { log.TokenId = v })
 }
 
 func orgIDParam(orgID string) AuditParam {
-	return sameImplParamFn(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
-	})
+	return optStringParam(orgID,
+		func(log *logging.AuditLogV2, v *logging.OrganizationId) { log.OrgId = v },
+		func(log *logging.AuditLogV3, v *logging.OrganizationId) { log.OrgId = v })
 }
 
 func traceIDParam(traceID string) AuditParam {
-	return sameImplParamFn(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TraceIDKey, traceID)
-	})
+	return optStringParam(traceID,
+		func(log *logging.AuditLogV2, v *logging.TraceId) { log.TraceId = v },
+		func(log *logging.AuditLogV3, v *logging.TraceId) { log.TraceId = v })
 }
 
 func originParam(origin string) AuditParam {
-	return AuditParam{
-		Audit2ParamFn: func(entry wlog.LogEntry) {
-			entry.OptionalStringValue(Audit2OriginKey, origin)
-		},
-		Audit3ParamFn: func(entry wlog.LogEntry) {
-			entry.OptionalStringValue(Audit3OriginKey, origin)
-		},
-	}
+	return optStringParam(origin,
+		func(log *logging.AuditLogV2, v *string) { log.Origin = v },
+		func(log *logging.AuditLogV3, v *string) { log.Origin = v })
 }
 
-func sameImplParamFn(fn func(entry wlog.LogEntry)) AuditParam {
+// optStringParam builds an AuditParam that sets an optional string field (of newtype T) on both the audit.v2 and
+// audit.v3 structs. Empty values clear previously supplied values.
+func optStringParam[T ~string](value string, set2 func(*logging.AuditLogV2, *T), set3 func(*logging.AuditLogV3, *T)) AuditParam {
+	v := T(value)
 	return AuditParam{
-		Audit2ParamFn: fn,
-		Audit3ParamFn: fn,
+		Audit2ParamFn: func(log *logging.AuditLogV2) { set2(log, &v) },
+		Audit3ParamFn: func(log *logging.AuditLogV3) { set3(log, &v) },
 	}
 }

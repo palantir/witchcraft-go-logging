@@ -51,9 +51,11 @@ func convertExternalParamsToInternalParams(params []Param) []auditloginternal.Au
 		return nil
 	}
 	out := make([]auditloginternal.Audit3Param, len(params))
-	for i := range out {
-		out[i] = auditloginternal.Audit3Param{
-			Param: params[i].getParam(),
+	for i, param := range params {
+		if param != nil {
+			out[i] = auditloginternal.Audit3Param{
+				Param: param.getParam(),
+			}
 		}
 	}
 	return out
@@ -112,11 +114,6 @@ func LogEntryID(logEntryID string) Param {
 
 func UserAgent(userAgent string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3UserAgent(userAgent))
-}
-
-// unexported because this should only be set by the "Category" param
-func categories(categories ...string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3Categories(categories))
 }
 
 func Entities(entities []any) Param {

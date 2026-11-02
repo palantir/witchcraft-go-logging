@@ -17,7 +17,9 @@ package wrapped1logtests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -100,7 +102,7 @@ func Audit3TestCases(entityName, entityVersion string) []Audit3TestCase {
 						"result":     objmatcher.NewEqualsMatcher(resultValue),
 						"logEntryId": objmatcher.NewRegExpMatcher(uuidRegexpValue),
 						"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"loadedResources": objmatcher.NewEqualsMatcher(nil),
+							"loadedResources": emptyOrNullMatcher{empty: []any{}},
 							"requestKey":      objmatcher.NewEqualsMatcher("requestValue"),
 						}),
 						"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -115,12 +117,41 @@ func Audit3TestCases(entityName, entityVersion string) []Audit3TestCase {
 }
 
 func Audit3LogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {
-	audit3LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
-	rFieldIsntOverwrittenByRFieldsTest(t, entityName, entityVersion, loggerProvider)
-	extraRFieldsDoNotAppear(t, entityName, entityVersion, loggerProvider)
+	audit3LogJSONTestSuite(t, entityName, entityVersion, loggerProvider, false)
 }
 
-func audit3LogJSONOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {
+func Audit3TypedLogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {
+	audit3LogJSONTestSuite(t, entityName, entityVersion, loggerProvider, true)
+}
+
+func audit3LogJSONTestSuite(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger, typed bool) {
+	audit3LogJSONOutputTests(t, entityName, entityVersion, loggerProvider, typed)
+	rFieldIsntOverwrittenByRFieldsTest(t, entityName, entityVersion, loggerProvider, typed)
+	extraRFieldsDoNotAppear(t, entityName, entityVersion, loggerProvider, typed)
+}
+
+type emptyOrNullMatcher struct{ empty any }
+
+func (m emptyOrNullMatcher) Matches(got any) error {
+	if got == nil || reflect.DeepEqual(got, m.empty) {
+		return nil
+	}
+	return fmt.Errorf("want null or %v, got %v", m.empty, got)
+}
+
+func matchAudit3(want objmatcher.MapMatcher, got map[string]any, typed bool) error {
+	if typed {
+		payload := want["payload"].(objmatcher.MapMatcher)
+		log := payload["auditLogV3"].(objmatcher.MapMatcher)
+		for _, key := range []string{"deployment", "host", "product", "productVersion", "producerType"} {
+			log[key] = objmatcher.NewEqualsMatcher("")
+		}
+		log["eventId"] = objmatcher.NewRegExpMatcher(uuidRegexpValue)
+	}
+	return want.Matches(withoutProviderTime(got))
+}
+
+func audit3LogJSONOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger, typed bool) {
 	for i, tc := range Audit3TestCases(entityName, entityVersion) {
 		t.Run(tc.Name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
@@ -144,14 +175,14 @@ func audit3LogJSONOutputTests(t *testing.T, entityName, entityVersion string, lo
 			err := safejson.Unmarshal(logEntry, &gotAuditLog)
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.Name, string(logEntry))
 
-			assert.NoError(t, tc.JSONMatcher.Matches(gotAuditLog), "Case %d: %s", i, tc.Name)
+			assert.NoError(t, matchAudit3(tc.JSONMatcher, gotAuditLog, typed), "Case %d: %s", i, tc.Name)
 		})
 	}
 }
 
 // Verifies that if different parameters are specified using ResultField/RequestField and ResultFields/RequestFields,
 // all of the values are present in the final output (that is, these parameters should be additive).
-func rFieldIsntOverwrittenByRFieldsTest(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {
+func rFieldIsntOverwrittenByRFieldsTest(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger, typed bool) {
 	mapFieldMatcher := objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 		"key1": objmatcher.NewEqualsMatcher("val1"),
 		"key2": objmatcher.NewEqualsMatcher("val2"),
@@ -226,14 +257,14 @@ func rFieldIsntOverwrittenByRFieldsTest(t *testing.T, entityName, entityVersion 
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, tc.want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, matchAudit3(tc.want, auditLog, typed), "Case %d: %s", i, tc.name)
 		})
 	}
 }
 
 // Verifies that parameters remain separate between different logger calls (ensures there is not a bug where parameters
 // are modified by making a logger call).
-func extraRFieldsDoNotAppear(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {
+func extraRFieldsDoNotAppear(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger, typed bool) {
 	const (
 		resultFieldsKey  = "resultFields"
 		requestFieldsKey = "requestFields"
@@ -298,7 +329,7 @@ func extraRFieldsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, matchAudit3(want, auditLog, typed), "Case %d: %s", i, tc.name)
 
 			buf.Reset()
 			logger.Audit("audited action name", audit3log.AuditResultSuccess, reusedParams)
@@ -332,7 +363,7 @@ func extraRFieldsDoNotAppear(t *testing.T, entityName, entityVersion string, log
 				i,
 				tc.name,
 				string(logEntry))
-			assert.NoError(t, want.Matches(auditLog), "Case %d: %s", i, tc.name)
+			assert.NoError(t, matchAudit3(want, auditLog, typed), "Case %d: %s", i, tc.name)
 		})
 	}
 }

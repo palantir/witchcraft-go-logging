@@ -15,6 +15,7 @@
 package wrapped1log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
 )
@@ -27,9 +28,16 @@ type wrappedAudit3Logger struct {
 }
 
 func (l *wrappedAudit3Logger) Audit(name string, result audit3log.AuditResultType, params ...audit3log.Param) {
-	l.logger.Log(l.toAuditParams(name, result, params)...)
-}
-
-func (l *wrappedAudit3Logger) toAuditParams(name string, result audit3log.AuditResultType, params []audit3log.Param) []wlog.Param {
-	return wrappedParams(l.name, l.version, audit3PayloadParams(name, result, params))
+	if direct, ok := l.logger.(conjureLogger); ok {
+		obj, fallback := audit3log.ToDirectObject(name, result, params)
+		if fallback == nil {
+			emitObject(direct, l.name, l.version, logging.NewWrappedLogV1PayloadFromAuditLogV3(obj))
+		} else {
+			l.logger.Log(wrappedParams(l.name, l.version, paramFunc(func(entry wlog.LogEntry) {
+				applyPayload(entry, PayloadAuditLogV3, []wlog.Param{fallback})
+			}))...)
+		}
+		return
+	}
+	l.logger.Log(wrappedParams(l.name, l.version, audit3PayloadParams(name, result, params))...)
 }

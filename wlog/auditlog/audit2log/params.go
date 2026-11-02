@@ -15,6 +15,7 @@
 package audit2log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
 )
@@ -48,7 +49,11 @@ func ApplyParam(p Param, entry wlog.LogEntry) {
 	if p == nil {
 		return
 	}
-	p.getParam().Audit2ParamFn(entry)
+	log := new(logging.AuditLogV2)
+	if fn := p.getParam().Audit2ParamFn; fn != nil {
+		fn(log)
+	}
+	auditloginternal.ApplyAudit2ObjectParams(log, entry)
 }
 
 func convertInternalParamToExportedParam(param auditloginternal.Audit2Param) Param {
@@ -63,8 +68,10 @@ func convertExternalParamsToInternalParams(params []Param) []auditloginternal.Au
 	}
 	out := make([]auditloginternal.Audit2Param, len(params))
 	for i, param := range params {
-		out[i] = auditloginternal.Audit2Param{
-			Param: param.getParam(),
+		if param != nil {
+			out[i] = auditloginternal.Audit2Param{
+				Param: param.getParam(),
+			}
 		}
 	}
 	return out

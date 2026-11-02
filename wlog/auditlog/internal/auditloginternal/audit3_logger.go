@@ -61,7 +61,7 @@ func Audit3NewFromCreator(audit3Writer, audit2Writer io.Writer, creator wlog.Log
 	return &audit3LoggerImpl{
 		logger: &logger{
 			audit3Logger: creator(audit3Writer),
-			audit2Logger: audit2Logger,
+			audit2Logger: newAudit2Logger(audit2Logger),
 		},
 	}
 }

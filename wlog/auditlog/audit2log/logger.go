@@ -53,14 +53,14 @@ func New(w io.Writer) Logger {
 }
 
 func NewDualLogger(audit2Writer, audit3Writer io.Writer) Logger {
-	return newDualLoggerFromCreator(audit2Writer, audit3Writer, wlog.DefaultLoggerProvider().NewLogger)
+	return NewDualLoggerFromCreator(audit2Writer, audit3Writer, wlog.DefaultLoggerProvider().NewLogger)
 }
 
 func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
-	return newDualLoggerFromCreator(w, nil, creator)
+	return NewDualLoggerFromCreator(w, nil, creator)
 }
 
-func newDualLoggerFromCreator(audit2Writer, audit3Writer io.Writer, creator wlog.LoggerCreator) Logger {
+func NewDualLoggerFromCreator(audit2Writer, audit3Writer io.Writer, creator wlog.LoggerCreator) Logger {
 	return convertInternalLoggerToExternalLogger(auditloginternal.Audit2NewFromCreator(audit2Writer, audit3Writer, creator))
 }
 

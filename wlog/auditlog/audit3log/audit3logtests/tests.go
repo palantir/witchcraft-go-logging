@@ -17,12 +17,14 @@ package audit3logtests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/uuid"
 	v2 "github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/category/v2"
 	commonv2 "github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/common/v2"
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
@@ -30,6 +32,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type nilOrEmptySliceMatcher struct{}
+
+func (nilOrEmptySliceMatcher) Matches(value any) error {
+	if value == nil {
+		return nil
+	}
+	if items, ok := value.([]any); ok && len(items) == 0 {
+		return nil
+	}
+	return fmt.Errorf("want null or empty array, got %T(%v)", value, value)
+}
 
 type TestCase struct {
 	TestCaseName string
@@ -227,7 +241,7 @@ func TestCases() []TestCase {
 				}),
 				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
 				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"loadedResources": objmatcher.NewEqualsMatcher(nil),
+					"loadedResources": nilOrEmptySliceMatcher{},
 					"key-1":           objmatcher.NewEqualsMatcher("value-1"),
 					"key-2":           objmatcher.NewEqualsMatcher(json.Number("2")),
 				}),
@@ -374,7 +388,7 @@ func TestCases() []TestCase {
 				}),
 				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
 				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"loadedResources": objmatcher.NewEqualsMatcher(nil),
+					"loadedResources": nilOrEmptySliceMatcher{},
 					"key-1":           objmatcher.NewEqualsMatcher("value-1"),
 					"key-2":           objmatcher.NewEqualsMatcher(json.Number("2")),
 				}),
@@ -525,12 +539,12 @@ func TestCases() []TestCase {
 				"sourceOrigin": objmatcher.NewEqualsMatcher("test-source-origin"),
 				"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
 					"containerSearchQuery": objmatcher.NewEqualsMatcher(nil),
-					"loadedResources":      objmatcher.NewEqualsMatcher(nil),
+					"loadedResources":      nilOrEmptySliceMatcher{},
 					"key-1":                objmatcher.NewEqualsMatcher("value-1"),
 					"key-2":                objmatcher.NewEqualsMatcher("value-2"),
 				}),
 				"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-					"containerSearchResults":   objmatcher.NewEqualsMatcher(nil),
+					"containerSearchResults":   nilOrEmptySliceMatcher{},
 					"test-result-fields-key-1": objmatcher.NewEqualsMatcher("test-result-fields-value-1"),
 					"test-result-fields-key-2": objmatcher.NewEqualsMatcher("test-result-fields-value-2"),
 				}),
@@ -688,6 +702,70 @@ func TestCases() []TestCase {
 }
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	jsonTestSuite(t, loggerProvider, false)
+	testSuppliedLogEntryID(t, loggerProvider)
+}
+
+func JSONConjureTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	jsonTestSuite(t, loggerProvider, true)
+	testSuppliedLogEntryID(t, loggerProvider)
+	t.Run("optional empty fields", func(t *testing.T) {
+		var buf bytes.Buffer
+		loggerProvider(&buf).Audit("test", audit3log.AuditResultSuccess, audit3log.EventID("c15487b9-ff6a-4bb1-8c25-2433a185c438"))
+		var got map[string]any
+		require.NoError(t, safejson.Unmarshal(buf.Bytes(), &got))
+		for _, key := range []string{"organizations", "categories", "entities", "users", "origins"} {
+			require.NotContains(t, got, key)
+		}
+		for _, key := range []string{"requestParams", "requestFields", "resultParams", "resultFields"} {
+			require.NotContains(t, got, key)
+		}
+	})
+	for _, tc := range []struct {
+		name   string
+		params []audit3log.Param
+	}{
+		{name: "missing event ID"},
+		{name: "invalid event ID", params: []audit3log.Param{audit3log.EventID("invalid")}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			loggerProvider(&buf).Audit("test", audit3log.AuditResultSuccess, tc.params...)
+			var got map[string]any
+			require.NoError(t, safejson.Unmarshal(buf.Bytes(), &got))
+			require.NotContains(t, got, "eventId")
+		})
+	}
+}
+
+func testSuppliedLogEntryID(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger) {
+	const validID = "46ac025f-5d70-4a79-8e8e-270da9635a43"
+	for _, tc := range []struct {
+		name string
+		ids  []string
+	}{
+		{name: "valid supplied log entry ID", ids: []string{validID}},
+		{name: "non-canonical supplied log entry ID", ids: []string{"46AC025F-5D70-4A79-8E8E-270DA9635A43"}},
+		{name: "malformed supplied log entry ID", ids: []string{"invalid-uuid"}},
+		{name: "empty supplied log entry ID", ids: []string{""}},
+		{name: "valid log entry ID after malformed", ids: []string{"invalid-uuid", validID}},
+		{name: "malformed log entry ID after valid", ids: []string{validID, "invalid-uuid"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			params := []audit3log.Param{audit3log.EventID("c15487b9-ff6a-4bb1-8c25-2433a185c438")}
+			for _, id := range tc.ids {
+				params = append(params, audit3log.LogEntryID(id))
+			}
+			loggerProvider(&buf).Audit("test", audit3log.AuditResultSuccess, params...)
+			var got map[string]any
+			require.NoError(t, safejson.Unmarshal(buf.Bytes(), &got))
+			require.Equal(t, tc.ids[len(tc.ids)-1], got["logEntryId"])
+		})
+	}
+}
+
+func jsonTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logger, direct bool) {
 	for i, tc := range TestCases() {
 		t.Run(tc.TestCaseName, func(t *testing.T) {
 			buf := &bytes.Buffer{}
@@ -703,6 +781,19 @@ func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer) audit3log.Logg
 			logEntry := buf.Bytes()
 			err := safejson.Unmarshal(logEntry, &gotAuditLog)
 			require.NoError(t, err, "Case %d: %s\nAudit log line is not a valid map: %v", i, tc.TestCaseName, string(logEntry))
+			if direct {
+				require.NotContains(t, gotAuditLog, "requestParams")
+				require.NotContains(t, gotAuditLog, "resultParams")
+				if users, ok := gotAuditLog["users"].([]any); ok {
+					for _, user := range users {
+						require.IsType(t, map[string]any{}, user)
+						userMap := user.(map[string]any)
+						if groups, ok := userMap["groups"].([]any); ok && len(groups) == 0 {
+							t.Errorf("empty groups should be omitted: %v", userMap)
+						}
+					}
+				}
+			}
 
 			assert.NoError(t, tc.JSONMatcher.Matches(gotAuditLog), "Case %d: %s", i, tc.TestCaseName)
 		})
@@ -736,6 +827,39 @@ func DualLoggingJSONTestSuite(t *testing.T, dualLoggerProvider func(audit3Writer
 			assertEqualNillableStringPointer(t, gotAuditV3Log.UserAgent, gotAuditV2Log.RequestParams, "_userAgent")
 			assert.Equal(t, gotAuditV3Log.EventId.String(), gotAuditV2Log.RequestParams["_auditEventId"])
 			assert.Equal(t, gotAuditV3Log.LogEntryId.String(), gotAuditV2Log.RequestParams["_auditLogEntryId"])
+		})
+	}
+	for _, tc := range []struct {
+		name string
+		ids  []string
+	}{
+		{name: "generated log entry ID"},
+		{name: "malformed log entry ID after valid", ids: []string{"46ac025f-5d70-4a79-8e8e-270da9635a43", "invalid-uuid"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var audit3Buf, audit2Buf bytes.Buffer
+			logger := dualLoggerProvider(&audit3Buf, &audit2Buf)
+			params := []audit3log.Param{audit3log.EventID("c15487b9-ff6a-4bb1-8c25-2433a185c438")}
+			for _, id := range tc.ids {
+				params = append(params, audit3log.LogEntryID(id))
+			}
+			for range 2 {
+				audit3Buf.Reset()
+				audit2Buf.Reset()
+				logger.Audit("test", audit3log.AuditResultSuccess, params...)
+				var audit3Log, audit2Log map[string]any
+				require.NoError(t, safejson.Unmarshal(audit3Buf.Bytes(), &audit3Log))
+				require.NoError(t, safejson.Unmarshal(audit2Buf.Bytes(), &audit2Log))
+				id := audit3Log["logEntryId"]
+				if len(tc.ids) > 0 {
+					require.Equal(t, tc.ids[len(tc.ids)-1], id)
+				} else {
+					_, err := uuid.ParseUUID(id.(string))
+					require.NoError(t, err)
+				}
+				require.Equal(t, id, audit2Log["requestParams"].(map[string]any)["_auditLogEntryId"])
+				require.Equal(t, audit3Log["time"], audit2Log["time"])
+			}
 		})
 	}
 }

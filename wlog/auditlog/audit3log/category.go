@@ -16,13 +16,14 @@ package audit3log
 
 import (
 	"context"
+	"slices"
 
 	werror "github.com/palantir/witchcraft-go-error"
 	v2 "github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/category/v2"
-	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	categoriespkg "github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/internal/categories"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type categoryInfo[T any] struct {
@@ -83,17 +84,17 @@ func (c *categoryInfo[T]) toParam(v T) Param {
 	return &paramStruct{
 		param: auditloginternal.Audit3Param{
 			Param: auditloginternal.AuditParam{
-				Audit2ParamFn: func(entry wlog.LogEntry) {
-					audit2log.ApplyParam(audit2log.RequestParam("_category", c.valueToCategory(v)), entry)
+				Audit2ParamFn: func(log *logging.AuditLogV2) {
+					wloginternal.SetMapParam(&log.RequestParams, "_category", any(c.valueToCategory(v)))
 				},
-				Audit3ParamFn: func(entry wlog.LogEntry) {
-					categories(c.categoryName).getParam().Audit3ParamFn(entry)
+				Audit3ParamFn: func(log *logging.AuditLogV3) {
+					log.Categories = append(log.Categories, c.categoryName)
 
 					for k, fieldVal := range c.requestFields {
-						RequestField(k, fieldVal.extractField(v)).getParam().Audit3ParamFn(entry)
+						wloginternal.SetMapParam(&log.RequestFields, k, fieldVal.extractField(v))
 					}
 					for k, fieldVal := range c.responseFields {
-						ResultField(k, fieldVal.extractField(v)).getParam().Audit3ParamFn(entry)
+						wloginternal.SetMapParam(&log.ResultFields, k, fieldVal.extractField(v))
 					}
 
 					// add all extracted entities
@@ -106,7 +107,7 @@ func (c *categoryInfo[T]) toParam(v T) Param {
 						for i, entity := range entities {
 							anyEntriesSlice[i] = entity
 						}
-						Entities(anyEntriesSlice).getParam().Audit3ParamFn(entry)
+						log.Entities = append(log.Entities, anyEntriesSlice...)
 					}
 
 					// add all extracted user IDs
@@ -115,13 +116,12 @@ func (c *categoryInfo[T]) toParam(v T) Param {
 						userIDExtractorFn = defaultUIDExtractor[T]
 					}
 					if userIDs, _ := userIDExtractorFn(v, c); len(userIDs) > 0 {
-						var users []ContextualizedUser
+						log.Users = slices.Grow(log.Users, len(userIDs))
 						for _, userID := range userIDs {
-							users = append(users, ContextualizedUser{
-								UID: string(userID),
+							log.Users = append(log.Users, logging.ContextualizedUser{
+								Uid: userID,
 							})
 						}
-						Users(users).getParam().Audit3ParamFn(entry)
 					}
 				},
 			},

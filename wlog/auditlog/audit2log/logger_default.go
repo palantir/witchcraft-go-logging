@@ -15,10 +15,16 @@
 package audit2log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
 )
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
 	return auditloginternal.Audit2ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+}
+
+func ToObject(name string, result AuditResultType, inParams []Param) logging.AuditLogV2 {
+	return *auditloginternal.BuildAuditLogV2(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
 }

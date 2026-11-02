@@ -15,10 +15,18 @@
 package audit3log
 
 import (
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
 )
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
 	return auditloginternal.Audit3ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+}
+
+// ToDirectObject builds an audit object. A non-nil fallback parameter must be emitted instead of the object
+// to preserve missing event IDs and noncanonical log-entry IDs. Both outputs share the same populated data.
+func ToDirectObject(name string, result AuditResultType, inParams []Param) (logging.AuditLogV3, wlog.Param) {
+	return auditloginternal.Audit3ToDirectObject(name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
 }
