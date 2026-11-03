@@ -16,6 +16,7 @@ package svc1log
 
 import (
 	"io"
+	"slices"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 )
@@ -47,15 +48,19 @@ func WithParams(logger Logger, params ...Param) Logger {
 	// logger evaluates its parameters at the same level in the stack, which is required to ensure that the
 	// OriginFromCallLine parameter works generically.
 
+	// The params of a wrappedLogger are clipped so that their capacity is equal to their length. This ensures that appending
+	// to them (as is done here and when logging) always allocates a new slice. Without this, loggers derived from the same
+	// logger and concurrent log calls on the same logger would write into the unused capacity of a shared backing array,
+	// overwriting each other's params.
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			params: slices.Clip(append(innerWrapped.params, params...)),
 		}
 	}
 
 	return &wrappedLogger{
 		logger: logger,
-		params: params,
+		params: slices.Clip(params),
 	}
 }
