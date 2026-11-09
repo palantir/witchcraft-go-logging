@@ -3,6 +3,7 @@ projects:
   witchcraft-logging-api:
     output-dir: ./conjure
     ir-locator: https://repo1.maven.org/maven2/com/palantir/witchcraft/api/witchcraft-logging-api/2.5.0/witchcraft-logging-api-2.5.0.conjure.json
+    omit-nil-collections: true
   audit-api:
     output-dir: ./conjure
     ir-locator: ./conjure/defs/audit-api-6.99.0.conjure.json

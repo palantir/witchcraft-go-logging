@@ -51,7 +51,7 @@ type AuditLogV2 struct {
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitzero"`
 	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
-	OtherUids []UserId `json:"otherUids"`
+	OtherUids []UserId `json:"otherUids,omitzero"`
 	/*
 	   Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier,
 	   or similar
@@ -62,42 +62,9 @@ type AuditLogV2 struct {
 	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
 	Result AuditResult `json:"result"`
 	// The parameters known at method invocation time.
-	RequestParams map[string]interface{} `json:"requestParams"`
+	RequestParams map[string]interface{} `json:"requestParams,omitzero"`
 	// Information derived within a method, commonly parts of the return value.
-	ResultParams map[string]interface{} `json:"resultParams"`
-}
-
-func (o AuditLogV2) MarshalJSON() ([]byte, error) {
-	if o.OtherUids == nil {
-		o.OtherUids = make([]UserId, 0)
-	}
-	if o.RequestParams == nil {
-		o.RequestParams = make(map[string]interface{})
-	}
-	if o.ResultParams == nil {
-		o.ResultParams = make(map[string]interface{})
-	}
-	type _tmpAuditLogV2 AuditLogV2
-	return safejson.Marshal(_tmpAuditLogV2(o))
-}
-
-func (o *AuditLogV2) UnmarshalJSON(data []byte) error {
-	type _tmpAuditLogV2 AuditLogV2
-	var rawAuditLogV2 _tmpAuditLogV2
-	if err := safejson.Unmarshal(data, &rawAuditLogV2); err != nil {
-		return err
-	}
-	if rawAuditLogV2.OtherUids == nil {
-		rawAuditLogV2.OtherUids = make([]UserId, 0)
-	}
-	if rawAuditLogV2.RequestParams == nil {
-		rawAuditLogV2.RequestParams = make(map[string]interface{})
-	}
-	if rawAuditLogV2.ResultParams == nil {
-		rawAuditLogV2.ResultParams = make(map[string]interface{})
-	}
-	*o = AuditLogV2(rawAuditLogV2)
-	return nil
+	ResultParams map[string]interface{} `json:"resultParams,omitzero"`
 }
 
 func (o AuditLogV2) MarshalYAML() (interface{}, error) {
@@ -141,7 +108,7 @@ type AuditLogV3 struct {
 	   they targeted.
 	   Not exposed to downstream consumers.
 	*/
-	Organizations []Organization `json:"organizations"`
+	Organizations []Organization `json:"organizations,omitzero"`
 	/*
 	   Unique identifier for this audit log event. If there are multiple log entries associated with this
 	   particular audit event, they will share the same eventId but will have different logEntryId and different
@@ -159,24 +126,24 @@ type AuditLogV3 struct {
 	   Each audit categories produces a set of keys that will be distributed between the request and
 	   response params.
 	*/
-	Categories []string `json:"categories"`
+	Categories []string `json:"categories,omitzero"`
 	/*
 	   All contextualized entities present in the request and response params of this log.
 	   Note: Some resources cannot be contextualized, and will not be included in this list as a result.
 	*/
-	Entities []interface{} `json:"entities"`
+	Entities []interface{} `json:"entities,omitzero"`
 	/*
 	   All contextualized users present in the request and response params of this log, including the top level
 	   UUID of this log.
 	*/
-	Users []ContextualizedUser `json:"users"`
+	Users []ContextualizedUser `json:"users,omitzero"`
 	/*
 	   All addresses attached to the request. Contains information
 	   from unreliable sources such as the X-Forwarded-For header.
 
 	   This value can be spoofed.
 	*/
-	Origins []string `json:"origins"`
+	Origins []string `json:"origins,omitzero"`
 	/*
 	   Origin of the network request. If a request goes through a proxy,
 	   this will contain the proxy''s address.
@@ -195,7 +162,7 @@ type AuditLogV3 struct {
 	   Should be translated to requestFields during emitting if requestFields is missing, by dropping the level
 	   from the SensitivityTaggedValue and directly using the payload as the value for the map.
 	*/
-	RequestParams map[string]SensitivityTaggedValue `json:"requestParams"`
+	RequestParams map[string]SensitivityTaggedValue `json:"requestParams,omitzero"`
 	/*
 	   The fields known at method invocation time.
 
@@ -204,7 +171,7 @@ type AuditLogV3 struct {
 
 	   This replaces requestParams and will take priority if present.
 	*/
-	RequestFields map[string]interface{} `json:"requestFields"`
+	RequestFields map[string]interface{} `json:"requestFields,omitzero"`
 	/*
 	   Information derived within a method, commonly parts of the return value.
 
@@ -216,7 +183,7 @@ type AuditLogV3 struct {
 	   Should be translated to resultFields during emitting if resultFields is missing, by dropping the level
 	   from the SensitivityTaggedValue and directly using the payload as the value for the map.
 	*/
-	ResultParams map[string]SensitivityTaggedValue `json:"resultParams"`
+	ResultParams map[string]SensitivityTaggedValue `json:"resultParams,omitzero"`
 	/*
 	   Information derived within a method, commonly parts of the return value.
 
@@ -225,7 +192,7 @@ type AuditLogV3 struct {
 
 	   This replaces resultParams and will take priority if present.
 	*/
-	ResultFields map[string]interface{} `json:"resultFields"`
+	ResultFields map[string]interface{} `json:"resultFields,omitzero"`
 	Time         datetime.DateTime      `json:"time"`
 	// User id (if available). This is the most downstream caller.
 	Uid *UserId `json:"uid,omitzero"`
@@ -250,75 +217,6 @@ type AuditLogV3 struct {
 	Result AuditResult `json:"result"`
 }
 
-func (o AuditLogV3) MarshalJSON() ([]byte, error) {
-	if o.Organizations == nil {
-		o.Organizations = make([]Organization, 0)
-	}
-	if o.Categories == nil {
-		o.Categories = make([]string, 0)
-	}
-	if o.Entities == nil {
-		o.Entities = make([]interface{}, 0)
-	}
-	if o.Users == nil {
-		o.Users = make([]ContextualizedUser, 0)
-	}
-	if o.Origins == nil {
-		o.Origins = make([]string, 0)
-	}
-	if o.RequestParams == nil {
-		o.RequestParams = make(map[string]SensitivityTaggedValue)
-	}
-	if o.RequestFields == nil {
-		o.RequestFields = make(map[string]interface{})
-	}
-	if o.ResultParams == nil {
-		o.ResultParams = make(map[string]SensitivityTaggedValue)
-	}
-	if o.ResultFields == nil {
-		o.ResultFields = make(map[string]interface{})
-	}
-	type _tmpAuditLogV3 AuditLogV3
-	return safejson.Marshal(_tmpAuditLogV3(o))
-}
-
-func (o *AuditLogV3) UnmarshalJSON(data []byte) error {
-	type _tmpAuditLogV3 AuditLogV3
-	var rawAuditLogV3 _tmpAuditLogV3
-	if err := safejson.Unmarshal(data, &rawAuditLogV3); err != nil {
-		return err
-	}
-	if rawAuditLogV3.Organizations == nil {
-		rawAuditLogV3.Organizations = make([]Organization, 0)
-	}
-	if rawAuditLogV3.Categories == nil {
-		rawAuditLogV3.Categories = make([]string, 0)
-	}
-	if rawAuditLogV3.Entities == nil {
-		rawAuditLogV3.Entities = make([]interface{}, 0)
-	}
-	if rawAuditLogV3.Users == nil {
-		rawAuditLogV3.Users = make([]ContextualizedUser, 0)
-	}
-	if rawAuditLogV3.Origins == nil {
-		rawAuditLogV3.Origins = make([]string, 0)
-	}
-	if rawAuditLogV3.RequestParams == nil {
-		rawAuditLogV3.RequestParams = make(map[string]SensitivityTaggedValue)
-	}
-	if rawAuditLogV3.RequestFields == nil {
-		rawAuditLogV3.RequestFields = make(map[string]interface{})
-	}
-	if rawAuditLogV3.ResultParams == nil {
-		rawAuditLogV3.ResultParams = make(map[string]SensitivityTaggedValue)
-	}
-	if rawAuditLogV3.ResultFields == nil {
-		rawAuditLogV3.ResultFields = make(map[string]interface{})
-	}
-	*o = AuditLogV3(rawAuditLogV3)
-	return nil
-}
-
 func (o AuditLogV3) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -340,29 +238,8 @@ type ContextualizedUser struct {
 	UserName  *string  `json:"userName,omitzero"`
 	FirstName *string  `json:"firstName,omitzero"`
 	LastName  *string  `json:"lastName,omitzero"`
-	Groups    []string `json:"groups"`
+	Groups    []string `json:"groups,omitzero"`
 	Realm     *string  `json:"realm,omitzero"`
-}
-
-func (o ContextualizedUser) MarshalJSON() ([]byte, error) {
-	if o.Groups == nil {
-		o.Groups = make([]string, 0)
-	}
-	type _tmpContextualizedUser ContextualizedUser
-	return safejson.Marshal(_tmpContextualizedUser(o))
-}
-
-func (o *ContextualizedUser) UnmarshalJSON(data []byte) error {
-	type _tmpContextualizedUser ContextualizedUser
-	var rawContextualizedUser _tmpContextualizedUser
-	if err := safejson.Unmarshal(data, &rawContextualizedUser); err != nil {
-		return err
-	}
-	if rawContextualizedUser.Groups == nil {
-		rawContextualizedUser.Groups = make([]string, 0)
-	}
-	*o = ContextualizedUser(rawContextualizedUser)
-	return nil
 }
 
 func (o ContextualizedUser) MarshalYAML() (interface{}, error) {
@@ -389,28 +266,7 @@ type DiagnosticLogV1 struct {
 	// The diagnostic being logged.
 	Diagnostic Diagnostic `json:"diagnostic"`
 	// Unredacted parameters
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
-}
-
-func (o DiagnosticLogV1) MarshalJSON() ([]byte, error) {
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpDiagnosticLogV1 DiagnosticLogV1
-	return safejson.Marshal(_tmpDiagnosticLogV1(o))
-}
-
-func (o *DiagnosticLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpDiagnosticLogV1 DiagnosticLogV1
-	var rawDiagnosticLogV1 _tmpDiagnosticLogV1
-	if err := safejson.Unmarshal(data, &rawDiagnosticLogV1); err != nil {
-		return err
-	}
-	if rawDiagnosticLogV1.UnsafeParams == nil {
-		rawDiagnosticLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	*o = DiagnosticLogV1(rawDiagnosticLogV1)
-	return nil
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 }
 
 func (o DiagnosticLogV1) MarshalYAML() (interface{}, error) {
@@ -463,7 +319,7 @@ type EventLogV1 struct {
 	// Type of event being represented, e.g. `gauge`, `histogram`, `counter`
 	EventType string `json:"eventType"`
 	// Observations, measurements and context associated with the event
-	Values map[string]interface{} `json:"values"`
+	Values map[string]interface{} `json:"values,omitzero"`
 	// User id (if available)
 	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
@@ -473,34 +329,7 @@ type EventLogV1 struct {
 	// Organization id (if available)
 	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Unsafe metadata describing the event
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
-}
-
-func (o EventLogV1) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make(map[string]interface{})
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpEventLogV1 EventLogV1
-	return safejson.Marshal(_tmpEventLogV1(o))
-}
-
-func (o *EventLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpEventLogV1 EventLogV1
-	var rawEventLogV1 _tmpEventLogV1
-	if err := safejson.Unmarshal(data, &rawEventLogV1); err != nil {
-		return err
-	}
-	if rawEventLogV1.Values == nil {
-		rawEventLogV1.Values = make(map[string]interface{})
-	}
-	if rawEventLogV1.UnsafeParams == nil {
-		rawEventLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	*o = EventLogV1(rawEventLogV1)
-	return nil
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 }
 
 func (o EventLogV1) MarshalYAML() (interface{}, error) {
@@ -526,7 +355,7 @@ type EventLogV2 struct {
 	// Dot-delimited name of event, e.g. `com.foundry.compass.api.Compass.http.ping.failures`
 	EventName string `json:"eventName"`
 	// Observations, measurements and context associated with the event
-	Values map[string]interface{} `json:"values"`
+	Values map[string]interface{} `json:"values,omitzero"`
 	// User id (if available)
 	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
@@ -538,42 +367,9 @@ type EventLogV2 struct {
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unsafe metadata describing the event
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 	// Additional dimensions that describe the instance of the log event
-	Tags map[string]string `json:"tags"`
-}
-
-func (o EventLogV2) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make(map[string]interface{})
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	if o.Tags == nil {
-		o.Tags = make(map[string]string)
-	}
-	type _tmpEventLogV2 EventLogV2
-	return safejson.Marshal(_tmpEventLogV2(o))
-}
-
-func (o *EventLogV2) UnmarshalJSON(data []byte) error {
-	type _tmpEventLogV2 EventLogV2
-	var rawEventLogV2 _tmpEventLogV2
-	if err := safejson.Unmarshal(data, &rawEventLogV2); err != nil {
-		return err
-	}
-	if rawEventLogV2.Values == nil {
-		rawEventLogV2.Values = make(map[string]interface{})
-	}
-	if rawEventLogV2.UnsafeParams == nil {
-		rawEventLogV2.UnsafeParams = make(map[string]interface{})
-	}
-	if rawEventLogV2.Tags == nil {
-		rawEventLogV2.Tags = make(map[string]string)
-	}
-	*o = EventLogV2(rawEventLogV2)
-	return nil
+	Tags map[string]string `json:"tags,omitzero"`
 }
 
 func (o EventLogV2) MarshalYAML() (interface{}, error) {
@@ -624,11 +420,11 @@ type MetricLogV1 struct {
 	// Type of metric being represented, e.g. `gauge`, `histogram`, `counter`
 	MetricType string `json:"metricType"`
 	// Observations, measurements and context associated with the metric
-	Values map[string]interface{} `json:"values"`
+	Values map[string]interface{} `json:"values,omitzero"`
 	// List of samples (if any) associated with the metric
-	Samples []Sample `json:"samples"`
+	Samples []Sample `json:"samples,omitzero"`
 	// Additional dimensions that describe the instance of the metric
-	Tags map[string]string `json:"tags"`
+	Tags map[string]string `json:"tags,omitzero"`
 	// User id (if available)
 	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
@@ -638,46 +434,7 @@ type MetricLogV1 struct {
 	// Organization id (if available)
 	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Unsafe metadata describing the event
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
-}
-
-func (o MetricLogV1) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make(map[string]interface{})
-	}
-	if o.Samples == nil {
-		o.Samples = make([]Sample, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make(map[string]string)
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpMetricLogV1 MetricLogV1
-	return safejson.Marshal(_tmpMetricLogV1(o))
-}
-
-func (o *MetricLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpMetricLogV1 MetricLogV1
-	var rawMetricLogV1 _tmpMetricLogV1
-	if err := safejson.Unmarshal(data, &rawMetricLogV1); err != nil {
-		return err
-	}
-	if rawMetricLogV1.Values == nil {
-		rawMetricLogV1.Values = make(map[string]interface{})
-	}
-	if rawMetricLogV1.Samples == nil {
-		rawMetricLogV1.Samples = make([]Sample, 0)
-	}
-	if rawMetricLogV1.Tags == nil {
-		rawMetricLogV1.Tags = make(map[string]string)
-	}
-	if rawMetricLogV1.UnsafeParams == nil {
-		rawMetricLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	*o = MetricLogV1(rawMetricLogV1)
-	return nil
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 }
 
 func (o MetricLogV1) MarshalYAML() (interface{}, error) {
@@ -730,13 +487,13 @@ type RequestLogV1 struct {
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
 	Path string `json:"path"`
 	// Known-safe path parameters
-	PathParams map[string]interface{} `json:"pathParams"`
+	PathParams map[string]interface{} `json:"pathParams,omitzero"`
 	// Known-safe query parameters
-	QueryParams map[string]interface{} `json:"queryParams"`
+	QueryParams map[string]interface{} `json:"queryParams,omitzero"`
 	// Known-safe header parameters
-	HeaderParams map[string]interface{} `json:"headerParams"`
+	HeaderParams map[string]interface{} `json:"headerParams,omitzero"`
 	// Known-safe body parameters
-	BodyParams map[string]interface{} `json:"bodyParams"`
+	BodyParams map[string]interface{} `json:"bodyParams,omitzero"`
 	// HTTP status code of response
 	Status int `json:"status"`
 	// Size of request (bytes). string to allow large numbers.
@@ -756,52 +513,7 @@ type RequestLogV1 struct {
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unredacted parameters such as path, query and header parameters
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
-}
-
-func (o RequestLogV1) MarshalJSON() ([]byte, error) {
-	if o.PathParams == nil {
-		o.PathParams = make(map[string]interface{})
-	}
-	if o.QueryParams == nil {
-		o.QueryParams = make(map[string]interface{})
-	}
-	if o.HeaderParams == nil {
-		o.HeaderParams = make(map[string]interface{})
-	}
-	if o.BodyParams == nil {
-		o.BodyParams = make(map[string]interface{})
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpRequestLogV1 RequestLogV1
-	return safejson.Marshal(_tmpRequestLogV1(o))
-}
-
-func (o *RequestLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpRequestLogV1 RequestLogV1
-	var rawRequestLogV1 _tmpRequestLogV1
-	if err := safejson.Unmarshal(data, &rawRequestLogV1); err != nil {
-		return err
-	}
-	if rawRequestLogV1.PathParams == nil {
-		rawRequestLogV1.PathParams = make(map[string]interface{})
-	}
-	if rawRequestLogV1.QueryParams == nil {
-		rawRequestLogV1.QueryParams = make(map[string]interface{})
-	}
-	if rawRequestLogV1.HeaderParams == nil {
-		rawRequestLogV1.HeaderParams = make(map[string]interface{})
-	}
-	if rawRequestLogV1.BodyParams == nil {
-		rawRequestLogV1.BodyParams = make(map[string]interface{})
-	}
-	if rawRequestLogV1.UnsafeParams == nil {
-		rawRequestLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	*o = RequestLogV1(rawRequestLogV1)
-	return nil
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 }
 
 func (o RequestLogV1) MarshalYAML() (interface{}, error) {
@@ -831,7 +543,7 @@ type RequestLogV2 struct {
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
 	Path string `json:"path"`
 	// Known-safe parameters
-	Params map[string]interface{} `json:"params"`
+	Params map[string]interface{} `json:"params,omitzero"`
 	// HTTP status code of response
 	Status int `json:"status"`
 	// Size of request (bytes)
@@ -851,34 +563,7 @@ type RequestLogV2 struct {
 	// Zipkin trace id (if available)
 	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unredacted parameters such as path, query and header parameters
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
-}
-
-func (o RequestLogV2) MarshalJSON() ([]byte, error) {
-	if o.Params == nil {
-		o.Params = make(map[string]interface{})
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpRequestLogV2 RequestLogV2
-	return safejson.Marshal(_tmpRequestLogV2(o))
-}
-
-func (o *RequestLogV2) UnmarshalJSON(data []byte) error {
-	type _tmpRequestLogV2 RequestLogV2
-	var rawRequestLogV2 _tmpRequestLogV2
-	if err := safejson.Unmarshal(data, &rawRequestLogV2); err != nil {
-		return err
-	}
-	if rawRequestLogV2.Params == nil {
-		rawRequestLogV2.Params = make(map[string]interface{})
-	}
-	if rawRequestLogV2.UnsafeParams == nil {
-		rawRequestLogV2.UnsafeParams = make(map[string]interface{})
-	}
-	*o = RequestLogV2(rawRequestLogV2)
-	return nil
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 }
 
 func (o RequestLogV2) MarshalYAML() (interface{}, error) {
@@ -924,29 +609,8 @@ func (o *Sample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type SensitivityTaggedValue struct {
 	// Sensitivity level of this value; must be a known level in sls-spec.
-	Level   []string    `json:"level"`
+	Level   []string    `json:"level,omitzero"`
 	Payload interface{} `json:"payload"`
-}
-
-func (o SensitivityTaggedValue) MarshalJSON() ([]byte, error) {
-	if o.Level == nil {
-		o.Level = make([]string, 0)
-	}
-	type _tmpSensitivityTaggedValue SensitivityTaggedValue
-	return safejson.Marshal(_tmpSensitivityTaggedValue(o))
-}
-
-func (o *SensitivityTaggedValue) UnmarshalJSON(data []byte) error {
-	type _tmpSensitivityTaggedValue SensitivityTaggedValue
-	var rawSensitivityTaggedValue _tmpSensitivityTaggedValue
-	if err := safejson.Unmarshal(data, &rawSensitivityTaggedValue); err != nil {
-		return err
-	}
-	if rawSensitivityTaggedValue.Level == nil {
-		rawSensitivityTaggedValue.Level = make([]string, 0)
-	}
-	*o = SensitivityTaggedValue(rawSensitivityTaggedValue)
-	return nil
 }
 
 func (o SensitivityTaggedValue) MarshalYAML() (interface{}, error) {
@@ -982,7 +646,7 @@ type ServiceLogV1 struct {
 	// Describes the safety of this log event based on prior knowledge within the application which produced the message. This field should not be set to `true` without _total_ confidence that it is correct. * _empty_:  Considered unsafe unless the logging pipeline has special configuration for this `origin`. Eventually these will all be equivalent to `false`. * `true`: All safe components can be trusted. * `false`: Event is _unsafe_ and cannot be exported.
 	Safe *bool `json:"safe,omitzero"`
 	// Known-safe parameters (redaction may be used to make params knowably safe, but is not required).
-	Params map[string]interface{} `json:"params"`
+	Params map[string]interface{} `json:"params,omitzero"`
 	// User id (if available).
 	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
@@ -996,42 +660,9 @@ type ServiceLogV1 struct {
 	// Language-specific stack trace. Content is knowably safe. Renderers should substitute named placeholders ({name}, for name as a key) with keyed value from unsafeParams and leave non-matching keys as the original placeholder text.
 	Stacktrace *string `json:"stacktrace,omitzero"`
 	// Unredacted parameters
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 	// Additional dimensions that describe the instance of the log event
-	Tags map[string]string `json:"tags"`
-}
-
-func (o ServiceLogV1) MarshalJSON() ([]byte, error) {
-	if o.Params == nil {
-		o.Params = make(map[string]interface{})
-	}
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	if o.Tags == nil {
-		o.Tags = make(map[string]string)
-	}
-	type _tmpServiceLogV1 ServiceLogV1
-	return safejson.Marshal(_tmpServiceLogV1(o))
-}
-
-func (o *ServiceLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpServiceLogV1 ServiceLogV1
-	var rawServiceLogV1 _tmpServiceLogV1
-	if err := safejson.Unmarshal(data, &rawServiceLogV1); err != nil {
-		return err
-	}
-	if rawServiceLogV1.Params == nil {
-		rawServiceLogV1.Params = make(map[string]interface{})
-	}
-	if rawServiceLogV1.UnsafeParams == nil {
-		rawServiceLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	if rawServiceLogV1.Tags == nil {
-		rawServiceLogV1.Tags = make(map[string]string)
-	}
-	*o = ServiceLogV1(rawServiceLogV1)
-	return nil
+	Tags map[string]string `json:"tags,omitzero"`
 }
 
 func (o ServiceLogV1) MarshalYAML() (interface{}, error) {
@@ -1064,36 +695,9 @@ type Span struct {
 	Timestamp safelong.SafeLong `json:"timestamp"`
 	// Duration of this span (microseconds)
 	Duration    safelong.SafeLong `json:"duration"`
-	Annotations []Annotation      `json:"annotations"`
+	Annotations []Annotation      `json:"annotations,omitzero"`
 	// Additional dimensions that describe the instance of the trace span
-	Tags map[string]string `json:"tags"`
-}
-
-func (o Span) MarshalJSON() ([]byte, error) {
-	if o.Annotations == nil {
-		o.Annotations = make([]Annotation, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make(map[string]string)
-	}
-	type _tmpSpan Span
-	return safejson.Marshal(_tmpSpan(o))
-}
-
-func (o *Span) UnmarshalJSON(data []byte) error {
-	type _tmpSpan Span
-	var rawSpan _tmpSpan
-	if err := safejson.Unmarshal(data, &rawSpan); err != nil {
-		return err
-	}
-	if rawSpan.Annotations == nil {
-		rawSpan.Annotations = make([]Annotation, 0)
-	}
-	if rawSpan.Tags == nil {
-		rawSpan.Tags = make(map[string]string)
-	}
-	*o = Span(rawSpan)
-	return nil
+	Tags map[string]string `json:"tags,omitzero"`
 }
 
 func (o Span) MarshalYAML() (interface{}, error) {
@@ -1122,28 +726,7 @@ type StackFrameV1 struct {
 	// The line number of the source location of the execution point of this stack frame.
 	Line *int `json:"line,omitzero"`
 	// Other frame-level information.
-	Params map[string]interface{} `json:"params"`
-}
-
-func (o StackFrameV1) MarshalJSON() ([]byte, error) {
-	if o.Params == nil {
-		o.Params = make(map[string]interface{})
-	}
-	type _tmpStackFrameV1 StackFrameV1
-	return safejson.Marshal(_tmpStackFrameV1(o))
-}
-
-func (o *StackFrameV1) UnmarshalJSON(data []byte) error {
-	type _tmpStackFrameV1 StackFrameV1
-	var rawStackFrameV1 _tmpStackFrameV1
-	if err := safejson.Unmarshal(data, &rawStackFrameV1); err != nil {
-		return err
-	}
-	if rawStackFrameV1.Params == nil {
-		rawStackFrameV1.Params = make(map[string]interface{})
-	}
-	*o = StackFrameV1(rawStackFrameV1)
-	return nil
+	Params map[string]interface{} `json:"params,omitzero"`
 }
 
 func (o StackFrameV1) MarshalYAML() (interface{}, error) {
@@ -1164,28 +747,7 @@ func (o *StackFrameV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ThreadDumpV1 struct {
 	// Information about each of the threads in the thread dump. "Thread" may refer to a userland thread such as a goroutine, or an OS-level thread.
-	Threads []ThreadInfoV1 `json:"threads"`
-}
-
-func (o ThreadDumpV1) MarshalJSON() ([]byte, error) {
-	if o.Threads == nil {
-		o.Threads = make([]ThreadInfoV1, 0)
-	}
-	type _tmpThreadDumpV1 ThreadDumpV1
-	return safejson.Marshal(_tmpThreadDumpV1(o))
-}
-
-func (o *ThreadDumpV1) UnmarshalJSON(data []byte) error {
-	type _tmpThreadDumpV1 ThreadDumpV1
-	var rawThreadDumpV1 _tmpThreadDumpV1
-	if err := safejson.Unmarshal(data, &rawThreadDumpV1); err != nil {
-		return err
-	}
-	if rawThreadDumpV1.Threads == nil {
-		rawThreadDumpV1.Threads = make([]ThreadInfoV1, 0)
-	}
-	*o = ThreadDumpV1(rawThreadDumpV1)
-	return nil
+	Threads []ThreadInfoV1 `json:"threads,omitzero"`
 }
 
 func (o ThreadDumpV1) MarshalYAML() (interface{}, error) {
@@ -1210,36 +772,9 @@ type ThreadInfoV1 struct {
 	// The name of the thread. Note that thread names may include unsafe information such as the path of the HTTP request being processed. It must be safely redacted.
 	Name *string `json:"name,omitzero"`
 	// A list of stack frames for the thread, ordered with the current frame first.
-	StackTrace []StackFrameV1 `json:"stackTrace"`
+	StackTrace []StackFrameV1 `json:"stackTrace,omitzero"`
 	// Other thread-level information.
-	Params map[string]interface{} `json:"params"`
-}
-
-func (o ThreadInfoV1) MarshalJSON() ([]byte, error) {
-	if o.StackTrace == nil {
-		o.StackTrace = make([]StackFrameV1, 0)
-	}
-	if o.Params == nil {
-		o.Params = make(map[string]interface{})
-	}
-	type _tmpThreadInfoV1 ThreadInfoV1
-	return safejson.Marshal(_tmpThreadInfoV1(o))
-}
-
-func (o *ThreadInfoV1) UnmarshalJSON(data []byte) error {
-	type _tmpThreadInfoV1 ThreadInfoV1
-	var rawThreadInfoV1 _tmpThreadInfoV1
-	if err := safejson.Unmarshal(data, &rawThreadInfoV1); err != nil {
-		return err
-	}
-	if rawThreadInfoV1.StackTrace == nil {
-		rawThreadInfoV1.StackTrace = make([]StackFrameV1, 0)
-	}
-	if rawThreadInfoV1.Params == nil {
-		rawThreadInfoV1.Params = make(map[string]interface{})
-	}
-	*o = ThreadInfoV1(rawThreadInfoV1)
-	return nil
+	Params map[string]interface{} `json:"params,omitzero"`
 }
 
 func (o ThreadInfoV1) MarshalYAML() (interface{}, error) {
@@ -1266,29 +801,8 @@ type TraceLogV1 struct {
 	Sid          *SessionId             `json:"sid,omitzero"`
 	TokenId      *TokenId               `json:"tokenId,omitzero"`
 	OrgId        *OrganizationId        `json:"orgId,omitzero"`
-	UnsafeParams map[string]interface{} `json:"unsafeParams"`
+	UnsafeParams map[string]interface{} `json:"unsafeParams,omitzero"`
 	Span         Span                   `json:"span"`
-}
-
-func (o TraceLogV1) MarshalJSON() ([]byte, error) {
-	if o.UnsafeParams == nil {
-		o.UnsafeParams = make(map[string]interface{})
-	}
-	type _tmpTraceLogV1 TraceLogV1
-	return safejson.Marshal(_tmpTraceLogV1(o))
-}
-
-func (o *TraceLogV1) UnmarshalJSON(data []byte) error {
-	type _tmpTraceLogV1 TraceLogV1
-	var rawTraceLogV1 _tmpTraceLogV1
-	if err := safejson.Unmarshal(data, &rawTraceLogV1); err != nil {
-		return err
-	}
-	if rawTraceLogV1.UnsafeParams == nil {
-		rawTraceLogV1.UnsafeParams = make(map[string]interface{})
-	}
-	*o = TraceLogV1(rawTraceLogV1)
-	return nil
 }
 
 func (o TraceLogV1) MarshalYAML() (interface{}, error) {
