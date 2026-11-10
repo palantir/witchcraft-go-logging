@@ -41,22 +41,22 @@ type AuditLogV2 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// User id (if available). This is the most downstream caller.
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	// All users upstream of the user currently taking an action. The first element in this list is the uid of the most upstream caller. This list does not include the `uid`.
 	OtherUids []UserId `json:"otherUids"`
 	/*
 	   Best-effort identifier of the originating machine, e.g. an IP address, a Kubernetes node identifier,
 	   or similar
 	*/
-	Origin *string `json:"origin,omitempty"`
+	Origin *string `json:"origin,omitzero"`
 	// Name of the audit event, e.g. PUT_FILE
 	Name string `json:"name"`
 	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
@@ -128,11 +128,11 @@ type AuditLogV3 struct {
 	// The version of the product that produced this log.
 	ProductVersion string `json:"productVersion"`
 	// The stack that this log was generated on.
-	Stack *string `json:"stack,omitempty"`
+	Stack *string `json:"stack,omitzero"`
 	// The service name that produced this log.
-	Service *string `json:"service,omitempty"`
+	Service *string `json:"service,omitzero"`
 	// The environment that produced this log.
-	Environment *string `json:"environment,omitempty"`
+	Environment *string `json:"environment,omitzero"`
 	// How this audit log was produced, eg. from a backend Server, frontend Client etc.
 	ProducerType AuditProducer `json:"producerType"`
 	/*
@@ -149,11 +149,11 @@ type AuditLogV3 struct {
 	*/
 	EventId uuid.UUID `json:"eventId"`
 	// Unique identifier for this audit log.
-	LogEntryId *uuid.UUID `json:"logEntryId,omitempty"`
+	LogEntryId *uuid.UUID `json:"logEntryId,omitzero"`
 	// Orders the log entries when there are multiple entries for the same event.
-	SequenceId *int `json:"sequenceId,omitempty"`
+	SequenceId *int `json:"sequenceId,omitzero"`
 	// The user agent of the user that originated this log.
-	UserAgent *string `json:"userAgent,omitempty"`
+	UserAgent *string `json:"userAgent,omitzero"`
 	/*
 	   All audit categories produced by this audit event.
 	   Each audit categories produces a set of keys that will be distributed between the request and
@@ -183,7 +183,7 @@ type AuditLogV3 struct {
 
 	   This value is verified through the TCP stack.
 	*/
-	SourceOrigin *string `json:"sourceOrigin,omitempty"`
+	SourceOrigin *string `json:"sourceOrigin,omitzero"`
 	/*
 	   The parameters known at method invocation time.
 
@@ -228,22 +228,22 @@ type AuditLogV3 struct {
 	ResultFields map[string]interface{} `json:"resultFields"`
 	Time         datetime.DateTime      `json:"time"`
 	// User id (if available). This is the most downstream caller.
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	/*
 	   Best-effort identifier of the originating machine, e.g. an
 	   IP address, a Kubernetes node identifier, or similar.
 
 	   This value can be spoofed.
 	*/
-	Origin *string `json:"origin,omitempty"`
+	Origin *string `json:"origin,omitzero"`
 	// Name of the audit event, e.g. PUT_FILE
 	Name string `json:"name"`
 	// Indicates whether the request was successful or the type of failure, e.g. ERROR or UNAUTHORIZED
@@ -337,11 +337,11 @@ func (o *AuditLogV3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ContextualizedUser struct {
 	Uid       UserId   `json:"uid"`
-	UserName  *string  `json:"userName,omitempty"`
-	FirstName *string  `json:"firstName,omitempty"`
-	LastName  *string  `json:"lastName,omitempty"`
+	UserName  *string  `json:"userName,omitzero"`
+	FirstName *string  `json:"firstName,omitzero"`
+	LastName  *string  `json:"lastName,omitzero"`
 	Groups    []string `json:"groups"`
-	Realm     *string  `json:"realm,omitempty"`
+	Realm     *string  `json:"realm,omitzero"`
 }
 
 func (o ContextualizedUser) MarshalJSON() ([]byte, error) {
@@ -433,9 +433,9 @@ type Endpoint struct {
 	// Name of the service that generated the annotation
 	ServiceName string `json:"serviceName"`
 	// IPv4 address of the machine that generated this annotation (`xxx.xxx.xxx.xxx`)
-	Ipv4 *string `json:"ipv4,omitempty"`
+	Ipv4 *string `json:"ipv4,omitzero"`
 	// IPv6 address of the machine that generated this annotation (standard hextet form)
-	Ipv6 *string `json:"ipv6,omitempty"`
+	Ipv6 *string `json:"ipv6,omitzero"`
 }
 
 func (o Endpoint) MarshalYAML() (interface{}, error) {
@@ -465,13 +465,13 @@ type EventLogV1 struct {
 	// Observations, measurements and context associated with the event
 	Values map[string]interface{} `json:"values"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 }
@@ -528,15 +528,15 @@ type EventLogV2 struct {
 	// Observations, measurements and context associated with the event
 	Values map[string]interface{} `json:"values"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 	// Additional dimensions that describe the instance of the log event
@@ -630,13 +630,13 @@ type MetricLogV1 struct {
 	// Additional dimensions that describe the instance of the metric
 	Tags map[string]string `json:"tags"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Unsafe metadata describing the event
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 }
@@ -724,7 +724,7 @@ type RequestLogV1 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// HTTP method of request
-	Method *string `json:"method,omitempty"`
+	Method *string `json:"method,omitzero"`
 	// Protocol, e.g. `HTTP/1.1`, `HTTP/2`
 	Protocol string `json:"protocol"`
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
@@ -746,15 +746,15 @@ type RequestLogV1 struct {
 	// Amount of time spent handling request (microseconds)
 	Duration int `json:"duration"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unredacted parameters such as path, query and header parameters
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 }
@@ -825,7 +825,7 @@ type RequestLogV2 struct {
 	Type string            `json:"type"`
 	Time datetime.DateTime `json:"time"`
 	// HTTP method of request
-	Method *string `json:"method,omitempty"`
+	Method *string `json:"method,omitzero"`
 	// Protocol, e.g. `HTTP/1.1`, `HTTP/2`
 	Protocol string `json:"protocol"`
 	// Path of request. If templated, the unrendered path, e.g.: `/catalog/dataset/{datasetId}`, `/{rid}/paths/contents/{path:.*}`.
@@ -841,15 +841,15 @@ type RequestLogV2 struct {
 	// Amount of time spent handling request (microseconds)
 	Duration safelong.SafeLong `json:"duration"`
 	// User id (if available)
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	// Unredacted parameters such as path, query and header parameters
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 }
@@ -903,7 +903,7 @@ type Sample struct {
 	// RFC3339Nano UTC datetime string of when the sample was taken
 	Time datetime.DateTime `json:"time"`
 	// Zipkin trace id associated with this sample, if available
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 }
 
 func (o Sample) MarshalYAML() (interface{}, error) {
@@ -974,27 +974,27 @@ type ServiceLogV1 struct {
 	// RFC3339Nano UTC datetime string when the log event was emitted
 	Time datetime.DateTime `json:"time"`
 	// Class or file name. May include line number.
-	Origin *string `json:"origin,omitempty"`
+	Origin *string `json:"origin,omitzero"`
 	// Thread name
-	Thread *string `json:"thread,omitempty"`
+	Thread *string `json:"thread,omitzero"`
 	// Log message. Palantir Java services using slf4j should not use slf4j placeholders ({}). Logs obtained from 3rd party libraries or services that use slf4j and contain slf4j placeholders will always produce `unsafeParams` with numeric indexes corresponding to the zero-indexed order of placeholders. Renderers should substitute numeric parameters from `unsafeParams` and may leave placeholders that do not match indexes as the original placeholder text.
 	Message string `json:"message"`
 	// Describes the safety of this log event based on prior knowledge within the application which produced the message. This field should not be set to `true` without _total_ confidence that it is correct. * _empty_:  Considered unsafe unless the logging pipeline has special configuration for this `origin`. Eventually these will all be equivalent to `false`. * `true`: All safe components can be trusted. * `false`: Event is _unsafe_ and cannot be exported.
-	Safe *bool `json:"safe,omitempty"`
+	Safe *bool `json:"safe,omitzero"`
 	// Known-safe parameters (redaction may be used to make params knowably safe, but is not required).
 	Params map[string]interface{} `json:"params"`
 	// User id (if available).
-	Uid *UserId `json:"uid,omitempty"`
+	Uid *UserId `json:"uid,omitzero"`
 	// Session id (if available)
-	Sid *SessionId `json:"sid,omitempty"`
+	Sid *SessionId `json:"sid,omitzero"`
 	// API token id (if available)
-	TokenId *TokenId `json:"tokenId,omitempty"`
+	TokenId *TokenId `json:"tokenId,omitzero"`
 	// Organization id (if available)
-	OrgId *OrganizationId `json:"orgId,omitempty"`
+	OrgId *OrganizationId `json:"orgId,omitzero"`
 	// Zipkin trace id (if available)
-	TraceId *TraceId `json:"traceId,omitempty"`
+	TraceId *TraceId `json:"traceId,omitzero"`
 	// Language-specific stack trace. Content is knowably safe. Renderers should substitute named placeholders ({name}, for name as a key) with keyed value from unsafeParams and leave non-matching keys as the original placeholder text.
-	Stacktrace *string `json:"stacktrace,omitempty"`
+	Stacktrace *string `json:"stacktrace,omitzero"`
 	// Unredacted parameters
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 	// Additional dimensions that describe the instance of the log event
@@ -1059,7 +1059,7 @@ type Span struct {
 	// Name of the span (typically the operation/RPC/method name for corresponding to this span)
 	Name string `json:"name"`
 	// 16-digit hex identifer of the parent span
-	ParentId *string `json:"parentId,omitempty"`
+	ParentId *string `json:"parentId,omitzero"`
 	// Timestamp of the start of this span (epoch microsecond value)
 	Timestamp safelong.SafeLong `json:"timestamp"`
 	// Duration of this span (microseconds)
@@ -1114,13 +1114,13 @@ func (o *Span) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type StackFrameV1 struct {
 	// The address of the execution point of this stack frame. This is a string because a safelong can't represent the full 64 bit address space.
-	Address *string `json:"address,omitempty"`
+	Address *string `json:"address,omitzero"`
 	// The identifier of the procedure containing the execution point of this stack frame. This is a fully qualified method name in Java and a demangled symbol name in native code, for example. Note that procedure names may include unsafe information if a service is, for exmaple, running user-defined code. It must be safely redacted.
-	Procedure *string `json:"procedure,omitempty"`
+	Procedure *string `json:"procedure,omitzero"`
 	// The name of the file containing the source location of the execution point of this stack frame. Note that file names may include unsafe information if a service is, for example, running user-defined code. It must be safely redacted.
-	File *string `json:"file,omitempty"`
+	File *string `json:"file,omitzero"`
 	// The line number of the source location of the execution point of this stack frame.
-	Line *int `json:"line,omitempty"`
+	Line *int `json:"line,omitzero"`
 	// Other frame-level information.
 	Params map[string]interface{} `json:"params"`
 }
@@ -1206,9 +1206,9 @@ func (o *ThreadDumpV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ThreadInfoV1 struct {
 	// The ID of the thread.
-	Id *safelong.SafeLong `json:"id,omitempty"`
+	Id *safelong.SafeLong `json:"id,omitzero"`
 	// The name of the thread. Note that thread names may include unsafe information such as the path of the HTTP request being processed. It must be safely redacted.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitzero"`
 	// A list of stack frames for the thread, ordered with the current frame first.
 	StackTrace []StackFrameV1 `json:"stackTrace"`
 	// Other thread-level information.
@@ -1262,10 +1262,10 @@ func (o *ThreadInfoV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type TraceLogV1 struct {
 	Type         string                 `json:"type"`
 	Time         datetime.DateTime      `json:"time"`
-	Uid          *UserId                `json:"uid,omitempty"`
-	Sid          *SessionId             `json:"sid,omitempty"`
-	TokenId      *TokenId               `json:"tokenId,omitempty"`
-	OrgId        *OrganizationId        `json:"orgId,omitempty"`
+	Uid          *UserId                `json:"uid,omitzero"`
+	Sid          *SessionId             `json:"sid,omitzero"`
+	TokenId      *TokenId               `json:"tokenId,omitzero"`
+	OrgId        *OrganizationId        `json:"orgId,omitzero"`
 	UnsafeParams map[string]interface{} `json:"unsafeParams"`
 	Span         Span                   `json:"span"`
 }
@@ -1366,13 +1366,13 @@ type WrappedLogV1 struct {
 	EntityName    string `json:"entityName"`
 	EntityVersion string `json:"entityVersion"`
 	// Defaults to the wrapped log producer's Skylab service name.
-	Service *string `json:"service,omitempty"`
+	Service *string `json:"service,omitzero"`
 	// Defaults to the wrapped log producer's Skylab service ID.
-	ServiceId *string `json:"serviceId,omitempty"`
+	ServiceId *string `json:"serviceId,omitzero"`
 	// Defaults to the wrapped log producer's Skylab stack name.
-	Stack *string `json:"stack,omitempty"`
+	Stack *string `json:"stack,omitzero"`
 	// Defaults to the wrapped log producer's Skylab stack ID.
-	StackId *string `json:"stackId,omitempty"`
+	StackId *string `json:"stackId,omitzero"`
 }
 
 func (o WrappedLogV1) MarshalYAML() (interface{}, error) {

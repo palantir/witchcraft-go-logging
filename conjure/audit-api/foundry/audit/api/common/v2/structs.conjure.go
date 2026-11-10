@@ -90,7 +90,7 @@ func (o *AssetCoordinate) UnmarshalYAML(unmarshal func(interface{}) error) error
 type AssetLocator struct {
 	AssetServerLocator ServiceLocator `json:"assetServerLocator" safelogging:"@Unsafe"`
 	Product            string         `json:"product" safelogging:"@Unsafe"`
-	Track              *string        `json:"track,omitempty" safelogging:"@Unsafe"`
+	Track              *string        `json:"track,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AssetLocator) MarshalYAML() (interface{}, error) {
@@ -159,8 +159,8 @@ func (o *ContentAddressableFileIdentifier) UnmarshalYAML(unmarshal func(interfac
 // safelogging:@Unsafe
 type ContextualizedResource struct {
 	Id          Resource `json:"id"`
-	Name        *string  `json:"name,omitempty" safelogging:"@Unsafe"`
-	Description *string  `json:"description,omitempty" safelogging:"@Unsafe"`
+	Name        *string  `json:"name,omitzero" safelogging:"@Unsafe"`
+	Description *string  `json:"description,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ContextualizedResource) MarshalYAML() (interface{}, error) {
@@ -323,9 +323,9 @@ type ImportDestination struct {
 	// The destination resource for the imported data.
 	Id DataResource `json:"id"`
 	// The parent of the destination resource.
-	Parent *DataResource `json:"parent,omitempty"`
+	Parent *DataResource `json:"parent,omitzero"`
 	// The total size, in bytes, of the imported data.
-	ImportedSize *safelong.SafeLong `json:"importedSize,omitempty" safelogging:"@Unsafe"`
+	ImportedSize *safelong.SafeLong `json:"importedSize,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ImportDestination) MarshalYAML() (interface{}, error) {
@@ -349,7 +349,7 @@ type ImportedFile struct {
 	// The filename of the imported data, or descriptor of the imported data.
 	Filename string `json:"filename" safelogging:"@Unsafe"`
 	// The filetype of the imported data.
-	Type *common.FileType `json:"type,omitempty"`
+	Type *common.FileType `json:"type,omitzero"`
 }
 
 func (o ImportedFile) MarshalYAML() (interface{}, error) {
@@ -447,11 +447,11 @@ type LlmInferenceContext struct {
 	   This field is optional to support providing the model id either at request or response time.
 	   Services producing logs with this type are expected to provide the model id at request or response time.
 	*/
-	ModelId *Identifier `json:"modelId,omitempty"`
+	ModelId *Identifier `json:"modelId,omitzero"`
 	// The temperature used for the llm inference request.
-	ModelTemperature *float64 `json:"modelTemperature,omitempty" safelogging:"@Unsafe"`
+	ModelTemperature *float64 `json:"modelTemperature,omitzero" safelogging:"@Unsafe"`
 	// Whether or not processing of the enrollment's data for the purposes of content moderation is enabled.
-	ContentModerationEnabled *bool `json:"contentModerationEnabled,omitempty" safelogging:"@Safe"`
+	ContentModerationEnabled *bool `json:"contentModerationEnabled,omitzero" safelogging:"@Safe"`
 }
 
 func (o LlmInferenceContext) MarshalYAML() (interface{}, error) {
@@ -477,7 +477,7 @@ type LlmRoutingRequest struct {
 	// The HTTP body forwarded to the LLM endpoint.
 	RequestBody string `json:"requestBody" safelogging:"@Unsafe"`
 	// The requested model for the query if available.
-	Model *string `json:"model,omitempty" safelogging:"@Safe"`
+	Model *string `json:"model,omitzero" safelogging:"@Safe"`
 }
 
 func (o LlmRoutingRequest) MarshalYAML() (interface{}, error) {
@@ -733,7 +733,7 @@ type OntologyContext struct {
 	   The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,
 	   this could the ObjectTypeId in an ObjectLocator specified in a request.
 	*/
-	EntityType *EntityTypeIdentifier `json:"entityType,omitempty"`
+	EntityType *EntityTypeIdentifier `json:"entityType,omitzero"`
 	// Properties loaded/access for this entity. This may be empty to represent all properties.
 	PropertyTypeRids []rid.ResourceIdentifier `json:"propertyTypeRids" safelogging:"@Unsafe"`
 }
@@ -781,7 +781,7 @@ type OntologyDataResource struct {
 	   By convention, the objectRid if this resource is an object
 	   And both object type rids if a link
 	*/
-	Id *Identifier `json:"id,omitempty"`
+	Id *Identifier `json:"id,omitzero"`
 	/*
 	   If a suitable ID is not present, a Primary Key may be present instead (or in addition to the ID) - this is
 	   expected to be SENSITIVE, and will be tagged as such.
@@ -795,9 +795,9 @@ type OntologyDataResource struct {
 	   Concretely, if non-empty, the whole OntologyDataResource will be sensitivity
 	   marked as Data, rather than MetaData.
 	*/
-	AdditionalObjectProperties *[]ObjectProperty `json:"additionalObjectProperties,omitempty"`
+	AdditionalObjectProperties *[]ObjectProperty `json:"additionalObjectProperties,omitzero"`
 	// Further ontology context to identify this resource.
-	OntologyContext *OntologyContext `json:"ontologyContext,omitempty"`
+	OntologyContext *OntologyContext `json:"ontologyContext,omitzero"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
 	   This includes a "type" context identifying the type represented by this resource (link, object type, etc...)
@@ -900,7 +900,7 @@ func (o *OntologyDataResourceList) UnmarshalYAML(unmarshal func(interface{}) err
 // A resource that refers to a selection or query over ontology data.
 type OntologyLogicResource struct {
 	// By convention, the objecSetRid if this resource is an object set
-	Id              *Identifier       `json:"id,omitempty"`
+	Id              *Identifier       `json:"id,omitzero"`
 	OntologyContext []OntologyContext `json:"ontologyContext"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
@@ -1009,7 +1009,7 @@ language.
 // safelogging:@Unsafe
 type OtherIdentifier struct {
 	Value       string  `json:"value" safelogging:"@Unsafe"`
-	Description *string `json:"description,omitempty" safelogging:"@Unsafe"`
+	Description *string `json:"description,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o OtherIdentifier) MarshalYAML() (interface{}, error) {
@@ -1032,8 +1032,8 @@ func (o *OtherIdentifier) UnmarshalYAML(unmarshal func(interface{}) error) error
 // safelogging:@Unsafe
 type PartialMavenCoordinate struct {
 	ArtifactId ArtifactId    `json:"artifactId" safelogging:"@Unsafe"`
-	GroupId    *GroupId      `json:"groupId,omitempty" safelogging:"@Unsafe"`
-	Version    *MavenVersion `json:"version,omitempty" safelogging:"@Unsafe"`
+	GroupId    *GroupId      `json:"groupId,omitzero" safelogging:"@Unsafe"`
+	Version    *MavenVersion `json:"version,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o PartialMavenCoordinate) MarshalYAML() (interface{}, error) {
@@ -1057,7 +1057,7 @@ type Patch struct {
 	Id          Identifier   `json:"id"`
 	AddedIds    []Identifier `json:"addedIds"`
 	RemovedIds  []Identifier `json:"removedIds"`
-	Description *string      `json:"description,omitempty" safelogging:"@Unsafe"`
+	Description *string      `json:"description,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o Patch) MarshalJSON() ([]byte, error) {
@@ -1249,11 +1249,11 @@ degree of access to a system, after validation.
 // safelogging:@Unsafe
 type Token struct {
 	// A unique identifier for this token, if one exists.
-	Id *Identifier `json:"id,omitempty"`
+	Id *Identifier `json:"id,omitzero"`
 	// The time at which this token expires, if known.
-	ExpirationTime *datetime.DateTime `json:"expirationTime,omitempty" safelogging:"@Unsafe"`
+	ExpirationTime *datetime.DateTime `json:"expirationTime,omitzero" safelogging:"@Unsafe"`
 	// The user associated with this token, if known.
-	UserId *string `json:"userId,omitempty"`
+	UserId *string `json:"userId,omitzero"`
 	/*
 	   There are many different variants of token types, depending on the use-case and system. This type will
 	   often determine the risk-profile of the token, so try to describe the token type that most accurately matches

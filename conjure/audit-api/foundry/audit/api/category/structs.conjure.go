@@ -12,10 +12,10 @@ import (
 // Programmatic or manual authentication event, e.g. token validation.
 // safelogging:@Unsafe
 type AuthenticationCheck struct {
-	UserId    *string `json:"userId,omitempty" safelogging:"@Unsafe"`
-	Username  *string `json:"username,omitempty" safelogging:"@Unsafe"`
-	Realm     *string `json:"realm,omitempty" safelogging:"@Unsafe"`
-	SessionId *string `json:"sessionId,omitempty" safelogging:"@Unsafe"`
+	UserId    *string `json:"userId,omitzero" safelogging:"@Unsafe"`
+	Username  *string `json:"username,omitzero" safelogging:"@Unsafe"`
+	Realm     *string `json:"realm,omitzero" safelogging:"@Unsafe"`
+	SessionId *string `json:"sessionId,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AuthenticationCheck) MarshalYAML() (interface{}, error) {
@@ -40,8 +40,8 @@ type CodeExecution struct {
 	BuildIds    []string          `json:"buildIds" safelogging:"@Unsafe"`
 	Inputs      []common.Resource `json:"inputs"`
 	Outputs     []common.Resource `json:"outputs"`
-	SourceId    *common.Resource  `json:"sourceId,omitempty"`
-	ContainerId *string           `json:"containerId,omitempty" safelogging:"@Unsafe"`
+	SourceId    *common.Resource  `json:"sourceId,omitzero"`
+	ContainerId *string           `json:"containerId,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o CodeExecution) MarshalJSON() ([]byte, error) {
@@ -101,7 +101,7 @@ environment.
 // safelogging:@Unsafe
 type ContainerLaunch struct {
 	ContainerId string    `json:"containerId" safelogging:"@Unsafe"`
-	Location    *[]string `json:"location,omitempty" safelogging:"@Unsafe"`
+	Location    *[]string `json:"location,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ContainerLaunch) MarshalYAML() (interface{}, error) {
@@ -127,7 +127,7 @@ shutdown (e.g. "failure" or "user request").
 // safelogging:@Unsafe
 type ContainerStop struct {
 	ContainerId string  `json:"containerId" safelogging:"@Unsafe"`
-	Reason      *string `json:"reason,omitempty" safelogging:"@Unsafe"`
+	Reason      *string `json:"reason,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ContainerStop) MarshalYAML() (interface{}, error) {
@@ -213,8 +213,8 @@ func (o *DataDelete) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Exports from the platform.
 // safelogging:@Unsafe
 type DataExport struct {
-	DownloadedResource *common.Resource   `json:"downloadedResource,omitempty"`
-	Size               *safelong.SafeLong `json:"size,omitempty" safelogging:"@Unsafe"`
+	DownloadedResource *common.Resource   `json:"downloadedResource,omitzero"`
+	Size               *safelong.SafeLong `json:"size,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataExport) MarshalYAML() (interface{}, error) {
@@ -240,11 +240,11 @@ DataPromote in a separate service.
 */
 // safelogging:@Unsafe
 type DataImport struct {
-	Filename         *string            `json:"filename,omitempty" safelogging:"@Unsafe"`
-	FileType         *common.FileType   `json:"fileType,omitempty"`
-	ResourceId       *common.Resource   `json:"resourceId,omitempty"`
-	ParentResourceId *common.Resource   `json:"parentResourceId,omitempty"`
-	Size             *safelong.SafeLong `json:"size,omitempty" safelogging:"@Unsafe"`
+	Filename         *string            `json:"filename,omitzero" safelogging:"@Unsafe"`
+	FileType         *common.FileType   `json:"fileType,omitzero"`
+	ResourceId       *common.Resource   `json:"resourceId,omitzero"`
+	ParentResourceId *common.Resource   `json:"parentResourceId,omitzero"`
+	Size             *safelong.SafeLong `json:"size,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataImport) MarshalYAML() (interface{}, error) {
@@ -326,7 +326,7 @@ func (o *DataPromote) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Searches of datasets, object, or other searches.
 // safelogging:@Unsafe
 type DataSearch struct {
-	Query *string `json:"query,omitempty" safelogging:"@Unsafe"`
+	Query *string `json:"query,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataSearch) MarshalYAML() (interface{}, error) {
@@ -348,9 +348,9 @@ func (o *DataSearch) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Discretionary share of data.
 // safelogging:@Unsafe
 type DataShare struct {
-	Id *string `json:"id,omitempty" safelogging:"@Unsafe"`
+	Id *string `json:"id,omitzero" safelogging:"@Unsafe"`
 	// A human-readable reason this data was shared (e.g. "visited a share link").
-	Reason *string           `json:"reason,omitempty" safelogging:"@Unsafe"`
+	Reason *string           `json:"reason,omitzero" safelogging:"@Unsafe"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -394,7 +394,7 @@ func (o *DataShare) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Creation of a share of data. For example, when creating a link that grants access to resources on visit.
 // safelogging:@Unsafe
 type DataShareCreate struct {
-	Id     *string           `json:"id,omitempty" safelogging:"@Unsafe"`
+	Id     *string           `json:"id,omitzero" safelogging:"@Unsafe"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -438,7 +438,7 @@ func (o *DataShareCreate) UnmarshalYAML(unmarshal func(interface{}) error) error
 // Deactivation of a mechanism to share data. For example, the disabling of a link that grants access to resources on visit.
 // safelogging:@Unsafe
 type DataShareDisable struct {
-	Id     *string           `json:"id,omitempty" safelogging:"@Unsafe"`
+	Id     *string           `json:"id,omitzero" safelogging:"@Unsafe"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -564,8 +564,8 @@ func (o *LogicUpdate) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Changes to group membership or otherwise, should always go through here.
 // safelogging:@Unsafe
 type ManagementGroups struct {
-	GroupId           *string  `json:"groupId,omitempty" safelogging:"@Unsafe"`
-	GroupName         *string  `json:"groupName,omitempty" safelogging:"@Unsafe"`
+	GroupId           *string  `json:"groupId,omitzero" safelogging:"@Unsafe"`
+	GroupName         *string  `json:"groupName,omitzero" safelogging:"@Unsafe"`
 	AddedPrincipals   []string `json:"addedPrincipals" safelogging:"@Unsafe"`
 	RemovedPrincipals []string `json:"removedPrincipals" safelogging:"@Unsafe"`
 }
@@ -638,9 +638,9 @@ func (o *ManagementPermissions) UnmarshalYAML(unmarshal func(interface{}) error)
 // Specific action related to token management, e.g. revocation/deletion of tokens.
 // safelogging:@Unsafe
 type ManagementTokens struct {
-	TokenId   *string           `json:"tokenId,omitempty" safelogging:"@Unsafe"`
+	TokenId   *string           `json:"tokenId,omitzero" safelogging:"@Unsafe"`
 	TokenTtl  safelong.SafeLong `json:"tokenTtl" safelogging:"@Unsafe"`
-	TokenType *TokenType        `json:"tokenType,omitempty"`
+	TokenType *TokenType        `json:"tokenType,omitzero"`
 }
 
 func (o ManagementTokens) MarshalYAML() (interface{}, error) {
@@ -666,8 +666,8 @@ the user is added or removed from a group, use ManagementGroups.
 */
 // safelogging:@Unsafe
 type ManagementUsers struct {
-	UserId   *string              `json:"userId,omitempty" safelogging:"@Unsafe"`
-	Username *string              `json:"username,omitempty" safelogging:"@Unsafe"`
+	UserId   *string              `json:"userId,omitzero" safelogging:"@Unsafe"`
+	Username *string              `json:"username,omitzero" safelogging:"@Unsafe"`
 	Action   UserManagementAction `json:"action"`
 }
 
@@ -837,9 +837,9 @@ func (o *SystemManagement) UnmarshalYAML(unmarshal func(interface{}) error) erro
 // Action that leads to generation of a new token.
 // safelogging:@Unsafe
 type TokenGeneration struct {
-	TokenId   *string           `json:"tokenId,omitempty" safelogging:"@Unsafe"`
+	TokenId   *string           `json:"tokenId,omitzero" safelogging:"@Unsafe"`
 	TokenTtl  safelong.SafeLong `json:"tokenTtl" safelogging:"@Unsafe"`
-	TokenType *TokenType        `json:"tokenType,omitempty"`
+	TokenType *TokenType        `json:"tokenType,omitzero"`
 }
 
 func (o TokenGeneration) MarshalYAML() (interface{}, error) {
@@ -936,11 +936,11 @@ func (o *UserJustify) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Login events of users.
 // safelogging:@Unsafe
 type UserLogin struct {
-	UserId         *string `json:"userId,omitempty" safelogging:"@Unsafe"`
-	Username       *string `json:"username,omitempty" safelogging:"@Unsafe"`
-	Realm          *string `json:"realm,omitempty" safelogging:"@Unsafe"`
-	OrganizationId *string `json:"organizationId,omitempty" safelogging:"@Unsafe"`
-	SessionId      *string `json:"sessionId,omitempty" safelogging:"@Unsafe"`
+	UserId         *string `json:"userId,omitzero" safelogging:"@Unsafe"`
+	Username       *string `json:"username,omitzero" safelogging:"@Unsafe"`
+	Realm          *string `json:"realm,omitzero" safelogging:"@Unsafe"`
+	OrganizationId *string `json:"organizationId,omitzero" safelogging:"@Unsafe"`
+	SessionId      *string `json:"sessionId,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o UserLogin) MarshalYAML() (interface{}, error) {
