@@ -67,7 +67,7 @@ type AppConfigAccess struct {
 	// The ApplicationResources that were accessed in this event.
 	AccessedAppConfigIds []v2.ApplicationResource `json:"accessedAppConfigIds"`
 	// A description of the configuration access.
-	AccessAppConfigDescription *string `json:"accessAppConfigDescription,omitempty" safelogging:"@Unsafe"`
+	AccessAppConfigDescription *string `json:"accessAppConfigDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AppConfigAccess) MarshalJSON() ([]byte, error) {
@@ -113,7 +113,7 @@ type AppConfigCreate struct {
 	// The ApplicationResources that were created in this event.
 	CreatedAppConfigIds []v2.ApplicationResource `json:"createdAppConfigIds"`
 	// A description of the configuration creation.
-	CreateAppConfigDescription *string `json:"createAppConfigDescription,omitempty" safelogging:"@Unsafe"`
+	CreateAppConfigDescription *string `json:"createAppConfigDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AppConfigCreate) MarshalJSON() ([]byte, error) {
@@ -159,7 +159,7 @@ type AppConfigDelete struct {
 	// The ApplicationResouces that were deleted in this event.
 	DeletedAppConfigIds []v2.ApplicationResource `json:"deletedAppConfigIds"`
 	// A description of the configuration deletion.
-	DeleteAppConfigDescription *string `json:"deleteAppConfigDescription,omitempty" safelogging:"@Unsafe"`
+	DeleteAppConfigDescription *string `json:"deleteAppConfigDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AppConfigDelete) MarshalJSON() ([]byte, error) {
@@ -207,7 +207,7 @@ be variable.
 // safelogging:@Unsafe
 type AppConfigSearch struct {
 	// The search-query that this event is running.
-	AppConfigSearchQuery *string `json:"appConfigSearchQuery,omitempty" safelogging:"@Unsafe"`
+	AppConfigSearchQuery *string `json:"appConfigSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// The search-results that are returned to the user in this event.
 	AppConfigSearchResults []v2.ApplicationResource `json:"appConfigSearchResults"`
 }
@@ -255,7 +255,7 @@ type AppConfigUpdate struct {
 	// The ApplicationResources that were updated in this event.
 	UpdatedAppConfigIds []v2.ApplicationResource `json:"updatedAppConfigIds"`
 	// A description of the configuration update.
-	UpdateAppConfigDescription *string `json:"updateAppConfigDescription,omitempty" safelogging:"@Unsafe"`
+	UpdateAppConfigDescription *string `json:"updateAppConfigDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AppConfigUpdate) MarshalJSON() ([]byte, error) {
@@ -304,7 +304,7 @@ type AssetFileLoad struct {
 	// Maven coordinate for the asset requested. Might not include groupId or version.
 	RequestMavenCoordinate v2.PartialMavenCoordinate `json:"requestMavenCoordinate" safelogging:"@Unsafe"`
 	// The full maven coordinate for the returned asset.
-	ResponseMavenCoordinate *v2.MavenCoordinate `json:"responseMavenCoordinate,omitempty"`
+	ResponseMavenCoordinate *v2.MavenCoordinate `json:"responseMavenCoordinate,omitzero"`
 	// The file path requested.
 	FilePath string `json:"filePath" safelogging:"@Unsafe"`
 }
@@ -328,7 +328,7 @@ func (o *AssetFileLoad) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Loads a file either from the asset coordiate or through the content addressable storage.
 type AssetFileLoadV2 struct {
 	FileIdentifier   v2.AssetFileLoadIdentifier `json:"fileIdentifier"`
-	FileLoadResponse *v2.AssetFileLoadResponse  `json:"fileLoadResponse,omitempty"`
+	FileLoadResponse *v2.AssetFileLoadResponse  `json:"fileLoadResponse,omitzero"`
 }
 
 func (o AssetFileLoadV2) MarshalYAML() (interface{}, error) {
@@ -416,7 +416,7 @@ type AuditDataTransform struct {
 	   may not have been shown to the user, but it wasn't persisted). In order to indicate an in-place
 	   transformation, the transformTarget and transformDestination fields should contain the same DataResource.
 	*/
-	TransformDestination *v2.DataResource `json:"transformDestination,omitempty"`
+	TransformDestination *v2.DataResource `json:"transformDestination,omitzero"`
 }
 
 func (o AuditDataTransform) MarshalJSON() ([]byte, error) {
@@ -462,9 +462,9 @@ type AuthenticationCheck struct {
 	// The identifiers that auth is being checked against.
 	AuthenticationCheckTargets []v2.Identifier `json:"authenticationCheckTargets"`
 	// Whether this authentication check succeeded or not.
-	AuthenticationCheckResult *bool `json:"authenticationCheckResult,omitempty" safelogging:"@Unsafe"`
+	AuthenticationCheckResult *bool `json:"authenticationCheckResult,omitzero" safelogging:"@Unsafe"`
 	// Further details on this authentication check result.
-	AuthenticationCheckResultMessage *string `json:"authenticationCheckResultMessage,omitempty" safelogging:"@Unsafe"`
+	AuthenticationCheckResultMessage *string `json:"authenticationCheckResultMessage,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AuthenticationCheck) MarshalJSON() ([]byte, error) {
@@ -516,7 +516,7 @@ type AuthorizationCheck struct {
 	// Targets that failed authorization.
 	AuthorizationCheckFailedTargets []v2.Identifier `json:"authorizationCheckFailedTargets"`
 	// Further details on this authorization check result.
-	AuthorizationCheckResultMessage *string `json:"authorizationCheckResultMessage,omitempty" safelogging:"@Unsafe"`
+	AuthorizationCheckResultMessage *string `json:"authorizationCheckResultMessage,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o AuthorizationCheck) MarshalJSON() ([]byte, error) {
@@ -633,7 +633,7 @@ type CancelCodeExecution struct {
 	// The specific resources that were being executed before cancellation. For example, could be a modelUUID or a buildRID.
 	CancelledExecutedResources []v2.LogicResource `json:"cancelledExecutedResources"`
 	// The encompasssing environment for the resources that were being executed before cancellation. For example, could be a liveRID or a workbookRID.
-	CancelledExecutedResourceEnvironment *v2.LogicResource `json:"cancelledExecutedResourceEnvironment,omitempty"`
+	CancelledExecutedResourceEnvironment *v2.LogicResource `json:"cancelledExecutedResourceEnvironment,omitzero"`
 }
 
 func (o CancelCodeExecution) MarshalJSON() ([]byte, error) {
@@ -678,7 +678,7 @@ type CodeExecution struct {
 	// The specific resources that were executed. For example, could be a modelUUID or a buildRID.
 	ExecutedResources []v2.LogicResource `json:"executedResources"`
 	// The encompasssing environment for the resources that were executed. For example, could be a liveRID or a workbookRID.
-	ExecutedResourceEnvironment *v2.LogicResource `json:"executedResourceEnvironment,omitempty"`
+	ExecutedResourceEnvironment *v2.LogicResource `json:"executedResourceEnvironment,omitzero"`
 }
 
 func (o CodeExecution) MarshalJSON() ([]byte, error) {
@@ -724,7 +724,7 @@ type ConfigureInfra struct {
 	// The SystemResources that are being configured.
 	ConfigureInfraTargets []v2.SystemResource `json:"configureInfraTargets"`
 	// The request-id of this configuration event.
-	ConfigureInfraRequestId *string `json:"configureInfraRequestId,omitempty" safelogging:"@Unsafe"`
+	ConfigureInfraRequestId *string `json:"configureInfraRequestId,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ConfigureInfra) MarshalJSON() ([]byte, error) {
@@ -881,7 +881,7 @@ module list is read.
 // safelogging:@Unsafe
 type ContainerSearch struct {
 	// The search-query that this event is running.
-	ContainerSearchQuery *string `json:"containerSearchQuery,omitempty" safelogging:"@Unsafe"`
+	ContainerSearchQuery *string `json:"containerSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// The search-results that are returned to the user in this event.
 	ContainerSearchResults []v2.SystemResource `json:"containerSearchResults"`
 }
@@ -932,7 +932,7 @@ type ContainerStop struct {
 	// The IDs of the resources that were stopped.
 	StoppedContainerIds []v2.SystemResource `json:"stoppedContainerIds"`
 	// The reason why the resource was stopped.
-	ContainerStopReason *string `json:"containerStopReason,omitempty" safelogging:"@Unsafe"`
+	ContainerStopReason *string `json:"containerStopReason,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ContainerStop) MarshalJSON() ([]byte, error) {
@@ -1122,7 +1122,7 @@ type DataExport struct {
 	// All resources that were downloaded in this event.
 	DownloadedResources []v2.DataResource `json:"downloadedResources"`
 	// The size, in bytes, of the downloaded data.
-	DownloadedSize *safelong.SafeLong `json:"downloadedSize,omitempty" safelogging:"@Unsafe"`
+	DownloadedSize *safelong.SafeLong `json:"downloadedSize,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataExport) MarshalJSON() ([]byte, error) {
@@ -1170,15 +1170,15 @@ DataPromote in a separate service.
 // safelogging:@Unsafe
 type DataImport struct {
 	// The filename of the imported data, if it exists.
-	ImportedFilename *string `json:"importedFilename,omitempty" safelogging:"@Unsafe"`
+	ImportedFilename *string `json:"importedFilename,omitzero" safelogging:"@Unsafe"`
 	// The filetype of the imported data.
-	ImportedFileType *common.FileType `json:"importedFileType,omitempty"`
+	ImportedFileType *common.FileType `json:"importedFileType,omitzero"`
 	// The destination resource for the imported data.
-	ImportResourceId *v2.DataResource `json:"importResourceId,omitempty"`
+	ImportResourceId *v2.DataResource `json:"importResourceId,omitzero"`
 	// The parent of the destination resource.
-	ImportParentResourceId *v2.DataResource `json:"importParentResourceId,omitempty"`
+	ImportParentResourceId *v2.DataResource `json:"importParentResourceId,omitzero"`
 	// The total size, in bytes, of the imported data.
-	ImportedSize *safelong.SafeLong `json:"importedSize,omitempty" safelogging:"@Unsafe"`
+	ImportedSize *safelong.SafeLong `json:"importedSize,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataImport) MarshalYAML() (interface{}, error) {
@@ -1248,7 +1248,7 @@ type DataMerge struct {
 	// The resources that were merged in this event.
 	ResourcesToMerge []v2.DataResource `json:"resourcesToMerge"`
 	// The resultant DataResource from the merging of the resources.
-	MergedResult *v2.DataResource `json:"mergedResult,omitempty"`
+	MergedResult *v2.DataResource `json:"mergedResult,omitzero"`
 }
 
 func (o DataMerge) MarshalJSON() ([]byte, error) {
@@ -1296,7 +1296,7 @@ type DataPromote struct {
 	// The resources that were promoted to another system.
 	PromotedResources []v2.DataResource `json:"promotedResources"`
 	// A description of this promotion event.
-	PromotionDescription *string `json:"promotionDescription,omitempty" safelogging:"@Unsafe"`
+	PromotionDescription *string `json:"promotionDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataPromote) MarshalJSON() ([]byte, error) {
@@ -1346,7 +1346,7 @@ func (o *DataPromote) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // safelogging:@Unsafe
 type DataSearch struct {
 	// The query that this search is executing.
-	DataSearchQuery *string `json:"dataSearchQuery,omitempty" safelogging:"@Unsafe"`
+	DataSearchQuery *string `json:"dataSearchQuery,omitzero" safelogging:"@Unsafe"`
 	/*
 	   Further information to contextualise the current query. This information is unstructured
 	   and should not be relied upon beyond informing auditors.
@@ -1403,10 +1403,10 @@ func (o *DataSearch) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // safelogging:@Unsafe
 type DataShare struct {
 	// An optional identifier for this share, if available.
-	DataShareId      *v2.Identifier    `json:"dataShareId,omitempty"`
+	DataShareId      *v2.Identifier    `json:"dataShareId,omitzero"`
 	DataShareTargets []v2.DataResource `json:"dataShareTargets"`
 	// A human-readable reason this data was shared (e.g. "visited a share link").
-	DataShareReason *string `json:"dataShareReason,omitempty" safelogging:"@Unsafe"`
+	DataShareReason *string `json:"dataShareReason,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataShare) MarshalJSON() ([]byte, error) {
@@ -1449,7 +1449,7 @@ func (o *DataShare) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Creation of a share of data. For example, when creating a link that grants access to resources on visit.
 type DataShareCreate struct {
 	// An optional identifier for this share, if available.
-	DataShareCreateId      *v2.Identifier    `json:"dataShareCreateId,omitempty"`
+	DataShareCreateId      *v2.Identifier    `json:"dataShareCreateId,omitzero"`
 	DataShareCreateTargets []v2.DataResource `json:"dataShareCreateTargets"`
 }
 
@@ -1493,7 +1493,7 @@ func (o *DataShareCreate) UnmarshalYAML(unmarshal func(interface{}) error) error
 // Deactivation of a mechanism to share data. For example, the disabling of a link that grants access to resources on visit.
 type DataShareDisable struct {
 	// An optional identifier for this share, if available.
-	DataShareDisableId      *v2.Identifier    `json:"dataShareDisableId,omitempty"`
+	DataShareDisableId      *v2.Identifier    `json:"dataShareDisableId,omitzero"`
 	DataShareDisableTargets []v2.DataResource `json:"dataShareDisableTargets"`
 }
 
@@ -1540,7 +1540,7 @@ type DataTransform struct {
 	// The resources that were transformed.
 	TransformTargets []v2.DataResource `json:"transformTargets"`
 	// A description of the transformation that was performed.
-	TransformDescription *string `json:"transformDescription,omitempty" safelogging:"@Unsafe"`
+	TransformDescription *string `json:"transformDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o DataTransform) MarshalJSON() ([]byte, error) {
@@ -1697,7 +1697,7 @@ func (o *InEnrollmentContext) UnmarshalYAML(unmarshal func(interface{}) error) e
 // safelogging:@Unsafe
 type InfraLogsAccess struct {
 	// The request-id of this access request event.
-	InfraLogsAccessRequestId *string `json:"infraLogsAccessRequestId,omitempty" safelogging:"@Unsafe"`
+	InfraLogsAccessRequestId *string `json:"infraLogsAccessRequestId,omitzero" safelogging:"@Unsafe"`
 	// The SystemResource from which logs are being requested.
 	InfraLogsAccessTarget v2.SystemResource `json:"infraLogsAccessTarget"`
 }
@@ -1731,7 +1731,7 @@ type LlmInference struct {
 	   Further context to identify this inference request, such as the model id.
 	   This must include any LLM inference context that is only available at response-time.
 	*/
-	LlmInferenceResponseContext *v2.LlmInferenceContext `json:"llmInferenceResponseContext,omitempty"`
+	LlmInferenceResponseContext *v2.LlmInferenceContext `json:"llmInferenceResponseContext,omitzero"`
 }
 
 func (o LlmInference) MarshalJSON() ([]byte, error) {
@@ -1784,7 +1784,7 @@ This audit category is intended for LLM proxies or load-balancers (i.e. llm-port
 // safelogging:@Unsafe
 type LlmRoute struct {
 	LlmRouteRequest  v2.LlmRoutingRequest   `json:"llmRouteRequest" safelogging:"@Unsafe"`
-	LlmRouteResponse *v2.LlmRoutingResponse `json:"llmRouteResponse,omitempty"`
+	LlmRouteResponse *v2.LlmRoutingResponse `json:"llmRouteResponse,omitzero"`
 }
 
 func (o LlmRoute) MarshalYAML() (interface{}, error) {
@@ -1936,7 +1936,7 @@ func (o *LogicDelete) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // safelogging:@Unsafe
 type LogicSearch struct {
 	// The query that this search is executing.
-	LogicSearchQuery *string `json:"logicSearchQuery,omitempty" safelogging:"@Unsafe"`
+	LogicSearchQuery *string `json:"logicSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// All underlying LogicResources returned by this search request.
 	LogicSearchResults []v2.LogicResource `json:"logicSearchResults"`
 }
@@ -2253,7 +2253,7 @@ type MetaDataAccess struct {
 	// The underlying DataResources that the accessed metadata describes.
 	AccessedMetaDataResources []v2.DataResource `json:"accessedMetaDataResources"`
 	// A description of the metadata access.
-	AccessedMetaDataDescription *string `json:"accessedMetaDataDescription,omitempty" safelogging:"@Unsafe"`
+	AccessedMetaDataDescription *string `json:"accessedMetaDataDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MetaDataAccess) MarshalJSON() ([]byte, error) {
@@ -2303,7 +2303,7 @@ type MetaDataCreate struct {
 	// The underlying DataResources that the created metadata describes.
 	CreatedMetaDataResources []v2.DataResource `json:"createdMetaDataResources"`
 	// A description of the metadata creation.
-	CreatedMetaDataDescription *string `json:"createdMetaDataDescription,omitempty" safelogging:"@Unsafe"`
+	CreatedMetaDataDescription *string `json:"createdMetaDataDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MetaDataCreate) MarshalJSON() ([]byte, error) {
@@ -2353,7 +2353,7 @@ type MetaDataDelete struct {
 	// The underlying DataResources that the deleted metadata describes.
 	DeletedMetaDataResources []v2.DataResource `json:"deletedMetaDataResources"`
 	// A description of the metadata deletion.
-	DeletedMetaDataDescription *string `json:"deletedMetaDataDescription,omitempty" safelogging:"@Unsafe"`
+	DeletedMetaDataDescription *string `json:"deletedMetaDataDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MetaDataDelete) MarshalJSON() ([]byte, error) {
@@ -2397,7 +2397,7 @@ func (o *MetaDataDelete) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // safelogging:@Unsafe
 type MetaDataSearch struct {
 	// The query that this search is executing.
-	MetaDataSearchQuery *string `json:"metaDataSearchQuery,omitempty" safelogging:"@Unsafe"`
+	MetaDataSearchQuery *string `json:"metaDataSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// All underlying resources that had metadata presented to the user by this search result.
 	MetaDataSearchResults []v2.DataResource `json:"metaDataSearchResults"`
 }
@@ -2449,7 +2449,7 @@ type MetaDataUpdate struct {
 	// The underlying DataResources that the updated metadata describes.
 	UpdatedMetaDataResources []v2.DataResource `json:"updatedMetaDataResources"`
 	// A description of the metadata update.
-	UpdatedMetaDataDescription *string `json:"updatedMetaDataDescription,omitempty" safelogging:"@Unsafe"`
+	UpdatedMetaDataDescription *string `json:"updatedMetaDataDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MetaDataUpdate) MarshalJSON() ([]byte, error) {
@@ -2495,7 +2495,7 @@ type MonitorAccess struct {
 	// The MonitorResources that were accessed in this event.
 	AccessedMonitorResources []v2.MonitorResource `json:"accessedMonitorResources"`
 	// A description of the monitor access.
-	AccessedMonitorDescription *string `json:"accessedMonitorDescription,omitempty" safelogging:"@Unsafe"`
+	AccessedMonitorDescription *string `json:"accessedMonitorDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MonitorAccess) MarshalJSON() ([]byte, error) {
@@ -2541,7 +2541,7 @@ type MonitorCreate struct {
 	// The MonitorResources that were created in this event.
 	CreatedMonitorResources []v2.MonitorResource `json:"createdMonitorResources"`
 	// A description of the monitor creation.
-	CreatedMonitorDescription *string `json:"createdMonitorDescription,omitempty" safelogging:"@Unsafe"`
+	CreatedMonitorDescription *string `json:"createdMonitorDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MonitorCreate) MarshalJSON() ([]byte, error) {
@@ -2587,7 +2587,7 @@ type MonitorDelete struct {
 	// The MonitorResources that were deleted in this event.
 	DeletedMonitorResources []v2.MonitorResource `json:"deletedMonitorResources"`
 	// A description of the monitor deletion.
-	DeletedMonitorDescription *string `json:"deletedMonitorDescription,omitempty" safelogging:"@Unsafe"`
+	DeletedMonitorDescription *string `json:"deletedMonitorDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MonitorDelete) MarshalJSON() ([]byte, error) {
@@ -2674,7 +2674,7 @@ func (o *MonitorRun) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // safelogging:@Unsafe
 type MonitorSearch struct {
 	// The search-query that this event is running.
-	MonitorSearchQuery *string `json:"monitorSearchQuery,omitempty" safelogging:"@Unsafe"`
+	MonitorSearchQuery *string `json:"monitorSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// The search-results that are returned to the user in this event.
 	MonitorSearchResults []v2.MonitorResource `json:"monitorSearchResults"`
 }
@@ -2722,7 +2722,7 @@ type MonitorUpdate struct {
 	// The MonitorResources that were updated in this event.
 	UpdatedMonitorResources []v2.MonitorResource `json:"updatedMonitorResources"`
 	// A description of the monitor update.
-	UpdatedMonitorDescription *string `json:"updatedMonitorDescription,omitempty" safelogging:"@Unsafe"`
+	UpdatedMonitorDescription *string `json:"updatedMonitorDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o MonitorUpdate) MarshalJSON() ([]byte, error) {
@@ -2955,7 +2955,7 @@ type OntologyDataTransform struct {
 	// The OntologyDataResources that the user intends to transform.
 	OntologyDataTransformTargets []v2.OntologyDataResource `json:"ontologyDataTransformTargets"`
 	// A description of the transformation that was performed.
-	OntologyDataTransformDescription *string `json:"ontologyDataTransformDescription,omitempty" safelogging:"@Unsafe"`
+	OntologyDataTransformDescription *string `json:"ontologyDataTransformDescription,omitzero" safelogging:"@Unsafe"`
 	// The OntologyDataResources that were transformed by the request.
 	TransformedOntologyDataResources []v2.OntologyDataResource `json:"transformedOntologyDataResources"`
 }
@@ -3368,7 +3368,7 @@ type OntologyMetaDataSearch struct {
 	// The OntologyMetaDataResources included in the search query.
 	OntologyMetaDataSearchedResources []v2.OntologyMetaDataResource `json:"ontologyMetaDataSearchedResources"`
 	// Further context to the search query - such as DatasourceType
-	OntologyMetaDataSearchContext *string `json:"ontologyMetaDataSearchContext,omitempty" safelogging:"@Unsafe"`
+	OntologyMetaDataSearchContext *string `json:"ontologyMetaDataSearchContext,omitzero" safelogging:"@Unsafe"`
 	// All OntologyMetaDataResources that were returned to the user.
 	OntologyMetaDataSearchResults []v2.OntologyMetaDataResource `json:"ontologyMetaDataSearchResults"`
 }
@@ -3558,7 +3558,7 @@ type RequestAccess struct {
 	// The requests that were accessed in this request.
 	AccessedRequestIds []v2.RequestResource `json:"accessedRequestIds"`
 	// A description of the request access.
-	AccessedRequestDescription *string `json:"accessedRequestDescription,omitempty" safelogging:"@Unsafe"`
+	AccessedRequestDescription *string `json:"accessedRequestDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o RequestAccess) MarshalJSON() ([]byte, error) {
@@ -3606,7 +3606,7 @@ type RequestApprove struct {
 	// The requests that are being approved
 	ApprovedRequestIds []v2.RequestResource `json:"approvedRequestIds"`
 	// The user that approved the request
-	ApproveRequestUserId *string `json:"approveRequestUserId,omitempty"`
+	ApproveRequestUserId *string `json:"approveRequestUserId,omitzero"`
 }
 
 func (o RequestApprove) MarshalJSON() ([]byte, error) {
@@ -3705,7 +3705,7 @@ type RequestCreate struct {
 	*/
 	CreatedRequestAffectedResources []v2.Resource `json:"createdRequestAffectedResources"`
 	// A description of the request creation.
-	CreatedRequestDescription *string `json:"createdRequestDescription,omitempty" safelogging:"@Unsafe"`
+	CreatedRequestDescription *string `json:"createdRequestDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o RequestCreate) MarshalJSON() ([]byte, error) {
@@ -3756,7 +3756,7 @@ type RequestDisapprove struct {
 	// The requests that are being disapproved
 	DisapprovedRequestIds []v2.RequestResource `json:"disapprovedRequestIds"`
 	// The user that disapproved the request
-	DisapproveRequestUserId *string `json:"disapproveRequestUserId,omitempty"`
+	DisapproveRequestUserId *string `json:"disapproveRequestUserId,omitzero"`
 }
 
 func (o RequestDisapprove) MarshalJSON() ([]byte, error) {
@@ -3854,7 +3854,7 @@ func (o *RequestExecute) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // safelogging:@Unsafe
 type RequestSearch struct {
 	// The search-query that this event is running.
-	RequestSearchQuery *string `json:"requestSearchQuery,omitempty" safelogging:"@Unsafe"`
+	RequestSearchQuery *string `json:"requestSearchQuery,omitzero" safelogging:"@Unsafe"`
 	// The search-results that are returned to the user in this event.
 	RequestSearchResults []v2.RequestResource `json:"requestSearchResults"`
 }
@@ -3902,7 +3902,7 @@ type RequestUpdate struct {
 	// The requests that were updated in this request
 	UpdatedRequestIds []v2.RequestResource `json:"updatedRequestIds"`
 	// A description of the request update.
-	UpdatedRequestDescription *string `json:"updatedRequestDescription,omitempty" safelogging:"@Unsafe"`
+	UpdatedRequestDescription *string `json:"updatedRequestDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o RequestUpdate) MarshalJSON() ([]byte, error) {
@@ -3993,7 +3993,7 @@ type ReviewInfraAction struct {
 	// The user who reviewed this action.
 	ReviewInfraActionUser string `json:"reviewInfraActionUser"`
 	// Whether the review was approved.
-	ReviewInfraActionWasApproved *bool `json:"reviewInfraActionWasApproved,omitempty" safelogging:"@Unsafe"`
+	ReviewInfraActionWasApproved *bool `json:"reviewInfraActionWasApproved,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o ReviewInfraAction) MarshalYAML() (interface{}, error) {
@@ -4227,7 +4227,7 @@ type TokenGeneration struct {
 	// All tokens that were generated
 	GeneratedTokens []v2.Token `json:"generatedTokens"`
 	// A description of how these tokens were generated, for auditor-context.
-	GenerateTokensDescription *string `json:"generateTokensDescription,omitempty" safelogging:"@Unsafe"`
+	GenerateTokensDescription *string `json:"generateTokensDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o TokenGeneration) MarshalJSON() ([]byte, error) {
@@ -4273,7 +4273,7 @@ type TokenRevoke struct {
 	// All tokens that were revoked.
 	RevokedTokens []v2.Token `json:"revokedTokens"`
 	// A description of how these tokens were generated, for auditor-context.
-	RevokeTokensDescription *string `json:"revokeTokensDescription,omitempty" safelogging:"@Unsafe"`
+	RevokeTokensDescription *string `json:"revokeTokensDescription,omitzero" safelogging:"@Unsafe"`
 }
 
 func (o TokenRevoke) MarshalJSON() ([]byte, error) {
@@ -4403,7 +4403,7 @@ func (o *UserJustify) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Login of a user.
 type UserLogin struct {
-	LoginUserId *string `json:"loginUserId,omitempty"`
+	LoginUserId *string `json:"loginUserId,omitzero"`
 }
 
 func (o UserLogin) MarshalYAML() (interface{}, error) {
@@ -4424,7 +4424,7 @@ func (o *UserLogin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Logout of a user.
 type UserLogout struct {
-	LogoutUserId *string `json:"logoutUserId,omitempty"`
+	LogoutUserId *string `json:"logoutUserId,omitzero"`
 }
 
 func (o UserLogout) MarshalYAML() (interface{}, error) {
