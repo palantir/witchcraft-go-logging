@@ -19,6 +19,7 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
 )
 
 type Logger interface {
@@ -35,11 +36,11 @@ func New(w io.Writer, level wlog.LogLevel, params ...Param) Logger {
 
 func NewFromCreator(w io.Writer, level wlog.LogLevel, creator wlog.LeveledLoggerCreator, params ...Param) Logger {
 	delegate := creator(w, level)
-	// The second return value is ignored because 'level: nil' is a valid state handled in the implementation.
 	levelChecker, _ := delegate.(wlog.LevelChecker)
 	return WithParams(&defaultLogger{
-		logger: delegate,
-		level:  levelChecker,
+		logger:   logentry.NewLeveledLogger(delegate),
+		delegate: delegate,
+		level:    levelChecker,
 	}, params...)
 }
 

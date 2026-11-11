@@ -20,10 +20,12 @@ import (
 	"io"
 	"log"
 	"sync"
+
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 )
 
-// NewJSONMarshalLoggerProvider returns a new logger provider that uses a MapLogEntry as its log entry and encodes it
-// with JSON v2.
+// NewJSONMarshalLoggerProvider returns a new logger provider that encodes log objects directly with JSON v2. Generic
+// Logger and LeveledLogger calls use a MapLogEntry.
 func NewJSONMarshalLoggerProvider() LoggerProvider {
 	return &jsonMarshalLoggerProvider{}
 }
@@ -32,6 +34,11 @@ type jsonMarshalLogger struct {
 	mu sync.Mutex
 	w  io.Writer
 	*AtomicLogLevel
+}
+
+// LogObject implements the internal logentry.Logger interface.
+func (l *jsonMarshalLogger) LogObject(obj logtypes.Log) {
+	l.writeObject(obj)
 }
 
 func (l *jsonMarshalLogger) Log(params ...Param) {
@@ -65,7 +72,11 @@ func (l *jsonMarshalLogger) Error(msg string, params ...Param) {
 func (l *jsonMarshalLogger) logOutput(params []Param) {
 	entry := NewMapLogEntry()
 	ApplyParams(entry, params)
-	if err := l.write(entry.AllValues()); err != nil {
+	l.writeObject(logtypes.AnyMap(entry.AllValues()))
+}
+
+func (l *jsonMarshalLogger) writeObject(obj any) {
+	if err := l.write(obj); err != nil {
 		log.Printf("json logger failed: %v", err)
 	}
 }

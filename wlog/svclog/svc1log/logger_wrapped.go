@@ -25,19 +25,36 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Debug(msg string, params ...Param) {
+	if w.skip(wlog.DebugLevel, params) {
+		return
+	}
 	w.logger.Debug(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Info(msg string, params ...Param) {
+	if w.skip(wlog.InfoLevel, params) {
+		return
+	}
 	w.logger.Info(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Warn(msg string, params ...Param) {
+	if w.skip(wlog.WarnLevel, params) {
+		return
+	}
 	w.logger.Warn(msg, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Error(msg string, params ...Param) {
+	if w.skip(wlog.ErrorLevel, params) {
+		return
+	}
 	w.logger.Error(msg, wloginternal.AppendParams(w.params, params)...)
+}
+
+// skip reports whether a disabled level makes appending the parameters wasted work.
+func (w *wrappedLogger) skip(level wlog.LogLevel, params []Param) bool {
+	return len(w.params) > 0 && len(params) > 0 && !w.Enabled(level)
 }
 
 func (w *wrappedLogger) SetLevel(level wlog.LogLevel) {

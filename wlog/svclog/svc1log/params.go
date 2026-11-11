@@ -22,18 +22,20 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 const (
-	TypeValue = "service.1"
-
-	LevelKey        = "level"
+	TypeValue       = "service.1"
 	LevelDebugValue = "DEBUG"
 	LevelInfoValue  = "INFO"
 	LevelWarnValue  = "WARN"
 	LevelErrorValue = "ERROR"
 
+	LevelKey      = "level"
 	OriginKey     = "origin"
 	ThreadKey     = "thread"
 	MessageKey    = "message"
@@ -42,27 +44,23 @@ const (
 	TagsKey       = "tags"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wloginternal.Param[logtypes.ServiceLogV1]
 
 func ApplyParam(p Param, entry wlog.LogEntry) {
 	if p == nil {
 		return
 	}
-	p.apply(entry)
+	log := new(logtypes.ServiceLogV1)
+	wloginternal.ApplyParam(log, p)
+	logentry.ServiceLogV1Params(entry, log)
 }
 
-type paramFunc func(entry wlog.LogEntry)
-
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
-}
+type paramFunc = wloginternal.ParamFunc[logtypes.ServiceLogV1]
 
 // Origin sets the "origin" field to be the provided value if it is non-empty.
 func Origin(origin string) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
-		logger.OptionalStringValue(OriginKey, origin)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.Origin = origin
 	})
 }
 
@@ -121,17 +119,15 @@ func OriginFromCallLine() Param {
 	return OriginFromCallLineWithSkip(0)
 }
 
-const defaultOriginFromCallLineStackSkip = 8
+const defaultOriginFromCallLineStackSkip = 7
 
 // OriginFromCallLineWithSkip is like OriginFromCallLine but allows for configuring additional skipped stack frames.
 // This allows for libraries wrapping loggers to hide their implementation frames from the caller.
 func OriginFromCallLineWithSkip(skipFrames int) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		origin := ""
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
 		if file, line, ok := initLineCaller(defaultOriginFromCallLineStackSkip + skipFrames); ok {
-			origin = file + ":" + strconv.Itoa(line)
+			log.Origin = file + ":" + strconv.Itoa(line)
 		}
-		entry.OptionalStringValue(OriginKey, origin)
 	})
 }
 
@@ -145,86 +141,88 @@ func initLineCaller(skip int) (string, int, bool) {
 }
 
 func SafeParam(key string, value any) Param {
-	return SafeParams(map[string]any{
-		key: value,
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParam(&log.Params, key, value)
 	})
 }
 
 func SafeParams(safe map[string]any) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ParamsKey, safe)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParams(&log.Params, safe)
 	})
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.Uid = uid
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.Sid = sid
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.TokenId = tokenID
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.OrgId = orgID
 	})
 }
 
 func TraceID(traceID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TraceIDKey, traceID)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		log.TraceId = traceID
 	})
 }
 
 func Stacktrace(err error) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
 		if err == nil {
 			return
 		}
-		entry.StringValue(StacktraceKey, werror.GenerateErrorString(err, false))
+		log.Stacktrace = werror.GenerateErrorString(err, false)
 
 		// add all safe and unsafe parameters stored in error
 		safeParams, unsafeParams := werror.ParamsFromError(err)
-		SafeParams(safeParams).apply(entry)
-		UnsafeParams(unsafeParams).apply(entry)
+		wloginternal.SetMapParams(&log.Params, safeParams)
+		wloginternal.SetMapParams(&log.UnsafeParams, unsafeParams)
 	})
 }
 
 func UnsafeParam(key string, value any) Param {
-	return UnsafeParams(map[string]any{
-		key: value,
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParam(&log.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]any) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParams(&log.UnsafeParams, unsafe)
 	})
 }
 
 func Params(object wparams.ParamStorer) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		SafeParams(object.SafeParams()).apply(entry)
-		UnsafeParams(object.UnsafeParams()).apply(entry)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParams(&log.Params, object.SafeParams())
+		wloginternal.SetMapParams(&log.UnsafeParams, object.UnsafeParams())
 	})
 }
 
 func Tag(key, value string) Param {
-	return Tags(map[string]string{key: value})
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParam(&log.Tags, key, value)
+	})
 }
 
 func Tags(tags map[string]string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringMapValue(TagsKey, tags)
+	return paramFunc(func(log *logtypes.ServiceLogV1) {
+		wloginternal.SetMapParams(&log.Tags, tags)
 	})
 }

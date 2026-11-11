@@ -27,11 +27,17 @@ import (
 
 type AnyMap map[string]any
 
+// IsZero lets omitzero omit an empty map.
+func (m AnyMap) IsZero() bool { return len(m) == 0 }
+
 func (m AnyMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return marshalSortedMap(enc, m, marshalAnyValue)
 }
 
 type StringMap map[string]string
+
+// IsZero lets omitzero omit an empty map.
+func (m StringMap) IsZero() bool { return len(m) == 0 }
 
 func (m StringMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return marshalSortedMap(enc, m, marshalStringValue)
