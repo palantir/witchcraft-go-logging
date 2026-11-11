@@ -16,6 +16,7 @@ package audit2log
 
 import (
 	"io"
+	"slices"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
@@ -71,12 +72,12 @@ func WithParams(logger Logger, params ...Param) Logger {
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			params: slices.Clip(append(innerWrapped.params, params...)),
 		}
 	}
 
 	return &wrappedLogger{
 		logger: logger,
-		params: params,
+		params: slices.Clip(params),
 	}
 }

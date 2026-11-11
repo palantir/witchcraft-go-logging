@@ -20,6 +20,8 @@ import (
 
 type wrappedLogger struct {
 	logger Logger
+	// params must have a capacity equal to its length (WithParams ensures this) so that the appends in the methods below
+	// never write into a backing array that is shared with other loggers or log calls.
 	params []Param
 }
 
