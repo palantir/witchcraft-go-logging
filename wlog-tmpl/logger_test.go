@@ -149,3 +149,13 @@ func TestLogger(t *testing.T) {
 		})
 	}
 }
+
+func TestLoggerWritesNothingForSkippedLogs(t *testing.T) {
+	out := &bytes.Buffer{}
+	provider := wlogtmpl.LoggerProvider(&wlogtmpl.Config{
+		Exclude: map[logentryformatter.LogType]struct{}{"event.2": {}},
+	})
+	evt2log.NewFromCreator(out, provider.NewLogger).Event("MY_EVENT")
+	svc1log.NewFromCreator(out, wlog.InfoLevel, provider.NewLeveledLogger).Debug("disabled")
+	assert.Empty(t, out.String())
+}
