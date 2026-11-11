@@ -30,7 +30,7 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 }
 
 // FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
-// created by calling DefaultLogger.
+// that writes to STDOUT using the default provider.
 func FromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger

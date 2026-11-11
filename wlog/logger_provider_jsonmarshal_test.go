@@ -43,6 +43,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/wlogtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log/wrapped1logtests"
+	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/stretchr/testify/require"
 )
 
@@ -273,5 +274,14 @@ func TestJSONEntryWritesNoTimestamp(t *testing.T) {
 			provider.NewLogger(&buf).Log(wlog.StringParam("key", "value"))
 			require.JSONEq(t, `{"key":"value"}`, buf.String())
 		})
+	}
+}
+
+func TestObjectJSONTrc1LogPreservesSpanTags(t *testing.T) {
+	logger := trc1log.NewFromCreator(io.Discard, wlog.NewJSONMarshalLoggerProvider().NewLogger)
+	span := wtracing.SpanModel{Tags: map[string]string{"key": "value"}}
+	logger.Log(span)
+	if got := span.Tags["key"]; got != "value" {
+		t.Fatalf("span tag after logging = %q, want value", got)
 	}
 }

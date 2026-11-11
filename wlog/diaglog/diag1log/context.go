@@ -16,24 +16,31 @@ package diag1log
 
 import (
 	"context"
+	"os"
 )
 
 type diag1LogContextKeyType string
 
 const contextKey = diag1LogContextKeyType(TypeValue)
 
+// FromContext returns the context's logger, or a logger that writes to STDOUT using the default provider.
 func FromContext(ctx context.Context) Logger {
-	untypedLogger := ctx.Value(contextKey)
-	if untypedLogger == nil {
-		return &defaultLogger{}
+	if logger, ok := ctx.Value(contextKey).(Logger); ok {
+		return logger
 	}
-	logger, ok := untypedLogger.(Logger)
-	if !ok {
-		return &defaultLogger{}
-	}
-	return logger
+	return New(os.Stdout)
 }
 
+// WithLogger returns a copy of ctx with its logger replaced by logger.
 func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
+}
+
+// WithLoggerParams configures the context's logger with params, using the default logger if none is set.
+// With no parameters, it returns the original context.
+func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
+	if len(params) == 0 {
+		return ctx
+	}
+	return WithLogger(ctx, WithParams(FromContext(ctx), params...))
 }

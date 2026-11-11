@@ -27,8 +27,17 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
 }
 
+// WithLoggerParams configures the context's logger with params, using the default logger if none is set.
+// With no parameters, it returns the original context.
+func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
+	if len(params) == 0 {
+		return ctx
+	}
+	return WithLogger(ctx, WithParams(FromContext(ctx), params...))
+}
+
 // FromContext returns the Logger stored in the provided context. If no logger was set on the context, returns a
-// logger that logs to STDOUT at the INFO level with an empty origin field.
+// logger that logs to STDOUT using the default provider.
 func FromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger

@@ -19,6 +19,8 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
 )
 
 type Logger interface {
@@ -31,6 +33,19 @@ func New(w io.Writer) Logger {
 
 func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
 	return &defaultLogger{
-		logger: creator(w),
+		logger: logentry.NewLogger(creator(w)),
 	}
+}
+
+func WithParams(logger Logger, params ...Param) Logger {
+	if len(params) == 0 {
+		return logger
+	}
+	if innerWrapped, ok := logger.(*wrappedLogger); ok {
+		return &wrappedLogger{
+			logger: innerWrapped.logger,
+			params: wloginternal.AppendParams(innerWrapped.params, params),
+		}
+	}
+	return &wrappedLogger{logger: logger, params: params}
 }

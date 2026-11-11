@@ -32,9 +32,17 @@ func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey, logger)
 }
 
-// FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
-// created by calling DefaultLogger. If the context contains a TraceID set using wtracing, the returned logger has that
-// TraceID set on it as a parameter.
+// WithLoggerParams configures the context's logger with params, using the default logger if none is set.
+// With no parameters, it returns the original context.
+func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
+	if len(params) == 0 {
+		return ctx
+	}
+	return WithLogger(ctx, WithParams(loggerFromContext(ctx), params...))
+}
+
+// FromContext returns the context's logger, or one created by the configured default logger creator.
+// Context IDs and the wtracing trace ID are applied to the returned logger.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
 	var params []Param
@@ -57,7 +65,7 @@ func FromContext(ctx context.Context) Logger {
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
-// logger created by calling DefaultLogger.
+// logger created by the configured default logger creator.
 func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
