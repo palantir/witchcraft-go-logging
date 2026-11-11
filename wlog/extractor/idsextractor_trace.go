@@ -32,6 +32,6 @@ type traceIDExtractor struct{}
 
 func (e *traceIDExtractor) ExtractIDs(req *http.Request) map[string]string {
 	return map[string]string{
-		TraceIDKey: req.Header.Get("X-B3-TraceId"),
+		TraceIDKey: req.Header.Get("X-B3-Traceid"),
 	}
 }
