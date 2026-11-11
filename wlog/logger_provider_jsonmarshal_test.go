@@ -28,6 +28,8 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log/audit3logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log/diag1logtests"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
@@ -284,4 +286,16 @@ func TestObjectJSONTrc1LogPreservesSpanTags(t *testing.T) {
 	if got := span.Tags["key"]; got != "value" {
 		t.Fatalf("span tag after logging = %q, want value", got)
 	}
+}
+
+func TestObjectJSONAudit3Log(t *testing.T) {
+	audit3logtests.JSONConjureTestSuite(t, func(w io.Writer) audit3log.Logger {
+		return audit3log.NewFromCreator(w, wlog.NewJSONMarshalLoggerProvider().NewLogger)
+	})
+}
+
+func TestObjectJSONAudit3DualLog(t *testing.T) {
+	audit3logtests.DualLoggingJSONTestSuite(t, func(audit3Writer, audit2Writer io.Writer) audit3log.Logger {
+		return audit3log.NewDualLoggerFromCreator(audit3Writer, audit2Writer, wlog.NewJSONMarshalLoggerProvider().NewLogger)
+	})
 }

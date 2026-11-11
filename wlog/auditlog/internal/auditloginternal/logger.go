@@ -15,10 +15,12 @@
 package auditloginternal
 
 import (
+	"io"
 	"time"
 
 	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
 )
 
 type AuditResultType string
@@ -29,9 +31,65 @@ const (
 	AuditResultError        AuditResultType = "ERROR"
 )
 
-type logger struct {
-	audit2Logger wlog.Logger
-	audit3Logger wlog.Logger
+// Logger writes audit.2 and audit.3 logs. Audit2 and Audit3 write their own version, then the other version if its
+// logger is set.
+type Logger struct {
+	audit2Logger logentry.Logger
+	audit3Logger logentry.Logger
+}
+
+// NewLogger returns a Logger that writes to the provided loggers. Either logger may be nil.
+func NewLogger(audit2Logger, audit3Logger wlog.Logger) *Logger {
+	return &Logger{audit2Logger: newObjectLogger(audit2Logger), audit3Logger: newObjectLogger(audit3Logger)}
+}
+
+// CreateIfSet returns a logger for w, or nil if w is nil.
+func CreateIfSet(w io.Writer, creator wlog.LoggerCreator) wlog.Logger {
+	if w == nil {
+		return nil
+	}
+	return creator(w)
+}
+
+func newObjectLogger(logger wlog.Logger) logentry.Logger {
+	if logger == nil {
+		return nil
+	}
+	return logentry.NewLogger(logger)
+}
+
+// Audit2 writes an audit.2 log, and an audit.3 log if the audit.3 logger is set. get returns the AuditParam of a
+// public param.
+func Audit2[P any](l *Logger, name string, result AuditResultType, params []P, get func(P) AuditParam) {
+	var values atLogTimeValues
+	writeAuditLogV2(l.audit2Logger, &values, name, result, params, get)
+	if l.audit3Logger != nil {
+		writeAuditLogV3(l.audit3Logger, &values, name, result, params, get)
+	}
+}
+
+// Audit3 writes an audit.3 log, and an audit.2 log if the audit.2 logger is set. get returns the AuditParam of a
+// public param.
+func Audit3[P any](l *Logger, name string, result AuditResultType, params []P, get func(P) AuditParam) {
+	var values atLogTimeValues
+	writeAuditLogV3(l.audit3Logger, &values, name, result, params, get)
+	if l.audit2Logger != nil {
+		writeAuditLogV2(l.audit2Logger, &values, name, result, params, get)
+	}
+}
+
+func writeAuditLogV2[P any](logger logentry.Logger, values *atLogTimeValues, name string, result AuditResultType, params []P, get func(P) AuditParam) {
+	log := poolAuditLogV2.Get()
+	populateAuditLogV2(log, values, name, result, params, get)
+	logger.LogObject(log)
+	poolAuditLogV2.Put(log)
+}
+
+func writeAuditLogV3[P any](logger logentry.Logger, values *atLogTimeValues, name string, result AuditResultType, params []P, get func(P) AuditParam) {
+	log := poolAuditLogV3.Get()
+	populateAuditLogV3(log, values, name, result, params, get)
+	logger.LogObject(log)
+	poolAuditLogV3.Put(log)
 }
 
 // atLogTimeValues stores values that are computed once when first logged. Exists to support dual-writing audit v2 and
@@ -43,60 +101,20 @@ type logger struct {
 // on a possible hot path (audit logging) and is an internal struct that is currently only used in a non-concurrent
 // manner, at this point the performance cost of making it safe does not seem to be worth the benefit.
 type atLogTimeValues struct {
-	timeValue       *string
-	logEntryIDValue *string
+	timeValue  time.Time
+	logEntryID string
 }
 
-func (v *atLogTimeValues) getOrComputeTimeValue() string {
-	if v.timeValue == nil {
-		value := time.Now().Format(time.RFC3339Nano)
-		v.timeValue = &value
+func (v *atLogTimeValues) getOrComputeTimeValue() time.Time {
+	if v.timeValue.IsZero() {
+		v.timeValue = time.Now()
 	}
-	return *v.timeValue
+	return v.timeValue
 }
 
-func (v *atLogTimeValues) getOrComputeLogEntryIDValue() string {
-	if v.logEntryIDValue == nil {
-		value := uuid.NewUUID().String()
-		v.logEntryIDValue = &value
+func (v *atLogTimeValues) getOrGenerateLogEntryID() string {
+	if v.logEntryID == "" {
+		v.logEntryID = uuid.NewUUID().String()
 	}
-	return *v.logEntryIDValue
-}
-
-func (v *atLogTimeValues) getLogEntryIDValue() *string {
-	return v.logEntryIDValue
-}
-
-func (l *logger) Audit2(name string, result AuditResultType, params ...Audit2Param) {
-	atLogTimeValuesProvider := &atLogTimeValues{}
-
-	l.audit2Logger.Log(Audit2ToParams(atLogTimeValuesProvider, name, result, params)...)
-
-	// dual-log if audit3Logger specified
-	if l.audit3Logger != nil {
-		audit3Params := make([]Audit3Param, len(params))
-		for i, param := range params {
-			audit3Params[i] = Audit3Param{
-				Param: param.Param,
-			}
-		}
-		l.audit3Logger.Log(Audit3ToParams(atLogTimeValuesProvider, name, result, audit3Params)...)
-	}
-}
-
-func (l *logger) Audit3(name string, result AuditResultType, params ...Audit3Param) {
-	atLogTimeValuesProvider := &atLogTimeValues{}
-
-	l.audit3Logger.Log(Audit3ToParams(atLogTimeValuesProvider, name, result, params)...)
-
-	// dual-log if audit2Logger specified
-	if l.audit2Logger != nil {
-		audit2Params := make([]Audit2Param, len(params))
-		for i, param := range params {
-			audit2Params[i] = Audit2Param{
-				Param: param.Param,
-			}
-		}
-		l.audit2Logger.Log(Audit2ToParams(atLogTimeValuesProvider, name, result, audit2Params)...)
-	}
+	return v.logEntryID
 }

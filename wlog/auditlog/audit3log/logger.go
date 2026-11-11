@@ -45,20 +45,6 @@ type Logger interface {
 	Audit(name string, result AuditResultType, params ...Param)
 }
 
-type audit3LoggerAdapter struct {
-	audit3logger auditloginternal.Audit3Logger
-}
-
-func (a *audit3LoggerAdapter) Audit(name string, result AuditResultType, params ...Param) {
-	a.audit3logger.Audit(name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(params)...)
-}
-
-func convertInternalLoggerToExternalLogger(logger auditloginternal.Audit3Logger) Logger {
-	return &audit3LoggerAdapter{
-		audit3logger: logger,
-	}
-}
-
 func New(w io.Writer) Logger {
 	return NewFromCreator(w, wlog.DefaultLoggerProvider().NewLogger)
 }
@@ -72,7 +58,7 @@ func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
 }
 
 func NewDualLoggerFromCreator(audit3Writer, audit2Writer io.Writer, creator wlog.LoggerCreator) Logger {
-	return convertInternalLoggerToExternalLogger(auditloginternal.Audit3NewFromCreator(audit3Writer, audit2Writer, creator))
+	return &defaultLogger{logger: auditloginternal.NewLogger(auditloginternal.CreateIfSet(audit2Writer, creator), creator(audit3Writer))}
 }
 
 func WithParams(logger Logger, params ...Param) Logger {
