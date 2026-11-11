@@ -31,6 +31,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/wlogtests"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
@@ -418,42 +419,53 @@ func TestServiceOriginFromCallLine(t *testing.T) {
 		{"zap", wlogzap.LoggerProvider()},
 		{"zerolog", wlogzerolog.LoggerProvider()},
 	} {
-		for _, instrumented := range []bool{false, true} {
-			for _, level := range []wlog.LogLevel{wlog.DebugLevel, wlog.InfoLevel, wlog.WarnLevel, wlog.ErrorLevel} {
-				t.Run(fmt.Sprintf("%s/instrumented=%t/%s", provider.name, instrumented, level), func(t *testing.T) {
-					var buf bytes.Buffer
-					skip := 0
-					if instrumented {
-						// Match the server's metric wrapper and the wrapper added by FromContext.
-						skip = 2
-					}
-					logger := svc1log.NewFromCreator(&buf, wlog.DebugLevel, provider.value.NewLeveledLogger, svc1log.OriginFromCallLineWithSkip(skip))
-					if instrumented {
-						ctx := svc1log.WithLogger(context.Background(), wrappedSvcLogger{delegate: logger})
-						logger = svc1log.FromContext(ctx)
-					}
+		for _, wrapped := range []bool{false, true} {
+			for _, instrumented := range []bool{false, true} {
+				for _, level := range []wlog.LogLevel{wlog.DebugLevel, wlog.InfoLevel, wlog.WarnLevel, wlog.ErrorLevel} {
+					t.Run(fmt.Sprintf("%s/wrapped=%t/instrumented=%t/%s", provider.name, wrapped, instrumented, level), func(t *testing.T) {
+						var buf bytes.Buffer
+						skip := 0
+						if instrumented {
+							// Match the server's metric wrapper and the wrapper added by FromContext.
+							skip = 2
+						}
+						origin := svc1log.OriginFromCallLineWithSkip(skip)
+						var logger svc1log.Logger
+						if wrapped {
+							logger = wrapped1log.NewFromProvider(&buf, wlog.DebugLevel, provider.value, "entity", "version").Service(origin)
+						} else {
+							logger = svc1log.NewFromCreator(&buf, wlog.DebugLevel, provider.value.NewLeveledLogger, origin)
+						}
+						if instrumented {
+							ctx := svc1log.WithLogger(context.Background(), wrappedSvcLogger{delegate: logger})
+							logger = svc1log.FromContext(ctx)
+						}
 
-					var file string
-					var line int
-					switch level {
-					case wlog.DebugLevel:
-						file, line = getFileAndLine()
-						logger.Debug("test")
-					case wlog.InfoLevel:
-						file, line = getFileAndLine()
-						logger.Info("test")
-					case wlog.WarnLevel:
-						file, line = getFileAndLine()
-						logger.Warn("test")
-					case wlog.ErrorLevel:
-						file, line = getFileAndLine()
-						logger.Error("test")
-					}
+						var file string
+						var line int
+						switch level {
+						case wlog.DebugLevel:
+							file, line = getFileAndLine()
+							logger.Debug("test")
+						case wlog.InfoLevel:
+							file, line = getFileAndLine()
+							logger.Info("test")
+						case wlog.WarnLevel:
+							file, line = getFileAndLine()
+							logger.Warn("test")
+						case wlog.ErrorLevel:
+							file, line = getFileAndLine()
+							logger.Error("test")
+						}
 
-					var entry map[string]any
-					require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
-					assert.Equal(t, fmt.Sprintf("%s:%d", file, line+1), entry["origin"])
-				})
+						var entry map[string]any
+						require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
+						if wrapped {
+							entry = entry["payload"].(map[string]any)["serviceLogV1"].(map[string]any)
+						}
+						assert.Equal(t, fmt.Sprintf("%s:%d", file, line+1), entry["origin"])
+					})
+				}
 			}
 		}
 	}

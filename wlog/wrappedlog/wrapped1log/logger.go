@@ -43,17 +43,13 @@ func New(w io.Writer, level wlog.LogLevel, name, version string) Logger {
 	return NewFromProvider(w, level, wlog.DefaultLoggerProvider(), name, version)
 }
 
-func NewFromProvider(w io.Writer, level wlog.LogLevel, creator wlog.LoggerProvider, name, version string) Logger {
-	delegate := creator.NewLeveledLogger(w, level)
-	// The second return value is ignored because 'level: nil' is a valid state handled in the implementation.
-	levelChecker, _ := delegate.(wlog.LevelChecker)
+func NewFromProvider(w io.Writer, level wlog.LogLevel, provider wlog.LoggerProvider, name, version string) Logger {
 	return &defaultLogger{
 		name:        name,
 		version:     version,
-		creator:     creator.NewLogger,
 		writer:      w,
-		logger:      creator.NewLogger(w),
-		levellogger: delegate,
-		level:       levelChecker,
+		creator:     provider.NewLogger,
+		sink:        newSink(name, version, provider.NewLogger(w)),
+		leveledSink: newLeveledSink(name, version, provider.NewLeveledLogger(w, level)),
 	}
 }

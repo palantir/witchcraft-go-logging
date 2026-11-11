@@ -17,7 +17,9 @@ package wrapped1logtests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/palantir/pkg/objmatcher"
@@ -100,7 +102,7 @@ func Audit3TestCases(entityName, entityVersion string) []Audit3TestCase {
 						"result":     objmatcher.NewEqualsMatcher(resultValue),
 						"logEntryId": objmatcher.NewRegExpMatcher(uuidRegexpValue),
 						"requestFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
-							"loadedResources": objmatcher.NewEqualsMatcher(nil),
+							"loadedResources": emptyOrNullMatcher{empty: []any{}},
 							"requestKey":      objmatcher.NewEqualsMatcher("requestValue"),
 						}),
 						"resultFields": objmatcher.MapMatcher(map[string]objmatcher.Matcher{
@@ -118,6 +120,15 @@ func Audit3LogJSONTestSuite(t *testing.T, entityName, entityVersion string, logg
 	audit3LogJSONOutputTests(t, entityName, entityVersion, loggerProvider)
 	rFieldIsntOverwrittenByRFieldsTest(t, entityName, entityVersion, loggerProvider)
 	extraRFieldsDoNotAppear(t, entityName, entityVersion, loggerProvider)
+}
+
+type emptyOrNullMatcher struct{ empty any }
+
+func (m emptyOrNullMatcher) Matches(got any) error {
+	if got == nil || reflect.DeepEqual(got, m.empty) {
+		return nil
+	}
+	return fmt.Errorf("want null or %v, got %v", m.empty, got)
 }
 
 func audit3LogJSONOutputTests(t *testing.T, entityName, entityVersion string, loggerProvider func(w io.Writer) audit3log.Logger) {

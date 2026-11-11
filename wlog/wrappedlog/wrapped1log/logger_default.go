@@ -16,6 +16,7 @@ package wrapped1log
 
 import (
 	"io"
+	"slices"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
@@ -31,93 +32,77 @@ import (
 
 var _ Logger = (*defaultLogger)(nil)
 
+// defaultLogger builds each family's own logger on a sink that wraps its log objects.
 type defaultLogger struct {
 	name    string
 	version string
-
-	// creator and writer are used only by the request logger, to allow consumers to override the default creator with a Param
-	creator wlog.LoggerCreator
 	writer  io.Writer
+	creator wlog.LoggerCreator
 
-	logger wlog.Logger
-	// levellogger is only used by the service logger which supports logging at different log levels
-	levellogger wlog.LeveledLogger
-	level       wlog.LevelChecker
+	sink        *sink
+	leveledSink *sink
+}
+
+func (l *defaultLogger) logger(io.Writer) wlog.Logger {
+	return l.sink
+}
+
+// leveledLogger ignores the level so that all service loggers share the sink's level.
+func (l *defaultLogger) leveledLogger(io.Writer, wlog.LogLevel) wlog.LeveledLogger {
+	return l.leveledSink
 }
 
 func (l *defaultLogger) Audit() audit2log.Logger {
-	return &wrappedAudit2Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return audit2log.NewFromCreator(l.writer, l.logger)
 }
 
 func (l *defaultLogger) AuditV3() audit3log.Logger {
-	return &wrappedAudit3Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return audit3log.NewFromCreator(l.writer, l.logger)
 }
 
 func (l *defaultLogger) Diagnostic() diag1log.Logger {
-	return &wrappedDiag1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return diag1log.NewFromCreator(l.writer, l.logger)
 }
 
 func (l *defaultLogger) Event() evt2log.Logger {
-	return &wrappedEvt2Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return evt2log.NewFromCreator(l.writer, l.logger)
 }
 
 func (l *defaultLogger) Metric() metric1log.Logger {
-	return &wrappedMetric1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return metric1log.NewFromCreator(l.writer, l.logger)
 }
 
+// Request writes wrapped logs to the logger of a Creator param, if one is given.
 func (l *defaultLogger) Request(params ...req2log.LoggerCreatorParam) req2log.Logger {
-	loggerBuilder := &req2LoggerBuilder{
-		name:          l.name,
-		version:       l.version,
-		loggerCreator: l.creator,
-		idsExtractor:  extractor.NewDefaultIDsExtractor(),
-	}
+	var b creatorBuilder
 	for _, p := range params {
-		p.Apply(loggerBuilder)
+		p.Apply(&b)
 	}
-	return loggerBuilder.build(l.writer)
+	creator := l.logger
+	if b.creator != nil {
+		creator = func(w io.Writer) wlog.Logger { return newSink(l.name, l.version, b.creator(w)) }
+	}
+	return req2log.NewFromCreator(l.writer, creator, append(slices.Clip(params), req2log.Creator(creator))...)
 }
 
 func (l *defaultLogger) Service(params ...svc1log.Param) svc1log.Logger {
-	return &wrappedSvc1Logger{
-		params:  params,
-		name:    l.name,
-		version: l.version,
-		logger:  l.levellogger,
-		level:   l.level,
-	}
+	return svc1log.NewFromCreator(l.writer, wlog.InfoLevel, l.leveledLogger, params...)
 }
 
 func (l *defaultLogger) Trace() trc1log.Logger {
-	return &wrappedTrc1Logger{
-		name:    l.name,
-		version: l.version,
-		logger:  l.logger,
-	}
+	return trc1log.NewFromCreator(l.writer, l.logger)
 }
 
-var defaultTypeParam = []wlog.Param{
-	wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TypeKey, TypeValue)
-	}),
+// creatorBuilder records the last Creator param and ignores all other params.
+type creatorBuilder struct {
+	creator wlog.LoggerCreator
 }
+
+func (b *creatorBuilder) LoggerCreator(creator wlog.LoggerCreator) { b.creator = creator }
+func (*creatorBuilder) IdsExtractor(extractor.IDsFromRequest)      {}
+func (*creatorBuilder) SafePathParams([]string)                    {}
+func (*creatorBuilder) ForbiddenPathParams([]string)               {}
+func (*creatorBuilder) SafeQueryParams([]string)                   {}
+func (*creatorBuilder) ForbiddenQueryParams([]string)              {}
+func (*creatorBuilder) SafeHeaderParams([]string)                  {}
+func (*creatorBuilder) ForbiddenHeaderParams([]string)             {}
