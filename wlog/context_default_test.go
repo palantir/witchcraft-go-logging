@@ -183,15 +183,10 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 		before func(loggerTestCase)
 		verify func(loggerTestCase, []byte)
 	}{
-		// Because the context has no logger set on it, the defaultLoggerCreator is used. The defaultLoggerCreator has
-		// not been set, so the default implementation writes a warning to os.Stderr followed by the logger output for
-		// a logger created by using wlog.DefaultLoggerProvider. Because wlog.DefaultLoggerProvider has not been set,
-		// the logger created by that function outputs a warning stating that the global logger should be set. As a
-		// result, the over-all logger output to os.Stderr is:
-		// "[WARNING] <logger not set in context>: [WARNING] <global logger provider not set>"
+		// A missing context logger warns on stderr and includes output from the default object JSON provider.
 		// NOTE: audit2log and audit3log no longer emit log output after the warning to prevent leaking sensitive data.
 		{
-			name: "Context with no logger set and no logger provider set returns default stderr warning logger that uses warn-once logger",
+			name: "Context with no logger set uses default object JSON provider",
 			verify: func(loggerTestCaseInfo loggerTestCase, bytes []byte) {
 				logOutput := string(bytes)
 
@@ -201,11 +196,9 @@ func testFromContextFromEmptyContextForSingleLogger(t *testing.T, tmpDir string,
 				require.NotNil(t, loc, "Unexpected log output: %s", logOutput)
 
 				if loggerTestCaseInfo.skipLogOutputVerification {
-					got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
-					assert.Equal(t, "", got)
+					assert.Equal(t, "", strings.TrimSuffix(logOutput[loc[1]:], "\n"))
 				} else {
-					got := strings.TrimSuffix(logOutput[loc[1]:], "\n")
-					assert.Equal(t, `[WARNING] Logging operation that uses the default logger provider was performed without specifying a logger provider implementation. To see logger output, set the global logger provider implementation using wlog.SetDefaultLoggerProvider or by importing an implementation. This warning can be disabled by setting the global logger provider to be the noop logger provider using wlog.SetDefaultLoggerProvider(wlog.NewNoopLoggerProvider()).`, got)
+					loggerTestCaseInfo.validateJSON([]byte(logOutput[loc[1]:]))
 				}
 			},
 		},

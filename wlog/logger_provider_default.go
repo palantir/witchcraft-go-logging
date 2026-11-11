@@ -14,7 +14,7 @@
 
 package wlog
 
-var defaultLoggerProvider = newWarnOnceLoggerProvider()
+var defaultLoggerProvider = NewJSONMarshalLoggerProvider()
 
 func SetDefaultLoggerProvider(provider LoggerProvider) {
 	defaultLoggerProvider = provider
