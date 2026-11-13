@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 )
 
 type Logger interface {
@@ -42,7 +43,7 @@ func WithParams(logger Logger, params ...Param) Logger {
 	if innerWrapped, ok := logger.(*wrappedLogger); ok {
 		return &wrappedLogger{
 			logger: innerWrapped.logger,
-			params: append(innerWrapped.params, params...),
+			params: wloginternal.AppendParams(innerWrapped.params, params),
 		}
 	}
 
