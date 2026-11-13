@@ -25,11 +25,13 @@ import (
 
 	"github.com/palantir/pkg/objmatcher"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
+	"github.com/palantir/witchcraft-go-logging/internal/origintest"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	wlogzerolog "github.com/palantir/witchcraft-go-logging/wlog-zerolog"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
@@ -405,6 +407,76 @@ func TestWithLoggerOriginFromCallLineWithSkip(t *testing.T) {
 			err = matcher.Matches(map[string]any(entries[0]))
 			assert.NoError(t, err, "%v", err)
 		})
+	}
+}
+
+func TestServiceOriginFromCallLine(t *testing.T) {
+	for _, provider := range []struct {
+		name  string
+		value wlog.LoggerProvider
+	}{
+		{"json", wlog.NewJSONMarshalLoggerProvider()},
+		{"zap", wlogzap.LoggerProvider()},
+		{"zerolog", wlogzerolog.LoggerProvider()},
+	} {
+		for _, wrapped := range []bool{false, true} {
+			for _, origin := range []struct {
+				name  string
+				param svc1log.Param
+				wrap  func(svc1log.Logger) svc1log.Logger
+				// Wrapped loggers add frames that frame-counting params do not account for.
+				countsFrames bool
+			}{
+				{"callLine", svc1log.OriginFromCallLine(), nil, false},
+				{"skip", svc1log.OriginFromCallLineWithSkip(0), nil, true},
+				// Match the server's metric wrapper and the wrapper added by FromContext.
+				{"instrumented/skip", svc1log.OriginFromCallLineWithSkip(2), func(l svc1log.Logger) svc1log.Logger { return wrappedSvcLogger{delegate: l} }, true},
+				{"instrumented/packages", svc1log.OriginFromCallLineSkippingPackages(origintest.Package), func(l svc1log.Logger) svc1log.Logger { return origintest.Logger{Delegate: l} }, false},
+			} {
+				if wrapped && origin.countsFrames {
+					continue
+				}
+				for _, level := range []wlog.LogLevel{wlog.DebugLevel, wlog.InfoLevel, wlog.WarnLevel, wlog.ErrorLevel} {
+					t.Run(fmt.Sprintf("%s/wrapped=%t/%s/%s", provider.name, wrapped, origin.name, level), func(t *testing.T) {
+						var buf bytes.Buffer
+						var logger svc1log.Logger
+						if wrapped {
+							logger = wrapped1log.NewFromProvider(&buf, wlog.DebugLevel, provider.value, "entity", "version").Service(origin.param)
+						} else {
+							logger = svc1log.NewFromCreator(&buf, wlog.DebugLevel, provider.value.NewLeveledLogger, origin.param)
+						}
+						if origin.wrap != nil {
+							ctx := svc1log.WithLogger(context.Background(), origin.wrap(logger))
+							logger = svc1log.FromContext(ctx)
+						}
+
+						var file string
+						var line int
+						switch level {
+						case wlog.DebugLevel:
+							file, line = getFileAndLine()
+							logger.Debug("test")
+						case wlog.InfoLevel:
+							file, line = getFileAndLine()
+							logger.Info("test")
+						case wlog.WarnLevel:
+							file, line = getFileAndLine()
+							logger.Warn("test")
+						case wlog.ErrorLevel:
+							file, line = getFileAndLine()
+							logger.Error("test")
+						}
+
+						var entry map[string]any
+						require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
+						if wrapped {
+							entry = entry["payload"].(map[string]any)["serviceLogV1"].(map[string]any)
+						}
+						assert.Equal(t, fmt.Sprintf("%s:%d", file, line+1), entry["origin"])
+					})
+				}
+			}
+		}
 	}
 }
 

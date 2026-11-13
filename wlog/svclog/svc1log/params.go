@@ -17,7 +17,10 @@ package svc1log
 import (
 	"path"
 	"runtime"
+	"slices"
 	"strconv"
+	"strings"
+	"sync"
 
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/internal/gopath"
@@ -107,32 +110,119 @@ func OriginFromInitPkg(skipPkg int) Param {
 }
 
 // OriginFromCallLine sets the "origin" field to be the filename and line of the location at which the logger invocation
-// is performed.
+// is performed: the innermost stack frame outside the wlog packages.
 //
-// Note that, when this parameter is used, every log invocation will perform a "runtime.Caller" call, which may not be
-// suitable for performance-critical scenarios.
-//
-// Note that this parameter is tied to the implementation details of the logger implementations defined in the svc1log
-// package (it hard-codes assumptions relating to the number of call stacks that must be skipped to reach the log site).
-// Using this parameter with an svc1log.Logger implementation not defined in the svc1log package may result in incorrect
-// output. If wrapping the default implementation of svc1log.Logger, OriginFromCallLineWithSkip allows for trimming
-// additional stack frames.
+// Note that, when this parameter is used, every log invocation walks the stack, which may not be suitable for
+// performance-critical scenarios.
 func OriginFromCallLine() Param {
-	return OriginFromCallLineWithSkip(0)
+	return OriginFromCallLineSkippingPackages()
+}
+
+// OriginFromCallLineSkippingPackages is like OriginFromCallLine but also skips frames in the provided packages and their
+// subpackages. This allows libraries that wrap loggers to hide their frames from the origin.
+func OriginFromCallLineSkippingPackages(pkgs ...string) Param {
+	return paramFunc(func(entry wlog.LogEntry) {
+		entry.OptionalStringValue(OriginKey, originOutside(pkgs))
+	})
+}
+
+const wlogPackage = "github.com/palantir/witchcraft-go-logging/wlog"
+
+// originOutside returns the origin of the innermost caller outside the wlog packages, the provider modules such as
+// wlog-zap that apply params while they build an entry, and pkgs.
+func originOutside(pkgs []string) string {
+	// runtime.Callers unwinds as many frames as the buffer holds, so start small and grow only if needed.
+	var buf [16]uintptr
+	pcs := buf[:]
+	for {
+		n := runtime.Callers(3, pcs)
+		for _, pc := range pcs[:n] {
+			for _, frame := range framesAt(pc) {
+				if !frame.inWlog && !slices.ContainsFunc(pkgs, func(p string) bool { return inPackage(frame.pkg, p) }) {
+					return frame.origin
+				}
+			}
+		}
+		if n < len(pcs) {
+			return ""
+		}
+		pcs = make([]uintptr, 2*len(pcs))
+	}
+}
+
+type pcFrame struct {
+	pkg    string
+	origin string
+	inWlog bool
+}
+
+// pcFrames caches framesAt, so that a log call resolves only call sites it has not seen before.
+var pcFrames sync.Map
+
+// framesAt returns the frames at a return PC from runtime.Callers, innermost first. A PC has more than one frame when
+// calls are inlined into it.
+func framesAt(pc uintptr) []pcFrame {
+	if frames, ok := pcFrames.Load(pc); ok {
+		return frames.([]pcFrame)
+	}
+	var out []pcFrame
+	frames := runtime.CallersFrames([]uintptr{pc})
+	for {
+		frame, more := frames.Next()
+		pkg := funcPackage(frame.Function)
+		// Test packages are callers even when they live in a wlog directory.
+		inWlog := (inPackage(pkg, wlogPackage) || strings.HasPrefix(pkg, wlogPackage+"-")) && !strings.HasSuffix(pkg, "_test")
+		out = append(out, pcFrame{pkg: pkg, origin: gopath.TrimPrefix(frame.File) + ":" + strconv.Itoa(frame.Line), inWlog: inWlog})
+		if !more {
+			break
+		}
+	}
+	stored, _ := pcFrames.LoadOrStore(pc, out)
+	return stored.([]pcFrame)
+}
+
+// funcPackage returns the package path of a function name reported by the runtime, such as "a/b.(*T).M[...]".
+func funcPackage(fn string) string {
+	fn, _, _ = strings.Cut(fn, "[")
+	lastSlash := strings.LastIndexByte(fn, '/')
+	if dot := strings.IndexByte(fn[lastSlash+1:], '.'); dot >= 0 {
+		return fn[:lastSlash+1+dot]
+	}
+	return fn
+}
+
+func inPackage(pkg, parent string) bool {
+	rest, ok := strings.CutPrefix(pkg, parent)
+	return ok && (rest == "" || rest[0] == '/')
 }
 
 const defaultOriginFromCallLineStackSkip = 8
 
-// OriginFromCallLineWithSkip is like OriginFromCallLine but allows for configuring additional skipped stack frames.
-// This allows for libraries wrapping loggers to hide their implementation frames from the caller.
+// OriginFromCallLineWithSkip sets the "origin" field to the location that is skipFrames frames above the svc1log
+// logger call. Unlike OriginFromCallLine, it counts frames, so skipFrames must include every frame that wraps the
+// logger, including frames added by svc1log itself such as the wrapper that FromContext adds for context params.
+// Prefer OriginFromCallLineSkippingPackages, which does not depend on the number of wrapping frames.
 func OriginFromCallLineWithSkip(skipFrames int) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		origin := ""
-		if file, line, ok := initLineCaller(defaultOriginFromCallLineStackSkip + skipFrames); ok {
-			origin = file + ":" + strconv.Itoa(line)
-		}
-		entry.OptionalStringValue(OriginKey, origin)
+		entry.OptionalStringValue(OriginKey, originAbove(defaultOriginFromCallLineStackSkip+skipFrames))
 	})
+}
+
+// originAbove returns the origin of the frame that is depth frames above its caller, counting inlined frames.
+func originAbove(depth int) string {
+	var buf [32]uintptr
+	pcs := buf[:min(depth+1, len(buf))]
+	if depth >= len(buf) {
+		pcs = make([]uintptr, depth+1)
+	}
+	for _, pc := range pcs[:runtime.Callers(2, pcs)] {
+		frames := framesAt(pc)
+		if depth < len(frames) {
+			return frames[depth].origin
+		}
+		depth -= len(frames)
+	}
+	return ""
 }
 
 func initLineCaller(skip int) (string, int, bool) {
