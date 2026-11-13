@@ -125,6 +125,9 @@ func (le *mapLogEntry) StringValue(k, v string) {
 }
 
 func (le *mapLogEntry) StringListValue(k string, v []string) {
+	if v == nil {
+		v = []string{}
+	}
 	mapLogEntrySetKey(le, le.stringListValues, k, v)
 }
 
@@ -157,6 +160,9 @@ func (le *mapLogEntry) AnyMapValue(k string, v map[string]any) {
 }
 
 func (le *mapLogEntry) ObjectListValue(k string, v []any) {
+	if v == nil {
+		v = []any{}
+	}
 	mapLogEntrySetKey(le, le.objectListValues, k, v)
 }
 
