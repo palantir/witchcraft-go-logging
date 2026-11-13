@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log/audit2logtests"
@@ -298,4 +299,64 @@ func TestObjectJSONAudit3DualLog(t *testing.T) {
 	audit3logtests.DualLoggingJSONTestSuite(t, func(audit3Writer, audit2Writer io.Writer) audit3log.Logger {
 		return audit3log.NewDualLoggerFromCreator(audit3Writer, audit2Writer, wlog.NewJSONMarshalLoggerProvider().NewLogger)
 	})
+}
+
+func TestObjectJSONWrapped1LogAudit3IDs(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		params []audit3log.Param
+		want   string
+	}{
+		{name: "generated"},
+		{name: "supplied", params: []audit3log.Param{audit3log.LogEntryID("46ac025f-5d70-4a79-8e8e-270da9635a43")}, want: "46ac025f-5d70-4a79-8e8e-270da9635a43"},
+		{name: "malformed after valid", params: []audit3log.Param{audit3log.LogEntryID("46ac025f-5d70-4a79-8e8e-270da9635a43"), audit3log.LogEntryID("invalid-uuid")}, want: "invalid-uuid"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			logger := wrapped1log.NewFromProvider(&buf, wlog.InfoLevel, wlog.NewJSONMarshalLoggerProvider(), "entity", "version").AuditV3()
+			logger.Audit("test", audit3log.AuditResultSuccess, append([]audit3log.Param{audit3log.EventID("c15487b9-ff6a-4bb1-8c25-2433a185c438")}, tc.params...)...)
+			var got struct {
+				Payload struct {
+					AuditLogV3 struct {
+						LogEntryID string `json:"logEntryId"`
+					} `json:"auditLogV3"`
+				} `json:"payload"`
+			}
+			if err := json.Unmarshal(buf.Bytes(), &got); err != nil {
+				t.Fatal(err)
+			}
+			if tc.want != "" && got.Payload.AuditLogV3.LogEntryID != tc.want {
+				t.Fatalf("logEntryId = %q, want %q", got.Payload.AuditLogV3.LogEntryID, tc.want)
+			}
+			if tc.want == "" {
+				if _, err := uuid.ParseUUID(got.Payload.AuditLogV3.LogEntryID); err != nil {
+					t.Fatalf("generated logEntryId = %q: %v", got.Payload.AuditLogV3.LogEntryID, err)
+				}
+			}
+		})
+	}
+}
+
+func TestObjectJSONWrapped1LogAudit3MissingEventID(t *testing.T) {
+	wrapped1logtests.Audit3LogJSONTestSuite(t, "entity", "version", func(w io.Writer) audit3log.Logger {
+		return wrapped1log.NewFromProvider(w, wlog.InfoLevel, wlog.NewJSONMarshalLoggerProvider(), "entity", "version").AuditV3()
+	})
+
+	var buf bytes.Buffer
+	logger := wrapped1log.NewFromProvider(&buf, wlog.InfoLevel, wlog.NewJSONMarshalLoggerProvider(), "entity", "version").AuditV3()
+	logger.Audit("test", audit3log.AuditResultSuccess)
+	var got struct {
+		Payload struct {
+			AuditLogV3 map[string]any `json:"auditLogV3"`
+		} `json:"payload"`
+	}
+	if err := json.Unmarshal(buf.Bytes(), &got); err != nil {
+		t.Fatal(err)
+	}
+	if _, hasEventID := got.Payload.AuditLogV3["eventId"]; hasEventID {
+		t.Fatalf("emitted absent event ID: %s", buf.Bytes())
+	}
+	if _, hasDeployment := got.Payload.AuditLogV3["deployment"]; hasDeployment {
+		t.Fatalf("emitted absent deployment: %s", buf.Bytes())
+	}
 }
