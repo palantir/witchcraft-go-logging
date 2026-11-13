@@ -15,71 +15,32 @@
 package wlogtmpl
 
 import (
-	"fmt"
+	"bytes"
 	"io"
-	"time"
 
-	"github.com/palantir/pkg/bytesbuffers"
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 )
 
-type tmplLogger struct {
+// formatWriter formats each JSON log line that the delegate logger writes.
+type formatWriter struct {
 	w   io.Writer
 	cfg *Config
-	*wlog.AtomicLogLevel
-
-	delegate   wlog.LoggerCreator
-	bufferPool bytesbuffers.Pool
 }
 
-func (l *tmplLogger) Log(params ...wlog.Param) {
-	l.logOutput(params)
-}
-
-func (l *tmplLogger) Debug(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.DebugLevel) {
-		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "DEBUG")))
+func (f *formatWriter) Write(p []byte) (int, error) {
+	line := string(bytes.TrimRight(p, "\n"))
+	out, err := logentryformatter.FormatLogLine(line, f.cfg.UnwrapperMap, f.cfg.FormatterMap, f.cfg.Only, f.cfg.Exclude)
+	switch {
+	case err != nil && f.cfg.Strict:
+		out = err.Error()
+	case err != nil:
+		out = line
+	case out == "":
+		// Only and Exclude filter the line out.
+		return len(p), nil
 	}
-}
-
-func (l *tmplLogger) Info(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.InfoLevel) {
-		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "INFO")))
+	if _, err := io.WriteString(f.w, out+"\n"); err != nil {
+		return 0, err
 	}
-}
-
-func (l *tmplLogger) Warn(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.WarnLevel) {
-		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "WARN")))
-	}
-}
-
-func (l *tmplLogger) Error(msg string, params ...wlog.Param) {
-	if l.Enabled(wlog.ErrorLevel) {
-		l.logOutput(append(params, wlog.StringParam("message", msg), wlog.StringParam("level", "ERROR")))
-	}
-}
-
-func (l *tmplLogger) logOutput(params []wlog.Param) {
-	_, _ = fmt.Fprintln(l.w, l.formatOutput(params))
-}
-
-func (l *tmplLogger) formatOutput(params []wlog.Param) string {
-	paramsWithTime := make([]wlog.Param, len(params)+1)
-	paramsWithTime[0] = wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-	copy(paramsWithTime[1:], params)
-
-	buf := l.bufferPool.Get()
-	defer l.bufferPool.Put(buf)
-	l.delegate(buf).Log(paramsWithTime...)
-
-	out, err := logentryformatter.FormatLogLine(buf.String(), l.cfg.UnwrapperMap, l.cfg.FormatterMap, l.cfg.Only, l.cfg.Exclude)
-	if err != nil {
-		if !l.cfg.Strict {
-			return buf.String()
-		}
-		return err.Error()
-	}
-	return out
+	return len(p), nil
 }

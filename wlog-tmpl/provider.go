@@ -17,7 +17,6 @@ package wlogtmpl
 import (
 	"io"
 
-	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter"
 	"github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs"
@@ -33,7 +32,8 @@ type Config struct {
 	UnwrapperMap  map[logentryformatter.LogType]logentryformatter.Unwrapper
 	FormatterMap  map[logentryformatter.LogType]logentryformatter.Formatter
 	Only, Exclude map[logentryformatter.LogType]struct{}
-	// DelegateLogger is used to create the intermediate json representation that is passed to the template.
+	// DelegateLogger is used to create the intermediate json representation that is passed to the template. It must
+	// write each log line in a single Write call.
 	DelegateLogger wlog.LoggerProvider
 }
 
@@ -68,21 +68,12 @@ func LoggerProvider(cfg *Config, params ...logentryformatter.Param) wlog.LoggerP
 	}
 }
 
+// The delegate logger writes to a formatWriter, so tmpl formats exactly what the delegate encodes, and loggers keep any
+// fast path the delegate has.
 func (p *tmplLoggerProvider) NewLogger(w io.Writer) wlog.Logger {
-	return &tmplLogger{
-		w:          w,
-		cfg:        p.cfg,
-		delegate:   p.cfg.DelegateLogger.NewLogger,
-		bufferPool: bytesbuffers.NewSyncPool(128),
-	}
+	return p.cfg.DelegateLogger.NewLogger(&formatWriter{w: w, cfg: p.cfg})
 }
 
 func (p *tmplLoggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
-	return &tmplLogger{
-		w:              w,
-		cfg:            p.cfg,
-		AtomicLogLevel: wlog.NewAtomicLogLevel(level),
-		delegate:       p.cfg.DelegateLogger.NewLogger,
-		bufferPool:     bytesbuffers.NewSyncPool(128),
-	}
+	return p.cfg.DelegateLogger.NewLeveledLogger(&formatWriter{w: w, cfg: p.cfg}, level)
 }

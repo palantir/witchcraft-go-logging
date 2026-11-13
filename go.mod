@@ -8,7 +8,6 @@ require (
 	github.com/fatih/color v1.19.0
 	github.com/golang/glog v1.2.5
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/pkg/bytesbuffers v1.3.0
 	github.com/palantir/pkg/datetime v1.5.0
 	github.com/palantir/pkg/objmatcher v1.2.0
 	github.com/palantir/pkg/rid v1.3.0
