@@ -15,7 +15,14 @@
 package diag1log
 
 import (
+	"time"
+
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/witchcraft-go-logging/conjure/witchcraft-logging-api/witchcraft/api/logging"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 )
 
 const (
@@ -24,31 +31,54 @@ const (
 	DiagnosticKey = "diagnostic"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wloginternal.Param[logtypes.DiagnosticLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logtypes.DiagnosticLogV1]
 
 func ApplyParam(p Param, entry wlog.LogEntry) {
 	if p == nil {
 		return
 	}
-	p.apply(entry)
+	log := new(logtypes.DiagnosticLogV1)
+	wloginternal.ApplyParam(log, p)
+	logentry.DiagnosticLogV1Params(entry, log)
 }
 
-type paramFunc func(entry wlog.LogEntry)
+// populateLogObject pre-populates the type, time, and diagnostic fields and applies user params in-place.
+func populateLogObject(log *logtypes.DiagnosticLogV1, diagnostic logging.Diagnostic, params []Param) {
+	log.Type = TypeValue
+	log.Time = datetime.DateTime(time.Now())
+	_ = diagnostic.Accept(diagnosticVisitor{&log.Diagnostic})
+	wloginternal.ApplyParams(log, params)
+}
 
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+// diagnosticVisitor copies the variant of a generated union into the log object's union.
+type diagnosticVisitor struct {
+	out *logtypes.DiagnosticLogV1Diagnostic
+}
+
+func (d diagnosticVisitor) VisitGeneric(v logging.GenericDiagnostic) error {
+	*d.out = logtypes.DiagnosticLogV1Diagnostic{Type: "generic", Generic: &v}
+	return nil
+}
+
+func (d diagnosticVisitor) VisitThreadDump(v logging.ThreadDumpV1) error {
+	*d.out = logtypes.DiagnosticLogV1Diagnostic{Type: "threadDump", ThreadDump: &v}
+	return nil
+}
+
+func (d diagnosticVisitor) VisitUnknown(string) error {
+	return nil
 }
 
 func UnsafeParam(key string, value any) Param {
-	return UnsafeParams(map[string]any{
-		key: value,
+	return paramFunc(func(log *logtypes.DiagnosticLogV1) {
+		wloginternal.SetMapParam(&log.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]any) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
+	return paramFunc(func(log *logtypes.DiagnosticLogV1) {
+		wloginternal.SetMapParams(&log.UnsafeParams, unsafe)
 	})
 }

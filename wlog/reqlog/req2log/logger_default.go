@@ -18,12 +18,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 )
 
 type defaultLogger struct {
-	logger       wlog.Logger
+	logger       logentry.Logger
 	idsExtractor extractor.IDsFromRequest
 
 	pathParamPerms   ParamPerms
@@ -32,7 +36,10 @@ type defaultLogger struct {
 }
 
 func (l *defaultLogger) Request(r Request) {
-	l.logger.Log(ToParams(r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms)...)
+	log := poolRequestLogV2.Get()
+	populateLogObject(log, r, l.idsExtractor, l.pathParamPerms, l.queryParamPerms, l.headerParamPerms)
+	l.logger.LogObject(log)
+	poolRequestLogV2.Put(log)
 }
 
 func (l *defaultLogger) PathParamPerms() ParamPerms {
@@ -47,68 +54,60 @@ func (l *defaultLogger) HeaderParamPerms() ParamPerms {
 	return l.headerParamPerms
 }
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) []wlog.Param {
-	safeParams, unsafeParams := parseRequestParams(r, pathParamPerms, queryParamPerms, headerParamPerms)
+	log := new(logtypes.RequestLogV2)
+	populateLogObject(log, r, idsExtractor, pathParamPerms, queryParamPerms, headerParamPerms)
+	return []wlog.Param{logentry.Param(log)}
+}
+
+// populateLogObject pre-populates a RequestLogV2 from the request and permissions: type, time, method, protocol,
+// path, status, request/response sizes, duration, params/unsafeParams, and any IDs extractable from the request.
+func populateLogObject(log *logtypes.RequestLogV2, r Request, idsExtractor extractor.IDsFromRequest, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) {
+	populateRequestParams(log, r, pathParamPerms, queryParamPerms, headerParamPerms)
 
 	reqPath := r.Request.URL.Path
 	if r.RouteInfo.Template != "" {
 		reqPath = r.RouteInfo.Template
 	}
 
-	// extract IDs from request
 	idsMap := idsExtractor.ExtractIDs(r.Request)
 
-	return []wlog.Param{
-		wlog.StringParam(wlog.TypeKey, TypeValue),
-		wlog.StringParam(wlog.TimeKey, time.Now().Format(time.RFC3339Nano)),
-		wlog.OptionalStringParam(methodKey, r.Request.Method),
-		wlog.StringParam(protocolKey, r.Request.Proto),
-		wlog.StringParam(pathKey, reqPath),
-		safeParams,
-		wlog.IntParam(statusKey, int32(r.ResponseStatus)),
-		wlog.Int64Param(requestSizeKey, r.Request.ContentLength),
-		wlog.Int64Param(responseSizeKey, r.ResponseSize),
-		wlog.Int64Param(durationKey, r.Duration.Nanoseconds()/1000),
-		wlog.OptionalStringParam(wlog.UIDKey, idsMap[wlog.UIDKey]),
-		wlog.OptionalStringParam(wlog.SIDKey, idsMap[wlog.SIDKey]),
-		wlog.OptionalStringParam(wlog.TokenIDKey, idsMap[wlog.TokenIDKey]),
-		wlog.OptionalStringParam(wlog.OrgIDKey, idsMap[wlog.OrgIDKey]),
-		wlog.OptionalStringParam(traceIDKey, idsMap[traceIDKey]),
-		unsafeParams,
-	}
+	log.Type = TypeValue
+	log.Time = datetime.DateTime(time.Now())
+	log.Protocol = r.Request.Proto
+	log.Path = reqPath
+	log.Status = r.ResponseStatus
+	log.RequestSize = r.Request.ContentLength
+	log.ResponseSize = r.ResponseSize
+	log.Duration = r.Duration.Nanoseconds() / 1000
+	log.Method = r.Request.Method
+	log.Uid = idsMap[wlog.UIDKey]
+	log.Sid = idsMap[wlog.SIDKey]
+	log.TokenId = idsMap[wlog.TokenIDKey]
+	log.OrgId = idsMap[wlog.OrgIDKey]
+	log.TraceId = idsMap[traceIDKey]
 }
 
-// parseRequestParams parses the path, header and query parameters. If any of the parameters are in a respective
+// populateRequestParams parses the path, header and query parameters. If any of the parameters are in a respective
 // "forbidden" list, they are not logged at all. Otherwise, if a parameter is whitelisted it is added to safeParams and
-// is added to unsafeParams otherwise. If a single key has multiple values, the value for that key in the returned field
+// is added to unsafeParams otherwise. If a single key has multiple values, the value for that key in the log
 // will be a slice that contains all of the values for the key.
-func parseRequestParams(r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) (safeParams wlog.Param, unsafeParams wlog.Param) {
-	safeMap := make(map[string]any)
-	unsafeMap := make(map[string]any)
-
+func populateRequestParams(log *logtypes.RequestLogV2, r Request, pathParamPerms, queryParamPerms, headerParamPerms ParamPerms) {
 	for pathParamKey, pathParamVal := range r.RouteInfo.PathParams {
-		processKeyValPair(pathParamKey, pathParamVal, safeMap, unsafeMap, pathParamPerms, r.PathParamPerms)
+		processKeyValPair(pathParamKey, pathParamVal, &log.Params, &log.UnsafeParams, pathParamPerms, r.PathParamPerms)
 	}
 	for k, valSlice := range r.Request.URL.Query() {
 		for _, v := range valSlice {
-			processKeyValPair(k, v, safeMap, unsafeMap, queryParamPerms, r.QueryParamPerms)
+			processKeyValPair(k, v, &log.Params, &log.UnsafeParams, queryParamPerms, r.QueryParamPerms)
 		}
 	}
 	for k := range r.Request.Header {
-		processKeyValPair(k, r.Request.Header.Get(k), safeMap, unsafeMap, headerParamPerms, r.HeaderParamPerms)
+		processKeyValPair(k, r.Request.Header.Get(k), &log.Params, &log.UnsafeParams, headerParamPerms, r.HeaderParamPerms)
 	}
-	return wlog.NewParam(func(entry wlog.LogEntry) {
-			if len(safeMap) > 0 {
-				entry.AnyMapValue(paramsKey, safeMap)
-			}
-		}), wlog.NewParam(func(entry wlog.LogEntry) {
-			if (len(unsafeMap)) > 0 {
-				entry.AnyMapValue(wlog.UnsafeParamsKey, unsafeMap)
-			}
-		})
 }
 
-func processKeyValPair(k, v string, safeDst, unsafeDst map[string]any, basePerms, reqPerms ParamPerms) {
+func processKeyValPair(k, v string, safeDst, unsafeDst *logtypes.AnyMap, basePerms, reqPerms ParamPerms) {
 	// lowercase keys are used for lookups. Convert once here to avoid multiple unnecessary allocations.
 	// Note that, if a key is added to an output map, the original unconverted key should be added.
 	lowerK := strings.ToLower(k)
@@ -141,10 +140,10 @@ func processKeyValPair(k, v string, safeDst, unsafeDst map[string]any, basePerms
 	addAsMultiMap(k, v, unsafeDst)
 }
 
-func addAsMultiMap(k, v string, m map[string]any) {
-	currVal, exists := m[k]
+func addAsMultiMap(k, v string, dst *logtypes.AnyMap) {
+	currVal, exists := (*dst)[k]
 	if !exists {
-		m[k] = v
+		wloginternal.SetMapParam(dst, k, any(v))
 		return
 	}
 
@@ -157,5 +156,5 @@ func addAsMultiMap(k, v string, m map[string]any) {
 	case []any:
 		newVal = append(t, v)
 	}
-	m[k] = newVal
+	(*dst)[k] = newVal
 }

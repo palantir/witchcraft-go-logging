@@ -205,6 +205,43 @@ func TestCases() []TestCase {
 
 func JSONTestSuite(t *testing.T, loggerProvider func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger) {
 	jsonOutputTests(t, loggerProvider)
+	testRequestParamsReset(t, loggerProvider)
+}
+
+func testRequestParamsReset(t *testing.T, loggerProvider func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger) {
+	t.Run("request parameters do not carry over between records", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := loggerProvider(&buf, req2log.SafeQueryParams("key"))
+		cases := []struct {
+			query  string
+			perms  req2log.ParamPerms
+			safe   map[string]any
+			unsafe map[string]any
+		}{
+			{query: "key=first&key=second&other=old", safe: map[string]any{"key": []any{"first", "second"}}, unsafe: map[string]any{"other": "old"}},
+			{query: "key=forbidden&other=forbidden", perms: req2log.NewParamPerms(nil, []string{"key", "other"})},
+			{},
+			{query: "key=new&other=new", perms: req2log.NewParamPerms([]string{"other"}, nil), safe: map[string]any{"key": "new", "other": "new"}},
+		}
+		for range 3 {
+			for _, tc := range cases {
+				buf.Reset()
+				req, err := http.NewRequest(http.MethodGet, "http://localhost/path?"+tc.query, nil)
+				require.NoError(t, err)
+				logger.Request(req2log.Request{Request: req, QueryParamPerms: tc.perms})
+				entries, err := logreader.EntriesFromContent(buf.Bytes())
+				require.NoError(t, err)
+				require.Len(t, entries, 1)
+				for key, want := range map[string]map[string]any{"params": tc.safe, "unsafeParams": tc.unsafe} {
+					if want == nil {
+						require.NotContains(t, entries[0], key)
+					} else {
+						require.Equal(t, want, entries[0][key])
+					}
+				}
+			}
+		}
+	})
 }
 
 func jsonOutputTests(t *testing.T, loggerProvider func(w io.Writer, params ...req2log.LoggerCreatorParam) req2log.Logger) {

@@ -19,6 +19,7 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
@@ -33,7 +34,7 @@ func New(w io.Writer) Logger {
 
 func NewFromCreator(w io.Writer, creator wlog.LoggerCreator) Logger {
 	return &defaultLogger{
-		logger: creator(w),
+		logger: logentry.NewLogger(creator(w)),
 	}
 }
 

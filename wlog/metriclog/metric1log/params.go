@@ -17,7 +17,11 @@ package metric1log
 import (
 	"time"
 
+	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 )
 
 const (
@@ -29,93 +33,98 @@ const (
 	TagsKey       = "tags"
 )
 
-type Param interface {
-	apply(entry wlog.LogEntry)
-}
+type Param = wloginternal.Param[logtypes.MetricLogV1]
+
+type paramFunc = wloginternal.ParamFunc[logtypes.MetricLogV1]
 
 func ApplyParam(p Param, entry wlog.LogEntry) {
 	if p == nil {
 		return
 	}
-	p.apply(entry)
+	log := new(logtypes.MetricLogV1)
+	wloginternal.ApplyParam(log, p)
+	if _, ok := p.(timeParam); ok {
+		entry.StringValue(wlog.TimeKey, log.Time.String())
+	}
+	logentry.MetricLogV1Params(entry, log)
 }
 
-type paramFunc func(entry wlog.LogEntry)
-
-func (f paramFunc) apply(entry wlog.LogEntry) {
-	f(entry)
+// populateLogObject pre-populates the type, time, metric name, and metric type fields and applies user params in-place.
+func populateLogObject(log *logtypes.MetricLogV1, metricName, metricType string, params []Param) {
+	log.Type = TypeValue
+	log.Time = datetime.DateTime(time.Now())
+	log.MetricName = metricName
+	log.MetricType = metricType
+	wloginternal.ApplyParams(log, params)
 }
 
-func metricNameTypeParam(name, typ string) Param {
-	return paramFunc(func(logger wlog.LogEntry) {
-		logger.StringValue(MetricNameKey, name)
-		logger.StringValue(MetricTypeKey, typ)
-	})
+type timeParam struct {
+	paramFunc
 }
 
 // Time overrides the time at which the metric was recorded. By default, metrics use the time at which they are logged.
 func Time(value time.Time) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringValue(wlog.TimeKey, value.Format(time.RFC3339Nano))
-	})
+	return timeParam{paramFunc(func(log *logtypes.MetricLogV1) {
+		log.Time = datetime.DateTime(value)
+	})}
 }
 
 func Value(key string, value any) Param {
-	return Values(map[string]any{
-		key: value,
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParam(&log.Values, key, value)
 	})
 }
 
 func Values(values map[string]any) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ValuesKey, values)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParams(&log.Values, values)
 	})
 }
 
 func Tag(key, value string) Param {
-	return Tags(map[string]string{
-		key: value,
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParam(&log.Tags, key, value)
 	})
 }
 
 func Tags(values map[string]string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.StringMapValue(TagsKey, values)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParams(&log.Tags, values)
 	})
 }
 
 func UID(uid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.UIDKey, uid)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		log.Uid = uid
 	})
 }
 
 func SID(sid string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.SIDKey, sid)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		log.Sid = sid
 	})
 }
 
 func TokenID(tokenID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.TokenIDKey, tokenID)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		log.TokenId = tokenID
 	})
 }
 
 func OrgID(orgID string) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.OptionalStringValue(wlog.OrgIDKey, orgID)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		log.OrgId = orgID
 	})
 }
 
 func UnsafeParam(key string, value any) Param {
-	return UnsafeParams(map[string]any{
-		key: value,
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParam(&log.UnsafeParams, key, value)
 	})
 }
 
 func UnsafeParams(unsafe map[string]any) Param {
-	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(wlog.UnsafeParamsKey, unsafe)
+	return paramFunc(func(log *logtypes.MetricLogV1) {
+		wloginternal.SetMapParams(&log.UnsafeParams, unsafe)
 	})
 }

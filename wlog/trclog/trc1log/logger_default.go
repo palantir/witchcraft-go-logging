@@ -15,95 +15,35 @@
 package trc1log
 
 import (
-	"time"
-
 	"github.com/palantir/witchcraft-go-logging/wlog"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logtypes"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 type defaultLogger struct {
-	logger wlog.Logger
+	logger logentry.Logger
 }
 
 func (l *defaultLogger) Log(span wtracing.SpanModel, params ...Param) {
-	l.logger.Log(ToParams(span, params)...)
+	log := poolTraceLogV1.Get()
+	populateLogObject(log, span, params)
+	l.logger.LogObject(log)
+	poolTraceLogV1.Put(log)
 }
 
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(span wtracing.SpanModel, inParams []Param) []wlog.Param {
-	outParams := make([]wlog.Param, len(inParams))
-	for idx := range inParams {
-		outParams[idx] = wlog.NewParam(inParams[idx].apply)
-	}
-	return append([]wlog.Param{
-		wlog.NewParam(func(entry wlog.LogEntry) {
-			entry.StringValue(wlog.TypeKey, TypeValue)
-			entry.StringValue(wlog.TimeKey, time.Now().Format(time.RFC3339Nano))
-		}),
-		spanParam(span),
-	}, outParams...)
+	log := new(logtypes.TraceLogV1)
+	populateLogObject(log, span, inParams)
+	return []wlog.Param{logentry.Param(log)}
 }
 
 func (l *defaultLogger) Send(span wtracing.SpanModel) {
 	l.Log(span)
 }
 
+// Close is a no-op that satisfies the wtracing.Reporter interface.
 func (l *defaultLogger) Close() error {
 	return nil
-}
-
-func spanParam(span wtracing.SpanModel) wlog.Param {
-	return wlog.NewParam(func(entry wlog.LogEntry) {
-		spanEntry := wlog.NewMapLogEntry()
-		spanEntry.StringValue(wlog.TraceIDKey, string(span.TraceID))
-		spanEntry.StringValue(SpanIDKey, string(span.ID))
-		spanEntry.StringValue(SpanNameKey, span.Name)
-
-		if parentID := span.ParentID; parentID != nil {
-			spanEntry.StringValue(SpanParentIDKey, string(*parentID))
-		}
-		spanEntry.SafeLongValue(SpanTimestampKey, span.Timestamp.Round(time.Microsecond).UnixNano()/1e3)
-		spanEntry.SafeLongValue(SpanDurationKey, int64(span.Duration/time.Microsecond))
-
-		if kind := span.Kind; kind != "" {
-			switch kind {
-			case wtracing.Server:
-				wlog.ApplyParams(spanEntry, []wlog.Param{spanAnnotationsParam("sr", "ss", span)})
-			case wtracing.Client:
-				wlog.ApplyParams(spanEntry, []wlog.Param{spanAnnotationsParam("cs", "cr", span)})
-			}
-		}
-
-		if tags := span.Tags; len(tags) > 0 {
-			spanEntry.StringMapValue(SpanTagsKey, tags)
-		}
-		entry.AnyMapValue(SpanKey, spanEntry.AllValues())
-	})
-}
-
-func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog.Param {
-	return wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.ObjectValue(SpanAnnotationsKey, []map[string]any{
-			spanAnnotationFields(startVal, span.Timestamp, span.LocalEndpoint),
-			spanAnnotationFields(endVal, span.Timestamp.Add(span.Duration), span.LocalEndpoint),
-		}, nil)
-	})
-}
-
-func spanAnnotationFields(value string, timeStamp time.Time, endpoint *wtracing.Endpoint) map[string]any {
-	fields := make(map[string]any)
-	fields[AnnotationValueKey] = value
-	fields[AnnotationTimestampKey] = timeStamp.Round(time.Microsecond).UnixNano() / time.Microsecond.Nanoseconds()
-	if endpoint != nil {
-		endpointFields := map[string]string{
-			EndpointServiceNameKey: endpoint.ServiceName,
-		}
-		if len(endpoint.IPv4) > 0 {
-			endpointFields[EndpointIPv4Key] = endpoint.IPv4.String()
-		}
-		if len(endpoint.IPv6) > 0 {
-			endpointFields[EndpointIPv6Key] = endpoint.IPv6.String()
-		}
-		fields[AnnotationEndpointKey] = endpointFields
-	}
-	return fields
 }

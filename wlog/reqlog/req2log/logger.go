@@ -21,20 +21,13 @@ import (
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
+	"github.com/palantir/witchcraft-go-logging/wlog/internal/logentry"
 )
 
 const (
 	TypeValue = "request.2"
 
-	methodKey       = "method"
-	protocolKey     = "protocol"
-	pathKey         = "path"
-	paramsKey       = "params"
-	statusKey       = "status"
-	requestSizeKey  = "requestSize"
-	responseSizeKey = "responseSize"
-	durationKey     = "duration"
-	traceIDKey      = wlog.TraceIDKey
+	traceIDKey = wlog.TraceIDKey
 )
 
 // Logger creates a request log entry based on the provided information.
@@ -151,13 +144,17 @@ func (b *defaultLoggerBuilder) ForbiddenHeaderParams(forbiddenHeaderParams []str
 	b.forbiddenHeaderParams = append(b.forbiddenHeaderParams, forbiddenHeaderParams...)
 }
 
-func (b *defaultLoggerBuilder) build(w io.Writer) *defaultLogger {
+func (b *defaultLoggerBuilder) build(w io.Writer) Logger {
 	defaultParams := DefaultRequestParamPerms()
+	pathParamPerms := CombinedParamPerms(defaultParams.PathParamPerms(), NewParamPerms(b.safePathParams, b.forbiddenPathParams))
+	queryParamPerms := CombinedParamPerms(defaultParams.QueryParamPerms(), NewParamPerms(b.safeQueryParams, b.forbiddenQueryParams))
+	headerParamPerms := CombinedParamPerms(defaultParams.HeaderParamPerms(), NewParamPerms(b.safeHeaderParams, b.forbiddenHeaderParams))
+
 	return &defaultLogger{
-		logger:           b.loggerCreator(w),
+		logger:           logentry.NewLogger(b.loggerCreator(w)),
 		idsExtractor:     b.idsExtractor,
-		pathParamPerms:   CombinedParamPerms(defaultParams.PathParamPerms(), NewParamPerms(b.safePathParams, b.forbiddenPathParams)),
-		queryParamPerms:  CombinedParamPerms(defaultParams.QueryParamPerms(), NewParamPerms(b.safeQueryParams, b.forbiddenQueryParams)),
-		headerParamPerms: CombinedParamPerms(defaultParams.HeaderParamPerms(), NewParamPerms(b.safeHeaderParams, b.forbiddenHeaderParams)),
+		pathParamPerms:   pathParamPerms,
+		queryParamPerms:  queryParamPerms,
+		headerParamPerms: headerParamPerms,
 	}
 }
