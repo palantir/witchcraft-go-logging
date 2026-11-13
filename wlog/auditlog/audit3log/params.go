@@ -33,30 +33,25 @@ type Param interface {
 var _ Param = (*paramStruct)(nil)
 
 type paramStruct struct {
-	param auditloginternal.Audit3Param
+	param auditloginternal.AuditParam
 }
 
 func (p *paramStruct) getParam() auditloginternal.AuditParam {
-	return p.param.Param
+	return p.param
 }
 
-func convertInternalParamToExportedParam(param auditloginternal.Audit3Param) Param {
+func convertInternalParamToExportedParam(param auditloginternal.AuditParam) Param {
 	return &paramStruct{
 		param: param,
 	}
 }
 
-func convertExternalParamsToInternalParams(params []Param) []auditloginternal.Audit3Param {
-	if params == nil {
-		return nil
+// internalParam returns the AuditParam of p, or an empty one if p is nil.
+func internalParam(p Param) auditloginternal.AuditParam {
+	if p == nil {
+		return auditloginternal.AuditParam{}
 	}
-	out := make([]auditloginternal.Audit3Param, len(params))
-	for i := range out {
-		out[i] = auditloginternal.Audit3Param{
-			Param: params[i].getParam(),
-		}
-	}
-	return out
+	return p.getParam()
 }
 
 func Deployment(deployment string) Param {
@@ -114,11 +109,6 @@ func UserAgent(userAgent string) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3UserAgent(userAgent))
 }
 
-// unexported because this should only be set by the "Category" param
-func categories(categories ...string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3Categories(categories))
-}
-
 func Entities(entities []any) Param {
 	return convertInternalParamToExportedParam(auditloginternal.Audit3Entities(entities))
 }
@@ -159,11 +149,11 @@ func ResultFields(resultFields map[string]any) Param {
 }
 
 func UID(uid string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3UID(uid))
+	return convertInternalParamToExportedParam(auditloginternal.UID(uid))
 }
 
 func SID(sid string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3SID(sid))
+	return convertInternalParamToExportedParam(auditloginternal.SID(sid))
 }
 
 func TokenID(tokenID string) Param {
@@ -171,13 +161,13 @@ func TokenID(tokenID string) Param {
 }
 
 func OrgID(orgID string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3OrgID(orgID))
+	return convertInternalParamToExportedParam(auditloginternal.OrgID(orgID))
 }
 
 func TraceID(traceID string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3TraceID(traceID))
+	return convertInternalParamToExportedParam(auditloginternal.TraceID(traceID))
 }
 
 func Origin(origin string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit3Origin(origin))
+	return convertInternalParamToExportedParam(auditloginternal.Origin(origin))
 }

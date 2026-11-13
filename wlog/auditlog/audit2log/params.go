@@ -37,45 +37,40 @@ type Param interface {
 var _ Param = (*paramStruct)(nil)
 
 type paramStruct struct {
-	param auditloginternal.Audit2Param
+	param auditloginternal.AuditParam
 }
 
 func (p *paramStruct) getParam() auditloginternal.AuditParam {
-	return p.param.Param
+	return p.param
 }
 
 func ApplyParam(p Param, entry wlog.LogEntry) {
 	if p == nil {
 		return
 	}
-	p.getParam().Audit2ParamFn(entry)
+	auditloginternal.ApplyAudit2Param(p.getParam(), entry)
 }
 
-func convertInternalParamToExportedParam(param auditloginternal.Audit2Param) Param {
+func convertInternalParamToExportedParam(param auditloginternal.AuditParam) Param {
 	return &paramStruct{
 		param: param,
 	}
 }
 
-func convertExternalParamsToInternalParams(params []Param) []auditloginternal.Audit2Param {
-	if params == nil {
-		return nil
+// internalParam returns the AuditParam of p, or an empty one if p is nil.
+func internalParam(p Param) auditloginternal.AuditParam {
+	if p == nil {
+		return auditloginternal.AuditParam{}
 	}
-	out := make([]auditloginternal.Audit2Param, len(params))
-	for i, param := range params {
-		out[i] = auditloginternal.Audit2Param{
-			Param: param.getParam(),
-		}
-	}
-	return out
+	return p.getParam()
 }
 
 func UID(uid string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit2UID(uid))
+	return convertInternalParamToExportedParam(auditloginternal.UID(uid))
 }
 
 func SID(sid string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit2SID(sid))
+	return convertInternalParamToExportedParam(auditloginternal.SID(sid))
 }
 
 func TokenID(tokenID string) Param {
@@ -83,11 +78,11 @@ func TokenID(tokenID string) Param {
 }
 
 func OrgID(orgID string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit2OrgID(orgID))
+	return convertInternalParamToExportedParam(auditloginternal.OrgID(orgID))
 }
 
 func TraceID(traceID string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit2TraceID(traceID))
+	return convertInternalParamToExportedParam(auditloginternal.TraceID(traceID))
 }
 
 func OtherUIDs(otherUIDs ...string) Param {
@@ -95,7 +90,7 @@ func OtherUIDs(otherUIDs ...string) Param {
 }
 
 func Origin(origin string) Param {
-	return convertInternalParamToExportedParam(auditloginternal.Audit2Origin(origin))
+	return convertInternalParamToExportedParam(auditloginternal.Origin(origin))
 }
 
 func RequestParam(key string, value any) Param {

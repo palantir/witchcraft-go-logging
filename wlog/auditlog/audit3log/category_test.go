@@ -37,9 +37,8 @@ func TestCategory(t *testing.T) {
 	testRid, err := rid.ParseRID("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b")
 	require.NoError(t, err)
 
-	query := "testQuery"
 	categoryParam := Category(v2.NewAuditCategoryV2FromAppConfigSearch(v2.AppConfigSearch{
-		AppConfigSearchQuery: &query,
+		AppConfigSearchQuery: new("testQuery"),
 		AppConfigSearchResults: []commonv2.ApplicationResource{
 			{
 				Id:      commonv2.NewIdentifierFromRid(testRid),
@@ -105,9 +104,8 @@ func TestMultiCategory(t *testing.T) {
 	testRid, err := rid.ParseRID("ri.function-registry.main.function.19f5abc7-c299-4f4d-92e3-b109f1d8795b")
 	require.NoError(t, err)
 
-	query := "testQuery"
 	appConfigSearchCategoryParams := Category(v2.NewAuditCategoryV2FromAppConfigSearch(v2.AppConfigSearch{
-		AppConfigSearchQuery: &query,
+		AppConfigSearchQuery: new("testQuery"),
 		AppConfigSearchResults: []commonv2.ApplicationResource{
 			{
 				Id:      commonv2.NewIdentifierFromRid(testRid),

@@ -19,6 +19,15 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/internal/auditloginternal"
 )
 
+type defaultLogger struct {
+	logger *auditloginternal.Logger
+}
+
+func (l *defaultLogger) Audit(name string, result AuditResultType, params ...Param) {
+	auditloginternal.Audit3(l.logger, name, auditloginternal.AuditResultType(result), params, internalParam)
+}
+
+// ToParams builds parameters backed by a fresh object that can outlive the log call.
 func ToParams(name string, result AuditResultType, inParams []Param) []wlog.Param {
-	return auditloginternal.Audit3ToParams(nil, name, auditloginternal.AuditResultType(result), convertExternalParamsToInternalParams(inParams))
+	return auditloginternal.Audit3ToParams(name, auditloginternal.AuditResultType(result), inParams, internalParam)
 }
