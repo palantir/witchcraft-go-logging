@@ -47,7 +47,7 @@ type jwtRequestIDsExtractor struct{}
 
 func (e *jwtRequestIDsExtractor) ExtractIDs(req *http.Request) map[string]string {
 	var uid, sid, tokenID, orgID string
-	if authContent := req.Header.Get("Sec-WebSocket-Protocol"); strings.HasPrefix(authContent, wsBearerTokenPrefix) {
+	if authContent := req.Header.Get("Sec-Websocket-Protocol"); strings.HasPrefix(authContent, wsBearerTokenPrefix) {
 		uid, sid, tokenID, orgID, _ = idsFromJWT(authContent[len(wsBearerTokenPrefix):])
 	}
 	if authContent := req.Header.Get("Authorization"); strings.HasPrefix(authContent, authBearerTokenPrefix) {
