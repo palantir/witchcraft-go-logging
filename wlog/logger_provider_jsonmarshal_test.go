@@ -49,6 +49,7 @@ import (
 func jsonProviders() map[string]wlog.LoggerProvider {
 	return map[string]wlog.LoggerProvider{
 		"object": wlog.NewJSONMarshalLoggerProvider(),
+		"map":    wlogtests.MapJSONProvider(),
 	}
 }
 

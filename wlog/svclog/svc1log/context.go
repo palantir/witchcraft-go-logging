@@ -17,7 +17,6 @@ package svc1log
 import (
 	"context"
 
-	"github.com/palantir/witchcraft-go-logging/wlog"
 	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
@@ -50,10 +49,8 @@ func WithLoggerParams(ctx context.Context, params ...Param) context.Context {
 	return WithLogger(ctx, WithParams(loggerFromContext(ctx), params...))
 }
 
-// FromContext returns the Logger stored in the provided context. If no logger is set on the context, returns the logger
-// created by calling DefaultLogger. If the context contains a TraceID set using wtracing, the returned logger has that
-// TraceID set on it as a parameter. Any safe or unsafe parameters stored on the context using wparams are also set as
-// parameters on the returned logger.
+// FromContext returns the context's logger, or one created by the configured default logger creator.
+// Context IDs, the wtracing trace ID, and safe or unsafe parameters stored using wparams are applied to it.
 func FromContext(ctx context.Context) Logger {
 	logger := loggerFromContext(ctx)
 	var params []Param
@@ -79,15 +76,17 @@ func FromContext(ctx context.Context) Logger {
 }
 
 func safeAndUnsafeParamsFromParams(params []Param) (safe map[string]any, unsafe map[string]any) {
-	logEntry := wlog.NewMapLogEntry()
-	for _, currParam := range params {
-		currParam.apply(logEntry)
-	}
-	return logEntry.AnyMapValues()[ParamsKey], logEntry.AnyMapValues()[wlog.UnsafeParamsKey]
+	log := poolServiceLogV1.Get()
+	wloginternal.ApplyParams(log, params)
+	// Hand off the maps before returning the struct to the pool: Reset clears the maps it keeps.
+	safe, unsafe = log.Params, log.UnsafeParams
+	log.Params, log.UnsafeParams = nil, nil
+	poolServiceLogV1.Put(log)
+	return safe, unsafe
 }
 
 // loggerFromContext returns the logger stored in the provided context. If no logger is set on the context, returns the
-// logger created by calling DefaultLogger.
+// logger created by the configured default logger creator.
 func loggerFromContext(ctx context.Context) Logger {
 	if logger, ok := ctx.Value(contextKey).(Logger); ok {
 		return logger
