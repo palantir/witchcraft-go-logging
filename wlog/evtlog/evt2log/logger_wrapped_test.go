@@ -18,8 +18,10 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,4 +38,42 @@ func TestWithParamsKeepsDerivedLoggersIndependent(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, entries, 1)
 	require.Equal(t, map[string]any{"base": "value", "branch": "first"}, entries[0]["tags"])
+}
+
+// paramsRecordingLogger records the org ID that the params of each call resolve to.
+type paramsRecordingLogger struct {
+	orgIDs []string
+}
+
+func (l *paramsRecordingLogger) Event(name string, params ...evt2log.Param) {
+	l.record(params)
+}
+
+func (l *paramsRecordingLogger) record(params []evt2log.Param) {
+	entry := wlog.NewMapLogEntry()
+	for _, p := range params {
+		evt2log.ApplyParam(p, entry)
+	}
+	l.orgIDs = append(l.orgIDs, entry.StringValues()[wlog.OrgIDKey])
+}
+
+// Tests that loggers derived from the same parent logger keep their own params: logging with one derived logger must
+// not use the params that were added to a sibling.
+func TestWithParamsDerivedLoggersDoNotShareParams(t *testing.T) {
+	recorder := &paramsRecordingLogger{}
+
+	// a logger that is wrapped repeatedly has more capacity than length in its params
+	var parent evt2log.Logger = recorder
+	for range 5 {
+		parent = evt2log.WithParams(parent, evt2log.OrgID("parent"))
+	}
+
+	first := evt2log.WithParams(parent, evt2log.OrgID("first"))
+	second := evt2log.WithParams(parent, evt2log.OrgID("second"))
+
+	first.Event("event")
+	second.Event("event")
+	parent.Event("event")
+
+	assert.Equal(t, []string{"first", "second", "parent"}, recorder.orgIDs)
 }
