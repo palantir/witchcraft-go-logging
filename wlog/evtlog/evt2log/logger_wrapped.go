@@ -14,11 +14,15 @@
 
 package evt2log
 
+import (
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+)
+
 type wrappedLogger struct {
 	logger Logger
 	params []Param
 }
 
 func (w *wrappedLogger) Event(name string, params ...Param) {
-	w.logger.Event(name, append(w.params, params...)...)
+	w.logger.Event(name, wloginternal.AppendParams(w.params, params)...)
 }

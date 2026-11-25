@@ -15,12 +15,30 @@
 package evt2log_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/logreader"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestWithParamsKeepsDerivedLoggersIndependent(t *testing.T) {
+	var out bytes.Buffer
+	stored := make([]evt2log.Param, 1, 3)
+	stored[0] = evt2log.Tag("base", "value")
+	base := evt2log.WithParams(newTestLogger(&out), stored...)
+	first := evt2log.WithParams(base, evt2log.Tag("branch", "first"))
+	_ = evt2log.WithParams(base, evt2log.Tag("branch", "second"))
+
+	first.Event("test")
+	entries, err := logreader.EntriesFromContent(out.Bytes())
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	require.Equal(t, map[string]any{"base": "value", "branch": "first"}, entries[0]["tags"])
+}
 
 // paramsRecordingLogger records the org ID that the params of each call resolve to.
 type paramsRecordingLogger struct {

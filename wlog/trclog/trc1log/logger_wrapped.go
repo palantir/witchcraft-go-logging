@@ -15,6 +15,7 @@
 package trc1log
 
 import (
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
@@ -24,7 +25,7 @@ type wrappedLogger struct {
 }
 
 func (w *wrappedLogger) Log(span wtracing.SpanModel, params ...Param) {
-	w.logger.Log(span, append(w.params, params...)...)
+	w.logger.Log(span, wloginternal.AppendParams(w.params, params)...)
 }
 
 func (w *wrappedLogger) Send(span wtracing.SpanModel) {

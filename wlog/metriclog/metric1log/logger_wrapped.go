@@ -14,11 +14,15 @@
 
 package metric1log
 
+import (
+	wloginternal "github.com/palantir/witchcraft-go-logging/wlog/internal"
+)
+
 type wrappedLogger struct {
 	logger Logger
 	params []Param
 }
 
 func (w *wrappedLogger) Metric(name, typ string, params ...Param) {
-	w.logger.Metric(name, typ, append(w.params, params...)...)
+	w.logger.Metric(name, typ, wloginternal.AppendParams(w.params, params)...)
 }

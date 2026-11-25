@@ -22,8 +22,8 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/pkg v1.2.0
-## explicit; go 1.26.0
+# github.com/palantir/pkg v1.3.0
+## explicit; go 1.27.0
 github.com/palantir/pkg
 # github.com/palantir/pkg/bytesbuffers v1.3.0
 ## explicit; go 1.25.0
@@ -52,14 +52,14 @@ github.com/palantir/pkg/transform
 # github.com/palantir/pkg/uuid v1.4.0
 ## explicit; go 1.27.0
 github.com/palantir/pkg/uuid
-# github.com/palantir/witchcraft-go-error v1.51.0
+# github.com/palantir/witchcraft-go-error v1.52.0
 ## explicit; go 1.27.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.50.0
+# github.com/palantir/witchcraft-go-params v1.51.0
 ## explicit; go 1.27.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.50.0
+# github.com/palantir/witchcraft-go-tracing v1.51.0
 ## explicit; go 1.27.0
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wzipkin
@@ -92,7 +92,7 @@ go.uber.org/zap/zapcore
 # go.yaml.in/yaml/v3 v3.0.6
 ## explicit; go 1.16
 go.yaml.in/yaml/v3
-# golang.org/x/sys v0.49.0
+# golang.org/x/sys v0.50.0
 ## explicit; go 1.26.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
