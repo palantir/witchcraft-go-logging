@@ -34,10 +34,10 @@ const (
 	LevelWarnValue  = "WARN"
 	LevelErrorValue = "ERROR"
 
-	OriginKey     = "origin"
-	ThreadKey     = "thread"
-	MessageKey    = "message"
-	ParamsKey     = "params"
+	OriginKey  = "origin"
+	ThreadKey  = "thread"
+	MessageKey = "message"
+
 	StacktraceKey = "stacktrace"
 	TagsKey       = "tags"
 )
@@ -152,7 +152,7 @@ func SafeParam(key string, value any) Param {
 
 func SafeParams(safe map[string]any) Param {
 	return paramFunc(func(entry wlog.LogEntry) {
-		entry.AnyMapValue(ParamsKey, safe)
+		entry.AnyMapValue(wlog.ParamsKey, safe)
 	})
 }
 

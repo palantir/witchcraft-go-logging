@@ -27,9 +27,15 @@ func LoggerProvider() wlog.LoggerProvider {
 type loggerProvider struct{}
 
 func (lp *loggerProvider) NewLogger(w io.Writer) wlog.Logger {
-	return &gLogger{AtomicLogLevel: wlog.NewAtomicLogLevel(wlog.InfoLevel)}
+	return &gLogger{
+		AtomicLogLevel: wlog.NewAtomicLogLevel(wlog.InfoLevel),
+		SafetyChecker:  wlog.NewSafetyChecker(),
+	}
 }
 
 func (lp *loggerProvider) NewLeveledLogger(w io.Writer, level wlog.LogLevel) wlog.LeveledLogger {
-	return &gLogger{AtomicLogLevel: wlog.NewAtomicLogLevel(level)}
+	return &gLogger{
+		AtomicLogLevel: wlog.NewAtomicLogLevel(level),
+		SafetyChecker:  wlog.NewSafetyChecker(),
+	}
 }

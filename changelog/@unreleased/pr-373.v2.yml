@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: 'feature: add safe logging'
+  links:
+  - https://github.com/palantir/witchcraft-go-logging/pull/373

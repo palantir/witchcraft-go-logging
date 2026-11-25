@@ -23,4 +23,5 @@ const (
 	OrgIDKey        = "orgId"
 	TraceIDKey      = "traceId"
 	UnsafeParamsKey = "unsafeParams"
+	ParamsKey       = "params"
 )
